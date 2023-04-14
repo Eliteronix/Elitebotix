@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, getAvatar, awaitWebRequestPermission } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -98,6 +98,7 @@ module.exports = {
 				.addChoices(
 					{ name: 'Bancho', value: 'bancho' },
 					{ name: 'Ripple', value: 'ripple' },
+					{ name: 'Gatari', value: 'gatari' },
 				)
 		)
 		.addStringOption(option =>
@@ -316,7 +317,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 				elements = await drawFooter(elements, server);
 
-				await drawAvatar(elements);
+				await drawAvatar(elements, server);
 
 				//Create as an attachment
 				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
@@ -419,11 +420,9 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 				elements = await drawPlays(elements, server);
 
-				elements = await drawBadges(elements, server, interaction.client);
-
 				elements = await drawFooter(elements, server);
 
-				await drawAvatar(elements);
+				await drawAvatar(elements, server);
 
 				//Create as an attachment
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
@@ -433,34 +432,6 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
-
-				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores 2');
-				let userScores = await DBOsuMultiScores.findAll({
-					attributes: ['score'],
-					where: {
-						osuUserId: user.id,
-						score: {
-							[Op.gte]: 10000
-						},
-						[Op.or]: [
-							{ warmup: false },
-							{ warmup: null }
-						],
-					}
-				});
-
-				for (let i = 0; i < userScores.length; i++) {
-					if (parseInt(userScores[i].score) <= 10000) {
-						userScores.splice(i, 1);
-						i--;
-					}
-				}
-
-				if (userScores.length) {
-					await sentMessage.react('<:master:951396806653255700>');
-					await sentMessage.react('🆚');
-					await sentMessage.react('📊');
-				}
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
@@ -469,6 +440,111 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 					console.error(err);
 				}
 			});
+	} else if (server === 'gatari') {
+		let gatariUser = await fetch(`https://api.gatari.pw/users/get?u=${username}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.users.length) {
+					await interaction.followUp(`Couldn't find user \`${username.replace(/`/g, '')}\` on Gatari.`);
+					return;
+				}
+
+				return responseJson.users[0];
+			})
+			.catch(async (err) => {
+				await interaction.followUp(`An error occured while trying to get user \`${username.replace(/`/g, '')}\`.`);
+				console.error(err);
+			});
+
+		if (!gatariUser) {
+			return;
+		}
+
+		let gatariUserStats = await fetch(`https://api.gatari.pw/user/stats?u=${username}&mode=${mode}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.stats) {
+					await interaction.followUp(`Couldn't find user stats for \`${username.replace(/`/g, '')}\` on Gatari.`);
+					return;
+				}
+
+				return responseJson.stats;
+			})
+			.catch(async (err) => {
+				await interaction.followUp(`An error occured while trying to get user \`${username.replace(/`/g, '')}\`.`);
+				console.error(err);
+			});
+
+		if (!gatariUserStats) {
+			return;
+		}
+
+		let date = new Date(gatariUser.registered_on * 1000);
+
+		let user = {
+			id: gatariUser.id,
+			name: gatariUser.username,
+			country: gatariUser.country,
+			level: `${gatariUserStats.level}.${gatariUserStats.level_progress}`,
+			secondsPlayed: gatariUserStats.playtime,
+			accuracy: gatariUserStats.avg_accuracy,
+			pp: {
+				rank: gatariUserStats.rank,
+				countryRank: gatariUserStats.country_rank,
+				raw: gatariUserStats.pp,
+			},
+			scores: {
+				ranked: gatariUserStats.ranked_score,
+				total: gatariUserStats.total_score,
+			},
+			counts: {
+				SSH: gatariUserStats.xh_count,
+				SS: gatariUserStats.x_count,
+				SH: gatariUserStats.sh_count,
+				S: gatariUserStats.s_count,
+				A: gatariUserStats.a_count,
+				plays: gatariUserStats.playcount,
+			},
+			raw_joinDate: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
+		};
+
+		const canvasWidth = 700;
+		const canvasHeight = 350;
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+		let elements = [canvas, ctx, user];
+
+		elements = await drawTitle(elements, server, mode);
+
+		elements = await drawRank(elements, interaction);
+
+		elements = await drawLevel(elements, server);
+
+		elements = await drawRanks(elements);
+
+		elements = await drawPlays(elements, server);
+
+		elements = await drawFooter(elements, server);
+
+		await drawAvatar(elements, server);
+
+		//Create as an attachment
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
+
+		//Send attachment
+		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+
+		await sentMessage.react('🥇');
+		await sentMessage.react('📈');
 	}
 }
 
@@ -642,7 +718,7 @@ async function drawLevel(input, server) {
 	ctx.fillText('Total:', canvas.width / 4 + 15, canvas.height / 2 + 6 - 8 + yOffset);
 	ctx.fillText(totalScore, canvas.width / 4 + 15, canvas.height / 2 + 6 + 8 + yOffset);
 	ctx.fillText('Acc:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 - 8 + yOffset);
-	if (server !== 'ripple') {
+	if (server !== 'ripple' && server !== 'gatari') {
 		ctx.fillText(user.accuracyFormatted, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
 	} else {
 		ctx.fillText(`${Math.round(user.accuracy * 100) / 100}%`, canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * 1 + 6 + 8 + yOffset);
@@ -794,7 +870,7 @@ async function drawFooter(input, server) {
 	return output;
 }
 
-async function drawAvatar(input) {
+async function drawAvatar(input, server) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -808,7 +884,16 @@ async function drawAvatar(input) {
 	ctx.clip();
 
 	//Draw a shape onto the main canvas in the middle
-	const avatar = await getAvatar(user.id);
+	let avatar = null;
+
+	if (server === 'ripple') {
+		avatar = await Canvas.loadImage(`https://a.ripple.moe/${user.id}`);
+	} else if (server === 'gatari') {
+		avatar = await Canvas.loadImage(`https://a.gatari.pw/${user.id}`);
+	} else {
+		avatar = await getAvatar(user.id);
+	}
+
 	ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4 + yOffset, canvas.height / 2, canvas.height / 2);
 
 	const output = [canvas, ctx, user];
