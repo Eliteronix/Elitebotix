@@ -1,6 +1,6 @@
 ﻿const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getBeatmapModeId, getModBits, multiToBanchoScore, scoreCardAttachment } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getBeatmapModeId, getModBits, multiToBanchoScore, scoreCardAttachment, gatariToBanchoScore } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -94,6 +94,7 @@ module.exports = {
 				.addChoices(
 					{ name: 'Bancho', value: 'bancho' },
 					{ name: 'Ripple', value: 'ripple' },
+					{ name: 'Gatari', value: 'gatari' },
 					{ name: 'Tournaments', value: 'tournaments' },
 				)
 		)
@@ -612,5 +613,101 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			await sentMessage.react('🗺️');
 			await sentMessage.react('👤');
 		}
+	} else if (server === 'gatari') {
+		let gatariUser = await fetch(`https://api.gatari.pw/users/get?u=${username}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.users.length) {
+					await interaction.followUp(`Couldn't find user \`${username.replace(/`/g, '')}\` on Gatari.`);
+					return;
+				}
+
+				return responseJson.users[0];
+			})
+			.catch(async (err) => {
+				await interaction.followUp(`An error occured while trying to get user \`${username.replace(/`/g, '')}\`.`);
+				console.error(err);
+			});
+
+		if (!gatariUser) {
+			return;
+		}
+
+		let gatariUserStats = await fetch(`https://api.gatari.pw/user/stats?u=${username}&mode=${mode}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.stats) {
+					await interaction.followUp(`Couldn't find user stats for \`${username.replace(/`/g, '')}\` on Gatari.`);
+					return;
+				}
+
+				return responseJson.stats;
+			})
+			.catch(async (err) => {
+				await interaction.followUp(`An error occured while trying to get user \`${username.replace(/`/g, '')}\`.`);
+				console.error(err);
+			});
+
+		if (!gatariUserStats) {
+			return;
+		}
+
+		let user = {
+			id: gatariUser.id,
+			name: gatariUser.username,
+			pp: {
+				rank: gatariUserStats.rank,
+				raw: gatariUserStats.pp,
+			}
+		};
+
+		let gatariScore = await fetch(`https://api.gatari.pw/beatmap/user/score?b=${beatmap.beatmapId}&u=${user.id}&mode=${mode}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.score) {
+					await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
+					return;
+				}
+
+				return responseJson.score;
+			})
+			.catch(async (err) => {
+				if (err.message === 'Not found') {
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				} else {
+					console.error(err);
+				}
+			});
+
+		if (!gatariScore) {
+			return;
+		}
+
+		gatariScore.username = user.name;
+		gatariScore.user_id = user.id;
+		gatariScore.beatmap_id = beatmap.beatmapId;
+		gatariScore.beatmap_max_combo = beatmap.maxCombo;
+
+		let score = gatariToBanchoScore(gatariScore);
+
+		const input = {
+			beatmap: beatmap,
+			score: score,
+			mode: mode,
+			user: user,
+			server: server,
+			mapRank: gatariScore.top,
+		};
+
+		const scoreCard = await scoreCardAttachment(input);
+
+		//Send attachment
+		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`, files: [scoreCard] });
+
+		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+			sentMessage.react('<:COMPARE:827974793365159997>');
+		}
+		await sentMessage.react('🗺️');
+		await sentMessage.react('👤');
 	}
 } 

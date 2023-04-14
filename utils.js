@@ -423,6 +423,40 @@ module.exports = {
 		}
 		return outputScore;
 	},
+	gatariToBanchoScore: function (inputScore) {
+		let date = new Date(inputScore.time);
+
+		let outputScore = {
+			score: inputScore.score,
+			user: {
+				name: inputScore.username,
+				id: inputScore.user_id
+			},
+			beatmapId: inputScore.beatmap_id,
+			counts: {
+				'50': inputScore.count_50,
+				'100': inputScore.count_100,
+				'300': inputScore.count_300,
+				geki: inputScore.count_geki,
+				katu: inputScore.count_katu,
+				miss: inputScore.count_miss
+			},
+			maxCombo: inputScore.max_combo,
+			perfect: false,
+			raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
+			rank: inputScore.rank,
+			pp: inputScore.pp,
+			hasReplay: false,
+			raw_mods: inputScore.mods,
+			beatmap: undefined
+		};
+
+		if (inputScore.beatmap_max_combo === inputScore.max_combo.toString()) {
+			outputScore.perfect = true;
+		}
+
+		return outputScore;
+	},
 	rippleToBanchoUser: function (inputUser) {
 		let outputUser = {
 			id: inputUser.user_id,
@@ -8584,6 +8618,8 @@ module.exports = {
 
 		if (input.server === 'ripple') {
 			userAvatar = await Canvas.loadImage(`https://a.ripple.moe/${input.user.id}`);
+		} else if (input.server === 'gatari') {
+			userAvatar = await Canvas.loadImage(`https://a.gatari.pw/${input.user.id}`);
 		} else {
 			userAvatar = await module.exports.getAvatar(input.user.id);
 		}
