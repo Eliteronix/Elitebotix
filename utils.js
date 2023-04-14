@@ -437,7 +437,7 @@ module.exports = {
 				'50': inputScore.count_50,
 				'100': inputScore.count_100,
 				'300': inputScore.count_300,
-				geki: inputScore.count_geki,
+				geki: inputScore.count_gekis,
 				katu: inputScore.count_katu,
 				miss: inputScore.count_miss
 			},

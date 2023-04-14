@@ -531,6 +531,30 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 
 		let score = gatariToBanchoScore(gatariScore);
 
+		if (gatariScore.rank !== 'F') {
+			let gatariBestScore = await fetch(`https://api.gatari.pw/beatmap/user/score?b=${beatmap.beatmapId}&u=${user.id}&mode=${mode}`)
+				.then(async (response) => {
+					const responseJson = await response.json();
+					if (!responseJson.score) {
+						await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
+						return;
+					}
+
+					return responseJson.score;
+				})
+				.catch(async (err) => {
+					if (err.message === 'Not found') {
+						await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					} else {
+						console.error(err);
+					}
+				});
+
+			if (gatariBestScore) {
+				gatariScore.top = gatariBestScore.top;
+			}
+		}
+
 		const input = {
 			beatmap: beatmap,
 			score: score,
