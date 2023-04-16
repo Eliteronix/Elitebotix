@@ -432,7 +432,7 @@ module.exports = {
 				name: inputScore.username,
 				id: inputScore.user_id
 			},
-			beatmapId: inputScore.beatmap_id,
+			beatmapId: inputScore.beatmap_id.toString(),
 			counts: {
 				'50': inputScore.count_50,
 				'100': inputScore.count_100,
@@ -442,7 +442,7 @@ module.exports = {
 				miss: inputScore.count_miss
 			},
 			maxCombo: inputScore.max_combo,
-			perfect: false,
+			perfect: inputScore.full_combo,
 			raw_date: `${date.getUTCFullYear()}-${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${(date.getUTCDate()).toString().padStart(2, '0')} ${(date.getUTCHours()).toString().padStart(2, '0')}:${(date.getUTCMinutes()).toString().padStart(2, '0')}:${(date.getUTCSeconds()).toString().padStart(2, '0')}`,
 			rank: inputScore.rank,
 			pp: inputScore.pp,
@@ -453,10 +453,6 @@ module.exports = {
 
 		if (!outputScore.rank && inputScore.ranking) {
 			outputScore.rank = inputScore.ranking;
-		}
-
-		if (inputScore.beatmap_max_combo === inputScore.max_combo.toString()) {
-			outputScore.perfect = true;
 		}
 
 		return outputScore;

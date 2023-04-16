@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers, DBOsuBeatmaps } = 
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, gatariToBanchoScore } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -129,6 +129,7 @@ module.exports = {
 				.addChoices(
 					{ name: 'Bancho', value: 'bancho' },
 					{ name: 'Ripple', value: 'ripple' },
+					{ name: 'Gatari', value: 'gatari' },
 					{ name: 'Tournaments', value: 'tournaments' },
 					{ name: 'Mixed (Bancho & Tournaments)', value: 'mixed' },
 				)
@@ -502,6 +503,69 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 					console.error(err);
 				}
 			});
+	} else if (server === 'gatari') {
+		let gatariUser = await fetch(`https://api.gatari.pw/users/get?u=${username}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.users.length) {
+					await interaction.followUp(`Couldn't find user \`${username.replace(/`/g, '')}\` on Gatari.`);
+					return;
+				}
+
+				return responseJson.users[0];
+			})
+			.catch(async (err) => {
+				await interaction.followUp(`An error occured while trying to get user \`${username.replace(/`/g, '')}\`.`);
+				console.error(err);
+			});
+
+		if (!gatariUser) {
+			return;
+		}
+
+		let user = {
+			id: gatariUser.id,
+			name: gatariUser.username,
+			country: gatariUser.country,
+		};
+
+		const canvasWidth = 1000;
+		const canvasHeight = 83 + limit * 41.66666;
+
+		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+		ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
+		let elements = [canvas, ctx, user];
+
+		elements = await drawTitle(elements, server, mode, sorting, order);
+
+		elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order);
+
+		let scores = elements[3];
+
+		await drawFooter(elements);
+
+		//Create as an attachment
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+
+		if (csv) {
+			let csv = new ObjectsToCsv(scores);
+			csv = await csv.toString();
+			// eslint-disable-next-line no-undef
+			const buffer = Buffer.from(csv);
+			//Create as an attachment
+			files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
+		}
+
+		//Send attachment
+		await interaction.followUp({ content: `\`${user.name}\`: <https://osu.gatari.pw/u/${user.id}?mode=${mode}>`, files: files });
 	} else if (server === 'tournaments' || server === 'mixed') {
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -718,6 +782,37 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		for (let i = 0; i < responseJson.length; i++) {
 
 			let score = rippleToBanchoScore(responseJson[i]);
+
+			scores.push(score);
+		}
+	} else if (server === 'gatari') {
+		let gatariUserBest = await fetch(`https://api.gatari.pw/user/scores/best?id=${user.id}&l=${limit}&p=1&mode=${mode}`)
+			.then(async (response) => {
+				const responseJson = await response.json();
+				if (!responseJson.scores.length) {
+					await interaction.followUp(`Couldn't find user best for \`${user.name.replace(/`/g, '')}\` on Gatari.`);
+					return;
+				}
+
+				return responseJson.scores;
+			})
+			.catch(async (err) => {
+				await interaction.followUp(`An error occured while trying to get user \`${user.name.replace(/`/g, '')}\`.`);
+				console.error(err);
+			});
+
+		if (!gatariUserBest) {
+			return;
+		}
+
+		for (let i = 0; i < gatariUserBest.length; i++) {
+			let gatariScore = gatariUserBest[i];
+
+			gatariScore.username = user.name;
+			gatariScore.user_id = user.id;
+			gatariScore.beatmap_id = gatariScore.beatmap.beatmap_id;
+
+			let score = gatariToBanchoScore(gatariScore);
 
 			scores.push(score);
 		}
