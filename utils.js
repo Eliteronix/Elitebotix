@@ -8414,6 +8414,25 @@ module.exports = {
 			ctx.fillText(`#${input.mapRank}`, canvas.width / 1000 * 453 + 55, canvas.height / 500 * 440);
 		}
 
+		if (input.score.rank === 'F') {
+			//Calculate Completion
+			const beatmapObjects = parseInt(input.beatmap.circles) + parseInt(input.beatmap.sliders) + parseInt(input.beatmap.spinners);
+			let scoreHits = parseInt(input.score.counts[300]) + parseInt(input.score.counts[100]) + parseInt(input.score.counts[50]) + parseInt(input.score.counts.miss);
+			//Mania needs to add geki and katu
+			if (input.mode === 3) {
+				scoreHits = scoreHits + parseInt(input.score.counts.geki) + parseInt(input.score.counts.katu);
+			}
+			const completion = 100 / beatmapObjects * scoreHits;
+
+			//Draw completion
+			module.exports.roundedRect(ctx, canvas.width / 1000 * 453, canvas.height / 500 * 395, 110, 50, 5, '00', '00', '00', 0.5);
+			ctx.font = '18px comfortaa, sans-serif';
+			ctx.fillStyle = '#ffffff';
+			ctx.textAlign = 'center';
+			ctx.fillText('Completion', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
+			ctx.fillText(`${Math.round(completion * 100) / 100}%`, canvas.width / 1000 * 453 + 55, canvas.height / 500 * 440);
+		}
+
 		//Calculate accuracy
 		accuracy = accuracy * 100;
 
