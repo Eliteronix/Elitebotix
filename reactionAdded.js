@@ -976,7 +976,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						if (string === 'id') {
 							return beatmapId;
 						} else if (string === 'mods') {
-							return getMods(modBits).join('');
+							return mods.join('');
 						}
 					},
 					getNumber: () => { },
