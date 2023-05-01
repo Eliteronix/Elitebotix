@@ -25,7 +25,7 @@ module.exports = {
 		for (let i = 0; i < verifiedMatches.length; i++) {
 			data.push(verifiedMatches[i].dataValues);
 
-			if (i % 150000 === 0 && i > 0 || verifiedMatches.length - 1 === i) {
+			if (i % 100000 === 0 && i > 0 || verifiedMatches.length - 1 === i) {
 				const developerUser = await interaction.client.users.cache.find(user => user.id === interaction.user.id);
 				let csv = new ObjectsToCsv(data);
 				csv = await csv.toString();
