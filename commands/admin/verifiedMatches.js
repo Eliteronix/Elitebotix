@@ -13,6 +13,7 @@ module.exports = {
 				verifiedAt: {
 					[Op.not]: null,
 				},
+				tourneyMatch: true,
 			},
 		});
 
