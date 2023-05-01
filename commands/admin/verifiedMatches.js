@@ -22,7 +22,10 @@ module.exports = {
 
 		let data = [];
 
+		let iterations = 0;
+
 		for (let i = 0; i < verifiedMatches.length; i++) {
+			iterations++;
 			data.push(verifiedMatches[i].dataValues);
 
 			if (i % 100000 === 0 && i > 0 || verifiedMatches.length - 1 === i) {
@@ -33,9 +36,9 @@ module.exports = {
 				const buffer = Buffer.from(csv);
 				//Create as an attachment
 				// eslint-disable-next-line no-undef
-				const attachment = new AttachmentBuilder(buffer, { name: `verified-matches-${process.env.SERVER}-${process.env.PROVIDER}.csv` });
+				const attachment = new AttachmentBuilder(buffer, { name: `verified-matches-${process.env.SERVER}-${process.env.PROVIDER}-${iterations}.csv` });
 				// eslint-disable-next-line no-undef
-				await developerUser.send({ content: `verified matches - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
+				await developerUser.send({ content: `verified matches - ${process.env.SERVER} Environment on ${process.env.PROVIDER} (${iterations})`, files: [attachment] });
 				data = [];
 			}
 		}
