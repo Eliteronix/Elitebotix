@@ -1,5 +1,5 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets, DBOsuPoolAccess } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating } = require('../utils');
 const { Op } = require('sequelize');
@@ -424,49 +424,51 @@ module.exports = {
 
 		let spreadsheetId = mappool[0].spreadsheetId;
 
-		if (spreadsheetId) {
-			let poolAccesses = await DBOsuPoolAccess.findAll({
-				attributes: ['accessGiverId'],
-				where: {
-					spreadsheetId: spreadsheetId,
-					accessTakerId: commandUser.osuUserId,
+		if (!developers.includes(interaction.user.id)) {
+			if (spreadsheetId) {
+				let poolAccesses = await DBOsuPoolAccess.findAll({
+					attributes: ['accessGiverId'],
+					where: {
+						spreadsheetId: spreadsheetId,
+						accessTakerId: commandUser.osuUserId,
+					}
+				});
+
+				for (let i = 0; i < players.length; i++) {
+					let player = players[i];
+
+					if (player.osuUserId === commandUser.osuUserId) {
+						continue;
+					}
+
+					let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
+
+					if (!access) {
+						return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the spreadsheet of the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantspreadsheetaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
+					}
 				}
-			});
+			} else {
+				let poolAccesses = await DBOsuPoolAccess.findAll({
+					attributes: ['accessGiverId'],
+					where: {
+						spreadsheetId: null,
+						mappoolName: mappoolName.toLowerCase(),
+						accessTakerId: commandUser.osuUserId,
+					}
+				});
 
-			for (let i = 0; i < players.length; i++) {
-				let player = players[i];
+				for (let i = 0; i < players.length; i++) {
+					let player = players[i];
 
-				if (player.osuUserId === commandUser.osuUserId) {
-					continue;
-				}
+					if (player.osuUserId === commandUser.osuUserId) {
+						continue;
+					}
 
-				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
+					let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
 
-				if (!access) {
-					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the spreadsheet of the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantspreadsheetaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
-				}
-			}
-		} else {
-			let poolAccesses = await DBOsuPoolAccess.findAll({
-				attributes: ['accessGiverId'],
-				where: {
-					spreadsheetId: null,
-					mappoolName: mappoolName.toLowerCase(),
-					accessTakerId: commandUser.osuUserId,
-				}
-			});
-
-			for (let i = 0; i < players.length; i++) {
-				let player = players[i];
-
-				if (player.osuUserId === commandUser.osuUserId) {
-					continue;
-				}
-
-				let access = poolAccesses.find(access => access.accessGiverId === player.osuUserId);
-
-				if (!access) {
-					return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantpoolaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
+					if (!access) {
+						return await interaction.followUp(`User \`${player.osuName}\` did not give you access to the scores for the mappool \`${mappoolName.replace(/`/g, '')}\`.\nYou can give access by using </osu-scoreaccess grantpoolaccess:${interaction.client.slashCommandData.find(command => command.name === 'osu-scoreaccess').id}>`);
+					}
 				}
 			}
 		}
