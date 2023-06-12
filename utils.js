@@ -3024,6 +3024,13 @@ module.exports = {
 							[Op.gte]: startDate
 						}
 					},
+				],
+				[Op.not]: [
+					{
+						matchName: {
+							[Op.like]: 'FEM2:%' //Femboy 2 has challenges including missing on purpose
+						}
+					}
 				]
 			}
 		});
