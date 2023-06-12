@@ -124,6 +124,37 @@ module.exports = {
 		)
 		.addSubcommand(subcommand =>
 			subcommand
+				.setName('duelratingdata')
+				.setNameLocalizations({
+					'de': 'duelratingdata',
+					'en-GB': 'duelratingdata',
+					'en-US': 'duelratingdata',
+				})
+				.setDescription('Provides the duel rating data of the provided tournament players')
+				.setDescriptionLocalizations({
+					'de': 'Liefert die Duel Rating Daten der bereitgestellten Turnierspieler',
+					'en-GB': 'Provides the duel rating data of the provided tournament players',
+					'en-US': 'Provides the duel rating data of the provided tournament players',
+				})
+				.addAttachmentOption(option =>
+					option
+						.setName('file')
+						.setNameLocalizations({
+							'de': 'datei',
+							'en-GB': 'file',
+							'en-US': 'file',
+						})
+						.setDescription('The .txt file containing the tournament players, one player id per line')
+						.setDescriptionLocalizations({
+							'de': 'Die .txt Datei, die die Turnierspieler enthält, eine Spieler ID pro Zeile',
+							'en-GB': 'The .txt file containing the tournament players, one player id per line',
+							'en-US': 'The .txt file containing the tournament players, one player id per line',
+						})
+						.setRequired(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand
 				.setName('ppwithtournamenttopplays')
 				.setNameLocalizations({
 					'de': 'ppmitturniertopplays',
@@ -502,6 +533,69 @@ module.exports = {
 					data = [];
 				}
 			}
+
+			if (interaction.client.hostCommands.includes(randomString)) {
+				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
+			}
+		} else if (interaction.options.getSubcommand() === 'duelratingdata') {
+			let lastUpdate = new Date();
+
+			for (let i = 0; i < file.length; i++) {
+				let osuUserId = file[i].trim();
+
+				let osuName = await getOsuPlayerName(osuUserId);
+
+				if (new Date() - lastUpdate > 15000) {
+					processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+					lastUpdate = new Date();
+				}
+
+				try {
+					let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId, client: interaction.client, forceUpdate: true });
+
+					let scores = [
+						duelRating.scores.NM,
+						duelRating.scores.HD,
+						duelRating.scores.HR,
+						duelRating.scores.DT,
+						duelRating.scores.FM
+					];
+
+					for (let i = 0; i < scores.length; i++) {
+						scores[i].sort((a, b) => a.score - b.score);
+
+						for (let j = 0; j < scores[i].length; j++) {
+							let outlierText = '';
+							if (scores[i][j].outlier) {
+								outlierText = ' [outlier - not counted]';
+							}
+							let date = new Date(scores[i][j].matchStartDate);
+							scores[i][j] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | Expected SR: ${scores[i][j].expectedRating.toFixed(2)} | https://osu.ppy.sh/b/${scores[i][j].beatmapId} | Match: https://osu.ppy.sh/mp/${scores[i][j].matchId} | ${outlierText}`;
+						}
+
+						if (i === 0) {
+							scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
+						} else if (i === 1) {
+							scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
+						} else if (i === 2) {
+							scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
+						} else if (i === 3) {
+							scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
+						} else if (i === 4) {
+							scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
+						}
+					}
+
+					// eslint-disable-next-line no-undef
+					scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUserId}.txt` });
+
+					await interaction.user.send({ content: `Duel Scores and Weights for ${osuName} (\`${osuUserId}\`)`, files: [scores] });
+				} catch (e) {
+					await interaction.user.send(`Error getting duel scores and weights for ${osuName} (\`${osuUserId}\`): ${e.message}`);
+				}
+			}
+
+			processingMessage.edit('Finished processing all accounts.');
 
 			if (interaction.client.hostCommands.includes(randomString)) {
 				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
