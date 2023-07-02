@@ -152,7 +152,8 @@ module.exports = {
 							return await processQueueEntry.save();
 						}
 					} catch (error) {
-						console.error(error, `going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
+						// eslint-disable-next-line no-undef
+						console.error(error, `API Key Index ${parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length} going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						//Go same if error
 						let date = new Date();
 						date.setUTCMinutes(date.getUTCMinutes() + 5);
