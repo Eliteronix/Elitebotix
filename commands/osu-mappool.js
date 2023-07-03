@@ -970,11 +970,11 @@ module.exports = {
 						continue;
 					}
 
-					if (data.toString().toLowerCase() === 'qualifiers' ||
-						data.toString().toLowerCase() === 'quals' ||
-						data.toString().toLowerCase().startsWith('group stage') ||
-						data.toString().toLowerCase().startsWith('round of') ||
-						data.toString().toLowerCase().endsWith('finals') ||
+					if (data.toString().toLowerCase().includes('qualifiers') ||
+						data.toString().toLowerCase().includes('quals') ||
+						data.toString().toLowerCase().includes('group stage') ||
+						data.toString().toLowerCase().includes('round of') ||
+						data.toString().toLowerCase().includes('finals') ||
 						data.toString().toLowerCase() === 'ql' ||
 						data.toString().toLowerCase() === 'q' ||
 						data.toString().toLowerCase() === 'gs' ||
