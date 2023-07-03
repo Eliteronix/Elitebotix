@@ -416,7 +416,9 @@ setInterval(() => {
 	uniqueOsuUsers.set(uniqueOsuUsersList.length);
 }, 5000);
 
-setInterval(() => {
+processOsuWebRequests(client);
+
+async function processOsuWebRequests(client) {
 	osuWebRequestsQueueLength.set([...new Set(osuWebRequestQueue)].length);
 
 	if (osuWebRequestQueue.length) {
@@ -435,5 +437,11 @@ setInterval(() => {
 		});
 
 		osuWebRequestQueue = osuWebRequestQueue.filter(item => item !== osuWebRequestQueue[0]);
+
+		await new Promise(resolve => setTimeout(resolve, 950));
 	}
-}, 1000);
+
+	setTimeout(() => {
+		processOsuWebRequests(client);
+	}, 50);
+}
