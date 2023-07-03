@@ -33,8 +33,6 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchId) % process.env.OSUTOKENSV1.split('-').length];
 
-		console.log(APItoken);
-
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(APItoken, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
