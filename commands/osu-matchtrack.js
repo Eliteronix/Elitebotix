@@ -554,8 +554,6 @@ async function getResultImage(event, users) {
 		}
 	}
 
-	console.log('Done getting scores.' + (new Date() - startTime) + 'ms');
-
 	const canvasWidth = 1000;
 	const canvasHeight = 300 + scores.length * 75 + 15 + teamModeHeight;
 
@@ -620,30 +618,22 @@ async function getResultImage(event, users) {
 		ctx.drawImage(modImage, 960 - ((event.game.mods.length - i) * 48), 35, 45, 32);
 	}
 
-	console.log('Done drawing mods.' + (new Date() - startTime) + 'ms');
-
 	//Write Title and Artist
 	ctx.fillStyle = '#ffffff';
 	ctx.font = '30px comfortaa, sans-serif';
 	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
 	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.team_type).width);
 
-	console.log('Done drawing title and artist.' + (new Date() - startTime) + 'ms');
-
 	//Write team and scoring type
 	ctx.textAlign = 'right';
 	ctx.fillText(event.game.scoring_type, 970, 240);
 	ctx.fillText(event.game.team_type, 970, 280);
-
-	console.log('Done drawing team and scoring type.' + (new Date() - startTime) + 'ms');
 
 	for (let i = 0; i < scores.length; i++) {
 		//Draw background rectangle
 		roundedRect(ctx, 25, 300 + i * 75, 950, 65, 10, '70', '57', '63', 0.75);
 
 		let user = users.find(u => u.id === scores[i].user_id);
-
-		console.log('----- Done drawing background rectangle.' + (new Date() - startTime) + 'ms');
 
 		//Draw Avatar
 		ctx.save();
@@ -687,8 +677,6 @@ async function getResultImage(event, users) {
 			ctx.fill();
 		}
 
-		console.log('----- Done drawing team color.' + (new Date() - startTime) + 'ms');
-
 		// Write the username
 		ctx.font = 'bold 25px comfortaa, sans-serif';
 		ctx.textAlign = 'left';
@@ -701,8 +689,6 @@ async function getResultImage(event, users) {
 			ctx.fillText(username, 100, 330 + i * 75);
 		}
 
-		console.log('----- Done drawing username.' + (new Date() - startTime) + 'ms');
-
 		// Draw the flag
 		try {
 			let flag = await Canvas.loadImage(`./other/flags/${user.country_code}.png`);
@@ -713,8 +699,6 @@ async function getResultImage(event, users) {
 
 			ctx.drawImage(flag, 100, 338 + i * 75, 25, 18);
 		}
-
-		console.log('----- Done drawing flag.' + (new Date() - startTime) + 'ms');
 
 		// Draw the grade
 		let mode = 'Standard';
@@ -754,16 +738,12 @@ async function getResultImage(event, users) {
 
 		ctx.drawImage(gradeImage, 927, 338 + i * 75, 32, 16);
 
-		console.log('----- Done drawing grade.' + (new Date() - startTime) + 'ms');
-
 		// Draw the mods
 		for (let j = 0; j < mods.length; j++) {
 			mods[j] = getModImage(mods[j]);
 			const modImage = await Canvas.loadImage(mods[j]);
 			ctx.drawImage(modImage, 475 - ((mods.length - j) * 48), 305 + i * 75, 45, 32);
 		}
-
-		console.log('----- Done drawing mods.' + (new Date() - startTime) + 'ms');
 
 		// Write the combo
 		ctx.font = 'bold 12px comfortaa, sans-serif';
@@ -774,8 +754,6 @@ async function getResultImage(event, users) {
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText(humanReadable(scores[i].max_combo), 550, 330 + i * 75);
 
-		console.log('----- Done drawing combo.' + (new Date() - startTime) + 'ms');
-
 		// Write the accuracy
 		ctx.font = 'bold 12px comfortaa, sans-serif';
 		ctx.fillStyle = '#F0DBE4';
@@ -784,8 +762,6 @@ async function getResultImage(event, users) {
 		ctx.font = 'bold 20px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText(`${Math.round(scores[i].accuracy * 10000) / 100}%`, 700, 330 + i * 75);
-
-		console.log('----- Done drawing accuracy.' + (new Date() - startTime) + 'ms');
 
 		// Write the score
 		ctx.font = 'bold 22px comfortaa, sans-serif';
@@ -798,8 +774,6 @@ async function getResultImage(event, users) {
 		ctx.font = 'bold 12px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Score', 953 - scoreTextWidth, 330 + i * 75);
-
-		console.log('----- Done drawing score.' + (new Date() - startTime) + 'ms');
 
 		// Write the counts
 		ctx.font = 'bold 10px comfortaa, sans-serif';
@@ -842,8 +816,6 @@ async function getResultImage(event, users) {
 		//Draw background rectangle
 		roundedRect(ctx, 25, 300 + scores.length * 75, 950, 65, 10, '70', '57', '63', 0.95);
 
-		console.log('Done drawing background rectangle.' + (new Date() - startTime) + 'ms');
-
 		// Write the teams and scores
 		ctx.font = 'bold 15px comfortaa, sans-serif';
 		ctx.fillStyle = '#FFFFFF';
@@ -867,8 +839,6 @@ async function getResultImage(event, users) {
 		} else {
 			ctx.fillText(`Blue Team Wins by ${humanReadable(blueScore - redScore)}`, 500, 342 + scores.length * 75);
 		}
-
-		console.log('Done drawing team scores.' + (new Date() - startTime) + 'ms');
 	}
 
 	let mods = event.game.mods;
