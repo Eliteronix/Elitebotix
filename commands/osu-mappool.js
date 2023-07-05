@@ -997,7 +997,7 @@ module.exports = {
 						continue;
 					}
 
-					if (j === modPoolIndex && (data.toString().toUpperCase().match(/[A-Z]+ *\d+/g) || data.toString().toUpperCase() === 'TB')) {
+					if (j === modPoolIndex && !modPoolHeaders.includes(data.toString().toLowerCase())) {
 						let modPool = data.toString().toUpperCase().replaceAll(' ', '').replace(/\d+/g, '');
 
 						modPool = checkViableModpool(modPool);
