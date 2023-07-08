@@ -409,6 +409,8 @@ module.exports = {
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
 													await lastMessage.react('🥇');
+
+													await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
 												} else if (json.events[i].detail.type === 'other') {
 													if (lastMessageType !== 'playing') {
 														let modBits = getModBits(json.events[i].game.mods.join(''));
@@ -440,6 +442,8 @@ module.exports = {
 														await lastMessage.react('<:COMPARE:827974793365159997>');
 														await lastMessage.react('🗺️');
 														await lastMessage.react('🥇');
+
+														await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
 													}
 												} else if (json.events[i].detail.type !== 'other') {
 													let embed = new Discord.EmbedBuilder()
