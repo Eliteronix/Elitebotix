@@ -1,5 +1,4 @@
 const osu = require('node-osu');
-const { assignPlayerRoles } = require('./assignPlayerRoles');
 const { setMapsForBracket } = require('./setMapsForBracket');
 const { createLeaderboard } = require('./createLeaderboard');
 const { DBDiscordUsers } = require('../dbObjects');
@@ -136,12 +135,6 @@ module.exports = {
 						return parseFloat(a.difficulty.rating) - parseFloat(b.difficulty.rating);
 					});
 
-					// eslint-disable-next-line no-undef
-					if (process.env.SERVER !== 'Dev') {
-						//Assign roles to all players currently registered and remove unneeded roles
-						await assignPlayerRoles(client);
-					}
-
 					//Get all players for today
 					const allPlayers = await getPlayers(client);
 
@@ -201,9 +194,6 @@ module.exports = {
 			//All Time Leaderboard
 			createLeaderboard(client, beginningOfTime, 1000000, 'All Time', '835187880229339187');
 			// eslint-disable-next-line no-undef
-		} else if (process.env.SERVER === 'Live' && today.getUTCMinutes() % 10 === 0) {
-			//Assign roles to all players currently registered and remove unneeded roles
-			await assignPlayerRoles(client);
 		}
 	}
 };
