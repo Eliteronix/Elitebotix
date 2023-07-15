@@ -98,6 +98,7 @@ module.exports = async function (client, bancho, interaction) {
 
 		// eslint-disable-next-line no-undef
 		process.send(`command ${command.name}`);
+		console.log(`${client.shardId} command ${command.name}`);
 
 		command.execute(null, [], interaction, [client, bancho]);
 	} else if (interaction.isAutocomplete()) {
