@@ -114,9 +114,6 @@ const gotBanchoPrivateMessage = require('./gotBanchoPrivateMessage');
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays, updateTwitchNames } = require('./utils');
 
-//Get MOTD/getMapsOnTime
-const { initializeMOTD } = require('./MOTD/initializeMOTD');
-
 const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
 const { Op } = require('sequelize');
@@ -323,8 +320,6 @@ setTimeout(() => {
 	checkOsuTracks(client);
 	updateTwitchNames(client);
 	resetSaveMultiMatches();
-
-	setInterval(() => initializeMOTD(client, bancho, false, false), 60000);
 
 	setInterval(() => checkForBirthdays(client), 300000);
 
