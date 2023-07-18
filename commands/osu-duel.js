@@ -828,6 +828,10 @@ module.exports = {
 
 				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
 			} else if (interaction.options._subcommand === 'rating') {
+				let startTime = Date.now();
+
+				console.log('Processing duel rating...');
+
 				let processingMessage = null;
 				if (interaction.id) {
 					try {
@@ -843,6 +847,8 @@ module.exports = {
 				} else {
 					let playerName = await getOsuPlayerName(interaction.options._hoistedOptions[0].value);
 					processingMessage = await interaction.channel.send(`Processing league ratings for ${playerName}...`);
+
+					console.log(`Processing league ratings for ${playerName}... | ${Date.now() - startTime} ms`);
 				}
 
 				let osuUser = {
@@ -865,6 +871,8 @@ module.exports = {
 					historical = 1;
 				}
 
+				console.log(`Got arguments | ${Date.now() - startTime} ms`);
+
 				if (username) {
 					//Get the user by the argument given
 					if (username.startsWith('<@') && username.endsWith('>')) {
@@ -885,6 +893,8 @@ module.exports = {
 					} else {
 						osuUser.name = getIDFromPotentialOsuLink(username);
 					}
+
+					console.log(`Got user | ${Date.now() - startTime} ms`);
 				} else {
 					//Try to get the user by the message if no argument given
 					msg = await populateMsgFromInteraction(interaction);
@@ -898,6 +908,8 @@ module.exports = {
 						const userDisplayName = await getMessageUserDisplayname(msg);
 						osuUser.name = userDisplayName;
 					}
+
+					console.log(`Got user from message | ${Date.now() - startTime} ms`);
 				}
 
 				if (!osuUser.id) {
@@ -928,6 +940,8 @@ module.exports = {
 
 					osuUser.id = user.id;
 					osuUser.name = user.name;
+
+					console.log(`Got user from osu!API | ${Date.now() - startTime} ms`);
 				}
 
 				let seasonEnd = new Date();
@@ -953,6 +967,8 @@ module.exports = {
 
 					seasonEnd.setUTCMonth(seasonEnd.getUTCMonth() - 12);
 					historical--;
+
+					console.log(`-----Got historical data for ${seasonEnd.getUTCFullYear() + 1} | ${Date.now() - startTime} ms`);
 				}
 
 				const canvasWidth = 700;
@@ -973,6 +989,8 @@ module.exports = {
 						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 					}
 				}
+
+				console.log(`Created canvas | ${Date.now() - startTime} ms`);
 
 				//Footer
 				let today = new Date().toLocaleDateString();
@@ -996,6 +1014,9 @@ module.exports = {
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
 				ctx.font = 'bold 25px comfortaa, sans-serif';
+
+				console.log(`Added title | ${Date.now() - startTime} ms`);
+
 				//Current Total Rating
 				ctx.fillText('Current Total Rating', 475, 100);
 				let userDuelStarRating = null;
@@ -1023,12 +1044,24 @@ module.exports = {
 					}
 				}
 
+				console.log(`Got user duel star rating | ${Date.now() - startTime} ms`);
+
 				let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
+
+				console.log(`Got user duel league | ${Date.now() - startTime} ms`);
+
+				let emblemImages = {
+
+				};
 
 				let leagueText = duelLeague.name;
 				let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
+				emblemImages[duelLeague.imageName] = leagueImage;
+
 				ctx.drawImage(leagueImage, 400, 100, 150, 150);
+
+				console.log(`Added league image | ${Date.now() - startTime} ms`);
 
 				if (userDuelStarRating.provisional) {
 					leagueText = 'Provisional: ' + leagueText;
@@ -1059,6 +1092,8 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
 				}
 
+				console.log(`Added NoMod | ${Date.now() - startTime} ms`);
+
 				//Current Hidden Rating
 				ctx.fillText('Hidden', 225, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
@@ -1076,6 +1111,8 @@ module.exports = {
 					}
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
 				}
+
+				console.log(`Added Hidden | ${Date.now() - startTime} ms`);
 
 				//Current HardRock Rating
 				ctx.fillText('HardRock', 350, 350);
@@ -1095,6 +1132,8 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
 				}
 
+				console.log(`Added HardRock | ${Date.now() - startTime} ms`);
+
 				//Current DoubleTime Rating
 				ctx.fillText('DoubleTime', 475, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
@@ -1113,6 +1152,8 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
 				}
 
+				console.log(`Added DoubleTime | ${Date.now() - startTime} ms`);
+
 				//Current FreeMod Rating
 				ctx.fillText('FreeMod', 600, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.freeMod);
@@ -1130,6 +1171,8 @@ module.exports = {
 					}
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
 				}
+
+				console.log(`Added FreeMod | ${Date.now() - startTime} ms`);
 
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
 					ctx.beginPath();
@@ -1160,6 +1203,8 @@ module.exports = {
 
 					ctx.font = 'bold 15px comfortaa, sans-serif';
 
+					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} Total Rating | ${Date.now() - startTime} ms`);
+
 					//Season NoMod Rating
 					ctx.fillText('NoMod', 287, 600 + i * 250);
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.noMod);
@@ -1173,6 +1218,8 @@ module.exports = {
 					if (historicalUserDuelStarRatings[i].ratings.noMod !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.noMod * 1000) / 1000}*)`, 287, 725 + i * 250);
 					}
+
+					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} NoMod Rating | ${Date.now() - startTime} ms`);
 
 					//Season Hidden Rating
 					ctx.fillText('Hidden', 377, 650 + i * 250);
@@ -1188,6 +1235,8 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hidden * 1000) / 1000}*)`, 377, 775 + i * 250);
 					}
 
+					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} Hidden Rating | ${Date.now() - startTime} ms`);
+
 					//Season HardRock Rating
 					ctx.fillText('HardRock', 467, 600 + i * 250);
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.hardRock);
@@ -1201,6 +1250,8 @@ module.exports = {
 					if (historicalUserDuelStarRatings[i].ratings.hardRock !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hardRock * 1000) / 1000}*)`, 467, 725 + i * 250);
 					}
+
+					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} HardRock Rating | ${Date.now() - startTime} ms`);
 
 					//Season DoubleTime Rating
 					ctx.fillText('DoubleTime', 557, 650 + i * 250);
@@ -1216,6 +1267,8 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.doubleTime * 1000) / 1000}*)`, 557, 775 + i * 250);
 					}
 
+					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} DoubleTime Rating | ${Date.now() - startTime} ms`);
+
 					//Season FreeMod Rating
 					ctx.fillText('FreeMod', 647, 600 + i * 250);
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.freeMod);
@@ -1229,10 +1282,14 @@ module.exports = {
 					if (historicalUserDuelStarRatings[i].ratings.freeMod !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.freeMod * 1000) / 1000}*)`, 647, 725 + i * 250);
 					}
+
+					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} FreeMod Rating | ${Date.now() - startTime} ms`);
 				}
 
 				//Draw badges onto the canvas				
 				let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
+
+				console.log(`Got additional info | ${Date.now() - startTime} ms`);
 
 				let yOffset = -2;
 				if (additionalInfo.badges.length < 6) {
@@ -1242,6 +1299,8 @@ module.exports = {
 				for (let i = 0; i < additionalInfo.badges.length && i < 6; i++) {
 					const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
+
+					console.log(`-----Added badge ${i} | ${Date.now() - startTime} ms`);
 				}
 
 				//Draw the Player derank rank
@@ -1253,11 +1312,15 @@ module.exports = {
 					}
 				});
 
+				console.log(`Got discord user | ${Date.now() - startTime} ms`);
+
 				if (discordUser) {
 					let derankStats = await getDerankStats(discordUser);
 
 					ctx.font = 'bold 25px comfortaa, sans-serif';
 					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
+
+					console.log(`Added derank rank | ${Date.now() - startTime} ms`);
 				}
 
 				//Get a circle for inserting the player avatar
@@ -1270,6 +1333,8 @@ module.exports = {
 				const avatar = await getAvatar(osuUser.id);
 				ctx.drawImage(avatar, 110, 90, 160, 160);
 
+				console.log(`Added avatar | ${Date.now() - startTime} ms`);
+
 				if (historicalUserDuelStarRatings.length < 2) {
 					// Save the image locally
 					const buffer = canvas.toBuffer('image/png');
@@ -1280,10 +1345,14 @@ module.exports = {
 					}
 
 					fs.writeFileSync(`./duelratingcards/${osuUser.id}.png`, buffer);
+
+					console.log(`Saved image locally | ${Date.now() - startTime} ms`);
 				}
 
 				//Create as an attachment
 				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });
+
+				console.log(`Created attachment | ${Date.now() - startTime} ms`);
 
 				let sentMessage = null;
 
