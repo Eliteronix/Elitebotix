@@ -1055,11 +1055,10 @@ module.exports = {
 				};
 
 				let leagueText = duelLeague.name;
-				let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				emblemImages[duelLeague.imageName] = leagueImage;
+				emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				ctx.drawImage(leagueImage, 400, 100, 150, 150);
+				ctx.drawImage(emblemImages[duelLeague.imageName], 400, 100, 150, 150);
 
 				console.log(`Added league image | ${Date.now() - startTime} ms`);
 
@@ -1079,9 +1078,12 @@ module.exports = {
 				duelLeague = getOsuDuelLeague(userDuelStarRating.noMod);
 
 				leagueText = duelLeague.name;
-				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				ctx.drawImage(leagueImage, 50, 350, 100, 100);
+				if (!emblemImages[duelLeague.imageName]) {
+					emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+				}
+
+				ctx.drawImage(emblemImages[duelLeague.imageName], 50, 350, 100, 100);
 
 				ctx.fillText(leagueText, 100, 475);
 				if (userDuelStarRating.noMod !== null) {
@@ -1099,9 +1101,12 @@ module.exports = {
 				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
 
 				leagueText = duelLeague.name;
-				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				ctx.drawImage(leagueImage, 175, 350, 100, 100);
+				if (!emblemImages[duelLeague.imageName]) {
+					emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+				}
+
+				ctx.drawImage(emblemImages[duelLeague.imageName], 175, 350, 100, 100);
 
 				ctx.fillText(leagueText, 225, 475);
 				if (userDuelStarRating.hidden !== null) {
@@ -1119,9 +1124,12 @@ module.exports = {
 				duelLeague = getOsuDuelLeague(userDuelStarRating.hardRock);
 
 				leagueText = duelLeague.name;
-				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				ctx.drawImage(leagueImage, 300, 350, 100, 100);
+				if (!emblemImages[duelLeague.imageName]) {
+					emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+				}
+
+				ctx.drawImage(emblemImages[duelLeague.imageName], 300, 350, 100, 100);
 
 				ctx.fillText(leagueText, 350, 475);
 				if (userDuelStarRating.hardRock !== null) {
@@ -1139,9 +1147,12 @@ module.exports = {
 				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
 
 				leagueText = duelLeague.name;
-				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				ctx.drawImage(leagueImage, 425, 350, 100, 100);
+				if (!emblemImages[duelLeague.imageName]) {
+					emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+				}
+
+				ctx.drawImage(emblemImages[duelLeague.imageName], 425, 350, 100, 100);
 
 				ctx.fillText(leagueText, 475, 475);
 				if (userDuelStarRating.doubleTime !== null) {
@@ -1159,9 +1170,12 @@ module.exports = {
 				duelLeague = getOsuDuelLeague(userDuelStarRating.freeMod);
 
 				leagueText = duelLeague.name;
-				leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-				ctx.drawImage(leagueImage, 550, 350, 100, 100);
+				if (!emblemImages[duelLeague.imageName]) {
+					emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+				}
+
+				ctx.drawImage(emblemImages[duelLeague.imageName], 550, 350, 100, 100);
 
 				ctx.fillText(leagueText, 600, 475);
 				if (userDuelStarRating.freeMod !== null) {
