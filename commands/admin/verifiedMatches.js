@@ -1,4 +1,4 @@
-const { DBOsuMultiScores } = require('../../dbObjects');
+const { DBOsuMultiScores, DBDiscordUsers } = require('../../dbObjects');
 const { Op } = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
 const { AttachmentBuilder } = require('discord.js');
@@ -8,7 +8,7 @@ module.exports = {
 	usage: 'None',
 	async execute(interaction) {
 		const verifiedMatches = await DBOsuMultiScores.findAll({
-			attributes: ['matchId', 'osuUserId', 'score', 'beatmapId', 'matchName'],
+			attributes: ['matchId', 'osuUserId', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode'],
 			where: {
 				verifiedAt: {
 					[Op.not]: null,
@@ -19,6 +19,22 @@ module.exports = {
 				}
 			},
 		});
+
+		const players = await DBDiscordUsers.findAll({
+			attributes: ['osuUserId', 'osuRank', 'osuBadges', 'osuDuelStarRating'],
+			where: {
+				osuUserId: {
+					[Op.in]: verifiedMatches.map(match => match.osuUserId),
+				},
+			},
+		});
+
+		for (let i = 0; i < verifiedMatches.length; i++) {
+			const player = players.find(player => player.osuUserId === verifiedMatches[i].osuUserId);
+			verifiedMatches[i].dataValues.osuRank = player.osuRank;
+			verifiedMatches[i].dataValues.osuBadges = player.osuBadges;
+			verifiedMatches[i].dataValues.osuDuelStarRating = player.osuDuelStarRating;
+		}
 
 		let data = [];
 

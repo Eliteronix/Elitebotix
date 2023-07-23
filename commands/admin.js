@@ -2,6 +2,10 @@ const { developers, showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const fs = require('node:fs');
 
+const peopleThatWantData = [
+	'146092837723832320' // Stage
+];
+
 module.exports = {
 	name: 'admin',
 	description: 'Sends a message with the bots server',
@@ -72,7 +76,7 @@ module.exports = {
 	},
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
-		if (!developers.includes(interaction.user.id)) {
+		if (!developers.includes(interaction.user.id) && !(interaction.options.getString('command') === 'verifiedMatches' && peopleThatWantData.includes(interaction.user.id))) {
 			try {
 				return await interaction.reply({ content: 'Only developers may use this command.', ephemeral: true });
 			} catch (error) {
