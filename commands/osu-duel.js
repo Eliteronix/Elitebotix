@@ -1233,7 +1233,7 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.noMod * 1000) / 1000}*)`, 287, 725 + i * 250);
 					}
 
-					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} NoMod Rating | ${Date.now() - startTime} ms`);
+					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} NoMod Rating | ${Date.now() - startTime} ms`);
 
 					//Season Hidden Rating
 					ctx.fillText('Hidden', 377, 650 + i * 250);
@@ -1249,7 +1249,7 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hidden * 1000) / 1000}*)`, 377, 775 + i * 250);
 					}
 
-					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} Hidden Rating | ${Date.now() - startTime} ms`);
+					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} Hidden Rating | ${Date.now() - startTime} ms`);
 
 					//Season HardRock Rating
 					ctx.fillText('HardRock', 467, 600 + i * 250);
@@ -1265,7 +1265,7 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hardRock * 1000) / 1000}*)`, 467, 725 + i * 250);
 					}
 
-					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} HardRock Rating | ${Date.now() - startTime} ms`);
+					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} HardRock Rating | ${Date.now() - startTime} ms`);
 
 					//Season DoubleTime Rating
 					ctx.fillText('DoubleTime', 557, 650 + i * 250);
@@ -1281,7 +1281,7 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.doubleTime * 1000) / 1000}*)`, 557, 775 + i * 250);
 					}
 
-					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} DoubleTime Rating | ${Date.now() - startTime} ms`);
+					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} DoubleTime Rating | ${Date.now() - startTime} ms`);
 
 					//Season FreeMod Rating
 					ctx.fillText('FreeMod', 647, 600 + i * 250);
@@ -1297,7 +1297,7 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.freeMod * 1000) / 1000}*)`, 647, 725 + i * 250);
 					}
 
-					console.log(`Added ${historicalUserDuelStarRatings[i].seasonEnd} FreeMod Rating | ${Date.now() - startTime} ms`);
+					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} FreeMod Rating | ${Date.now() - startTime} ms`);
 				}
 
 				//Draw badges onto the canvas				
