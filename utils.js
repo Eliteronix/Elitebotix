@@ -1348,9 +1348,11 @@ module.exports = {
 										sentMessage.crosspost();
 									}
 								}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} tournament badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
-							}
 
-							discordUser.osuBadges = additionalInfo.tournamentBadges.length;
+								console.log('Badge update', discordUser.osuBadges, '->', additionalInfo.tournamentBadges.length);
+
+								discordUser.osuBadges = additionalInfo.tournamentBadges.length;
+							}
 
 							if (additionalInfo.tournamentBan) {
 								if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
