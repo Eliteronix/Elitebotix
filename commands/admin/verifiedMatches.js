@@ -8,7 +8,7 @@ module.exports = {
 	usage: 'None',
 	async execute(interaction) {
 		const verifiedMatches = await DBOsuMultiScores.findAll({
-			attributes: ['matchId', 'osuUserId', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode'],
+			attributes: ['matchId', 'osuUserId', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode', 'matchStartDate', 'gameStartDate'],
 			where: {
 				verifiedAt: {
 					[Op.not]: null,
