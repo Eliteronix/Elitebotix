@@ -515,10 +515,6 @@ module.exports = {
 };
 
 async function getResultImage(event, users) {
-	let startTime = new Date();
-
-	console.log('Getting result image...');
-
 	let scores = [];
 	let teamModeHeight = 0;
 	let blueScore = 0;
@@ -575,8 +571,6 @@ async function getResultImage(event, users) {
 		}
 	}
 
-	console.log('Done drawing background.' + (new Date() - startTime) + 'ms');
-
 	//Draw beatmap cover
 	ctx.save();
 	ctx.beginPath();
@@ -612,8 +606,6 @@ async function getResultImage(event, users) {
 	}
 
 	ctx.restore();
-
-	console.log('Done drawing beatmap cover.' + (new Date() - startTime) + 'ms');
 
 	//Draw mods
 	for (let i = 0; i < event.game.mods.length; i++) {
@@ -662,8 +654,6 @@ async function getResultImage(event, users) {
 		}
 
 		ctx.restore();
-
-		console.log('----- Done drawing avatar.' + (new Date() - startTime) + 'ms');
 
 		//Mark the team if needed
 		if (scores[i].match.team !== 'none') {
@@ -812,8 +802,6 @@ async function getResultImage(event, users) {
 		ctx.fillText('Miss', 873, 350 + i * 75);
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText(humanReadable(scores[i].statistics.count_miss.toString()), 900, 350 + i * 75);
-
-		console.log('----- Done drawing counts.' + (new Date() - startTime) + 'ms');
 	}
 
 	if (teamModeHeight) {
@@ -861,8 +849,6 @@ async function getResultImage(event, users) {
 	}
 
 	let modBits = getModBits(mods.join(''));
-
-	console.log('Done getting mods for file.' + (new Date() - startTime) + 'ms');
 
 	//Create as an attachment
 	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
