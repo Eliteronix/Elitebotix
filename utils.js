@@ -1282,6 +1282,7 @@ module.exports = {
 							&& !badge.description.includes(' contribution to the ')
 							&& !badge.description.includes(' contributor')
 							&& !badge.description.includes('Contributions')
+							&& !badge.description.includes('commitment')
 							&& !badge.description.includes('Mapper\'s Favourite ')
 							&& !badge.description.includes('Community Favourite ')
 							&& !badge.description.includes('Community Choice ')
