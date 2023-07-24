@@ -1094,8 +1094,6 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
 				}
 
-				console.log(`Added NoMod | ${Date.now() - startTime} ms`);
-
 				//Current Hidden Rating
 				ctx.fillText('Hidden', 225, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
@@ -1116,8 +1114,6 @@ module.exports = {
 					}
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
 				}
-
-				console.log(`Added Hidden | ${Date.now() - startTime} ms`);
 
 				//Current HardRock Rating
 				ctx.fillText('HardRock', 350, 350);
@@ -1140,8 +1136,6 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
 				}
 
-				console.log(`Added HardRock | ${Date.now() - startTime} ms`);
-
 				//Current DoubleTime Rating
 				ctx.fillText('DoubleTime', 475, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
@@ -1162,8 +1156,6 @@ module.exports = {
 					}
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
 				}
-
-				console.log(`Added DoubleTime | ${Date.now() - startTime} ms`);
 
 				//Current FreeMod Rating
 				ctx.fillText('FreeMod', 600, 350);
@@ -1186,7 +1178,7 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
 				}
 
-				console.log(`Added FreeMod | ${Date.now() - startTime} ms`);
+				console.log(`Added Mods | ${Date.now() - startTime} ms`);
 
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
 					ctx.beginPath();
