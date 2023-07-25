@@ -1094,8 +1094,6 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.noMod * 1000) / 1000}*)`, 100, 500);
 				}
 
-				console.log(`Added NoMod | ${Date.now() - startTime} ms`);
-
 				//Current Hidden Rating
 				ctx.fillText('Hidden', 225, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.hidden);
@@ -1116,8 +1114,6 @@ module.exports = {
 					}
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hidden * 1000) / 1000}*)`, 225, 500);
 				}
-
-				console.log(`Added Hidden | ${Date.now() - startTime} ms`);
 
 				//Current HardRock Rating
 				ctx.fillText('HardRock', 350, 350);
@@ -1140,8 +1136,6 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.hardRock * 1000) / 1000}*)`, 350, 500);
 				}
 
-				console.log(`Added HardRock | ${Date.now() - startTime} ms`);
-
 				//Current DoubleTime Rating
 				ctx.fillText('DoubleTime', 475, 350);
 				duelLeague = getOsuDuelLeague(userDuelStarRating.doubleTime);
@@ -1162,8 +1156,6 @@ module.exports = {
 					}
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.doubleTime * 1000) / 1000}*)`, 475, 500);
 				}
-
-				console.log(`Added DoubleTime | ${Date.now() - startTime} ms`);
 
 				//Current FreeMod Rating
 				ctx.fillText('FreeMod', 600, 350);
@@ -1186,7 +1178,7 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
 				}
 
-				console.log(`Added FreeMod | ${Date.now() - startTime} ms`);
+				console.log(`Added Mods | ${Date.now() - startTime} ms`);
 
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
 					ctx.beginPath();
@@ -1217,8 +1209,6 @@ module.exports = {
 
 					ctx.font = 'bold 15px comfortaa, sans-serif';
 
-					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} Total Rating | ${Date.now() - startTime} ms`);
-
 					//Season NoMod Rating
 					ctx.fillText('NoMod', 287, 600 + i * 250);
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.noMod);
@@ -1232,8 +1222,6 @@ module.exports = {
 					if (historicalUserDuelStarRatings[i].ratings.noMod !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.noMod * 1000) / 1000}*)`, 287, 725 + i * 250);
 					}
-
-					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} NoMod Rating | ${Date.now() - startTime} ms`);
 
 					//Season Hidden Rating
 					ctx.fillText('Hidden', 377, 650 + i * 250);
@@ -1249,8 +1237,6 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hidden * 1000) / 1000}*)`, 377, 775 + i * 250);
 					}
 
-					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} Hidden Rating | ${Date.now() - startTime} ms`);
-
 					//Season HardRock Rating
 					ctx.fillText('HardRock', 467, 600 + i * 250);
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.hardRock);
@@ -1264,8 +1250,6 @@ module.exports = {
 					if (historicalUserDuelStarRatings[i].ratings.hardRock !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hardRock * 1000) / 1000}*)`, 467, 725 + i * 250);
 					}
-
-					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} HardRock Rating | ${Date.now() - startTime} ms`);
 
 					//Season DoubleTime Rating
 					ctx.fillText('DoubleTime', 557, 650 + i * 250);
@@ -1281,8 +1265,6 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.doubleTime * 1000) / 1000}*)`, 557, 775 + i * 250);
 					}
 
-					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} DoubleTime Rating | ${Date.now() - startTime} ms`);
-
 					//Season FreeMod Rating
 					ctx.fillText('FreeMod', 647, 600 + i * 250);
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.freeMod);
@@ -1297,7 +1279,7 @@ module.exports = {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.freeMod * 1000) / 1000}*)`, 647, 725 + i * 250);
 					}
 
-					console.log(`-----Added ${historicalUserDuelStarRatings[i].seasonEnd} FreeMod Rating | ${Date.now() - startTime} ms`);
+					console.log(`-----Added Mod Ratings | ${Date.now() - startTime} ms`);
 				}
 
 				//Draw badges onto the canvas				
