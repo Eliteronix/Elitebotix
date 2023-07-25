@@ -1304,15 +1304,11 @@ module.exports = {
 					}
 				});
 
-				console.log(`Got discord user | ${Date.now() - startTime} ms`);
-
 				if (discordUser) {
 					let derankStats = await getDerankStats(discordUser);
 
 					ctx.font = 'bold 25px comfortaa, sans-serif';
 					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
-
-					console.log(`Added derank rank | ${Date.now() - startTime} ms`);
 				}
 
 				//Get a circle for inserting the player avatar
@@ -1325,8 +1321,6 @@ module.exports = {
 				const avatar = await getAvatar(osuUser.id);
 				ctx.drawImage(avatar, 110, 90, 160, 160);
 
-				console.log(`Added avatar | ${Date.now() - startTime} ms`);
-
 				if (historicalUserDuelStarRatings.length < 2) {
 					// Save the image locally
 					const buffer = canvas.toBuffer('image/png');
@@ -1337,8 +1331,6 @@ module.exports = {
 					}
 
 					fs.writeFileSync(`./duelratingcards/${osuUser.id}.png`, buffer);
-
-					console.log(`Saved image locally | ${Date.now() - startTime} ms`);
 				}
 
 				//Create as an attachment
