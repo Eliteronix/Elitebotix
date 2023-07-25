@@ -1081,7 +1081,7 @@ module.exports = {
 
 				ctx.drawImage(emblemImages[duelLeague.imageName], 50, 350, 100, 100);
 
-				ctx.fillText(leagueText, 100, 475);
+				ctx.fillText(leagueText, 100, 475, 100);
 				if (userDuelStarRating.noMod !== null) {
 					let limited = '';
 					if (userDuelStarRating.noModLimited) {
@@ -1102,7 +1102,7 @@ module.exports = {
 
 				ctx.drawImage(emblemImages[duelLeague.imageName], 175, 350, 100, 100);
 
-				ctx.fillText(leagueText, 225, 475);
+				ctx.fillText(leagueText, 225, 475, 100);
 				if (userDuelStarRating.hidden !== null) {
 					let limited = '';
 					if (userDuelStarRating.hiddenLimited) {
@@ -1123,7 +1123,7 @@ module.exports = {
 
 				ctx.drawImage(emblemImages[duelLeague.imageName], 300, 350, 100, 100);
 
-				ctx.fillText(leagueText, 350, 475);
+				ctx.fillText(leagueText, 350, 475, 100);
 				if (userDuelStarRating.hardRock !== null) {
 					let limited = '';
 					if (userDuelStarRating.hardRockLimited) {
@@ -1144,7 +1144,7 @@ module.exports = {
 
 				ctx.drawImage(emblemImages[duelLeague.imageName], 425, 350, 100, 100);
 
-				ctx.fillText(leagueText, 475, 475);
+				ctx.fillText(leagueText, 475, 475, 100);
 				if (userDuelStarRating.doubleTime !== null) {
 					let limited = '';
 					if (userDuelStarRating.doubleTimeLimited) {
@@ -1165,7 +1165,7 @@ module.exports = {
 
 				ctx.drawImage(emblemImages[duelLeague.imageName], 550, 350, 100, 100);
 
-				ctx.fillText(leagueText, 600, 475);
+				ctx.fillText(leagueText, 600, 475, 100);
 				if (userDuelStarRating.freeMod !== null) {
 					let limited = '';
 					if (userDuelStarRating.freeModLimited) {
@@ -1192,15 +1192,18 @@ module.exports = {
 					let duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.total);
 
 					let leagueText = duelLeague.name;
-					let leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-					ctx.drawImage(leagueImage, 50, 575 + i * 250, 150, 150);
+					if (!emblemImages[duelLeague.imageName]) {
+						emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+					}
+
+					ctx.drawImage(emblemImages[duelLeague.imageName], 50, 575 + i * 250, 150, 150);
 
 					if (historicalUserDuelStarRatings[i].ratings.provisional) {
 						leagueText = 'Provisional: ' + leagueText;
 					}
 
-					ctx.fillText(leagueText, 125, 750 + i * 250);
+					ctx.fillText(leagueText, 125, 750 + i * 250, 150);
 					ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.total * 1000) / 1000}*)`, 125, 775 + i * 250);
 
 					ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -1210,11 +1213,14 @@ module.exports = {
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.noMod);
 
 					leagueText = duelLeague.name;
-					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-					ctx.drawImage(leagueImage, 250, 600 + i * 250, 75, 75);
+					if (!emblemImages[duelLeague.imageName]) {
+						emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+					}
 
-					ctx.fillText(leagueText, 287, 700 + i * 250);
+					ctx.drawImage(emblemImages[duelLeague.imageName], 250, 600 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 287, 700 + i * 250, 75);
 					if (historicalUserDuelStarRatings[i].ratings.noMod !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.noMod * 1000) / 1000}*)`, 287, 725 + i * 250);
 					}
@@ -1224,11 +1230,14 @@ module.exports = {
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.hidden);
 
 					leagueText = duelLeague.name;
-					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-					ctx.drawImage(leagueImage, 340, 650 + i * 250, 75, 75);
+					if (!emblemImages[duelLeague.imageName]) {
+						emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+					}
 
-					ctx.fillText(leagueText, 377, 750 + i * 250);
+					ctx.drawImage(emblemImages[duelLeague.imageName], 340, 650 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 377, 750 + i * 250, 75);
 					if (historicalUserDuelStarRatings[i].ratings.hidden !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hidden * 1000) / 1000}*)`, 377, 775 + i * 250);
 					}
@@ -1238,11 +1247,14 @@ module.exports = {
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.hardRock);
 
 					leagueText = duelLeague.name;
-					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-					ctx.drawImage(leagueImage, 430, 600 + i * 250, 75, 75);
+					if (!emblemImages[duelLeague.imageName]) {
+						emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+					}
 
-					ctx.fillText(leagueText, 467, 700 + i * 250);
+					ctx.drawImage(emblemImages[duelLeague.imageName], 430, 600 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 467, 700 + i * 250, 75);
 					if (historicalUserDuelStarRatings[i].ratings.hardRock !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.hardRock * 1000) / 1000}*)`, 467, 725 + i * 250);
 					}
@@ -1252,11 +1264,14 @@ module.exports = {
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.doubleTime);
 
 					leagueText = duelLeague.name;
-					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-					ctx.drawImage(leagueImage, 520, 650 + i * 250, 75, 75);
+					if (!emblemImages[duelLeague.imageName]) {
+						emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+					}
 
-					ctx.fillText(leagueText, 557, 750 + i * 250);
+					ctx.drawImage(emblemImages[duelLeague.imageName], 520, 650 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 557, 750 + i * 250, 75);
 					if (historicalUserDuelStarRatings[i].ratings.doubleTime !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.doubleTime * 1000) / 1000}*)`, 557, 775 + i * 250);
 					}
@@ -1266,11 +1281,14 @@ module.exports = {
 					duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.freeMod);
 
 					leagueText = duelLeague.name;
-					leagueImage = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
-					ctx.drawImage(leagueImage, 610, 600 + i * 250, 75, 75);
+					if (!emblemImages[duelLeague.imageName]) {
+						emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
+					}
 
-					ctx.fillText(leagueText, 647, 700 + i * 250);
+					ctx.drawImage(emblemImages[duelLeague.imageName], 610, 600 + i * 250, 75, 75);
+
+					ctx.fillText(leagueText, 647, 700 + i * 250, 75);
 					if (historicalUserDuelStarRatings[i].ratings.freeMod !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.freeMod * 1000) / 1000}*)`, 647, 725 + i * 250);
 					}
