@@ -871,8 +871,6 @@ module.exports = {
 					historical = 1;
 				}
 
-				console.log(`Got arguments | ${Date.now() - startTime} ms`);
-
 				if (username) {
 					//Get the user by the argument given
 					if (username.startsWith('<@') && username.endsWith('>')) {
@@ -989,8 +987,6 @@ module.exports = {
 						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
 					}
 				}
-
-				console.log(`Created canvas | ${Date.now() - startTime} ms`);
 
 				//Footer
 				let today = new Date().toLocaleDateString();
