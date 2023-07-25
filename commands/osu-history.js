@@ -770,6 +770,7 @@ module.exports = {
 			labels.reverse();
 			duelRatings.reverse();
 
+			let grandmasterHistory = [];
 			let masterHistory = [];
 			let diamondHistory = [];
 			let platinumHistory = [];
@@ -791,6 +792,7 @@ module.exports = {
 					highestRating = duelRatings[i].rating;
 				}
 
+				let grandmasterRating = null;
 				let masterRating = null;
 				let diamondRating = null;
 				let platinumRating = null;
@@ -798,7 +800,9 @@ module.exports = {
 				let silverRating = null;
 				let bronzeRating = null;
 
-				if (duelRatings[i].rating > 7) {
+				if (duelRatings[i].rating > 7.6) {
+					grandmasterRating = duelRatings[i].rating;
+				} else if (duelRatings[i].rating > 7) {
 					masterRating = duelRatings[i].rating;
 				} else if (duelRatings[i].rating > 6.4) {
 					diamondRating = duelRatings[i].rating;
@@ -812,6 +816,7 @@ module.exports = {
 					bronzeRating = duelRatings[i].rating;
 				}
 
+				grandmasterHistory.push(grandmasterRating);
 				masterHistory.push(masterRating);
 				diamondHistory.push(diamondRating);
 				platinumHistory.push(platinumRating);
@@ -998,6 +1003,14 @@ module.exports = {
 			const data = {
 				labels: labels,
 				datasets: [
+					{
+						label: 'Grandmaster',
+						data: grandmasterHistory,
+						borderColor: 'rgb(88, 28, 255)',
+						fill: true,
+						backgroundColor: 'rgba(88, 28, 255, 0.6)',
+						tension: 0.4
+					},
 					{
 						label: 'Master',
 						data: masterHistory,

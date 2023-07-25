@@ -161,6 +161,7 @@ module.exports = {
 
 			history.reverse();
 
+			let grandmasterHistory = [];
 			let masterHistory = [];
 			let diamondHistory = [];
 			let platinumHistory = [];
@@ -169,6 +170,7 @@ module.exports = {
 			let bronzeHistory = [];
 
 			for (let j = 0; j < history.length; j++) {
+				let grandmasterRating = null;
 				let masterRating = null;
 				let diamondRating = null;
 				let platinumRating = null;
@@ -176,7 +178,9 @@ module.exports = {
 				let silverRating = null;
 				let bronzeRating = null;
 
-				if (history[j] > 7) {
+				if (history[j] > 7.6) {
+					grandmasterRating = history[j];
+				} else if (history[j] > 7) {
 					masterRating = history[j];
 				} else if (history[j] > 6.4) {
 					diamondRating = history[j];
@@ -190,6 +194,7 @@ module.exports = {
 					bronzeRating = history[j];
 				}
 
+				grandmasterHistory.push(grandmasterRating);
 				masterHistory.push(masterRating);
 				diamondHistory.push(diamondRating);
 				platinumHistory.push(platinumRating);
@@ -205,6 +210,14 @@ module.exports = {
 			const data = {
 				labels: labels,
 				datasets: [
+					{
+						label: 'Grandmaster',
+						data: grandmasterHistory,
+						borderColor: 'rgb(88, 28, 255)',
+						fill: true,
+						backgroundColor: 'rgba(88, 28, 255, 0.6)',
+						tension: 0.4
+					},
 					{
 						label: 'Master',
 						data: masterHistory,

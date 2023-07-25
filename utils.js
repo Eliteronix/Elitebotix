@@ -3762,8 +3762,18 @@ module.exports = {
 		return duelRatings;
 	},
 	getOsuDuelLeague(rating) {
-		if (rating > 7) {
-			return { name: 'Master', imageName: 'master', color: '#FFAEFB' };
+		if (rating > 8) {
+			return { name: 'Grandmaster 3', imageName: 'grandmaster_3', color: '#581CFF' };
+		} else if (rating > 7.8) {
+			return { name: 'Grandmaster 2', imageName: 'grandmaster_2', color: '#581CFF' };
+		} else if (rating > 7.6) {
+			return { name: 'Grandmaster 1', imageName: 'grandmaster_1', color: '#581CFF' };
+		} else if (rating > 7.4) {
+			return { name: 'Master 3', imageName: 'master_3', color: '#FFAEFB' };
+		} else if (rating > 7.2) {
+			return { name: 'Master 2', imageName: 'master_2', color: '#FFAEFB' };
+		} else if (rating > 7) {
+			return { name: 'Master 1', imageName: 'master_1', color: '#FFAEFB' };
 		} else if (rating > 6.8) {
 			return { name: 'Diamond 3', imageName: 'diamond_3', color: '#49B0FF' };
 		} else if (rating > 6.6) {
