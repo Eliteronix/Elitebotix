@@ -3007,6 +3007,10 @@ module.exports = {
 				'matchStartDate',
 				'gameRawMods',
 				'rawMods',
+				'count300',
+				'count100',
+				'count50',
+				'countMiss'
 			],
 			where: {
 				osuUserId: input.osuUserId,
@@ -3080,7 +3084,15 @@ module.exports = {
 			const checkedMapIds = [];
 			const userMapIds = [];
 			const userMaps = [];
+
+			// Don't count plays with more than 10% misses
 			for (let i = 0; i < userScores.length; i++) {
+				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
+
+				if (100 / totalHits * parseInt(userScores[i].countMiss) > 10) {
+					continue;
+				}
+
 				//Check if the map is already in; the score is above 10k and the map is not an aspire map
 				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 					checkedMapIds.push(userScores[i].beatmapId);
