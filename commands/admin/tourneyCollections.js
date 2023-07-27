@@ -314,6 +314,23 @@ module.exports = {
 			}
 		}
 
+		// Reconstruct the all pools collection
+		let allPoolsCollection = collections.find(collection => collection.name === '2.1.1 All Pools');
+
+		allPoolsCollection.mapAmount = 0;
+		allPoolsCollection.mapHashes = [];
+
+		allCurrentPoolCollections = collections.filter(collection => collection.name.match(/2\.[2-9]\.1 .+/));
+
+		for (let i = 0; i < allCurrentPoolCollections.length; i++) {
+			for (let j = 0; j < allCurrentPoolCollections[i].mapHashes.length; j++) {
+				if (!allPoolsCollection.mapHashes.includes(allCurrentPoolCollections[i].mapHashes[j])) {
+					allPoolsCollection.mapHashes.push(allCurrentPoolCollections[i].mapHashes[j]);
+					allPoolsCollection.mapAmount++;
+				}
+			}
+		}
+
 		// Add all maps to the unplayed collection
 		let unplayedCollection = collections.find(collection => collection.name === '2.1.2 Pools unplayed');
 
@@ -324,18 +341,12 @@ module.exports = {
 			}
 		}
 
-		// Reconstruct the all pools collection
-		let allPoolsCollection = collections.find(collection => collection.name === '2.1.1 All Pools');
-
-		allPoolsCollection.mapAmount = 0;
-		allPoolsCollection.mapHashes = [];
-
-		for (let i = 0; i < allCurrentPoolCollections.length; i++) {
-			for (let j = 0; j < allCurrentPoolCollections[i].mapHashes.length; j++) {
-				if (!allPoolsCollection.mapHashes.includes(allCurrentPoolCollections[i].mapHashes[j])) {
-					allPoolsCollection.mapHashes.push(allCurrentPoolCollections[i].mapHashes[j]);
-					allPoolsCollection.mapAmount++;
-				}
+		// Remove what is not in the all pools collection from the unplayed collection
+		for (let i = 0; i < unplayedCollection.mapHashes.length; i++) {
+			if (!allPoolsCollection.mapHashes.includes(unplayedCollection.mapHashes[i])) {
+				unplayedCollection.mapHashes.splice(i, 1);
+				unplayedCollection.mapAmount--;
+				i--;
 			}
 		}
 
