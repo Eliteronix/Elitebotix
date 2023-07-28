@@ -2,13 +2,14 @@ const { DBOsuMultiScores, DBDiscordUsers } = require('../../dbObjects');
 const { Op } = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
 const { AttachmentBuilder } = require('discord.js');
+const { getAccuracy } = require('../../utils');
 
 module.exports = {
 	name: 'verifiedMatches',
 	usage: 'None',
 	async execute(interaction) {
 		const verifiedMatches = await DBOsuMultiScores.findAll({
-			attributes: ['osuUserId', 'matchId', 'gameId', 'scoringType', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode', 'matchStartDate', 'gameStartDate', 'freeMod', 'forceMod', 'teamType', 'team'],
+			attributes: ['osuUserId', 'matchId', 'gameId', 'scoringType', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode', 'matchStartDate', 'gameStartDate', 'freeMod', 'forceMod', 'teamType', 'team', 'count50', 'count100', 'count300', 'countMiss', 'countKatu', 'countGeki'],
 			where: {
 				verifiedAt: {
 					[Op.not]: null,
@@ -74,10 +75,10 @@ module.exports = {
 			};
 		});
 		const gameIdsUniqueCountFiltered = gameIdsUniqueCount.filter(gameId => gameId.count > 1);
-		const verifiedMatchesFiltered = verifiedMatches.filter(match => gameIdsUniqueCountFiltered.find(gameId => gameId.gameId === match.gameId));
+		let verifiedMatchesFiltered = verifiedMatches.filter(match => gameIdsUniqueCountFiltered.find(gameId => gameId.gameId === match.gameId));
 
 		const players = await DBDiscordUsers.findAll({
-			attributes: ['osuUserId', 'osuRank', 'osuBadges', 'osuDuelStarRating'],
+			attributes: ['osuUserId', 'osuName', 'osuRank', 'osuBadges', 'osuDuelStarRating'],
 			where: {
 				osuUserId: {
 					[Op.in]: verifiedMatchesFiltered.map(match => match.osuUserId),
@@ -87,10 +88,35 @@ module.exports = {
 
 		for (let i = 0; i < verifiedMatchesFiltered.length; i++) {
 			const player = players.find(player => player.osuUserId === verifiedMatchesFiltered[i].osuUserId);
+			verifiedMatchesFiltered[i].dataValues.osuName = player.osuName;
 			verifiedMatchesFiltered[i].dataValues.osuRank = player.osuRank;
 			verifiedMatchesFiltered[i].dataValues.osuBadges = player.osuBadges;
 			verifiedMatchesFiltered[i].dataValues.osuDuelStarRating = player.osuDuelStarRating;
+
+			const score = verifiedMatchesFiltered[i].dataValues;
+
+			let mode = 0;
+
+			if (score.mode === 'Mania') {
+				mode = 3;
+			} else if (score.mode === 'Catch the Beat') {
+				mode = 2;
+			} else if (score.mode === 'Taiko') {
+				mode = 1;
+			}
+
+			verifiedMatchesFiltered[i].dataValues.accuracy = getAccuracy({ counts: { 300: score.count300, 100: score.count100, 50: score.count50, miss: score.countMiss, katu: score.countKatu, geki: score.countGeki } }, mode) * 100;
+
+			delete verifiedMatchesFiltered[i].dataValues.count300;
+			delete verifiedMatchesFiltered[i].dataValues.count100;
+			delete verifiedMatchesFiltered[i].dataValues.count50;
+			delete verifiedMatchesFiltered[i].dataValues.countMiss;
+			delete verifiedMatchesFiltered[i].dataValues.countKatu;
+			delete verifiedMatchesFiltered[i].dataValues.countGeki;
 		}
+
+		verifiedMatchesFiltered = verifiedMatchesFiltered.concat(verifiedMatchesFiltered);
+		verifiedMatchesFiltered = verifiedMatchesFiltered.concat(verifiedMatchesFiltered);
 
 		let data = [];
 
