@@ -75,7 +75,7 @@ module.exports = {
 			};
 		});
 		const gameIdsUniqueCountFiltered = gameIdsUniqueCount.filter(gameId => gameId.count > 1);
-		let verifiedMatchesFiltered = verifiedMatches.filter(match => gameIdsUniqueCountFiltered.find(gameId => gameId.gameId === match.gameId));
+		const verifiedMatchesFiltered = verifiedMatches.filter(match => gameIdsUniqueCountFiltered.find(gameId => gameId.gameId === match.gameId));
 
 		const players = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', 'osuName', 'osuRank', 'osuBadges', 'osuDuelStarRating'],
@@ -114,9 +114,6 @@ module.exports = {
 			delete verifiedMatchesFiltered[i].dataValues.countKatu;
 			delete verifiedMatchesFiltered[i].dataValues.countGeki;
 		}
-
-		verifiedMatchesFiltered = verifiedMatchesFiltered.concat(verifiedMatchesFiltered);
-		verifiedMatchesFiltered = verifiedMatchesFiltered.concat(verifiedMatchesFiltered);
 
 		let data = [];
 
