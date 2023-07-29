@@ -8,6 +8,10 @@ module.exports = {
 	name: 'verifiedMatches',
 	usage: 'None',
 	async execute(interaction) {
+		await interaction.editReply('Getting verified matches...');
+
+		let startTime = new Date();
+
 		const verifiedMatches = await DBOsuMultiScores.findAll({
 			attributes: ['osuUserId', 'matchId', 'gameId', 'scoringType', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode', 'matchStartDate', 'gameStartDate', 'freeMod', 'forceMod', 'teamType', 'team', 'count50', 'count100', 'count300', 'countMiss', 'countKatu', 'countGeki'],
 			where: {
@@ -65,17 +69,30 @@ module.exports = {
 			},
 		});
 
+		await interaction.channel.send(`Found ${verifiedMatches.length} verified matchscores. Took ${new Date() - startTime}ms.`);
+
 		// Remove entries with only one player per gameId
 		const gameIds = verifiedMatches.map(match => match.gameId);
 		const gameIdsUnique = [...new Set(gameIds)];
+
+		await interaction.channel.send(`Found ${gameIdsUnique.length} unique gameIds. Took ${new Date() - startTime}ms.`);
+
 		const gameIdsUniqueCount = gameIdsUnique.map(gameId => {
 			return {
 				gameId: gameId,
 				count: gameIds.filter(gameId2 => gameId2 === gameId).length,
 			};
 		});
+
+		await interaction.channel.send(`Found ${gameIdsUniqueCount.length} unique gameIds with their count. Took ${new Date() - startTime}ms.`);
+
 		const gameIdsUniqueCountFiltered = gameIdsUniqueCount.filter(gameId => gameId.count > 1);
+
+		await interaction.channel.send(`Found ${gameIdsUniqueCountFiltered.length} unique gameIds with more than one player. Took ${new Date() - startTime}ms.`);
+
 		const verifiedMatchesFiltered = verifiedMatches.filter(match => gameIdsUniqueCountFiltered.find(gameId => gameId.gameId === match.gameId));
+
+		await interaction.channel.send(`Found ${verifiedMatchesFiltered.length} verified matchscores with more than one player per gameId. Took ${new Date() - startTime}ms.`);
 
 		const players = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', 'osuName', 'osuRank', 'osuBadges', 'osuDuelStarRating'],
@@ -85,6 +102,8 @@ module.exports = {
 				},
 			},
 		});
+
+		await interaction.channel.send(`Found ${players.length} players. Took ${new Date() - startTime}ms.`);
 
 		for (let i = 0; i < verifiedMatchesFiltered.length; i++) {
 			const player = players.find(player => player.osuUserId === verifiedMatchesFiltered[i].osuUserId);
@@ -115,6 +134,8 @@ module.exports = {
 			delete verifiedMatchesFiltered[i].dataValues.countGeki;
 		}
 
+		await interaction.channel.send(`Creating CSV. Took ${new Date() - startTime}ms.`);
+
 		let data = [];
 
 		for (let i = 0; i < verifiedMatchesFiltered.length; i++) {
@@ -135,6 +156,6 @@ module.exports = {
 			}
 		}
 
-		return await interaction.editReply(`Verified matches sent to ${interaction.user.username}`);
+		return await interaction.channel.send(`Verified matches sent to ${interaction.user.username} in DM. Took ${new Date() - startTime}ms.`);
 	},
 };
