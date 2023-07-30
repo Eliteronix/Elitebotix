@@ -1,8 +1,8 @@
-const { DBOsuMultiScores, DBDiscordUsers } = require('../../dbObjects');
+const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../../dbObjects');
 const { Op } = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
 const { AttachmentBuilder } = require('discord.js');
-const { getAccuracy } = require('../../utils');
+const { getAccuracy, getOsuBeatmap } = require('../../utils');
 
 module.exports = {
 	name: 'verifiedMatches',
@@ -12,8 +12,8 @@ module.exports = {
 
 		let startTime = new Date();
 
-		const verifiedMatches = await DBOsuMultiScores.findAll({
-			attributes: ['osuUserId', 'matchId', 'gameId', 'scoringType', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode', 'matchStartDate', 'gameStartDate', 'freeMod', 'forceMod', 'teamType', 'team', 'count50', 'count100', 'count300', 'countMiss', 'countKatu', 'countGeki'],
+		const gameIdCounts = await DBOsuMultiScores.findAll({
+			attributes: ['gameId', [DBOsuMultiScores.sequelize.fn('COUNT', DBOsuMultiScores.sequelize.col('gameId')), 'count']],
 			where: {
 				verifiedAt: {
 					[Op.not]: null,
@@ -67,52 +67,46 @@ module.exports = {
 					},
 				]
 			},
+			group: ['gameId'],
+			having: {
+				count: {
+					[Op.gt]: 1,
+				},
+			},
+		});
+
+		await interaction.channel.send(`Found ${gameIdCounts.length} gameIds with more than one player. Took ${new Date() - startTime}ms.`);
+
+		const verifiedMatches = await DBOsuMultiScores.findAll({
+			attributes: ['osuUserId', 'matchId', 'gameId', 'scoringType', 'score', 'beatmapId', 'gameRawMods', 'rawMods', 'matchName', 'mode', 'matchStartDate', 'gameStartDate', 'freeMod', 'forceMod', 'teamType', 'team', 'count50', 'count100', 'count300', 'countMiss', 'countKatu', 'countGeki'],
+			where: {
+				gameId: {
+					[Op.in]: gameIdCounts.map(gameIdCount => gameIdCount.gameId),
+				},
+			},
 		});
 
 		await interaction.channel.send(`Found ${verifiedMatches.length} verified matchscores. Took ${new Date() - startTime}ms.`);
-
-		// Remove entries with only one player per gameId
-		const gameIds = verifiedMatches.map(match => match.gameId);
-		const gameIdsUnique = [...new Set(gameIds)];
-
-		await interaction.channel.send(`Found ${gameIdsUnique.length} unique gameIds. Took ${new Date() - startTime}ms.`);
-
-		const gameIdsUniqueCount = gameIdsUnique.map(gameId => {
-			return {
-				gameId: gameId,
-				count: gameIds.filter(gameId2 => gameId2 === gameId).length,
-			};
-		});
-
-		await interaction.channel.send(`Found ${gameIdsUniqueCount.length} unique gameIds with their count. Took ${new Date() - startTime}ms.`);
-
-		const gameIdsUniqueCountFiltered = gameIdsUniqueCount.filter(gameId => gameId.count > 1);
-
-		await interaction.channel.send(`Found ${gameIdsUniqueCountFiltered.length} unique gameIds with more than one player. Took ${new Date() - startTime}ms.`);
-
-		const verifiedMatchesFiltered = verifiedMatches.filter(match => gameIdsUniqueCountFiltered.find(gameId => gameId.gameId === match.gameId));
-
-		await interaction.channel.send(`Found ${verifiedMatchesFiltered.length} verified matchscores with more than one player per gameId. Took ${new Date() - startTime}ms.`);
 
 		const players = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', 'osuName', 'osuRank', 'osuBadges', 'osuDuelStarRating'],
 			where: {
 				osuUserId: {
-					[Op.in]: verifiedMatchesFiltered.map(match => match.osuUserId),
+					[Op.in]: verifiedMatches.map(match => match.osuUserId),
 				},
 			},
 		});
 
 		await interaction.channel.send(`Found ${players.length} players. Took ${new Date() - startTime}ms.`);
 
-		for (let i = 0; i < verifiedMatchesFiltered.length; i++) {
-			const player = players.find(player => player.osuUserId === verifiedMatchesFiltered[i].osuUserId);
-			verifiedMatchesFiltered[i].dataValues.osuName = player.osuName;
-			verifiedMatchesFiltered[i].dataValues.osuRank = player.osuRank;
-			verifiedMatchesFiltered[i].dataValues.osuBadges = player.osuBadges;
-			verifiedMatchesFiltered[i].dataValues.osuDuelStarRating = player.osuDuelStarRating;
+		for (let i = 0; i < verifiedMatches.length; i++) {
+			const player = players.find(player => player.osuUserId === verifiedMatches[i].osuUserId);
+			verifiedMatches[i].dataValues.osuName = player.osuName;
+			verifiedMatches[i].dataValues.osuRank = player.osuRank;
+			verifiedMatches[i].dataValues.osuBadges = player.osuBadges;
+			verifiedMatches[i].dataValues.osuDuelStarRating = player.osuDuelStarRating;
 
-			const score = verifiedMatchesFiltered[i].dataValues;
+			const score = verifiedMatches[i].dataValues;
 
 			let mode = 0;
 
@@ -124,24 +118,64 @@ module.exports = {
 				mode = 1;
 			}
 
-			verifiedMatchesFiltered[i].dataValues.accuracy = getAccuracy({ counts: { 300: score.count300, 100: score.count100, 50: score.count50, miss: score.countMiss, katu: score.countKatu, geki: score.countGeki } }, mode) * 100;
+			verifiedMatches[i].dataValues.accuracy = getAccuracy({ counts: { 300: score.count300, 100: score.count100, 50: score.count50, miss: score.countMiss, katu: score.countKatu, geki: score.countGeki } }, mode) * 100;
 
-			delete verifiedMatchesFiltered[i].dataValues.count300;
-			delete verifiedMatchesFiltered[i].dataValues.count100;
-			delete verifiedMatchesFiltered[i].dataValues.count50;
-			delete verifiedMatchesFiltered[i].dataValues.countMiss;
-			delete verifiedMatchesFiltered[i].dataValues.countKatu;
-			delete verifiedMatchesFiltered[i].dataValues.countGeki;
+			delete verifiedMatches[i].dataValues.count300;
+			delete verifiedMatches[i].dataValues.count100;
+			delete verifiedMatches[i].dataValues.count50;
+			delete verifiedMatches[i].dataValues.countMiss;
+			delete verifiedMatches[i].dataValues.countKatu;
+			delete verifiedMatches[i].dataValues.countGeki;
 		}
 
-		await interaction.channel.send(`Creating CSV. Took ${new Date() - startTime}ms.`);
+		await interaction.channel.send(`Added accuracy and player stats. Took ${new Date() - startTime}ms.`);
+
+		const beatmaps = await DBOsuBeatmaps.findAll({
+			where: {
+				beatmapId: {
+					[Op.in]: verifiedMatches.map(score => score.beatmapId),
+				},
+			},
+		});
+
+		await interaction.channel.send(`Found ${beatmaps.length} beatmaps. Took ${new Date() - startTime}ms.`);
+
+		let unavailableBeatmaps = [];
+
+		for (let i = 0; i < verifiedMatches.length; i++) {
+			if (i % 5000 === 0 && i > 0) {
+				await interaction.channel.send(`Assigned beatmap stats to ${i} scores. Took ${new Date() - startTime}ms.`);
+			}
+
+			let beatmap = beatmaps.find(beatmap => beatmap.beatmapId === verifiedMatches[i].beatmapId && beatmap.mods === parseInt(verifiedMatches[i].rawMods) + parseInt(verifiedMatches[i].gameRawMods));
+
+			verifiedMatches[i].dataValues.CS = null;
+			verifiedMatches[i].dataValues.AR = null;
+			verifiedMatches[i].dataValues.OD = null;
+
+			if (!beatmap && !unavailableBeatmaps.includes(verifiedMatches[i].beatmapId)) {
+				beatmap = await getOsuBeatmap({ beatmapId: verifiedMatches[i].beatmapId, modBits: parseInt(verifiedMatches[i].rawMods) + parseInt(verifiedMatches[i].gameRawMods) });
+			}
+
+			if (beatmap) {
+				beatmaps.push(beatmap);
+
+				verifiedMatches[i].dataValues.CS = beatmap.circleSize;
+				verifiedMatches[i].dataValues.AR = beatmap.approachRate;
+				verifiedMatches[i].dataValues.OD = beatmap.overallDifficulty;
+			} else {
+				unavailableBeatmaps.push(verifiedMatches[i].beatmapId);
+			}
+		}
+
+		await interaction.channel.send(`Added beatmap stats. Took ${new Date() - startTime}ms.`);
 
 		let data = [];
 
-		for (let i = 0; i < verifiedMatchesFiltered.length; i++) {
-			data.push(verifiedMatchesFiltered[i].dataValues);
+		for (let i = 0; i < verifiedMatches.length; i++) {
+			data.push(verifiedMatches[i].dataValues);
 
-			if (i % 100000 === 0 && i > 0 || verifiedMatchesFiltered.length - 1 === i) {
+			if (i % 100000 === 0 && i > 0 || verifiedMatches.length - 1 === i) {
 				const developerUser = await interaction.client.users.cache.find(user => user.id === interaction.user.id);
 				let csv = new ObjectsToCsv(data);
 				csv = await csv.toString();
