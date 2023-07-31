@@ -155,16 +155,18 @@ module.exports = {
 
 			if (!beatmap && !unavailableBeatmaps.includes(verifiedMatches[i].beatmapId)) {
 				beatmap = await getOsuBeatmap({ beatmapId: verifiedMatches[i].beatmapId, modBits: parseInt(verifiedMatches[i].rawMods) + parseInt(verifiedMatches[i].gameRawMods) });
+
+				if (beatmap) {
+					beatmaps.push(beatmap);
+				} else {
+					unavailableBeatmaps.push(verifiedMatches[i].beatmapId);
+				}
 			}
 
 			if (beatmap) {
-				beatmaps.push(beatmap);
-
 				verifiedMatches[i].dataValues.CS = beatmap.circleSize;
 				verifiedMatches[i].dataValues.AR = beatmap.approachRate;
 				verifiedMatches[i].dataValues.OD = beatmap.overallDifficulty;
-			} else {
-				unavailableBeatmaps.push(verifiedMatches[i].beatmapId);
 			}
 		}
 
