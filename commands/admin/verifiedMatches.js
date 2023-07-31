@@ -101,10 +101,13 @@ module.exports = {
 
 		for (let i = 0; i < verifiedMatches.length; i++) {
 			const player = players.find(player => player.osuUserId === verifiedMatches[i].osuUserId);
-			verifiedMatches[i].dataValues.osuName = player.osuName;
-			verifiedMatches[i].dataValues.osuRank = player.osuRank;
-			verifiedMatches[i].dataValues.osuBadges = player.osuBadges;
-			verifiedMatches[i].dataValues.osuDuelStarRating = player.osuDuelStarRating;
+
+			if (player) {
+				verifiedMatches[i].dataValues.osuName = player.osuName;
+				verifiedMatches[i].dataValues.osuRank = player.osuRank;
+				verifiedMatches[i].dataValues.osuBadges = player.osuBadges;
+				verifiedMatches[i].dataValues.osuDuelStarRating = player.osuDuelStarRating;
+			}
 
 			const score = verifiedMatches[i].dataValues;
 
