@@ -143,7 +143,7 @@ module.exports = {
 
 		await interaction.channel.send(`Found ${beatmaps.length} beatmaps. Took ${new Date() - startTime}ms.`);
 
-		let unavailableBeatmaps = [];
+		// let unavailableBeatmaps = [];
 
 		for (let i = 0; i < verifiedMatches.length; i++) {
 			if (i % 5000 === 0 && i > 0) {
@@ -156,15 +156,15 @@ module.exports = {
 			verifiedMatches[i].dataValues.AR = null;
 			verifiedMatches[i].dataValues.OD = null;
 
-			if (!beatmap && !unavailableBeatmaps.includes(verifiedMatches[i].beatmapId)) {
-				beatmap = await getOsuBeatmap({ beatmapId: verifiedMatches[i].beatmapId, modBits: parseInt(verifiedMatches[i].rawMods) + parseInt(verifiedMatches[i].gameRawMods) });
+			// if (!beatmap && !unavailableBeatmaps.includes(verifiedMatches[i].beatmapId)) {
+			// 	beatmap = await getOsuBeatmap({ beatmapId: verifiedMatches[i].beatmapId, modBits: parseInt(verifiedMatches[i].rawMods) + parseInt(verifiedMatches[i].gameRawMods) });
 
-				if (beatmap) {
-					beatmaps.push(beatmap);
-				} else {
-					unavailableBeatmaps.push(verifiedMatches[i].beatmapId);
-				}
-			}
+			// 	if (beatmap) {
+			// 		beatmaps.push(beatmap);
+			// 	} else {
+			// 		unavailableBeatmaps.push(verifiedMatches[i].beatmapId);
+			// 	}
+			// }
 
 			if (beatmap) {
 				verifiedMatches[i].dataValues.CS = beatmap.circleSize;
