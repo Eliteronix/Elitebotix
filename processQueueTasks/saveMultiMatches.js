@@ -8,7 +8,7 @@ const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
-		console.log(client.shardId, 'saveMultiMatches');
+		// console.log(client.shardId, 'saveMultiMatches');
 		let args = processQueueEntry.additions.split(';');
 
 		let matchID = args[0];
@@ -167,8 +167,6 @@ module.exports = {
 };
 
 async function processIncompleteScores(osuApi, client, processQueueEntry, channelId, secondsToWait) {
-	console.log(client.shardId, 'processIncompleteScores');
-
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
 	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores');
