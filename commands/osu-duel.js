@@ -830,8 +830,6 @@ module.exports = {
 			} else if (interaction.options._subcommand === 'rating') {
 				let startTime = Date.now();
 
-				console.log('Processing duel rating...');
-
 				let processingMessage = null;
 				if (interaction.id) {
 					try {
@@ -847,8 +845,6 @@ module.exports = {
 				} else {
 					let playerName = await getOsuPlayerName(interaction.options._hoistedOptions[0].value);
 					processingMessage = await interaction.channel.send(`Processing league ratings for ${playerName}...`);
-
-					console.log(`Processing league ratings for ${playerName}... | ${Date.now() - startTime} ms`);
 				}
 
 				let osuUser = {
@@ -891,8 +887,6 @@ module.exports = {
 					} else {
 						osuUser.name = getIDFromPotentialOsuLink(username);
 					}
-
-					console.log(`Got user | ${Date.now() - startTime} ms`);
 				} else {
 					//Try to get the user by the message if no argument given
 					msg = await populateMsgFromInteraction(interaction);
@@ -906,8 +900,6 @@ module.exports = {
 						const userDisplayName = await getMessageUserDisplayname(msg);
 						osuUser.name = userDisplayName;
 					}
-
-					console.log(`Got user from message | ${Date.now() - startTime} ms`);
 				}
 
 				if (!osuUser.id) {
@@ -938,8 +930,6 @@ module.exports = {
 
 					osuUser.id = user.id;
 					osuUser.name = user.name;
-
-					console.log(`Got user from osu!API | ${Date.now() - startTime} ms`);
 				}
 
 				let seasonEnd = new Date();
@@ -965,8 +955,6 @@ module.exports = {
 
 					seasonEnd.setUTCMonth(seasonEnd.getUTCMonth() - 12);
 					historical--;
-
-					console.log(`-----Got historical data for ${seasonEnd.getUTCFullYear() + 1} | ${Date.now() - startTime} ms`);
 				}
 
 				const canvasWidth = 700;
@@ -1011,8 +999,6 @@ module.exports = {
 				ctx.textAlign = 'center';
 				ctx.font = 'bold 25px comfortaa, sans-serif';
 
-				console.log(`Added title | ${Date.now() - startTime} ms`);
-
 				//Current Total Rating
 				ctx.fillText('Current Total Rating', 475, 100);
 				let userDuelStarRating = null;
@@ -1040,11 +1026,7 @@ module.exports = {
 					}
 				}
 
-				console.log(`Got user duel star rating | ${Date.now() - startTime} ms`);
-
 				let duelLeague = getOsuDuelLeague(userDuelStarRating.total);
-
-				console.log(`Got user duel league | ${Date.now() - startTime} ms`);
 
 				let emblemImages = {
 
@@ -1055,8 +1037,6 @@ module.exports = {
 				emblemImages[duelLeague.imageName] = await Canvas.loadImage(`./other/emblems/${duelLeague.imageName}.png`);
 
 				ctx.drawImage(emblemImages[duelLeague.imageName], 400, 100, 150, 150);
-
-				console.log(`Added league image | ${Date.now() - startTime} ms`);
 
 				if (userDuelStarRating.provisional) {
 					leagueText = 'Provisional: ' + leagueText;
@@ -1174,8 +1154,6 @@ module.exports = {
 					ctx.fillText(`(${limited}${Math.round(userDuelStarRating.freeMod * 1000) / 1000}*)`, 600, 500);
 				}
 
-				console.log(`Added Mods | ${Date.now() - startTime} ms`);
-
 				for (let i = 0; i < historicalUserDuelStarRatings.length; i++) {
 					ctx.beginPath();
 					ctx.moveTo(20, 545 + i * 250);
@@ -1292,9 +1270,9 @@ module.exports = {
 					if (historicalUserDuelStarRatings[i].ratings.freeMod !== null) {
 						ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.freeMod * 1000) / 1000}*)`, 647, 725 + i * 250);
 					}
-
-					console.log(`-----Added Mod Ratings | ${Date.now() - startTime} ms`);
 				}
+
+				console.log(`Getting additional info | ${Date.now() - startTime} ms`);
 
 				//Draw badges onto the canvas				
 				let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
@@ -1309,8 +1287,6 @@ module.exports = {
 				for (let i = 0; i < additionalInfo.badges.length && i < 6; i++) {
 					const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
-
-					console.log(`-----Added badge ${i} | ${Date.now() - startTime} ms`);
 				}
 
 				//Draw the Player derank rank
@@ -1353,8 +1329,6 @@ module.exports = {
 
 				//Create as an attachment
 				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });
-
-				console.log(`Created attachment | ${Date.now() - startTime} ms`);
 
 				let sentMessage = null;
 
