@@ -1898,6 +1898,8 @@ module.exports = {
 								beatmapModPools.push({ modPool: modPool, beatmapId: match.games[gameIndex].beatmapId });
 							}
 						}
+					} else if (existingScore.matchEndDate === null) {
+						existingScore.matchEndDate = match.raw_end;
 					} else {
 						if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
 							existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
