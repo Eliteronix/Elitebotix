@@ -420,15 +420,16 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				});
 		} else {
-			// Get all matchLogs that contain "Looking for new map..." and are not verified
+			// Get all matchLogs that contain "Looking for a map..." and are not verified
 			const fs = require('fs');
 
 			let matchLogFiles = fs.readdirSync('./matchLogs');
 			let matchLogsToVerify = [];
+
 			for (let i = 0; i < matchLogFiles.length; i++) {
 				let matchLog = fs.readFileSync(`./matchLogs/${matchLogFiles[i]}`, 'utf8');
 
-				if (matchLog.includes('[Eliteronix]: Looking for new map...') || matchLog.includes('[Elitebotix]: Looking for new map...')) {
+				if (matchLog.includes('[Eliteronix]: Looking for a map...') || matchLog.includes('[Elitebotix]: Looking for a map...')) {
 					matchLogsToVerify.push(matchLogFiles[i].replace('.txt', ''));
 				}
 			}
