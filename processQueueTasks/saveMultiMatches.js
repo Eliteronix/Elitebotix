@@ -435,7 +435,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			}
 
 			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
-			let matchToVerify = await DBOsuMultiScores.findOne({
+			let matchesToVerify = await DBOsuMultiScores.findAll({
 				attributes: ['matchId'],
 				where: {
 					verifiedAt: null,
@@ -446,9 +446,12 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						[Op.not]: null,
 					},
 				},
+				group: ['matchId'],
 			});
 
-			if (matchToVerify) {
+			matchesToVerify = matchesToVerify.map(match => match.matchId);
+
+			if (matchesToVerify.length) {
 				// If there is a match to verify
 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Elitebotix duel match');
 				await DBOsuMultiScores.update({
@@ -458,50 +461,54 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					verificationComment: 'Elitebotix Duel Match',
 				}, {
 					where: {
-						matchId: matchToVerify.matchId,
+						matchId: {
+							[Op.in]: matchesToVerify,
+						},
 					},
 				});
 
-				if (logVerificationProcess) {
-					// eslint-disable-next-line no-console
-					console.log(`Match ${matchToVerify.matchId} verified - Elitebotix Duel Match`);
-				}
-
-				let guildId = '727407178499096597';
-				let channelId = '1068905937219362826';
-
-				// eslint-disable-next-line no-undef
-				if (process.env.SERVER === 'Dev') {
-					guildId = '800641468321759242';
-					channelId = '1070013925334204516';
-				}
-
-				if (logBroadcastEval) {
-					// eslint-disable-next-line no-console
-					console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Elitebotix Duel Match to shards...');
-				}
-
-				client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-					let guild = await c.guilds.cache.get(guildId);
-
-					if (!guild || guild.shardId !== c.shardId) {
-						return;
+				for (let i = 0; i < matchesToVerify.length; i++) {
+					if (logVerificationProcess) {
+						// eslint-disable-next-line no-console
+						console.log(`Match ${matchesToVerify[i]} verified - Elitebotix Duel Match`);
 					}
 
-					let channel = await guild.channels.cache.get(channelId);
+					let guildId = '727407178499096597';
+					let channelId = '1068905937219362826';
 
-					if (!channel) {
-						return;
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Dev') {
+						guildId = '800641468321759242';
+						channelId = '1070013925334204516';
 					}
 
-					await channel.send(message);
-				}, {
-					context: {
-						guildId: guildId,
-						channelId: channelId,
-						message: `\`\`\`diff\n+ Valid: True\nComment: Elitebotix Duel Match\`\`\`https://osu.ppy.sh/mp/${matchToVerify.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Elitebotix Duel Match to shards...');
 					}
-				});
+
+					client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+						let guild = await c.guilds.cache.get(guildId);
+
+						if (!guild || guild.shardId !== c.shardId) {
+							return;
+						}
+
+						let channel = await guild.channels.cache.get(channelId);
+
+						if (!channel) {
+							return;
+						}
+
+						await channel.send(message);
+					}, {
+						context: {
+							guildId: guildId,
+							channelId: channelId,
+							message: `\`\`\`diff\n+ Valid: True\nComment: Elitebotix Duel Match\`\`\`https://osu.ppy.sh/mp/${matchesToVerify[i]} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
+						}
+					});
+				}
 			} else {
 				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
 				let matchToVerify = await DBOsuMultiScores.findOne({
