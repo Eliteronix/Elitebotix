@@ -430,7 +430,7 @@ module.exports = {
 				}
 
 				unverifiedScoresEmbed.fields.push({
-					name: `[${score.matchName}](https://osu.ppy.sh/mp/${score.matchId})`,
+					name: `[${score.matchName}](<https://osu.ppy.sh/mp/${score.matchId}>)`,
 					value: comment,
 					inline: false,
 				});
