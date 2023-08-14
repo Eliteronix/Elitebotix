@@ -236,7 +236,7 @@ module.exports = {
 					},
 				},
 				group: ['matchName'],
-				limit: 25000,
+				limit: 50000,
 			});
 
 			let acronyms = [];
