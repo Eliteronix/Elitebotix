@@ -423,15 +423,15 @@ module.exports = {
 
 				let score = orderedUnverifiedScores[i];
 
-				let comment = '';
+				let comment = 'No comment available yet.';
 
 				if (score.verificationComment) {
-					comment = `\n${score.verificationComment}`;
+					comment = score.verificationComment;
 				}
 
 				unverifiedScoresEmbed.fields.push({
-					name: score.matchName,
-					value: `https://osu.ppy.sh/mp/${score.matchId}${comment}`,
+					name: `[${score.matchName}](https://osu.ppy.sh/mp/${score.matchId})`,
+					value: comment,
 					inline: false,
 				});
 
