@@ -3081,7 +3081,7 @@ module.exports = {
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
 		let suspiciousActivityLogGuildId = '727407178499096597';
-		let suspiciousActivityLogChannelId = '1068905937219362826';
+		let suspiciousActivityLogChannelId = '1142772110540931154';
 
 		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
@@ -3124,7 +3124,7 @@ module.exports = {
 						context: {
 							guildId: suspiciousActivityLogGuildId,
 							channelId: suspiciousActivityLogChannelId,
-							message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 10% misses on a map`
+							message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`
 						}
 					});
 
