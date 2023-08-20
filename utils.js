@@ -3080,6 +3080,15 @@ module.exports = {
 
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
+		let suspiciousActivityLogGuildId = '727407178499096597';
+		let suspiciousActivityLogChannelId = '1068905937219362826';
+
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER === 'Dev') {
+			suspiciousActivityLogGuildId = '800641468321759242';
+			suspiciousActivityLogChannelId = '1142772857877823488';
+		}
+
 		//Loop through all modpools
 		for (let modIndex = 0; modIndex < modPools.length; modIndex++) {
 			//Get only unique maps for each modpool
@@ -3091,7 +3100,34 @@ module.exports = {
 			for (let i = 0; i < userScores.length; i++) {
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
-				if (100 / totalHits * parseInt(userScores[i].countMiss) > 10) {
+				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15) {
+					if (logBroadcastEval) {
+						// eslint-disable-next-line no-console
+						console.log('Broadcasting utils/.js Found suspicious unverified match');
+					}
+
+					input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+						let guild = await c.guilds.cache.get(guildId);
+
+						if (!guild || guild.shardId !== c.shardId) {
+							return;
+						}
+
+						let channel = await guild.channels.cache.get(channelId);
+
+						if (!channel) {
+							return;
+						}
+
+						await channel.send(message);
+					}, {
+						context: {
+							guildId: suspiciousActivityLogGuildId,
+							channelId: suspiciousActivityLogChannelId,
+							message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 10% misses on a map`
+						}
+					});
+
 					continue;
 				}
 
