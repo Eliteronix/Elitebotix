@@ -3014,7 +3014,9 @@ module.exports = {
 				'count300',
 				'count100',
 				'count50',
-				'countMiss'
+				'countMiss',
+				'verifiedBy',
+				'verifiedAt'
 			],
 			where: {
 				osuUserId: input.osuUserId,
@@ -3102,7 +3104,12 @@ module.exports = {
 			for (let i = 0; i < userScores.length; i++) {
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
-				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15) {
+				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
+					(
+						(userScores[i].matchName.startsWith('ETX') && userScores[i].verifiedBy === '31050083') ||
+						userScores[i].verifiedAt === null
+					)
+				) {
 					if (knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
 						knownSuspiciousMatches.push(userScores[i].matchId);
 
