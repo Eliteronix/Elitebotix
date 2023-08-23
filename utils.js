@@ -7,6 +7,8 @@ const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { Beatmap, Calculator } = require('rosu-pp');
 
+const knownSuspiciousMatches = [];
+
 module.exports = {
 	getGuildPrefix: async function (msg) {
 		//Define prefix command
@@ -3012,7 +3014,9 @@ module.exports = {
 				'count300',
 				'count100',
 				'count50',
-				'countMiss'
+				'countMiss',
+				'verifiedBy',
+				'verifiedAt'
 			],
 			where: {
 				osuUserId: input.osuUserId,
@@ -3100,33 +3104,42 @@ module.exports = {
 			for (let i = 0; i < userScores.length; i++) {
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
-				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15) {
-					if (logBroadcastEval) {
-						// eslint-disable-next-line no-console
-						console.log('Broadcasting utils/.js Found suspicious unverified match');
+				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
+					(
+						((userScores[i].matchName.startsWith('ETX') || userScores[i].matchName.startsWith('o!mm')) && userScores[i].verifiedBy === '31050083') ||
+						userScores[i].verifiedAt === null
+					)
+				) {
+					if (knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
+						knownSuspiciousMatches.push(userScores[i].matchId);
+
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting utils/.js Found suspicious unverified match');
+						}
+
+						input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+							let guild = await c.guilds.cache.get(guildId);
+
+							if (!guild || guild.shardId !== c.shardId) {
+								return;
+							}
+
+							let channel = await guild.channels.cache.get(channelId);
+
+							if (!channel) {
+								return;
+							}
+
+							await channel.send(message);
+						}, {
+							context: {
+								guildId: suspiciousActivityLogGuildId,
+								channelId: suspiciousActivityLogChannelId,
+								message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`
+							}
+						});
 					}
-
-					input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-						let guild = await c.guilds.cache.get(guildId);
-
-						if (!guild || guild.shardId !== c.shardId) {
-							return;
-						}
-
-						let channel = await guild.channels.cache.get(channelId);
-
-						if (!channel) {
-							return;
-						}
-
-						await channel.send(message);
-					}, {
-						context: {
-							guildId: suspiciousActivityLogGuildId,
-							channelId: suspiciousActivityLogChannelId,
-							message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`
-						}
-					});
 
 					continue;
 				}

@@ -326,10 +326,10 @@ setTimeout(() => {
 	setInterval(() => refreshOsuRank(client), 50000);
 }, 60000);
 
-// Set update to 1 after 24 hours to make it restart
+// Set update to 1 after 23 hours to make it restart
 setTimeout(() => {
 	client.update = 1;
-}, 86400000);
+}, 82800000);
 
 async function executeProcessQueue(client, bancho) {
 	try {
