@@ -8021,7 +8021,16 @@ module.exports = {
 			console.error(err);
 		}
 
-		return await Canvas.loadImage(path);
+		let loadedImage;
+
+		try {
+			loadedImage = await Canvas.loadImage(path);
+		} catch (err) {
+			console.error(err);
+			loadedImage = await Canvas.loadImage('./other/defaultAvatar.png');
+		}
+
+		return loadedImage;
 	},
 	async getBadgeImage(badgeName) {
 		const fs = require('fs');
