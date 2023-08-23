@@ -3106,7 +3106,7 @@ module.exports = {
 
 				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
 					(
-						((userScores[i].matchName.startsWith('ETX') || userScores[i].startsWith('o!mm')) && userScores[i].verifiedBy === '31050083') ||
+						((userScores[i].matchName.startsWith('ETX') || userScores[i].matchName.startsWith('o!mm')) && userScores[i].verifiedBy === '31050083') ||
 						userScores[i].verifiedAt === null
 					)
 				) {
