@@ -8154,7 +8154,7 @@ module.exports = {
 
 		if (logWebRequests) {
 			// eslint-disable-next-line no-console
-			console.log(new Date().toDateString(), 'Permission granted for web request:', request);
+			console.log('Permission granted for web request:', request);
 		}
 
 		return;
