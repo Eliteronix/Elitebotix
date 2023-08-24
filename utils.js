@@ -8142,7 +8142,7 @@ module.exports = {
 		let iterator = 0;
 		// eslint-disable-next-line no-undef
 		while (process.webRequestsWaiting.includes(randomString)) {
-			//Every 3 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
+			//Every 10 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
 			if (iterator % 100 === 0) {
 				// eslint-disable-next-line no-undef
 				process.send(`osu! website ${randomString}`);
@@ -8153,7 +8153,8 @@ module.exports = {
 		}
 
 		if (logWebRequests) {
-			console.log('Permission granted for web request:', request);
+			// eslint-disable-next-line no-console
+			console.log(new Date().toDateString(), 'Permission granted for web request:', request);
 		}
 
 		return;
