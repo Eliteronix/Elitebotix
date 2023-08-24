@@ -587,7 +587,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 												json.events = earlierEvents.concat(json.events);
 
-												if (json.first_event_id === firstIdInJSON) {
+												if (json.events[0].id === firstIdInJSON) {
 													break;
 												}
 											}
