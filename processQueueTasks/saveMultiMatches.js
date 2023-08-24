@@ -566,6 +566,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											let json = JSON.parse(regexMatch);
 
 											while (json.first_event_id !== json.events[0].id) {
+												let firstIdInJSON = json.events[0].id;
+
 												await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
 												let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 													.then(async (res) => {
@@ -584,6 +586,10 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 													});
 
 												json.events = earlierEvents.concat(json.events);
+
+												if (json.first_event_id === firstIdInJSON) {
+													break;
+												}
 											}
 
 											if (json.events[0].detail.type === 'match-created') {
@@ -1130,7 +1136,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
 												await DBOsuMultiScores.update({
 													verifiedBy: 31050083, // Elitebotix
-													verificationComment: 'Not determinable if match was created by MaidBot',
+													verificationComment: 'Not determinable who created the match',
 												}, {
 													where: {
 														matchId: match.id,
@@ -1139,7 +1145,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 												if (logVerificationProcess) {
 													// eslint-disable-next-line no-console
-													console.log(`Match ${match.id} verified - Not determinable if match was created by MaidBot`);
+													console.log(`Match ${match.id} verified - Not determinable who created the match`);
 												}
 											}
 										}
