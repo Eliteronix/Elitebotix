@@ -7,8 +7,6 @@ const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { Beatmap, Calculator } = require('rosu-pp');
 
-const knownSuspiciousMatches = [];
-
 module.exports = {
 	getGuildPrefix: async function (msg) {
 		//Define prefix command
@@ -3110,8 +3108,8 @@ module.exports = {
 						userScores[i].verifiedAt === null
 					)
 				) {
-					if (knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
-						knownSuspiciousMatches.push(userScores[i].matchId);
+					if (input.client.knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
+						input.client.knownSuspiciousMatches.push(userScores[i].matchId);
 
 						if (logBroadcastEval) {
 							// eslint-disable-next-line no-console

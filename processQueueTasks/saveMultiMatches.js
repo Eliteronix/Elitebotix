@@ -519,8 +519,24 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						matchEndDate: {
 							[Op.not]: null,
 						},
+						matchId: {
+							[Op.in]: client.knownSuspiciousMatches,
+						}
 					},
 				});
+
+				if (!matchToVerify) {
+					matchToVerify = await DBOsuMultiScores.findOne({
+						attributes: ['matchId', 'matchName', 'osuUserId'],
+						where: {
+							tourneyMatch: true,
+							verifiedBy: null,
+							matchEndDate: {
+								[Op.not]: null,
+							},
+						},
+					});
+				}
 
 				if (matchToVerify && (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm'))) {
 					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Last step of verification - ETX or o!mm not verifyable');
