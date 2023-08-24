@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
-const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval } = require('./config.json');
+const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -1228,7 +1228,7 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-		await module.exports.awaitWebRequestPermission();
+		await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/`);
 		return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -4317,7 +4317,7 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
-				await module.exports.awaitWebRequestPermission();
+				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 				await new Promise((resolve, reject) => {
 					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
@@ -6072,7 +6072,7 @@ module.exports = {
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {
-		await module.exports.awaitWebRequestPermission();
+		await module.exports.awaitWebRequestPermission('https://osu.ppy.sh/community/forums/55');
 		await fetch('https://osu.ppy.sh/community/forums/55')
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -7846,7 +7846,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission();
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
 
 				if (res.status === 404) {
@@ -7903,7 +7903,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission();
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
 
 				if (res.status === 404) {
@@ -7956,7 +7956,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission();
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
 
 				if (res.status === 404) {
@@ -8003,7 +8003,7 @@ module.exports = {
 		try {
 			// Doesn't exist or older than 24 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
-				await module.exports.awaitWebRequestPermission();
+				await module.exports.awaitWebRequestPermission(`http://s.ppy.sh/a/${osuUserId}`);
 				const res = await fetch(`http://s.ppy.sh/a/${osuUserId}`);
 
 				if (res.status === 404) {
@@ -8049,7 +8049,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path)) {
-				await module.exports.awaitWebRequestPermission();
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/profile-badges/${badgeName}`);
 				const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
 
 				await new Promise((resolve, reject) => {
@@ -8123,7 +8123,7 @@ module.exports = {
 			}
 		}
 	},
-	async awaitWebRequestPermission() {
+	async awaitWebRequestPermission(request) {
 		let randomString = Math.random().toString(36);
 
 		// eslint-disable-next-line no-undef
@@ -8141,6 +8141,10 @@ module.exports = {
 
 			await new Promise(resolve => setTimeout(resolve, 100));
 			iterator++;
+		}
+
+		if (logWebRequests) {
+			console.log('Permission granted for web request:', request);
 		}
 
 		return;

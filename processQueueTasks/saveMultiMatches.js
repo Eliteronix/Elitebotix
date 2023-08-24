@@ -131,7 +131,7 @@ module.exports = {
 					try {
 						// Check using node fetch
 						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-						await awaitWebRequestPermission();
+						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						let response = await fetch(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						let htmlCode = await response.text();
 						let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
@@ -257,7 +257,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			await osuApi.getMatch({ mp: incompleteMatch.matchId })
 				.then(async (match) => {
 					try {
-						await awaitWebRequestPermission();
+						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -543,7 +543,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					await osuApi.getMatch({ mp: matchToVerify.matchId })
 						.then(async (match) => {
 							try {
-								await awaitWebRequestPermission();
+								await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
 								await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 									.then(async (res) => {
 										let htmlCode = await res.text();
@@ -566,7 +566,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											let json = JSON.parse(regexMatch);
 
 											while (json.first_event_id !== json.events[0].id) {
-												await awaitWebRequestPermission();
+												await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
 												let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 													.then(async (res) => {
 														let htmlCode = await res.text();

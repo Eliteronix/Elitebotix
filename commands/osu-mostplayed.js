@@ -736,7 +736,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 	let link;
 	let showLimit = limit;
 	if (server === 'bancho') {
-		await awaitWebRequestPermission();
+		await awaitWebRequestPermission(`https://osu.ppy.sh/users/${user.id}/beatmapsets/most_played?limit=${limit}`);
 		link = await fetch(`https://osu.ppy.sh/users/${user.id}/beatmapsets/most_played?limit=${limit}`).then(res => res.json());
 
 		for (let i = 0; i < link.length && i < showLimit; i++) {

@@ -909,7 +909,7 @@ async function getRankHistoryGraph(osuUserId, mode) {
 		mode = 'fruits';
 	}
 
-	await awaitWebRequestPermission();
+	await awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/${mode}`);
 	let history = await fetch(`https://osu.ppy.sh/users/${osuUserId}/${mode}`)
 		.then(async (res) => {
 			let htmlCode = await res.text();

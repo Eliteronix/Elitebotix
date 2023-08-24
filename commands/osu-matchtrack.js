@@ -229,7 +229,7 @@ module.exports = {
 
 				while (!stop) {
 					try {
-						await awaitWebRequestPermission();
+						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -256,7 +256,7 @@ module.exports = {
 									}
 
 									while (json.first_event_id !== json.events[0].id) {
-										await awaitWebRequestPermission();
+										await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
 										let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 											.then(async (res) => {
 												let htmlCode = await res.text();
