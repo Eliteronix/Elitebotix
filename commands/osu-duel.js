@@ -828,8 +828,6 @@ module.exports = {
 
 				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
 			} else if (interaction.options._subcommand === 'rating') {
-				let startTime = Date.now();
-
 				let processingMessage = null;
 				if (interaction.id) {
 					try {
@@ -1272,12 +1270,8 @@ module.exports = {
 					}
 				}
 
-				console.log(`Getting additional info | ${Date.now() - startTime} ms`);
-
 				//Draw badges onto the canvas				
 				let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
-
-				console.log(`Got additional info | ${Date.now() - startTime} ms`);
 
 				let yOffset = -2;
 				if (additionalInfo.badges.length < 6) {
