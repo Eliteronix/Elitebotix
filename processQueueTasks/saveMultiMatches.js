@@ -525,7 +525,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					},
 				});
 
-				console.log('matchToVerify', matchToVerify);
+				console.log('matchToVerify', client.knownSuspiciousMatches, matchToVerify);
 
 				if (!matchToVerify) {
 					console.log('matchToVerify new one', matchToVerify);
