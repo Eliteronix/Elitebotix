@@ -525,7 +525,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					},
 				});
 
+				console.log('matchToVerify', matchToVerify);
+
 				if (!matchToVerify) {
+					console.log('matchToVerify new one', matchToVerify);
+
 					matchToVerify = await DBOsuMultiScores.findOne({
 						attributes: ['matchId', 'matchName', 'osuUserId'],
 						where: {
