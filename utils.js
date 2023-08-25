@@ -3116,7 +3116,9 @@ module.exports = {
 							console.log('Broadcasting utils/.js Found suspicious unverified match');
 						}
 
-						input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+						input.client.shard.broadcastEval(async (c, { guildId, channelId, matchId }) => {
+							c.knownSuspiciousMatches.push(matchId);
+
 							let guild = await c.guilds.cache.get(guildId);
 
 							if (!guild || guild.shardId !== c.shardId) {
@@ -3129,12 +3131,12 @@ module.exports = {
 								return;
 							}
 
-							await channel.send(message);
+							await channel.send(`Found suspicious unverified match: https://osu.ppy.sh/community/matches/${matchId}\nReason: More than 15% misses on a map`);
 						}, {
 							context: {
 								guildId: suspiciousActivityLogGuildId,
 								channelId: suspiciousActivityLogChannelId,
-								message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`
+								matchId: userScores[i].matchId
 							}
 						});
 					}
