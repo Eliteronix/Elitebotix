@@ -3100,6 +3100,10 @@ module.exports = {
 
 			// Don't count plays with more than 10% misses
 			for (let i = 0; i < userScores.length; i++) {
+				if (parseInt(userScores[i].score) <= 10000) {
+					continue;
+				}
+
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
 				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
@@ -3145,7 +3149,7 @@ module.exports = {
 				}
 
 				//Check if the map is already in; the score is above 10k and the map is not an aspire map
-				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
+				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 					checkedMapIds.push(userScores[i].beatmapId);
 					if (module.exports.getScoreModpool(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
