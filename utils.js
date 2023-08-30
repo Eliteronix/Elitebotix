@@ -2805,6 +2805,7 @@ module.exports = {
 							});
 
 						// send the birthday message
+						console.log(birthdayMessageChannel);
 						birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
 						return true;
 					}
