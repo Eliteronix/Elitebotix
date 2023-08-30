@@ -2,7 +2,7 @@ const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../../dbObj
 const { Op } = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
 const { AttachmentBuilder } = require('discord.js');
-const { getAccuracy, getOsuBeatmap } = require('../../utils');
+const { getAccuracy } = require('../../utils');
 
 module.exports = {
 	name: 'verifiedMatches',
@@ -134,6 +134,7 @@ module.exports = {
 		await interaction.channel.send(`Added accuracy and player stats. Took ${new Date() - startTime}ms.`);
 
 		const beatmaps = await DBOsuBeatmaps.findAll({
+			attributes: ['beatmapId', 'mods', 'starRating', 'circleSize', 'approachRate', 'overallDifficulty'],
 			where: {
 				beatmapId: {
 					[Op.in]: verifiedMatches.map(score => score.beatmapId),
@@ -152,6 +153,7 @@ module.exports = {
 
 			let beatmap = beatmaps.find(beatmap => beatmap.beatmapId === verifiedMatches[i].beatmapId && beatmap.mods === parseInt(verifiedMatches[i].rawMods) + parseInt(verifiedMatches[i].gameRawMods));
 
+			verifiedMatches[i].dataValues.starRating = null;
 			verifiedMatches[i].dataValues.CS = null;
 			verifiedMatches[i].dataValues.AR = null;
 			verifiedMatches[i].dataValues.OD = null;
@@ -167,6 +169,7 @@ module.exports = {
 			// }
 
 			if (beatmap) {
+				verifiedMatches[i].dataValues.starRating = beatmap.starRating;
 				verifiedMatches[i].dataValues.CS = beatmap.circleSize;
 				verifiedMatches[i].dataValues.AR = beatmap.approachRate;
 				verifiedMatches[i].dataValues.OD = beatmap.overallDifficulty;

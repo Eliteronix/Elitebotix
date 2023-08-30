@@ -3101,6 +3101,10 @@ module.exports = {
 
 			// Don't count plays with more than 10% misses
 			for (let i = 0; i < userScores.length; i++) {
+				if (parseInt(userScores[i].score) <= 10000) {
+					continue;
+				}
+
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
 				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
@@ -3117,7 +3121,9 @@ module.exports = {
 							console.log('Broadcasting utils/.js Found suspicious unverified match');
 						}
 
-						input.client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+						input.client.shard.broadcastEval(async (c, { guildId, channelId, matchId }) => {
+							c.knownSuspiciousMatches.push(matchId);
+
 							let guild = await c.guilds.cache.get(guildId);
 
 							if (!guild || guild.shardId !== c.shardId) {
@@ -3130,12 +3136,12 @@ module.exports = {
 								return;
 							}
 
-							await channel.send(message);
+							await channel.send(`Found suspicious unverified match: https://osu.ppy.sh/community/matches/${matchId}\nReason: More than 15% misses on a map`);
 						}, {
 							context: {
 								guildId: suspiciousActivityLogGuildId,
 								channelId: suspiciousActivityLogChannelId,
-								message: `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`
+								matchId: userScores[i].matchId
 							}
 						});
 					}
@@ -3144,7 +3150,7 @@ module.exports = {
 				}
 
 				//Check if the map is already in; the score is above 10k and the map is not an aspire map
-				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && parseInt(userScores[i].score) > 10000 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
+				if (checkedMapIds.indexOf(userScores[i].beatmapId) === -1 && userScores[i].beatmapId !== '1033882' && userScores[i].beatmapId !== '529285') {
 					checkedMapIds.push(userScores[i].beatmapId);
 					if (module.exports.getScoreModpool(userScores[i]) === modPools[modIndex]) {
 						if (userMapIds.indexOf(userScores[i].beatmapId) === -1) {
