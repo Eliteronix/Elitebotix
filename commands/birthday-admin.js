@@ -171,7 +171,11 @@ module.exports = {
 			return interaction.editReply({ content: `Shared birthdays for this server:\n${birthdays.join('\n')}`, ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'channel') {
 			//There is only one argument so we can set the channelId to the first argument
-			let channel = interaction.options._hoistedOptions[0].value;
+			let channel = interaction.options.getChannel('set', true);
+
+			if (channel.type !== 0) {
+				return interaction.editReply({ content: 'The channel has to be a text channel.', ephemeral: true });
+			}
 
 			if (!guild) {
 				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds channel create');
@@ -181,9 +185,9 @@ module.exports = {
 				});
 			}
 
-			guild.birthdayMessageChannel = channel;
+			guild.birthdayMessageChannel = channel.id;
 			guild.save();
-			return interaction.editReply({ content: `Birthday announcements channel has been set to <#${channel}>`, ephemeral: true });
+			return interaction.editReply({ content: `Birthday announcements channel has been set to ${channel}`, ephemeral: true });
 		}
 	}
 };

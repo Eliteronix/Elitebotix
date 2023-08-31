@@ -2793,6 +2793,23 @@ module.exports = {
 					const birthdayMessageChannel = await c.channels.cache.get(channelId);
 
 					if (birthdayMessageChannel) {
+						if (birthdayMessageChannel.type !== 0) {
+							// eslint-disable-next-line no-undef
+							const { DBGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+
+							let dbGuild = await DBGuilds.findOne({
+								attributes: ['birthdayEnabled', 'birthdayMessageChannel'],
+								where: {
+									guildId: birthdayAnnouncements[i].guildId
+								}
+							});
+
+							dbGuild.birthdayEnabled = false;
+							dbGuild.birthdayMessageChannel = null;
+							await dbGuild.save();
+							return false;
+						}
+
 						// send a birthday gif from tenor 
 						let index;
 						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -2805,7 +2822,6 @@ module.exports = {
 							});
 
 						// send the birthday message
-						console.log(birthdayMessageChannel);
 						birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
 						return true;
 					}
