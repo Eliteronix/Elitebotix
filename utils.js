@@ -2789,7 +2789,7 @@ module.exports = {
 					console.log('Broadcasting utils.js birthdayAnnouncement to shards...');
 				}
 
-				let channelFound = await client.shard.broadcastEval(async (c, { channelId, userId }) => {
+				let channelFound = await client.shard.broadcastEval(async (c, { guildId, channelId, userId }) => {
 					const birthdayMessageChannel = await c.channels.cache.get(channelId);
 
 					if (birthdayMessageChannel) {
@@ -2800,7 +2800,7 @@ module.exports = {
 							let dbGuild = await DBGuilds.findOne({
 								attributes: ['birthdayEnabled', 'birthdayMessageChannel'],
 								where: {
-									guildId: birthdayAnnouncements[i].guildId
+									guildId: guildId
 								}
 							});
 
@@ -2826,7 +2826,7 @@ module.exports = {
 						return true;
 					}
 					return false;
-				}, { context: { channelId: dbGuild.birthdayMessageChannel, userId: birthdayAnnouncements[i].userId } });
+				}, { context: { guildId: birthdayAnnouncements[i].guildId, channelId: dbGuild.birthdayMessageChannel, userId: birthdayAnnouncements[i].userId } });
 
 				channelFound = channelFound.some(channel => channel);
 				if (channelFound) {
