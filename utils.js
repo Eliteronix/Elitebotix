@@ -2798,7 +2798,7 @@ module.exports = {
 							const { DBGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
 							let dbGuild = await DBGuilds.findOne({
-								attributes: ['birthdayEnabled', 'birthdayMessageChannel'],
+								attributes: ['id', 'birthdayEnabled', 'birthdayMessageChannel'],
 								where: {
 									guildId: guildId
 								}
