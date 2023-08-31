@@ -3134,7 +3134,7 @@ module.exports = {
 
 						if (logBroadcastEval) {
 							// eslint-disable-next-line no-console
-							console.log('Broadcasting utils/.js Found suspicious unverified match');
+							console.log('Broadcasting utils.js Found suspicious unverified match');
 						}
 
 						input.client.shard.broadcastEval(async (c, { guildId, channelId, matchId }) => {
