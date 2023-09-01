@@ -6802,7 +6802,7 @@ module.exports = {
 
 			// console.log(`Processing osu! track for ${osuTracker.osuUserId}...`);
 
-			if (logBroadcastEval) {
+			if (true || logBroadcastEval) {
 				// eslint-disable-next-line no-console
 				console.log('Broadcasting utils.js osu! track activity to shards...');
 			}
