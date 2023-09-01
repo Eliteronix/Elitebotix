@@ -2796,7 +2796,10 @@ module.exports = {
 						if (birthdayMessageChannel.type !== 0) {
 							// eslint-disable-next-line no-undef
 							const { DBGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+							// eslint-disable-next-line no-undef
+							const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
+							logDatabaseQueries(4, 'utils.js DBGuilds checkForBirthdays broadcastEval');
 							let dbGuild = await DBGuilds.findOne({
 								attributes: ['id', 'birthdayEnabled', 'birthdayMessageChannel'],
 								where: {
