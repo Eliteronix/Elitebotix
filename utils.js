@@ -5932,67 +5932,71 @@ module.exports = {
 
 		// eslint-disable-next-line no-empty-pattern
 		client.shard.broadcastEval(async (c, { }) => {
-			let voiceChannelId = '1010093794714189865';
-			let textChannelId = '1045505232576184470';
-			// eslint-disable-next-line no-undef
-			if (process.env.SERVER === 'Dev') {
-				voiceChannelId = '1010092736155762818';
-				textChannelId = '1045483219555983381';
-			}
-
-			let textChannel = await c.channels.cache.get(textChannelId);
-			if (textChannel && textChannel.guildId) {
+			try {
+				let voiceChannelId = '1010093794714189865';
+				let textChannelId = '1045505232576184470';
 				// eslint-disable-next-line no-undef
-				const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				// eslint-disable-next-line no-undef
-				const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
-
-				logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
-				let existingQueueTasks = await DBProcessQueue.findAll({
-					attributes: ['additions', 'createdAt'],
-					where: {
-						task: 'duelQueue1v1',
-					},
-				});
-
-				let voiceChannel = await c.channels.cache.get(voiceChannelId);
-
-				let multipleString = 's';
-				let verb = 'are';
-				if (existingQueueTasks.length === 1) {
-					multipleString = '';
-					verb = 'is';
+				if (process.env.SERVER === 'Dev') {
+					voiceChannelId = '1010092736155762818';
+					textChannelId = '1045483219555983381';
 				}
 
-				voiceChannel.edit({ name: `1v1 queue | ${existingQueueTasks.length} user${multipleString}` });
+				let textChannel = await c.channels.cache.get(textChannelId);
+				if (textChannel && textChannel.guildId) {
+					// eslint-disable-next-line no-undef
+					const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+					// eslint-disable-next-line no-undef
+					const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-				// Get all messages and delete
-				let messages = await textChannel.messages.fetch({ limit: 100 });
+					logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
+					let existingQueueTasks = await DBProcessQueue.findAll({
+						attributes: ['additions', 'createdAt'],
+						where: {
+							task: 'duelQueue1v1',
+						},
+					});
 
-				await textChannel.bulkDelete(messages);
+					let voiceChannel = await c.channels.cache.get(voiceChannelId);
 
-				// Send new message
-				let players = [];
+					let multipleString = 's';
+					let verb = 'are';
+					if (existingQueueTasks.length === 1) {
+						multipleString = '';
+						verb = 'is';
+					}
 
-				for (let i = 0; i < existingQueueTasks.length; i++) {
-					let args = existingQueueTasks[i].additions.split(';');
+					voiceChannel.edit({ name: `1v1 queue | ${existingQueueTasks.length} user${multipleString}` });
 
-					let currentUser = args[0];
-					let playername = await getOsuPlayerName(currentUser);
-					let starRating = parseFloat(args[1]);
+					// Get all messages and delete
+					let messages = await textChannel.messages.fetch({ limit: 100 });
 
-					players.push({ text: `${playername} - ${starRating.toFixed(2)}* <t:${Date.parse(existingQueueTasks[i].createdAt) / 1000}:R>`, starRating: starRating });
+					await textChannel.bulkDelete(messages);
+
+					// Send new message
+					let players = [];
+
+					for (let i = 0; i < existingQueueTasks.length; i++) {
+						let args = existingQueueTasks[i].additions.split(';');
+
+						let currentUser = args[0];
+						let playername = await getOsuPlayerName(currentUser);
+						let starRating = parseFloat(args[1]);
+
+						players.push({ text: `${playername} - ${starRating.toFixed(2)}* <t:${Date.parse(existingQueueTasks[i].createdAt) / 1000}:R>`, starRating: starRating });
+					}
+
+					players.sort((a, b) => {
+						return b.starRating - a.starRating;
+					});
+
+					players.reverse();
+
+					players = players.map(player => player.text);
+
+					textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\nRead <#1042938217684541551> for more information.\n\n${players.join('\n')}`);
 				}
-
-				players.sort((a, b) => {
-					return b.starRating - a.starRating;
-				});
-
-				players.reverse();
-
-				players = players.map(player => player.text);
-
-				textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\nRead <#1042938217684541551> for more information.\n\n${players.join('\n')}`);
+			} catch (error) {
+				console.error('Error in updateQueueChannels utils.js', error);
 			}
 		}, { context: {} });
 	},
