@@ -43,8 +43,9 @@ module.exports = {
 				} catch (e) {
 					if (e.message !== 'Members didn\'t arrive in time.') {
 						console.error('processQueueTasks/nameSync.js | Get members', e);
-						return;
 					}
+
+					return;
 				}
 
 				logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
