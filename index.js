@@ -349,7 +349,9 @@ manager.spawn()
 						.then(processQueueTasks => {
 							runningTournamentMatches.set(processQueueTasks);
 						})
-						.catch(console.error);
+						.catch(error => {
+							console.error(error);
+						});
 				} else if (typeof message === 'string' && message.startsWith('discorduser')) {
 					let discordUser = uniqueDiscordUsersList.find(user => user.id === message.split(' ')[1]);
 					if (discordUser) {
@@ -397,7 +399,9 @@ manager.spawn()
 			});
 		});
 	})
-	.catch(console.error);
+	.catch(error => {
+		console.error(error);
+	});
 
 setInterval(() => {
 	uniqueDiscordUsersInTheLastMinute.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 60000).length);
