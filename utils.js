@@ -1355,7 +1355,7 @@ module.exports = {
 
 							if (additionalInfo.tournamentBan) {
 								if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
-									let bannedUntilString = 'permanent';
+									let bannedUntilString = 'indefinite';
 
 									if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
 										bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
