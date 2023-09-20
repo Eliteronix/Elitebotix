@@ -233,7 +233,7 @@ module.exports = {
 			});
 
 			if (!commandUser) {
-				return msg.user.sendMessage(`Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> [https://discord.gg/Asz5Gfe Discord]`);
+				return msg.user.sendMessage('Please connect and verify your account with the bot on discord as a backup by using: /osu-link connect [https://discord.gg/Asz5Gfe Discord]');
 			}
 		}
 
