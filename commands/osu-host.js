@@ -477,7 +477,7 @@ module.exports = {
 				}
 
 				try {
-					let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId });
+					let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId, client: interaction.client });
 
 					csvData.push({
 						osuUserId: osuUserId,
