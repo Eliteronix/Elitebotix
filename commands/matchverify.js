@@ -532,6 +532,9 @@ module.exports = {
 								{
 									verifiedAt: null,
 								},
+								{
+									verifiedBy: '31050083'
+								},
 							],
 						},
 					});
