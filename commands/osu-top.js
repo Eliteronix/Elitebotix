@@ -638,11 +638,20 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 
 					//Send attachment
 					let sentMessage;
-					if (noLinkedAccount) {
-						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-					} else {
-						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+					try {
+						if (noLinkedAccount) {
+							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
+						} else {
+							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+						}
+					} catch (err) {
+						if (err.message === 'Invalid Webhook Token') {
+							sentMessage = await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+						} else {
+							console.error(err);
+						}
 					}
+
 					try {
 						await sentMessage.react('👤');
 						await sentMessage.react('📈');
