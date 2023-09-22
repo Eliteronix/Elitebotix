@@ -2402,14 +2402,14 @@ module.exports = {
 					lastRework.setUTCHours(18);
 				}
 
-				console.log(beatmapId, dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()));
-
 				if (!dbBeatmap
 					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Qualified'
 					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()) //Update if old non-ranked map
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
+
+					console.log(beatmapId, dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()));
 
 					//Delete the map if it exists and we are checking NM
 					const path = `./maps/${beatmapId}.osu`;
