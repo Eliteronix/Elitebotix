@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission } = require('../utils');
+const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -614,8 +614,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 			parseNumeric: false,
 		});
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-mostplayed.js');
 		osuApi.getUser({ u: username })
 			.then(async (user) => {
 

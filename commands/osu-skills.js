@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { Op } = require('sequelize');
@@ -281,8 +281,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
-	// eslint-disable-next-line no-undef
-	process.send('osu!API');
+	logOsuAPICalls('commands/osu-skills.js');
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
 			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 })

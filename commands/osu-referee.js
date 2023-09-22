@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDatabaseQueries, getModBits } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDatabaseQueries, getModBits, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -720,8 +720,7 @@ module.exports = {
 			for (let i = 0; i < teams.length; i++) {
 				let team = [];
 				for (let j = 0; j < teams[i].split(',').length; j++) {
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-referee.js');
 					const response = await osuApi.getUser({ u: getIDFromPotentialOsuLink(teams[i].split(',')[j]), m: 0 })
 						.then(async (user) => {
 							updateOsuDetailsforUser(interaction.client, user, 0);

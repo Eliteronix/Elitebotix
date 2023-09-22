@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { humanReadable, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo } = require('../utils');
+const { humanReadable, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const Parser = require('expr-eval').Parser;
 
@@ -306,8 +306,7 @@ async function getProfile(interaction, username, formula, rank, desiredrank, bad
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
-	// eslint-disable-next-line no-undef
-	process.send('osu!API');
+	logOsuAPICalls('commands/osu-bws.js');
 	osuApi.getUser({ u: username, m: 0 })
 		.then(async (user) => {
 			updateOsuDetailsforUser(interaction.client, user, 0);

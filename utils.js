@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
-const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests } = require('./config.json');
+const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -2427,8 +2427,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					module.exports.logOsuAPICalls('utils.js getOsuBeatmap');
 					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
@@ -2708,6 +2707,15 @@ module.exports = {
 		// 		break;
 		// 	}
 		// }
+	},
+	logOsuAPICalls(output) {
+		// eslint-disable-next-line no-undef
+		process.send('osu!API');
+
+		if (traceOsuAPICalls) {
+			// eslint-disable-next-line no-console
+			console.log('osu!API', new Date(), output);
+		}
 	},
 	fitTextOnMiddleCanvas(ctx, text, startingSize, fontface, yPosition, width, widthReduction) {
 		// start with a large font size
@@ -3780,8 +3788,7 @@ module.exports = {
 		let topScores = null;
 
 		for (let i = 0; i < 5 && !topScores; i++) {
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			module.exports.logOsuAPICalls('utils.js getUserDuelStarRating');
 			topScores = await osuApi.getUserBest({ u: input.osuUserId, m: 0, limit: 100 })
 				.then((response) => {
 					i = Infinity;
@@ -4073,8 +4080,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				module.exports.logOsuAPICalls('utils.js twitchConnect');
 				let match = await osuApi.getMatch({ mp: matchID })
 					.then(async (match) => {
 						await module.exports.saveOsuMultiScores(match, client);
@@ -5208,8 +5214,7 @@ module.exports = {
 			});
 
 			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				module.exports.logOsuAPICalls('utils.js getOsuPlayerName');
 				const osuUser = await osuApi.getUser({ u: osuUserId });
 				if (osuUser) {
 					playerName = osuUser.name;
@@ -5795,8 +5800,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				module.exports.logOsuAPICalls('utils.js createDuelMatch 1');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
 						module.exports.saveOsuMultiScores(match, client);
@@ -5893,8 +5897,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				module.exports.logOsuAPICalls('utils.js createDuelMatch 2');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
 						await module.exports.saveOsuMultiScores(match, client);
@@ -6833,7 +6836,7 @@ module.exports = {
 					// eslint-disable-next-line no-undef
 					const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					// eslint-disable-next-line no-undef
-					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -6898,8 +6901,7 @@ module.exports = {
 							if (!osuUser.osuUser) {
 								// console.log(`Grabbing osu! user for ${osuUser.osuUserId}...`);
 								try {
-									// eslint-disable-next-line no-undef
-									process.send('osu!API');
+									logOsuAPICalls('utils.js processOsuTrack getUser');
 									let osuUserResult = await osuApi.getUser({ u: osuUser.osuUserId });
 									osuUser.osuUser = osuUserResult;
 								} catch (err) {
@@ -7060,8 +7062,7 @@ module.exports = {
 						if (guildTrackers[i].osuTopPlays) {
 							if (guildTrackers[i].osuNumberTopPlays === undefined) {
 								// console.log(`Getting osu! top plays for ${osuUser.osuUserId}...`);
-								// eslint-disable-next-line no-undef
-								process.send('osu!API');
+								logOsuAPICalls('utils.js processOsuTrack getUserBest standard');
 								guildTrackers[i].osuNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 0 })
 									.then(scores => {
 										let recentPlaysAmount = 0;
@@ -7141,8 +7142,7 @@ module.exports = {
 						if (guildTrackers[i].taikoTopPlays) {
 							if (guildTrackers[i].taikoNumberTopPlays === undefined) {
 								// console.log(`Getting taiko top plays for ${osuUser.osuUserId}...`);
-								// eslint-disable-next-line no-undef
-								process.send('osu!API');
+								logOsuAPICalls('utils.js processOsuTrack getUserBest taiko');
 								guildTrackers[i].taikoNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 1 })
 									.then(scores => {
 										let recentPlaysAmount = 0;
@@ -7223,8 +7223,7 @@ module.exports = {
 							if (guildTrackers[i].catchNumberTopPlays === undefined) {
 								// console.log(`Getting catch top plays for ${osuUser.osuUserId}...`);
 
-								// eslint-disable-next-line no-undef
-								process.send('osu!API');
+								logOsuAPICalls('utils.js processOsuTrack getUserBest catch');
 								guildTrackers[i].catchNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 2 })
 									.then(scores => {
 										let recentPlaysAmount = 0;
@@ -7305,8 +7304,7 @@ module.exports = {
 							if (guildTrackers[i].maniaNumberTopPlays === undefined) {
 								// console.log(`Getting mania top plays for ${osuUser.osuUserId}...`);
 
-								// eslint-disable-next-line no-undef
-								process.send('osu!API');
+								logOsuAPICalls('utils.js processOsuTrack getUserBest mania');
 								guildTrackers[i].maniaNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 3 })
 									.then(scores => {
 										let recentPlaysAmount = 0;

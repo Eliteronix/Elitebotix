@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, getMods, getOsuPlayerName } = require('../utils');
+const { createLeaderboard, getIDFromPotentialOsuLink, saveOsuMultiScores, getMods, getOsuPlayerName, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -153,8 +153,7 @@ module.exports = {
 			}
 		}
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-matchscore.js');
 		osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
 				if (interaction.id) {

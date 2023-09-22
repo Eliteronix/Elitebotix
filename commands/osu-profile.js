@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -282,8 +282,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-profile.js');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
 				updateOsuDetailsforUser(interaction.client, user, mode);

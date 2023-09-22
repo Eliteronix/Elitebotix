@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar } = require('../utils');
+const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fs = require('fs');
@@ -148,8 +148,7 @@ module.exports = {
 			});
 
 			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-wrapped.js');
 				const user = await osuApi.getUser({ u: username });
 				osuUser.osuUserId = user.id;
 				osuUser.osuName = user.name;

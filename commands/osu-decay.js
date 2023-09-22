@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { logDatabaseQueries, humanReadable } = require('../utils');
+const { logDatabaseQueries, humanReadable, logOsuAPICalls } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op, Sequelize } = require('sequelize');
 
@@ -122,8 +122,7 @@ module.exports = {
 		let user = null;
 
 		try {
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			logOsuAPICalls('commands/osu-decay.js user');
 			user = await osuApi.getUser({ u: username });
 		} catch (error) {
 			return await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
@@ -194,8 +193,7 @@ module.exports = {
 			}
 
 			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-decay.js compareUser');
 				let updatedUserToCompare = await osuApi.getUser({ u: discordUsers[index].osuUserId });
 
 				if (Number(updatedUserToCompare.pp.raw) !== Number(discordUsers[index].osuPP)) {

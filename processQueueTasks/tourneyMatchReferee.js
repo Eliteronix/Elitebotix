@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps, DBProcessQueue } = require('../dbObjects');
-const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage, updateCurrentMatchesChannel } = require('../utils');
+const { pause, saveOsuMultiScores, logDatabaseQueries, logMatchCreation, addMatchMessage, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const osu = require('node-osu');
 const Discord = require('discord.js');
 const { logBroadcastEval } = require('../config.json');
@@ -521,8 +521,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('processQueueTasks/tourneyMatchReferee.js');
 				osuApi.getMatch({ mp: lobby.id })
 					.then(async (match) => {
 						saveOsuMultiScores(match, client);

@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode, getMessageUserDisplayname, getDerankStats, getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils');
+const { getUserDuelStarRating, populateMsgFromInteraction, getOsuUserServerMode, getMessageUserDisplayname, getDerankStats, getIDFromPotentialOsuLink, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -99,8 +99,7 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			logOsuAPICalls('commands/osu-derank.js');
 			let user = await osuApi.getUser({ u: username, m: 0 })
 				.then(osuUser => {
 					return osuUser;

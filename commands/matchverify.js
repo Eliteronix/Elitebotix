@@ -1,7 +1,7 @@
 const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
-const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause } = require('../utils');
+const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause, logOsuAPICalls } = require('../utils');
 const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const osu = require('node-osu');
 const matchIdsGettingProcessed = [];
@@ -862,8 +862,7 @@ module.exports = {
 			let user = null;
 
 			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/matchverify.js');
 				user = await osuApi.getUser({ u: player });
 			} catch (error) {
 				return await interaction.editReply(`Could not find user \`${player.replace(/`/g, '')}\`.`);

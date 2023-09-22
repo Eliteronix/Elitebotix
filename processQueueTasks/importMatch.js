@@ -1,4 +1,4 @@
-const { saveOsuMultiScores, logDatabaseQueries, updateCurrentMatchesChannel } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
@@ -41,8 +41,7 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('processQueueTasks/importMatch.js');
 		await osuApi.getMatch({ mp: matchId })
 			.then(async (match) => {
 				let sixHoursAgo = new Date();

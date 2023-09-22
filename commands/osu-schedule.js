@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBOsuMultiScores, DBDiscordUsers } = require('../dbObjects');
-const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -382,8 +382,7 @@ module.exports = {
 		let teamsReadable = [[], []];
 		for (let i = 0; i < teams.length; i++) {
 			for (let j = 0; j < teams[i].length; j++) {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-schedule.js');
 				await osuApi.getUser({ u: teams[i][j] })
 					.then(user => {
 						teams[i][j] = user.id;

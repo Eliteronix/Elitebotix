@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -909,8 +909,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-duel.js rating');
 					const user = await osuApi.getUser({ u: osuUser.name, m: 0 })
 						.catch(err => {
 							if (err.message !== 'Not found') {
@@ -1700,8 +1699,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-duel.js data');
 					const user = await osuApi.getUser({ u: osuUser.id, m: 0 })
 						.catch(err => {
 							if (err.message !== 'Not found') {

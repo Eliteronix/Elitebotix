@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiScores } = require('../../dbObjects');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
-const { getUserDuelStarRating, logDatabaseQueries } = require('../../utils');
+const { getUserDuelStarRating, logDatabaseQueries, logOsuAPICalls } = require('../../utils');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const Discord = require('discord.js');
 
@@ -67,8 +67,7 @@ module.exports = {
 			});
 
 			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('admin/duelRatingDevelopment.js');
 				const user = await osuApi.getUser({ u: username });
 				osuUser.osuUserId = user.id;
 				osuUser.osuName = user.name;
