@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { getOsuPlayerName, logDatabaseQueries } = require('../utils');
+const { getOsuPlayerName, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -173,8 +173,7 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			logOsuAPICalls('commands/osu-follow.js follow');
 			await osuApi.getUser({ u: username, m: 0 })
 				.then(async (osuUser) => {
 					//TODO: Attributes
@@ -229,8 +228,7 @@ module.exports = {
 				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 			});
 
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			logOsuAPICalls('commands/osu-follow.js unfollow');
 			await osuApi.getUser({ u: username, m: 0 })
 				.then(async (osuUser) => {
 					//TODO: Attributes

@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, awaitWebRequestPermission, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, awaitWebRequestPermission, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -97,8 +97,7 @@ module.exports = {
 
 		matchID = Number(matchID);
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-matchtrack.js initial info');
 		osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				if (match.raw_end && !showStart) {
@@ -143,8 +142,7 @@ module.exports = {
 						}
 					}
 
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-matchtrack.js save data');
 					await osuApi.getMatch({ mp: matchID })
 						.then(async (match) => {
 							if (msg.id) {

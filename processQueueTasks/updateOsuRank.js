@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo } = require('../utils.js');
+const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs, logBroadcastEval } = require('../config.json');
 const { Op } = require('sequelize');
@@ -141,8 +141,7 @@ module.exports = {
 			}
 
 			if (discordUser.nextOsuPPUpdate <= new Date()) {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('processQueueTasks/updateOsuRank.js standard user');
 				const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
 
 				discordUser.osuName = osuUser.name;
@@ -168,8 +167,7 @@ module.exports = {
 			}
 
 			if (discordUser.nextTaikoPPUpdate <= new Date()) {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('processQueueTasks/updateOsuRank.js taiko user');
 				const taikoUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 1 });
 
 				discordUser.osuName = taikoUser.name;
@@ -194,8 +192,7 @@ module.exports = {
 			}
 
 			if (discordUser.nextCatchPPUpdate <= new Date()) {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('processQueueTasks/updateOsuRank.js catch user');
 				const catchUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 2 });
 
 				discordUser.osuName = catchUser.name;
@@ -220,8 +217,7 @@ module.exports = {
 			}
 
 			if (discordUser.nextManiaPPUpdate <= new Date()) {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('processQueueTasks/updateOsuRank.js mania user');
 				const maniaUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 3 });
 
 				discordUser.osuName = maniaUser.name;

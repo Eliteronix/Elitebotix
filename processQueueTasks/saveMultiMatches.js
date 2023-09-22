@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
-const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const { logBroadcastEval } = require('../config.json');
 
@@ -29,8 +29,7 @@ module.exports = {
 			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 0);
 		}
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('processQueueTasks/saveMultiMatches.js main');
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
 				// eslint-disable-next-line no-undef
@@ -182,8 +181,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	});
 
 	if (incompleteMatchScore) {
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('processQueueTasks/saveMultiMatches.js incompleteMatchScore');
 		await osuApi.getMatch({ mp: incompleteMatchScore.matchId })
 			.then(async (match) => {
 				if (logBroadcastEval) {
@@ -252,8 +250,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 		if (incompleteMatch) {
 			// Fetch the match and check if the match was created by MaidBot
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			logOsuAPICalls('processQueueTasks/saveMultiMatches.js maidbot match check');
 			await osuApi.getMatch({ mp: incompleteMatch.matchId })
 				.then(async (match) => {
 					try {
