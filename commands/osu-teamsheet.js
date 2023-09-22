@@ -1,7 +1,7 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets, DBOsuPoolAccess } = require('../dbObjects');
-const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating } = require('../utils');
+const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const osu = require('node-osu');
@@ -363,8 +363,7 @@ module.exports = {
 				continue;
 			}
 
-			// eslint-disable-next-line no-undef
-			process.send('osu!API');
+			logOsuAPICalls('commands/osu-teamsheet.js getUser rawPlayers');
 			let osuUser = await osuApi.getUser({ u: username })
 				.then(osuUser => {
 					return osuUser;
@@ -540,8 +539,7 @@ module.exports = {
 			let matchLink = getIDFromPotentialOsuLink(interaction.options.getString('matchlink'));
 
 			try {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-teamsheet.js getMatch initial');
 				let match = await osuApi.getMatch({ mp: matchLink });
 
 				for (let i = 0; i < match.games.length; i++) {
@@ -728,8 +726,7 @@ module.exports = {
 				}
 
 				if (!['Graveyard', 'WIP', 'Pending'].includes(tourneyMaps[j].approvalStatus)) {
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-teamsheet.js getScores');
 					await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].osuUserId, m: 0 })
 						.then(async mapScores => {
 							if (mapScores.length === 0) {
@@ -1390,8 +1387,7 @@ module.exports = {
 				let matchLink = getIDFromPotentialOsuLink(interaction.options.getString('matchlink'));
 
 				try {
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-teamsheet.js getmatch tracking');
 					let match = await osuApi.getMatch({ mp: matchLink });
 
 					for (let i = 0; i < match.games.length; i++) {

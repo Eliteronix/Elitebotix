@@ -1,6 +1,6 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { logDatabaseQueries, getIDFromPotentialOsuLink, getOsuPlayerName } = require('../utils');
+const { logDatabaseQueries, getIDFromPotentialOsuLink, getOsuPlayerName, logOsuAPICalls } = require('../utils');
 const { DBDiscordUsers, DBOsuPoolAccess } = require('../dbObjects');
 const { Op } = require('sequelize');
 const osu = require('node-osu');
@@ -282,8 +282,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-scoreaccess.js grantspreadsheetaccess getUser');
 				const osuUser = await osuApi.getUser({ u: captain, m: 0 })
 					.then(osuUser => {
 						return osuUser;
@@ -380,8 +379,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-scoreaccess.js revokespreadsheetaccess getUser');
 				const osuUser = await osuApi.getUser({ u: captain, m: 0 })
 					.then(osuUser => {
 						return osuUser;
@@ -473,8 +471,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-scoreaccess.js grantpoolaccess getUser');
 				const osuUser = await osuApi.getUser({ u: captain, m: 0 })
 					.then(osuUser => {
 						return osuUser;
@@ -572,8 +569,7 @@ module.exports = {
 					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-scoreaccess.js revokepoolaccess getUser');
 				const osuUser = await osuApi.getUser({ u: captain, m: 0 })
 					.then(osuUser => {
 						return osuUser;

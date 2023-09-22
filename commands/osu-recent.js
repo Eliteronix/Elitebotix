@@ -1,6 +1,6 @@
 ﻿const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, scoreCardAttachment, gatariToBanchoScore } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -286,8 +286,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 		let i = 0;
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-recent.js getUserRecent Bancho');
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
 				if (!(scores[0])) {
@@ -304,15 +303,13 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 				}
 
 				const dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: 0 });
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-recent.js getUser Bancho');
 				const user = await osuApi.getUser({ u: username, m: mode });
 				updateOsuDetailsforUser(interaction.client, user, mode);
 
 				let mapRank = 0;
 				//Get the map leaderboard and fill the maprank if found
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-recent.js getScores Bancho');
 				await osuApi.getScores({ b: dbBeatmap.beatmapId, m: mode, limit: 100 })
 					.then(async (mapScores) => {
 						for (let j = 0; j < mapScores.length && !mapRank; j++) {

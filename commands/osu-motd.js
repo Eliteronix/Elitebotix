@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects');
-const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries } = require('../utils');
+const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
@@ -977,8 +977,7 @@ module.exports = {
 			let players = [];
 			let playersNotFound = [];
 			for (let i = 0; i < args.length; i++) {
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-motd.js custom-fixed-players getUser');
 				let player = await osuApi.getUser({ u: args[i] });
 				if (player) {
 					players.push(player);
@@ -1087,8 +1086,7 @@ module.exports = {
 				let amountOfMapsInDB = -1;
 
 				while (amountOfMapsInDB === -1) {
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-motd.js custom-fixed-players getBeatmaps');
 					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
 
 					const dbBeatmap = await getOsuBeatmap({ beatmapId: mostRecentBeatmap[0].id, modBits: 0 });
@@ -1414,8 +1412,7 @@ module.exports = {
 				let amountOfMapsInDB = -1;
 
 				while (amountOfMapsInDB === -1) {
-					// eslint-disable-next-line no-undef
-					process.send('osu!API');
+					logOsuAPICalls('commands/osu-motd.js custom-react-to-play');
 					const mostRecentBeatmap = await osuApi.getBeatmaps({ limit: 1 });
 
 					const dbBeatmap = await getOsuBeatmap({ beatmapId: mostRecentBeatmap[0].id, modBits: 0 });

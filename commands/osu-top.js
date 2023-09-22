@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers, DBOsuBeatmaps } = 
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, gatariToBanchoScore } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -362,8 +362,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-top.js getUser Bancho');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
 				updateOsuDetailsforUser(interaction.client, user, mode);
@@ -575,8 +574,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-top.js getUser tournaments');
 		osuApi.getUser({ u: username, m: mode })
 			.then(async (user) => {
 				updateOsuDetailsforUser(interaction.client, user, mode);
@@ -778,8 +776,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	let unrankedBonusPP = 0;
 
 	if (server === 'bancho') {
-		// eslint-disable-next-line no-undef
-		process.send('osu!API');
+		logOsuAPICalls('commands/osu-top.js getUserBest bancho');
 		scores = await osuApi.getUserBest({ u: user.name, m: mode, limit: limit });
 	} else if (server === 'ripple') {
 		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);

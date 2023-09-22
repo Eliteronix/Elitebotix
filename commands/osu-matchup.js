@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar } = require('../utils');
+const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
@@ -698,8 +698,7 @@ module.exports = {
 					team1[i] = getIDFromPotentialOsuLink(team1[i]);
 				}
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-matchup.js team1');
 				await osuApi.getUser({ u: team1[i] })
 					.then(user => {
 						team1[i] = user.id;
@@ -741,8 +740,7 @@ module.exports = {
 					team2[i] = getIDFromPotentialOsuLink(team2[i]);
 				}
 
-				// eslint-disable-next-line no-undef
-				process.send('osu!API');
+				logOsuAPICalls('commands/osu-matchup.js team2');
 				await osuApi.getUser({ u: team2[i] })
 					.then(user => {
 						team2[i] = user.id;

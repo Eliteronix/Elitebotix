@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries } = require('../utils');
+const { logDatabaseQueries, logOsuAPICalls } = require('../utils');
 
 module.exports = {
 	name: 'osu-track',
@@ -584,8 +584,7 @@ module.exports = {
 					});
 
 					try {
-						// eslint-disable-next-line no-undef
-						process.send('osu!API');
+						logOsuAPICalls('commands/osu-track.js enable');
 						const user = await osuApi.getUser({ u: username });
 						osuUser.osuUserId = user.id;
 						osuUser.osuName = user.name;
@@ -856,8 +855,7 @@ module.exports = {
 					});
 
 					try {
-						// eslint-disable-next-line no-undef
-						process.send('osu!API');
+						logOsuAPICalls('commands/osu-track.js disable');
 						const user = await osuApi.getUser({ u: username });
 						osuUser.osuUserId = user.id;
 						osuUser.osuName = user.name;
@@ -1080,8 +1078,7 @@ module.exports = {
 					});
 
 					try {
-						// eslint-disable-next-line no-undef
-						process.send('osu!API');
+						logOsuAPICalls('commands/osu-track.js list');
 						const user = await osuApi.getUser({ u: username });
 						osuUser.osuUserId = user.id;
 						osuUser.osuName = user.name;
