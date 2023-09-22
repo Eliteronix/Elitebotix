@@ -2664,6 +2664,9 @@ module.exports = {
 									starRating: 0,
 									maxCombo: 0,
 								});
+							} else if (dbBeatmap) {
+								dbBeatmap.changed('updatedAt', true);
+								await dbBeatmap.save();
 							}
 						});
 				}
