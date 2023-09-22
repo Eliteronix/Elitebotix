@@ -11,7 +11,7 @@
 		"458196977939906562"
 	],
 	"traceDatabaseQueries": 6,
-	"traceOsuAPICalls": true,
+	"traceOsuAPICalls": false,
 	"showUnknownInteractionError": false,
 	"logBroadcastEval": false,
 	"logWebRequests": false,
