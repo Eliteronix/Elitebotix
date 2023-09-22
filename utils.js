@@ -2565,6 +2565,7 @@ module.exports = {
 								dbBeatmap.hash = beatmaps[0].hash;
 								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
+								console.log('Changed updatedAt');
 							} else { // Map has to be added new
 								//Get the tourney map flags
 								let tourneyMap = false;
@@ -2655,6 +2656,7 @@ module.exports = {
 								dbBeatmap.approvalStatus = 'Not found';
 								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
+								console.log('Changed updatedAt');
 							} else if (error.message === 'Not found') { // Map has to be added new
 								module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap create not found');
 								dbBeatmap = await DBOsuBeatmaps.create({
@@ -2667,6 +2669,7 @@ module.exports = {
 							} else if (dbBeatmap) {
 								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
+								console.log('Changed updatedAt');
 							}
 						});
 				}
