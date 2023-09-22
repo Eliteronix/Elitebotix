@@ -3055,19 +3055,25 @@ module.exports = {
 						}
 					},
 				],
-				[Op.not]: [
+				[Op.and]: [
 					{
-						matchName: {
-							[Op.like]: 'FEM2:%' //Femboy 2 has challenges including missing on purpose
-						}
-					}
-				],
-				[Op.not]: [
+						[Op.not]: [
+							{
+								matchName: {
+									[Op.like]: 'FEM2:%' //Femboy 2 has challenges including missing on purpose
+								}
+							}
+						],
+					},
 					{
-						matchName: {
-							[Op.like]: 'ZKFC S2:%' //Requires getting a specific score
-						}
-					}
+						[Op.not]: [
+							{
+								matchName: {
+									[Op.like]: 'ZKFC S2:%' //Requires getting a specific score
+								}
+							}
+						]
+					},
 				]
 			}
 		});
