@@ -2402,6 +2402,8 @@ module.exports = {
 					lastRework.setUTCHours(18);
 				}
 
+				console.log(beatmapId, forceUpdate, dbBeatmap && dbBeatmap.updatedAt < lastRework, dbBeatmap && dbBeatmap.approvalStatus === 'Qualified', dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()), dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode));
+
 				if (!dbBeatmap
 					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
