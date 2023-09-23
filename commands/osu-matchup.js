@@ -926,6 +926,7 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuBeatmaps');
 		let dbBeatmaps = await DBOsuBeatmaps.findAll({
 			attributes: [
+				'id',
 				'beatmapId',
 				'beatmapsetId',
 				'approvalStatus',
