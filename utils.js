@@ -3203,6 +3203,7 @@ module.exports = {
 			module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuBeatmaps beatmaps');
 			let beatmaps = await DBOsuBeatmaps.findAll({
 				attributes: [
+					'id',
 					'beatmapId',
 					'mods',
 					'starRating',
