@@ -2427,7 +2427,7 @@ module.exports = {
 						parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 					});
 
-					module.exports.logOsuAPICalls('utils.js getOsuBeatmap');
+					module.exports.logOsuAPICalls(`utils.js getOsuBeatmap ${beatmapId} ${modBits}`);
 					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
@@ -2561,8 +2561,6 @@ module.exports = {
 								dbBeatmap.notDownloadable = notDownloadable;
 								dbBeatmap.audioUnavailable = audioUnavailable;
 								dbBeatmap.hash = beatmaps[0].hash;
-								dbBeatmap.changed('updatedAt', true);
-								await dbBeatmap.save();
 							} else { // Map has to be added new
 								//Get the tourney map flags
 								let tourneyMap = false;
@@ -2651,8 +2649,6 @@ module.exports = {
 							//Map is already saved; Delay next check until 7 days
 							if (dbBeatmap && error.message === 'Not found') {
 								dbBeatmap.approvalStatus = 'Not found';
-								dbBeatmap.changed('updatedAt', true);
-								await dbBeatmap.save();
 							} else if (error.message === 'Not found') { // Map has to be added new
 								module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap create not found');
 								dbBeatmap = await DBOsuBeatmaps.create({
@@ -2662,9 +2658,6 @@ module.exports = {
 									starRating: 0,
 									maxCombo: 0,
 								});
-							} else if (dbBeatmap) {
-								dbBeatmap.changed('updatedAt', true);
-								await dbBeatmap.save();
 							}
 						});
 				}
@@ -2677,8 +2670,13 @@ module.exports = {
 			}
 		}
 
-		if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
-			return null;
+		if (dbBeatmap) {
+			dbBeatmap.changed('updatedAt', true);
+			await dbBeatmap.save();
+
+			if (dbBeatmap.approvalStatus === 'Not found') {
+				return null;
+			}
 		}
 
 		return dbBeatmap;
