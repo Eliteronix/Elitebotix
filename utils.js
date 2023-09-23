@@ -6392,6 +6392,7 @@ module.exports = {
 		}
 
 		const beatmapAttributes = [
+			'id',
 			'artist',
 			'title',
 			'difficulty',
