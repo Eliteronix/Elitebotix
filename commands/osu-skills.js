@@ -305,6 +305,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			logDatabaseQueries(4, 'commands/osu-skills.js DBOsuBeatmaps');
 			let dbBeatmaps = await DBOsuBeatmaps.findAll({
 				attributes: [
+					'id',
 					'beatmapId',
 					'mods',
 					'starRating',
