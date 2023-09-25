@@ -3153,7 +3153,7 @@ module.exports = {
 					)
 				) {
 					if (input.client.knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
-						// input.client.knownSuspiciousMatches.push(userScores[i].matchId);
+						input.client.knownSuspiciousMatches.push(userScores[i].matchId);
 
 						if (logBroadcastEval) {
 							// eslint-disable-next-line no-console
