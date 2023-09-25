@@ -2,7 +2,7 @@ const { logBroadcastEval } = require('../../config.json');
 const { pause } = require('../../utils');
 
 module.exports = {
-	name: 'profile',
+	name: 'cpuprofile',
 	usage: '<seconds>',
 	async execute(interaction) {
 		let seconds = 30;
