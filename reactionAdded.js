@@ -192,6 +192,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			const command = require(`./commands/${commandName[0]}.js`);
 			if (commandName[0] == 'osu-leaderboard') {
 				message = {
+					client: reaction.message.client,
 					guild: reaction.message.guild,
 					guildId: reaction.message.guild.id,
 					content: `e!${commandName[0]} --${mode} ${page}`,
@@ -205,6 +206,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				command.execute(message, [page, `--${mode}`], null, additionalObjects);
 			} else {
 				message = {
+					client: reaction.message.client,
 					guild: reaction.message.guild,
 					guildId: reaction.message.guild.id,
 					content: `e!${commandName[0]} ${page}`,
