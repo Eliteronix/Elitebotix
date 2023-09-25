@@ -332,7 +332,7 @@ setTimeout(() => {
 	client.update = 1;
 }, 82800000);
 
-let nextMBThreshold = 600;
+let nextMBThreshold = 1000;
 
 setInterval(function () {
 	// eslint-disable-next-line no-undef
