@@ -13,7 +13,7 @@ module.exports = {
 
 		if (logBroadcastEval) {
 			// eslint-disable-next-line no-console
-			console.log('Broadcasting commands/admin/profile.js to shards...');
+			console.log('Broadcasting commands/admin/cpuprofile.js to shards...');
 		}
 
 		await interaction.client.shard.broadcastEval(async (c, { seconds }) => {
