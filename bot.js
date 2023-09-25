@@ -332,13 +332,13 @@ setTimeout(() => {
 	client.update = 1;
 }, 82800000);
 
-let nextMBThreshold = 1000;
+let nextMBThreshold = 600;
 
 setInterval(function () {
 	// eslint-disable-next-line no-undef
 	let memMB = process.memoryUsage().rss / 1048576;
 	if (memMB > nextMBThreshold) {
-		require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${client.shardId}.heapsnapshot`);
+		require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${client.shardId}-${nextMBThreshold}.heapsnapshot`);
 		nextMBThreshold += 100;
 	}
 }, 6000 * 2);
