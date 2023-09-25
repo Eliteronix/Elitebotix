@@ -332,6 +332,17 @@ setTimeout(() => {
 	client.update = 1;
 }, 82800000);
 
+let nextMBThreshold = 1000;
+
+setInterval(function () {
+	// eslint-disable-next-line no-undef
+	let memMB = process.memoryUsage().rss / 1048576;
+	if (memMB > nextMBThreshold) {
+		require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${client.shardId}.heapsnapshot`);
+		nextMBThreshold += 100;
+	}
+}, 6000 * 2);
+
 async function executeProcessQueue(client, bancho) {
 	try {
 		await executeNextProcessQueueTask(client, bancho);
