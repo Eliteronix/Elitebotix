@@ -2883,8 +2883,6 @@ module.exports = {
 		// console.log('-------------------------------------------------------------------------------------------------------------------');
 		// let startTime = new Date();
 		//Try to get it from tournament data if available
-		let userScores;
-
 		let endDate = new Date();
 		if (input.date) {
 			endDate = input.date;
@@ -3031,9 +3029,48 @@ module.exports = {
 			return duelRatings;
 		}
 
+		//Check for scores from the past half a year
+		const lastHalfYear = new Date();
+		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
+
+		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiScores pastHalfYearScoreCount');
+		const pastHalfYearScoreCount = await DBOsuMultiScores.count({
+			where: {
+				osuUserId: input.osuUserId,
+				tourneyMatch: true,
+				scoringType: 'Score v2',
+				mode: 'Standard',
+				gameEndDate: {
+					[Op.gte]: lastHalfYear
+				}
+			}
+		});
+
+		let outdated = false;
+
+		if (pastHalfYearScoreCount < 5) {
+			outdated = true;
+		}
+
+		duelRatings.outdated = outdated;
+
+		let scoresPerMod = 35;
+		let outliersPerMod = 3;
+
+		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+
+		let suspiciousActivityLogGuildId = '727407178499096597';
+		let suspiciousActivityLogChannelId = '1142772110540931154';
+
+		// eslint-disable-next-line no-undef
+		if (process.env.SERVER === 'Dev') {
+			suspiciousActivityLogGuildId = '800641468321759242';
+			suspiciousActivityLogChannelId = '1142772857877823488';
+		}
+
 		//Get the tournament data either limited by the date
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
-		userScores = await DBOsuMultiScores.findAll({
+		let userScores = await DBOsuMultiScores.findAll({
 			attributes: [
 				'gameId',
 				'beatmapId',
@@ -3094,48 +3131,23 @@ module.exports = {
 			}
 		});
 
-		//Check for scores from the past half a year
-		const lastHalfYear = new Date();
-		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
-
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiScores pastHalfYearScoreCount');
-		const pastHalfYearScoreCount = await DBOsuMultiScores.count({
-			where: {
-				osuUserId: input.osuUserId,
-				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
-				gameEndDate: {
-					[Op.gte]: lastHalfYear
-				}
-			}
-		});
-
-		let outdated = false;
-
-		if (pastHalfYearScoreCount < 5) {
-			outdated = true;
-		}
-
-		duelRatings.outdated = outdated;
-
 		//Sort it by game ID
 		userScores.sort((a, b) => {
 			return parseInt(b.gameId) - parseInt(a.gameId);
 		});
 
-		let scoresPerMod = 35;
-		let outliersPerMod = 3;
+		// Get the modpool ratios for the first 100 maps for later
+		const modPoolAmounts = [0, 0, 0, 0, 0];
 
-		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
+		//Get ratio of modPools played maps
+		for (let i = 0; i < userScores.length && i < 100; i++) {
+			if (parseInt(userScores[i].score) <= 10000) {
+				userScores.splice(i, 1);
+				i--;
+				continue;
+			}
 
-		let suspiciousActivityLogGuildId = '727407178499096597';
-		let suspiciousActivityLogChannelId = '1142772110540931154';
-
-		// eslint-disable-next-line no-undef
-		if (process.env.SERVER === 'Dev') {
-			suspiciousActivityLogGuildId = '800641468321759242';
-			suspiciousActivityLogChannelId = '1142772857877823488';
+			modPoolAmounts[modPools.indexOf(module.exports.getScoreModpool(userScores[i]))]++;
 		}
 
 		//Loop through all modpools
@@ -3148,6 +3160,8 @@ module.exports = {
 			// Don't count plays with more than 10% misses
 			for (let i = 0; i < userScores.length; i++) {
 				if (parseInt(userScores[i].score) <= 10000) {
+					userScores.splice(i, 1);
+					i--;
 					continue;
 				}
 
@@ -3452,6 +3466,9 @@ module.exports = {
 			}
 		}
 
+		// Free the memory
+		userScores = null;
+
 		//Check the past month for individual ratings and limit a potential drop to .02
 		let newEndDate = new Date(endDate);
 		newEndDate.setUTCDate(1);
@@ -3541,17 +3558,6 @@ module.exports = {
 				if (lastMonthStats.osuFreeModDuelStarRating && duelRatings.freeMod < lastMonthStats.osuFreeModDuelStarRating - 0.025) {
 					duelRatings.freeMod = lastMonthStats.osuFreeModDuelStarRating - 0.025;
 					duelRatings.freeModLimited = true;
-				}
-			}
-
-			//Get ratio of modPools played maps
-			const modPoolAmounts = [0, 0, 0, 0, 0];
-			for (let i = 0; i < userScores.length && i < 100; i++) {
-				if (parseInt(userScores[i].score) > 10000) {
-					modPoolAmounts[modPools.indexOf(module.exports.getScoreModpool(userScores[i]))]++;
-				} else {
-					userScores.splice(i, 1);
-					i--;
 				}
 			}
 
