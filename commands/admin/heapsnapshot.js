@@ -19,13 +19,8 @@ module.exports = {
 				fs.mkdirSync('./heapSnapshots');
 			}
 
-			// Save a heap snapshot in ./heapSnapshots
-			const snapshotStream = await require('inspector').heapProfiler.takeHeapSnapshot();
-			const filename = `./heapSnapshots/heapSnapshot${c.shardId}.heapsnapshot`;
-
-
-			const fileStream = fs.createWriteStream(filename, { flags: 'w' });
-			snapshotStream.pipe(fileStream);
+			// Save a heap snapshot in ./heapSnapshots with require('v8').writeHeapSnapshot();
+			require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${c.shardId}.heapsnapshot`);
 		}, { context: {} });
 
 		await interaction.editReply('Finished creating heap snapshots');
