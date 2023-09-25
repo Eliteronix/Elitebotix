@@ -823,6 +823,13 @@ module.exports = {
 			return;
 		}
 
+		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue existing count');
+		let existingTasksCount = await DBProcessQueue.count({ where: { task: 'updateOsuRank' } });
+
+		if (existingTasksCount > 10) {
+			return;
+		}
+
 		let now = new Date();
 
 		let yesterday = new Date();
