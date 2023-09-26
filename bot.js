@@ -332,14 +332,23 @@ setTimeout(() => {
 	client.update = 1;
 }, 82800000);
 
-let nextMBThreshold = 1000;
+let nextMBThreshold = 2000;
 
 setInterval(function () {
 	// eslint-disable-next-line no-undef
 	let memMB = process.memoryUsage().rss / 1048576;
 	if (memMB > nextMBThreshold) {
+		console.log(`[${client.shardId}] ${new Date()} Heap snapshot taken at ${memMB}MB`);
+
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./heapSnapshots')) {
+			fs.mkdirSync('./heapSnapshots');
+		}
+
 		require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${client.shardId}-${nextMBThreshold}.heapsnapshot`);
-		nextMBThreshold += 100;
+		nextMBThreshold += 500;
 	}
 }, 6000 * 2);
 

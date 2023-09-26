@@ -2344,8 +2344,8 @@ module.exports = {
 		lastRework.setUTCDate(13);
 		lastRework.setUTCHours(23);
 
-		let lastWeek = new Date();
-		lastWeek.setUTCDate(lastWeek.getUTCDate() - 7);
+		let lastMonth = new Date();
+		lastMonth.setUTCMonth(lastMonth.getUTCMonth() - 1);
 
 		// //Date of reworked EZ values
 		// if (mods.includes('EZ')) {
@@ -2413,8 +2413,18 @@ module.exports = {
 					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Qualified'
-					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastWeek.getTime()) //Update if old non-ranked map
+					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastMonth.getTime()) //Update if old non-ranked map
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
+
+					console.log('beatmapId', beatmapId);
+
+					if (dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved') {
+						console.log('Non-Ranked and Non-Approved map dbBeatmap.updatedAt', dbBeatmap.updatedAt, !dbBeatmap.updatedAt);
+
+						if (dbBeatmap.updatedAt) {
+							console.log('Non-Ranked and Non-Approved map additional check', dbBeatmap.updatedAt.getTime(), lastMonth.getTime(), dbBeatmap.updatedAt.getTime() < lastMonth.getTime());
+						}
+					}
 
 					//Delete the map if it exists and we are checking NM
 					const path = `./maps/${beatmapId}.osu`;
@@ -2568,6 +2578,8 @@ module.exports = {
 								dbBeatmap.notDownloadable = notDownloadable;
 								dbBeatmap.audioUnavailable = audioUnavailable;
 								dbBeatmap.hash = beatmaps[0].hash;
+								dbBeatmap.changed('updatedAt', true);
+								await dbBeatmap.save();
 							} else { // Map has to be added new
 								//Get the tourney map flags
 								let tourneyMap = false;
@@ -2656,6 +2668,8 @@ module.exports = {
 							//Map is already saved; Delay next check until 7 days
 							if (dbBeatmap && error.message === 'Not found') {
 								dbBeatmap.approvalStatus = 'Not found';
+								dbBeatmap.changed('updatedAt', true);
+								await dbBeatmap.save();
 							} else if (error.message === 'Not found') { // Map has to be added new
 								module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap create not found');
 								dbBeatmap = await DBOsuBeatmaps.create({
@@ -2677,13 +2691,8 @@ module.exports = {
 			}
 		}
 
-		if (dbBeatmap) {
-			dbBeatmap.changed('updatedAt', true);
-			await dbBeatmap.save();
-
-			if (dbBeatmap.approvalStatus === 'Not found') {
-				return null;
-			}
+		if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
+			return null;
 		}
 
 		return dbBeatmap;

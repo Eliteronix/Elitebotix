@@ -77,9 +77,9 @@ module.exports = {
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		if (interaction.options.getBoolean('showtournamentdetails')) {
-			return interaction.reply('`showtournamentdetails` is currently causing issues and is disabled until it is fixed.');
-		}
+		// if (interaction.options.getBoolean('showtournamentdetails')) {
+		// 	return interaction.reply('`showtournamentdetails` is currently causing issues and is disabled until it is fixed.');
+		// }
 
 		try {
 			await interaction.deferReply();
@@ -570,10 +570,12 @@ module.exports = {
 				let tourneyScores = await DBOsuMultiScores.findAll({
 					attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
 					where: {
+						tourneyMatch: true,
 						matchName: {
 							[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
 						},
 					},
+					group: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
 					order: [['matchStartDate', 'DESC']],
 				});
 
@@ -646,7 +648,6 @@ module.exports = {
 					} else if (team.length === 0 && tourneysPlayed[i].matches.length > 1 || team.length === 1) {
 						tourneysPlayed[i].team = 'Solo';
 					} else {
-
 						let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
 
 						if (matchesToFindOutFormat.length > 0) {
