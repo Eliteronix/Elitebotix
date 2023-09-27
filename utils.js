@@ -9001,7 +9001,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 }
 
 function getExpectedDuelRating(score) {
-	score.score = Math.max(Math.min(parseInt(score.score), 20000), 950000);
+	score.score = Math.min(Math.max(parseInt(score.score), 20000), 950000);
 
 	score.starRating = parseFloat(score.starRating);
 
