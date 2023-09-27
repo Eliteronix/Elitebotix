@@ -3355,21 +3355,23 @@ module.exports = {
 				//Add the maps to the scores array
 				worstBeatmap.outlier = true;
 				bestBeatmap.outlier = true;
-				if (modIndex === 0) {
-					duelRatings.scores.NM.push(worstBeatmap);
-					duelRatings.scores.NM.push(bestBeatmap);
-				} else if (modIndex === 1) {
-					duelRatings.scores.HD.push(worstBeatmap);
-					duelRatings.scores.HD.push(bestBeatmap);
-				} else if (modIndex === 2) {
-					duelRatings.scores.HR.push(worstBeatmap);
-					duelRatings.scores.HR.push(bestBeatmap);
-				} else if (modIndex === 3) {
-					duelRatings.scores.DT.push(worstBeatmap);
-					duelRatings.scores.DT.push(bestBeatmap);
-				} else if (modIndex === 4) {
-					duelRatings.scores.FM.push(worstBeatmap);
-					duelRatings.scores.FM.push(bestBeatmap);
+				if (!completeMonth && !completeWeek) {
+					if (modIndex === 0) {
+						duelRatings.scores.NM.push(worstBeatmap);
+						duelRatings.scores.NM.push(bestBeatmap);
+					} else if (modIndex === 1) {
+						duelRatings.scores.HD.push(worstBeatmap);
+						duelRatings.scores.HD.push(bestBeatmap);
+					} else if (modIndex === 2) {
+						duelRatings.scores.HR.push(worstBeatmap);
+						duelRatings.scores.HR.push(bestBeatmap);
+					} else if (modIndex === 3) {
+						duelRatings.scores.DT.push(worstBeatmap);
+						duelRatings.scores.DT.push(bestBeatmap);
+					} else if (modIndex === 4) {
+						duelRatings.scores.FM.push(worstBeatmap);
+						duelRatings.scores.FM.push(bestBeatmap);
+					}
 				}
 
 				relevantMaps.splice(relevantMaps.indexOf(worstBeatmap), 1);
@@ -3380,17 +3382,19 @@ module.exports = {
 			const steps = [];
 			const stepData = [];
 			for (let i = 0; i < relevantMaps.length; i++) {
-				//Add the map to the scores array
-				if (modIndex === 0) {
-					duelRatings.scores.NM.push(relevantMaps[i]);
-				} else if (modIndex === 1) {
-					duelRatings.scores.HD.push(relevantMaps[i]);
-				} else if (modIndex === 2) {
-					duelRatings.scores.HR.push(relevantMaps[i]);
-				} else if (modIndex === 3) {
-					duelRatings.scores.DT.push(relevantMaps[i]);
-				} else if (modIndex === 4) {
-					duelRatings.scores.FM.push(relevantMaps[i]);
+				if (!completeMonth && !completeWeek) {
+					//Add the map to the scores array
+					if (modIndex === 0) {
+						duelRatings.scores.NM.push(relevantMaps[i]);
+					} else if (modIndex === 1) {
+						duelRatings.scores.HD.push(relevantMaps[i]);
+					} else if (modIndex === 2) {
+						duelRatings.scores.HR.push(relevantMaps[i]);
+					} else if (modIndex === 3) {
+						duelRatings.scores.DT.push(relevantMaps[i]);
+					} else if (modIndex === 4) {
+						duelRatings.scores.FM.push(relevantMaps[i]);
+					}
 				}
 
 				//Add the data to the 5 steps in the area of the maps' star rating -> 5.0 will be representing 4.8, 4.9, 5.0, 5.1, 5.2
@@ -3448,19 +3452,29 @@ module.exports = {
 
 				if (modIndex === 0) {
 					duelRatings.noMod = weightedStarRating;
-					duelRatings.stepData.NM = stepData;
+					if (!completeMonth && !completeWeek) {
+						duelRatings.stepData.NM = stepData;
+					}
 				} else if (modIndex === 1) {
 					duelRatings.hidden = weightedStarRating;
-					duelRatings.stepData.HD = stepData;
+					if (!completeMonth && !completeWeek) {
+						duelRatings.stepData.HD = stepData;
+					}
 				} else if (modIndex === 2) {
 					duelRatings.hardRock = weightedStarRating;
-					duelRatings.stepData.HR = stepData;
+					if (!completeMonth && !completeWeek) {
+						duelRatings.stepData.HR = stepData;
+					}
 				} else if (modIndex === 3) {
 					duelRatings.doubleTime = weightedStarRating;
-					duelRatings.stepData.DT = stepData;
+					if (!completeMonth && !completeWeek) {
+						duelRatings.stepData.DT = stepData;
+					}
 				} else if (modIndex === 4) {
 					duelRatings.freeMod = weightedStarRating;
-					duelRatings.stepData.FM = stepData;
+					if (!completeMonth && !completeWeek) {
+						duelRatings.stepData.FM = stepData;
+					}
 				}
 			}
 		}
