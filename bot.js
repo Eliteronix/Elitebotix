@@ -338,6 +338,7 @@ setInterval(function () {
 	// eslint-disable-next-line no-undef
 	let memMB = process.memoryUsage().rss / 1048576;
 	if (memMB > nextMBThreshold) {
+		// eslint-disable-next-line no-console
 		console.log(`[${client.shardId}] ${new Date()} Heap snapshot taken at ${memMB}MB`);
 
 		const fs = require('fs');

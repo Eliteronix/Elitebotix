@@ -2416,16 +2416,6 @@ module.exports = {
 					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastMonth.getTime()) //Update if old non-ranked map
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
 
-					console.log('beatmapId', beatmapId);
-
-					if (dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved') {
-						console.log('Non-Ranked and Non-Approved map dbBeatmap.updatedAt', dbBeatmap.updatedAt, !dbBeatmap.updatedAt);
-
-						if (dbBeatmap.updatedAt) {
-							console.log('Non-Ranked and Non-Approved map additional check', dbBeatmap.updatedAt.getTime(), lastMonth.getTime(), dbBeatmap.updatedAt.getTime() < lastMonth.getTime());
-						}
-					}
-
 					//Delete the map if it exists and we are checking NM
 					const path = `./maps/${beatmapId}.osu`;
 
@@ -9011,12 +9001,8 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 }
 
 function getExpectedDuelRating(score) {
-	score.score = parseFloat(score.score);
-	if (score.score < 20000) {
-		score.score = 20000;
-	} else if (score.score > 950000) {
-		score.score = 950000;
-	}
+	score.score = Math.max(Math.min(parseInt(score.score), 20000), 950000);
+
 	score.starRating = parseFloat(score.starRating);
 
 	let rating = score.starRating;
