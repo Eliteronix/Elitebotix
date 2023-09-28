@@ -2887,6 +2887,8 @@ module.exports = {
 			endDate = input.date;
 		}
 
+		console.log('Duel Rating calc for', input.osuUserId, endDate);
+
 		let startDate = new Date(endDate);
 		startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
 
