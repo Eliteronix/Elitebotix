@@ -3,7 +3,7 @@ const { logDatabaseQueries } = require('../../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
-	name: 'resetSavedRatings',
+	name: 'resetFuckedRatings',
 	usage: 'None',
 	async execute(interaction) {
 		let fuckedUp = new Date();
@@ -13,9 +13,9 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/admin/resetSavedRatings.js DBDuelRatingHistory');
 		let deleted = await DBDuelRatingHistory.destroy({
 			where: {
-				id: {
-					[Op.gt]: 0,
-				},
+				updatedAt: {
+					[Op.gte]: fuckedUp
+				}
 			}
 		});
 
@@ -27,7 +27,7 @@ module.exports = {
 		}, {
 			where: {
 				lastDuelRatingUpdate: {
-					[Op.not]: null,
+					[Op.gte]: fuckedUp,
 				},
 			},
 			silent: true
