@@ -970,6 +970,11 @@ module.exports = {
 						continue;
 					}
 
+					if (headerRow[j].toString().toLowerCase().includes('notes') ||
+						headerRow[j].toString().toLowerCase().includes('comments')) {
+						continue;
+					}
+
 					if (data.toString().toLowerCase().includes('qualifiers') ||
 						data.toString().toLowerCase().includes('quals') ||
 						data.toString().toLowerCase().includes('group stage') ||
