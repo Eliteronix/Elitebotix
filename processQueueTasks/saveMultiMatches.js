@@ -225,7 +225,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			});
 	}
 
-	if (!incompleteMatchScore || incompleteMatchScore && parseInt(incompleteMatchScore.matchId) % 10 === 0) {
+	if (!incompleteMatchScore) {
 		let logVerificationProcess = false;
 
 		// Verify matches instead
