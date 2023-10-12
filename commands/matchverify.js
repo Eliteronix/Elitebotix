@@ -800,15 +800,6 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'tournament') {
 			let acronym = interaction.options.getString('acronym', true);
 
-			if (acronym.toLowerCase() === 'o!mm ranked'
-				|| acronym.toLowerCase() === 'o!mm private'
-				|| acronym.toLowerCase() === 'o!mm team ranked'
-				|| acronym.toLowerCase() === 'o!mm team private'
-				|| acronym.toLowerCase() === 'etx'
-				|| acronym.toLowerCase() === 'etx teams') {
-				return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
-			}
-
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
 			let userScores = await DBOsuMultiScores.findAll({
 				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
