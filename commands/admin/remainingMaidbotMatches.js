@@ -17,6 +17,18 @@ module.exports = {
 			group: ['matchId'],
 		});
 
+		logDatabaseQueries(4, 'commands/admin/remainingMaidbotMatches.js DBOsuMultiScores findOne');
+		let ommMatches = await DBOsuMultiScores.findOne({
+			where: {
+				matchName: {
+					[Op.startsWith]: 'o!mm'
+				},
+				verifiedAt: null,
+			},
+		});
+
+		console.log(ommMatches);
+
 		return await interaction.editReply(`Remaining unverified maidbot matches: ${count.length}`);
 	},
 };
