@@ -1853,7 +1853,7 @@ module.exports = {
 							teamType: match.games[gameIndex].teamType,
 							team: match.games[gameIndex].scores[scoreIndex].team,
 						});
-					} else if (existingScore.warmup === null) {
+					} else if (existingScore.warmup === null || !existingScore.matchEndDate) {
 						if (!existingMatchPlayers.includes(match.games[gameIndex].scores[scoreIndex].userId)) {
 							existingMatchPlayers.push(match.games[gameIndex].scores[scoreIndex].userId);
 						}
