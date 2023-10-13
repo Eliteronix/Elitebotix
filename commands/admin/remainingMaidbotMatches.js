@@ -15,7 +15,7 @@ module.exports = {
 				},
 				verifiedAt: null,
 			},
-			group: ['matchId'],
+			group: ['matchId', 'matchName', 'matchEndDate', 'verifiedAt', 'verifiedBy', 'verificationComment'],
 		});
 
 		console.log(ommMatches);
