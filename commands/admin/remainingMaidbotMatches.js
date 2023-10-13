@@ -8,6 +8,7 @@ module.exports = {
 	async execute(interaction) {
 		logDatabaseQueries(4, 'commands/admin/remainingMaidbotMatches.js DBOsuMultiScores');
 		let ommMatches = await DBOsuMultiScores.findAll({
+			attributes: ['matchId'],
 			where: {
 				matchName: {
 					[Op.startsWith]: 'o!mm'
