@@ -33,9 +33,6 @@ module.exports = {
 				order: [['gameEndDate', 'DESC']],
 			});
 
-			// eslint-disable-next-line no-console
-			console.log('matchId', noEndDateMatch[i].matchId, 'latestEndDate', latestEndDate.gameEndDate);
-
 			logDatabaseQueries(4, 'commands/admin/noEndDate.js DBOsuMultiScores update');
 			await DBOsuMultiScores.update({ matchEndDate: latestEndDate.gameEndDate }, { where: { matchId: noEndDateMatch[i].matchId } });
 			await interaction.followUp(`Updated match https://osu.ppy.sh/mp/matches/${noEndDateMatch[i].matchId} with latest end date ${latestEndDate.gameEndDate}`);
