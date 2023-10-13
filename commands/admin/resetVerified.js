@@ -42,6 +42,22 @@ module.exports = {
 			});
 
 			return await interaction.editReply(`Reset all ${count} Elitebotix verifications.`);
+		} else if (argument === 'o!mm incomplete') {
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores all');
+			let count = await DBOsuMultiScores.update({
+				verifiedBy: null,
+				verifiedAt: null,
+				verificationComment: null,
+			}, {
+				where: {
+					verifiedBy: {
+						[Op.eq]: 31050083,
+					},
+					verificationComment: 'Not determinable if match was created by MaidBot',
+				},
+			});
+
+			return await interaction.editReply(`Reset all ${count} o!mm incomplete Elitebotix verifications.`);
 		} else {
 			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores osuUserId');
 			let count = await DBOsuMultiScores.update({
