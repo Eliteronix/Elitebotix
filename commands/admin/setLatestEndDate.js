@@ -38,7 +38,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/admin/noEndDate.js DBOsuMultiScores update');
 			await DBOsuMultiScores.update({ matchEndDate: latestEndDate.gameEndDate }, { where: { matchId: noEndDateMatch[i].matchId } });
-			await interaction.followUp(`Updated matchId ${noEndDateMatch[i].matchId} with latest end date ${latestEndDate.gameEndDate}`);
+			await interaction.followUp(`Updated match https://osu.ppy.sh/mp/matches/${noEndDateMatch[i].matchId} with latest end date ${latestEndDate.gameEndDate}`);
 		}
 
 		return await interaction.followUp(`Updated ${noEndDateMatch.length} matches with latest end date.`);
