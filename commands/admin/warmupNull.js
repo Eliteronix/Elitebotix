@@ -9,6 +9,7 @@ module.exports = {
 		let count = await DBOsuMultiScores.count({
 			where: {
 				warmup: null,
+				tourneyMatch: true,
 			},
 		});
 
