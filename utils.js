@@ -1663,6 +1663,16 @@ module.exports = {
 			}
 		}
 
+		if (match.games.length && match.raw_end === null) {
+			let yesterday = new Date();
+
+			yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+
+			if (yesterday > new Date(match.games[match.games.length - 1].raw_end)) {
+				match.raw_end = match.games[match.games.length - 1].raw_end;
+			}
+		}
+
 		let tourneyMatchPlayers = [];
 		let newMatchPlayers = [];
 		let existingMatchPlayers = [];
@@ -4953,6 +4963,7 @@ module.exports = {
 		}, {
 			where: {
 				matchEndDate: null,
+				tourneyMatch: true,
 			}
 		});
 
