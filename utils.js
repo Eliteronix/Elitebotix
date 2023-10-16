@@ -4964,6 +4964,9 @@ module.exports = {
 			where: {
 				matchEndDate: null,
 				tourneyMatch: true,
+				warmup: {
+					[Op.not]: null
+				}
 			}
 		});
 
