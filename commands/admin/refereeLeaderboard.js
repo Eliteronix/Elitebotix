@@ -30,6 +30,9 @@ module.exports = {
 			}
 		}
 
+		// Sort by number of matches reffed descending
+		refereeLeaderboard.sort((a, b) => b.refereeCount - a.refereeCount);
+
 		// eslint-disable-next-line no-console
 		console.log('Referee leaderboard:');
 
