@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		matchId: DataTypes.STRING,
 		matchName: DataTypes.STRING,
+		referee: DataTypes.STRING,
 		gameId: DataTypes.STRING,
 		scoringType: DataTypes.STRING,
 		mode: DataTypes.STRING,
