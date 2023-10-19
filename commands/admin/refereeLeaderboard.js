@@ -6,24 +6,36 @@ module.exports = {
 	usage: 'None',
 	async execute(interaction) {
 		logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiScores');
-		const refereeLeaderboard = await DBOsuMultiScores.findAll({
+		const refereesPerMatch = await DBOsuMultiScores.findAll({
 			attributes: [
 				'referee',
-				[DBOsuMultiScores.sequelize.fn('COUNT', DBOsuMultiScores.sequelize.col('referee')), 'refereeCount'],
 			],
 			group: ['referee', 'matchId'],
 		});
 
-		console.log(refereeLeaderboard);
+		const refereeLeaderboard = [];
+
+		// Count the number of matches each referee has reffed
+		for (let i = 0; i < refereesPerMatch.length; i++) {
+			const referee = refereesPerMatch[i].referee;
+
+			if (refereeLeaderboard.some((entry) => entry.referee === referee)) {
+				refereeLeaderboard.find((entry) => entry.referee === referee).refereeCount++;
+			} else {
+				refereeLeaderboard.push({
+					referee: referee,
+					refereeUsername: await getOsuPlayerName(refereeLeaderboard[i].referee),
+					refereeCount: 1,
+				});
+			}
+		}
 
 		// eslint-disable-next-line no-console
 		console.log('Referee leaderboard:');
 
 		for (let i = 0; i < refereeLeaderboard.length && i < 100; i++) {
-			const refereeUsername = await getOsuPlayerName(refereeLeaderboard[i].referee);
-
 			// eslint-disable-next-line no-console
-			console.log(`#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`);
+			console.log(`#${i + 1}. ${refereeLeaderboard[i].refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`);
 		}
 
 		await interaction.editReply('Logged the leaderboard to the console.');
