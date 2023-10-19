@@ -10,6 +10,10 @@ module.exports = {
 			attributes: [
 				'referee',
 			],
+			where: {
+				tourneyMatch: true,
+				warmup: false,
+			},
 			group: ['referee', 'matchId'],
 		});
 
