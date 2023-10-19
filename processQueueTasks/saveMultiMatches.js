@@ -284,6 +284,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match created by MaidBot',
+												referee: json.events[0].user_id,
 											}, {
 												where: {
 													matchId: match.id,
@@ -337,6 +338,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match not created by MaidBot',
+												referee: json.events[0].user_id,
 											}, {
 												where: {
 													matchId: match.id,
@@ -511,6 +513,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					verifiedAt: new Date(),
 					verifiedBy: 31050083, // Elitebotix
 					verificationComment: 'Elitebotix Duel Match',
+					referee: 31050083, // Elitebotix
 				}, {
 					where: {
 						matchId: {
@@ -677,6 +680,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 													await DBOsuMultiScores.update({
 														verifiedBy: 31050083, // Elitebotix
 														verificationComment: 'Match creator played a round - Not determined if valid',
+														referee: json.events[0].user_id,
 													}, {
 														where: {
 															matchId: match.id,
@@ -790,6 +794,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																verifiedAt: new Date(),
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -860,6 +865,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															await DBOsuMultiScores.update({
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Qualifiers - Not all maps played more than 20 times outside of the lobby',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -879,6 +885,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																verifiedAt: new Date(),
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -930,6 +937,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															await DBOsuMultiScores.update({
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -945,6 +953,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															await DBOsuMultiScores.update({
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -962,6 +971,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																verifiedAt: new Date(),
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -1015,6 +1025,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																verifiedAt: new Date(),
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -1068,6 +1079,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																verifiedAt: new Date(),
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -1121,6 +1133,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 																verifiedAt: new Date(),
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -1172,6 +1185,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 															await DBOsuMultiScores.update({
 																verifiedBy: 31050083, // Elitebotix
 																verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - not verifyable',
+																referee: json.events[0].user_id,
 															}, {
 																where: {
 																	matchId: match.id,
@@ -1188,6 +1202,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 														await DBOsuMultiScores.update({
 															verifiedBy: 31050083, // Elitebotix
 															verificationComment: 'Match reffed by someone else - Verification status not determinable',
+															referee: json.events[0].user_id,
 														}, {
 															where: {
 																matchId: match.id,
