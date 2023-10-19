@@ -14,6 +14,11 @@ module.exports = {
 			group: ['referee', 'matchId'],
 		});
 
+		console.log(refereeLeaderboard);
+
+		// eslint-disable-next-line no-console
+		console.log('Referee leaderboard:');
+
 		for (let i = 0; i < refereeLeaderboard.length && i < 100; i++) {
 			const refereeUsername = await getOsuPlayerName(refereeLeaderboard[i].referee);
 
