@@ -24,7 +24,7 @@ module.exports = {
 			} else {
 				refereeLeaderboard.push({
 					referee: referee,
-					refereeUsername: await getOsuPlayerName(refereeLeaderboard[i].referee),
+					refereeUsername: await getOsuPlayerName(referee),
 					refereeCount: 1,
 				});
 			}
