@@ -39,15 +39,15 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log('Referee leaderboard:');
 
-		let leaderboardString = '```md\n# Referee leaderboard\n\n';
+		let leaderboardString = '```md\n# Referee leaderboard\n\n#Rank. osu! username (osu! userid) - Matches reffed\n\n';
 
 		for (let i = 0; i < refereeLeaderboard.length && i < 100; i++) {
 			const refereeUsername = await getOsuPlayerName(refereeLeaderboard[i].referee);
 
 			// eslint-disable-next-line no-console
-			console.log(`#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`);
+			console.log(`#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount}`);
 
-			leaderboardString += `#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches\n`;
+			leaderboardString += `#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount}\n`;
 		}
 
 		leaderboardString += '```';
