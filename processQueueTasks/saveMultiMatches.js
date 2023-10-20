@@ -786,7 +786,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 													let qualsMatchOfTheSamePlayers = otherMatchesWithTheSamePlayers.find((match) => match.matchName.includes('(Qualifiers)') || match.matchName.includes('(Qualifier)') || match.matchName.includes('(Quals)') || match.matchName.includes('(Kwalifikacje)'));
 
-													if (matchToVerify[0].matchName.includes('(Qualifiers)') || match.matchName.includes('(Qualifier)') || matchToVerify[0].matchName.includes('(Quals)') || match.matchName.includes('(Kwalifikacje)') || matchToVerify[0].matchName.includes('(Tryouts)')) {
+													if (matchToVerify[0].matchName.includes('(Qualifiers)') || matchToVerify[0].matchName.includes('(Qualifier)') || matchToVerify[0].matchName.includes('(Quals)') || matchToVerify[0].matchName.includes('(Kwalifikacje)') || matchToVerify[0].matchName.includes('(Tryouts)')) {
 														if (mapsPlayed.every((map) => map.amount >= 20)) {
 															logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Qualifiers all maps played more than 20 times');
 															await DBOsuMultiScores.update({
