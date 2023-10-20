@@ -28,7 +28,6 @@ module.exports = {
 			} else {
 				refereeLeaderboard.push({
 					referee: referee,
-					refereeUsername: await getOsuPlayerName(referee),
 					refereeCount: 1,
 				});
 			}
@@ -40,11 +39,19 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log('Referee leaderboard:');
 
+		let leaderboardString = '```md\n# Referee leaderboard\n\n';
+
 		for (let i = 0; i < refereeLeaderboard.length && i < 100; i++) {
+			const refereeUsername = await getOsuPlayerName(refereeLeaderboard[i].referee);
+
 			// eslint-disable-next-line no-console
-			console.log(`#${i + 1}. ${refereeLeaderboard[i].refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`);
+			console.log(`#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`);
+
+			leaderboardString += `#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches\n`;
 		}
 
-		await interaction.editReply('Logged the leaderboard to the console.');
+		leaderboardString += '```';
+
+		await interaction.editReply(leaderboardString);
 	},
 };
