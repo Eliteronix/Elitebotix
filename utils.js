@@ -1669,6 +1669,8 @@ module.exports = {
 			yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
 			if (yesterday > new Date(match.games[match.games.length - 1].raw_end)) {
+				console.log(yesterday, new Date(match.games[match.games.length - 1].raw_end, match.id));
+
 				// Set the end date to the last map's enddate for bugged lobbies
 				match.raw_end = match.games[match.games.length - 1].raw_end;
 
