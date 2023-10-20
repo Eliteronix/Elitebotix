@@ -1668,16 +1668,12 @@ module.exports = {
 
 			yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 
-			if (yesterday > new Date(match.games[match.games.length - 1].raw_end)) {
-				console.log(yesterday, new Date(match.games[match.games.length - 1].raw_end, match.id));
-
+			if (match.games[match.games.length - 1].raw_end && yesterday > new Date(match.games[match.games.length - 1].raw_end)) {
 				// Set the end date to the last map's enddate for bugged lobbies
 				match.raw_end = match.games[match.games.length - 1].raw_end;
-
+			} else if (match.games[match.games.length - 2].raw_end && yesterday > new Date(match.games[match.games.length - 2].raw_end)) {
 				// Sometimes it bugged during the last map and has to take the timestamp from the one before
-				if (match.raw_end === null && match.games.length > 1) {
-					match.raw_end = match.games[match.games.length - 2].raw_end;
-				}
+				match.raw_end = match.games[match.games.length - 2].raw_end;
 			}
 		}
 
