@@ -226,7 +226,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 	}
 
 	if (!incompleteMatchScore) {
-		let logVerificationProcess = true;
+		let logVerificationProcess = false;
 
 		// Verify matches instead
 		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
