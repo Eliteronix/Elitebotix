@@ -39,7 +39,7 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log('Referee leaderboard:');
 
-		let leaderboardString = '```md\n# Referee leaderboard\n\n';
+		let leaderboardString = '# Referee leaderboard\n```';
 
 		for (let i = 0; i < refereeLeaderboard.length && i < 100; i++) {
 			const refereeUsername = await getOsuPlayerName(refereeLeaderboard[i].referee);
@@ -47,18 +47,16 @@ module.exports = {
 			// eslint-disable-next-line no-console
 			console.log(`#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`);
 
-			let newString = `#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches\n`;
+			let newString = `\n#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches`;
 
-			if (leaderboardString.length + newString.length > 2000) {
+			if (leaderboardString.length + newString.length + '```' > 2000) {
 				await interaction.followUp(leaderboardString + '```');
-				leaderboardString = '```md\n# Referee leaderboard\n\n';
+				leaderboardString = '# Referee leaderboard\n```';
 			}
 
-			leaderboardString += `#${i + 1}. ${refereeUsername} (${refereeLeaderboard[i].referee}) - ${refereeLeaderboard[i].refereeCount} matches\n`;
+			leaderboardString += newString;
 		}
 
-		leaderboardString += '```';
-
-		await interaction.followUp(leaderboardString);
+		await interaction.followUp(leaderboardString + '```');
 	},
 };
