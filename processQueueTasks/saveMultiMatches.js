@@ -1265,11 +1265,132 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 							}
 						});
 				} else {
-					secondsToWait = secondsToWait + 60;
-
 					if (logVerificationProcess) {
 						// eslint-disable-next-line no-console
-						console.log(`No match to verify - waiting ${secondsToWait} seconds`);
+						console.log('No match to verify');
+					}
+
+					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores refereeInfoMissing');
+					let refereeInfoMissing = await DBOsuMultiScores.findOne({
+						attributes: ['matchId'],
+						where: {
+							tourneyMatch: true,
+							referee: null,
+						},
+					});
+
+					if (refereeInfoMissing) {
+						let logRefereeInfoMissing = true;
+
+						logOsuAPICalls('processQueueTasks/saveMultiMatches.js refereeInfoMissing');
+						await osuApi.getMatch({ mp: refereeInfoMissing.matchId })
+							.then(async (match) => {
+								try {
+									await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
+									await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+										.then(async (res) => {
+											let htmlCode = await res.text();
+											htmlCode = htmlCode.replace(/&quot;/gm, '"');
+											const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
+											const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+											const matchesRunning = matchRunningRegex.exec(htmlCode);
+											const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+											let regexMatch = null;
+											if (matchesRunning && matchesRunning[0]) {
+												regexMatch = matchesRunning[0];
+											}
+
+											if (matchesPaused && matchesPaused[0]) {
+												regexMatch = matchesPaused[0];
+											}
+
+											if (regexMatch) {
+												let json = JSON.parse(regexMatch);
+
+												while (json.first_event_id !== json.events[0].id) {
+													await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
+													let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
+														.then(async (res) => {
+															let htmlCode = await res.text();
+															htmlCode = htmlCode.replace(/&quot;/gm, '"');
+															const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+															const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+															if (matchesPaused && matchesPaused[0]) {
+																regexMatch = matchesPaused[0];
+															}
+
+															let json = JSON.parse(regexMatch);
+
+															return json.events;
+														});
+
+													json.events = earlierEvents.concat(json.events);
+												}
+
+												if (json.events[0].detail.type === 'match-created') {
+													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update referee');
+													await DBOsuMultiScores.update({
+														referee: json.events[0].user_id,
+													}, {
+														where: {
+															matchId: match.id,
+														},
+													});
+
+													if (logRefereeInfoMissing) {
+														// eslint-disable-next-line no-console
+														console.log(`Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}`);
+													}
+												} else {
+													logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update unavailable match start referee 2');
+													await DBOsuMultiScores.update({
+														referee: 'Match start unavailable',
+													}, {
+														where: {
+															matchId: refereeInfoMissing.matchId,
+														},
+													});
+
+													if (logRefereeInfoMissing) {
+														// eslint-disable-next-line no-console
+														console.log(`Match start ${refereeInfoMissing.matchId} unavailable`);
+													}
+												}
+											}
+										});
+								} catch (e) {
+									if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
+										&& !e.message.endsWith('reason: read ECONNRESET')) {
+										console.error(e);
+									}
+									// Go same if error
+									secondsToWait = secondsToWait + 60;
+								}
+							})
+							.catch(async (err) => {
+								if (err.message === 'Not found') {
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update unavailable match referee 2');
+									await DBOsuMultiScores.update({
+										referee: 'Match unavailable',
+									}, {
+										where: {
+											matchId: refereeInfoMissing.matchId,
+										},
+									});
+
+									if (logRefereeInfoMissing) {
+										// eslint-disable-next-line no-console
+										console.log(`Match ${refereeInfoMissing.matchId} unavailable`);
+									}
+								} else {
+									// Go same if error
+									secondsToWait = secondsToWait + 60;
+								}
+							});
+					} else {
+						secondsToWait = secondsToWait + 60;
 					}
 				}
 			}
