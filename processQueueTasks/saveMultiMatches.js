@@ -1279,9 +1279,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						},
 					});
 
-					if (refereeInfoMissing) {
-						let logRefereeInfoMissing = true;
+					let logRefereeInfoMissing = true;
 
+					if (refereeInfoMissing) {
 						logOsuAPICalls('processQueueTasks/saveMultiMatches.js refereeInfoMissing');
 						await osuApi.getMatch({ mp: refereeInfoMissing.matchId })
 							.then(async (match) => {
@@ -1390,6 +1390,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 								}
 							});
 					} else {
+						if (logRefereeInfoMissing) {
+							// eslint-disable-next-line no-console
+							console.log('No match to get referee info for');
+						}
+
 						secondsToWait = secondsToWait + 60;
 					}
 				}
