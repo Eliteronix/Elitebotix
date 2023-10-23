@@ -18,6 +18,8 @@ module.exports = {
 		for (let i = 0; i < noEndDate.length; i++) {
 			// eslint-disable-next-line no-console
 			console.log('matchId', noEndDate[i].matchId, 'matchName', noEndDate[i].matchName);
+
+			await interaction.channel.send(`https://osu.ppy.sh/community/matches${noEndDate[i].matchId}`);
 		}
 
 		return await interaction.editReply(`Logged ${noEndDate.length} matches with no end date.`);
