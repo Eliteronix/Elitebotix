@@ -371,7 +371,7 @@ module.exports = {
 												if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other'
 													|| playerUpdates.join('\n').length > 4096) {
 
-													// Remove all but the last one
+													// Remove all but the last one in case we come from a truncated array (4096 character limit)
 													playerUpdates.splice(0, playerUpdates.length - 1);
 
 													let embed = new Discord.EmbedBuilder()
