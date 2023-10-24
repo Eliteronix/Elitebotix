@@ -94,7 +94,7 @@ module.exports = async function (reaction, user) {
 			}
 		} else {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
-			let emoji = '<:' + reaction._emoji.name + ':';
+			let emoji = '<%:' + reaction._emoji.name + ':';
 
 			logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 2');
 			//Get the reactionRole from the db by all the string (works for general emojis)
