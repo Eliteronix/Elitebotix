@@ -338,7 +338,7 @@ module.exports = {
 												}
 											} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
 												let playerName = await getOsuPlayerName(json.events[i].user_id);
-												playerUpdates.push(`<:exchangealtsolid:1005141205069344859> ${playerName} became the host.`);
+												playerUpdates.push(`<:exchangealtsolid:1005141205069344859> \`${playerName}\` became the host.`);
 											} else if (json.events[i].detail.type === 'host-changed') {
 												playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
 
@@ -348,13 +348,13 @@ module.exports = {
 												}
 											} else if (json.events[i].detail.type === 'player-joined') {
 												let playerName = await getOsuPlayerName(json.events[i].user_id);
-												playerUpdates.push(`<:arrowrightsolid:1005141207879536761> ${playerName} joined the match.`);
+												playerUpdates.push(`<:arrowrightsolid:1005141207879536761> \`${playerName}\` joined the match.`);
 											} else if (json.events[i].detail.type === 'player-left') {
 												let playerName = await getOsuPlayerName(json.events[i].user_id);
-												playerUpdates.push(`<:arrowleftsolid:1005141359008682024> ${playerName} left the match.`);
+												playerUpdates.push(`<:arrowleftsolid:1005141359008682024> \`${playerName}\` left the match.`);
 											} else if (json.events[i].detail.type === 'player-kicked') {
 												let playerName = await getOsuPlayerName(json.events[i].user_id);
-												playerUpdates.push(`<:bansolid:1032747189941829683> ${playerName} has been kicked from the match.`);
+												playerUpdates.push(`<:bansolid:1032747189941829683> \`${playerName}\` has been kicked from the match.`);
 											} else if (json.events[i].detail.type === 'match-disbanded') {
 												playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
 											} else if (json.events[i].detail.type === 'match-created') {
@@ -368,7 +368,12 @@ module.exports = {
 													reactionCollector.stop();
 												}
 
-												if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other') {
+												if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other'
+													|| playerUpdates.join('\n').length > 4096) {
+
+													// Remove all but the last one
+													playerUpdates.splice(0, playerUpdates.length - 1);
+
 													let embed = new Discord.EmbedBuilder()
 														.setColor(0x0099FF)
 														.setTitle(`${match.name.replace(/`/g, '')}`)
