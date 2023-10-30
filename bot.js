@@ -429,11 +429,13 @@ async function resetSaveMultiMatches() {
 		});
 
 		let date = new Date();
-		date.setMinutes(date.getMinutes() - 2);
+		date.setMinutes(date.getMinutes() - 3);
 
 		if (task && task.updatedAt < date) {
 			task.beingExecuted = false;
 			await task.save();
+			// eslint-disable-next-line no-console
+			console.log(`Reset ${task.task} task`);
 		}
 	} catch (e) {
 		console.error(e);
