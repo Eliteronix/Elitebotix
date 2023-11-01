@@ -567,6 +567,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			} else {
 				const result = await verifyAnyMatch(osuApi, client, logVerificationProcess);
 
+				await addMissingRefereeInfo(osuApi);
+
 				if (result === true) {
 					secondsToWait = secondsToWait + 60;
 				}
