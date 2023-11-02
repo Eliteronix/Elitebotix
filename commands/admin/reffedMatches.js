@@ -2,6 +2,7 @@ const { DBOsuMultiScores, DBDiscordUsers } = require('../../dbObjects');
 const { logDatabaseQueries, logOsuAPICalls } = require('../../utils');
 const { Op } = require('sequelize');
 const { daysHidingQualifiers } = require('../../config.json');
+const Discord = require('discord.js');
 
 module.exports = {
 	name: 'reffedMatches',
