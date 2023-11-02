@@ -1282,11 +1282,17 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 async function addMissingRefereeInfo(osuApi) {
 	logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores refereeInfoMissing');
 	let refereeInfoMissing = await DBOsuMultiScores.findOne({
-		// attributes: ['matchId'],
+		attributes: ['matchId'],
 		where: {
 			tourneyMatch: true,
+			verifiedBy: {
+				[Op.not]: null,
+			},
 			referee: null,
 		},
+		order: [
+			['updatedAt', 'DESC'],
+		],
 	});
 
 	let logRefereeInfoMissing = true;
