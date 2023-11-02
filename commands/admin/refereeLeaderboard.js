@@ -1,5 +1,6 @@
 const { DBOsuMultiScores } = require('../../dbObjects');
 const { logDatabaseQueries, getOsuPlayerName } = require('../../utils');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'refereeLeaderboard',
@@ -13,6 +14,9 @@ module.exports = {
 			where: {
 				tourneyMatch: true,
 				warmup: false,
+				referee: {
+					[Op.not]: 'Match unavailable',
+				},
 			},
 			group: ['referee', 'matchId'],
 		});
