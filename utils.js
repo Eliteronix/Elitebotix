@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
-const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -15,7 +15,7 @@ module.exports = {
 		//Check if the channel type is not a dm
 		if (msg.channel.type === Discord.ChannelType.DM) {
 			//Set prefix to standard prefix
-			guildPrefix = prefix;
+			guildPrefix = 'e!';
 		} else {
 			module.exports.logDatabaseQueries(3, 'utils.js DBGuilds getGuildPrefix');
 			const guild = await DBGuilds.findOne({
@@ -31,11 +31,11 @@ module.exports = {
 					guildPrefix = guild.customPrefix;
 				} else {
 					//Set prefix to standard prefix
-					guildPrefix = prefix;
+					guildPrefix = 'e!';
 				}
 			} else {
 				//Set prefix to standard prefix
-				guildPrefix = prefix;
+				guildPrefix = 'e!';
 			}
 		}
 		return guildPrefix;
