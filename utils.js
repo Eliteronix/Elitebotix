@@ -8236,7 +8236,6 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		process.webRequestsWaiting.push(randomString);
 
-
 		let iterator = 0;
 		// eslint-disable-next-line no-undef
 		while (process.webRequestsWaiting.includes(randomString)) {
@@ -8252,7 +8251,7 @@ module.exports = {
 
 		if (logWebRequests) {
 			// eslint-disable-next-line no-console
-			console.log('Permission granted for web request:', request);
+			console.log('Permission granted for web request:', request, randomString);
 		}
 
 		return;
