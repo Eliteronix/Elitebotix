@@ -4398,6 +4398,7 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
+				console.log(dbBeatmap);
 				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 				await new Promise((resolve, reject) => {
