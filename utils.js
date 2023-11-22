@@ -4398,7 +4398,7 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
-				console.log(dbBeatmap);
+				console.log('Due to forcedownload:' + forceDownload + ' or file not existing:' + !fs.existsSync(path) + ' downloading map with id ' + beatmapId);
 				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 				await new Promise((resolve, reject) => {
