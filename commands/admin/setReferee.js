@@ -5,8 +5,6 @@ module.exports = {
 	name: 'setReferee',
 	usage: '<matchId> <referee>',
 	async execute(interaction) {
-		await interaction.deferReply();
-
 		const args = interaction.options.getString('argument').split(/ +/);
 
 		const matchId = args[0];
