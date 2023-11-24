@@ -419,7 +419,7 @@ async function resetSaveMultiMatches() {
 
 		logDatabaseQueries(2, 'bot.js DBProcessQueue');
 		const task = await DBProcessQueue.findOne({
-			attributes: ['id', 'beingExecuted', 'updatedAt'],
+			attributes: ['id', 'task', 'beingExecuted', 'updatedAt'],
 			where: {
 				task: {
 					[Op.in]: tasksToReset,
@@ -429,7 +429,7 @@ async function resetSaveMultiMatches() {
 		});
 
 		let date = new Date();
-		date.setMinutes(date.getMinutes() - 3);
+		date.setMinutes(date.getMinutes() - 5);
 
 		if (task && task.updatedAt < date) {
 			task.beingExecuted = false;
