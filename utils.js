@@ -4401,6 +4401,11 @@ module.exports = {
 				console.log('Due to forcedownload:' + forceDownload + ' or file not existing:' + !fs.existsSync(path) + ' downloading map with id ' + beatmapId);
 				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+				
+				if (beatmapId == 708466) {
+					console.log(res);
+				}
+
 				await new Promise((resolve, reject) => {
 					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
 					res.body.pipe(fileStream);
