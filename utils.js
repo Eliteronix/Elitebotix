@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
-const { prefix, leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -15,7 +15,7 @@ module.exports = {
 		//Check if the channel type is not a dm
 		if (msg.channel.type === Discord.ChannelType.DM) {
 			//Set prefix to standard prefix
-			guildPrefix = prefix;
+			guildPrefix = 'e!';
 		} else {
 			module.exports.logDatabaseQueries(3, 'utils.js DBGuilds getGuildPrefix');
 			const guild = await DBGuilds.findOne({
@@ -31,11 +31,11 @@ module.exports = {
 					guildPrefix = guild.customPrefix;
 				} else {
 					//Set prefix to standard prefix
-					guildPrefix = prefix;
+					guildPrefix = 'e!';
 				}
 			} else {
 				//Set prefix to standard prefix
-				guildPrefix = prefix;
+				guildPrefix = 'e!';
 			}
 		}
 		return guildPrefix;
@@ -4398,6 +4398,7 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
+				console.log('Due to forcedownload:' + forceDownload + ' or file not existing:' + !fs.existsSync(path) + ' downloading map with id ' + beatmapId);
 				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 				await new Promise((resolve, reject) => {
@@ -8236,7 +8237,6 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		process.webRequestsWaiting.push(randomString);
 
-
 		let iterator = 0;
 		// eslint-disable-next-line no-undef
 		while (process.webRequestsWaiting.includes(randomString)) {
@@ -8252,7 +8252,7 @@ module.exports = {
 
 		if (logWebRequests) {
 			// eslint-disable-next-line no-console
-			console.log('Permission granted for web request:', request);
+			console.log('Permission granted for web request:', request, randomString);
 		}
 
 		return;
