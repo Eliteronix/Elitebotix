@@ -4401,7 +4401,7 @@ module.exports = {
 				console.log('Due to forcedownload:' + forceDownload + ' or file not existing:' + !fs.existsSync(path) + ' downloading map with id ' + beatmapId);
 				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
-				
+
 				if (beatmapId == 708466) {
 					console.log(res);
 				}
@@ -4441,6 +4441,8 @@ module.exports = {
 			return new Calculator(arg).performance(map).pp;
 		} catch (e) {
 			if (depth < 3) {
+				console.log('error with map ' + beatmapId + ' retrying with depth ' + depth);
+
 				const path = `./maps/${beatmapId}.osu`;
 
 				try {
