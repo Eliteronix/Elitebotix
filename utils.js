@@ -6,6 +6,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { Beatmap, Calculator } = require('rosu-pp');
+const mapsRetriedTooOften = [];
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -4398,6 +4399,10 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
+				if (mapsRetriedTooOften.includes(beatmapId)) {
+					return null;
+				}
+
 				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 
@@ -4449,8 +4454,10 @@ module.exports = {
 				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, depth);
 			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin') {
 				console.error(`error with map ${beatmapId}`, e);
+				mapsRetriedTooOften.push(beatmapId);
 				return null;
 			} else {
+				mapsRetriedTooOften.push(beatmapId);
 				return null;
 			}
 		}
