@@ -8109,8 +8109,8 @@ module.exports = {
 		try {
 			// Doesn't exist or older than 24 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
-				await module.exports.awaitWebRequestPermission(`http://s.ppy.sh/a/${osuUserId}`);
-				const res = await fetch(`http://s.ppy.sh/a/${osuUserId}`);
+				await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`);
+				const res = await fetch(`https://s.ppy.sh/a/${osuUserId}`);
 
 				if (res.status === 404) {
 					await new Promise((resolve, reject) => {
