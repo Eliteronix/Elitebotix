@@ -93,6 +93,18 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 	},
 });
 
+const multiMatchScores = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/multiMatchScores.sqlite',
+	retry: {
+		max: 15, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+});
+
 const beatmaps = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
@@ -150,6 +162,10 @@ require('./models/DBElitiriCupLobbies')(elitiriData, Sequelize.DataTypes);
 
 require('./models/DBOsuMultiScores')(multiScores, Sequelize.DataTypes);
 
+require('./models/DBOsuMultiMatches')(multiMatchScores, Sequelize.DataTypes);
+require('./models/DBOsuMultiGames')(multiMatchScores, Sequelize.DataTypes);
+require('./models/DBOsuMultiGameScores')(multiMatchScores, Sequelize.DataTypes);
+
 require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 
 require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
@@ -202,11 +218,19 @@ require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 // 	})
 // 	.catch(console.error);
 
-multiScores.sync({ alter: true })
+// multiScores.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('multiScores database synced');
+// 		multiScores.close();
+// 	})
+// 	.catch(console.error);
+
+multiMatchScores.sync({ alter: true })
 	.then(async () => {
 		// eslint-disable-next-line no-console
-		console.log('multiScores database synced');
-		multiScores.close();
+		console.log('multiMatchScores database synced');
+		multiMatchScores.close();
 	})
 	.catch(console.error);
 

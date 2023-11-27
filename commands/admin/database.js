@@ -47,6 +47,7 @@ module.exports = {
 
 		for (let i = 0; i < dbList.length; i++) {
 			data.push(dbList[i].dataValues);
+			console.log(dbList[i].dataValues);
 
 			if (i % 10000 === 0 && i > 0 || dbList.length - 1 === i) {
 				const developerUser = await interaction.client.users.cache.find(user => user.id === interaction.user.id);

@@ -11,10 +11,10 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		matchId: DataTypes.INTEGER,
 		gameId: DataTypes.INTEGER,
-		scoringType: DataTypes.STRING, //TODO: Datatype?
-		mode: DataTypes.STRING, //TODO: Datatype?
+		scoringType: DataTypes.INTEGER,
+		mode: DataTypes.INTEGER,
 		beatmapId: DataTypes.INTEGER,
-		evaluation: DataTypes.STRING, //TODO: Datatype?
+		evaluation: DataTypes.DECIMAL(10, 5),
 		score: DataTypes.INTEGER,
 		gameRawMods: DataTypes.INTEGER,
 		rawMods: DataTypes.INTEGER,
@@ -26,8 +26,8 @@ module.exports = (sequelize, DataTypes) => {
 		countKatu: DataTypes.INTEGER,
 		countGeki: DataTypes.INTEGER,
 		perfect: DataTypes.BOOLEAN,
-		team: DataTypes.STRING, //TODO: Datatype?
-		pp: DataTypes.STRING, //TODO: Datatype?
+		team: DataTypes.STRING,
+		pp: DataTypes.DECIMAL(10, 3),
 		paranoid: true,
 	}, {
 		indexes: [
