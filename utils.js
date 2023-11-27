@@ -8239,7 +8239,7 @@ module.exports = {
 		}
 	},
 	async awaitWebRequestPermission(request) {
-		let randomString = Math.random().toString(36);
+		let randomString = Math.random().toString(36).substring(2);
 
 		// eslint-disable-next-line no-undef
 		process.webRequestsWaiting.push(randomString);
