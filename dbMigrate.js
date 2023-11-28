@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 // eslint-disable-next-line no-console
 console.log('Migrating database...');
-const { DBOsuMultiScores, DBOsuMultiGameScores } = require('./dbObjects');
+const { DBOsuMultiScores, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('./dbObjects');
 (async () => {
 	let multiScoresData = await DBOsuMultiScores.findAll({
 		attributes: [
@@ -77,7 +77,9 @@ const { DBOsuMultiScores, DBOsuMultiGameScores } = require('./dbObjects');
 			multiScore.mode = 3;
 		}
 
-		// TODO: Referee is currently a string when unavailable
+		if (multiScore.referee && isNaN(multiScore.referee)) {
+			multiScore.referee = -1;
+		}
 
 		return multiScore;
 	});
@@ -86,7 +88,7 @@ const { DBOsuMultiScores, DBOsuMultiGameScores } = require('./dbObjects');
 
 	await DBOsuMultiGameScores.bulkCreate(multiScoresData);
 
-	console.log('Done migrating scores...');
+	console.log(`Done migrating ${multiScoresData.length} scores...`);
 
 	// Reduce to one score per gameId
 	let multiGamesData = [];
@@ -98,7 +100,21 @@ const { DBOsuMultiScores, DBOsuMultiGameScores } = require('./dbObjects');
 		}
 	}
 
-	console.log(multiGamesData);
+	await DBOsuMultiGames.bulkCreate(multiGamesData);
 
-	//TODO: Bulk import games and matches
+	console.log(`Done migrating ${multiGamesData.length} games...`);
+
+	// Reduce to one score per matchId
+	let multiMatchData = [];
+	let matchIds = [];
+	for (let i = 0; i < multiScoresData.length; i++) {
+		if (!matchIds.includes(multiScoresData[i].matchId)) {
+			matchIds.push(multiScoresData[i].matchId);
+			multiMatchData.push(multiScoresData[i]);
+		}
+	}
+
+	await DBOsuMultiMatches.bulkCreate(multiMatchData);
+
+	console.log(`Done migrating ${multiMatchData.length} matches...`);
 })();
