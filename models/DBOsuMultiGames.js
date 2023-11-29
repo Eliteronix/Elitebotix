@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
 		warmup: DataTypes.BOOLEAN,
 		warmupDecidedByAmount: DataTypes.BOOLEAN,
 		teamType: DataTypes.INTEGER,
+		scores: DataTypes.INTEGER,
 		paranoid: true,
 	}, {
 		indexes: [
