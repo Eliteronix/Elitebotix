@@ -105,11 +105,41 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 	}
 });
 
-const multiMatchScores = new Sequelize('database', 'username', 'password', {
+const multiMatches = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/multiMatchScores.sqlite',
+	storage: 'databases/multiMatches.sqlite',
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
+});
+
+const multiGames = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/multiGames.sqlite',
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
+});
+
+const multiGameScores = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/multiGameScores.sqlite',
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -183,9 +213,11 @@ const DBElitiriCupLobbies = require('./models/DBElitiriCupLobbies')(elitiriData,
 
 const DBOsuMultiScores = require('./models/DBOsuMultiScores')(multiScores, Sequelize.DataTypes);
 
-const DBOsuMultiMatches = require('./models/DBOsuMultiMatches')(multiMatchScores, Sequelize.DataTypes);
-const DBOsuMultiGames = require('./models/DBOsuMultiGames')(multiMatchScores, Sequelize.DataTypes);
-const DBOsuMultiGameScores = require('./models/DBOsuMultiGameScores')(multiMatchScores, Sequelize.DataTypes);
+const DBOsuMultiMatches = require('./models/DBOsuMultiMatches')(multiMatches, Sequelize.DataTypes);
+
+const DBOsuMultiGames = require('./models/DBOsuMultiGames')(multiGames, Sequelize.DataTypes);
+
+const DBOsuMultiGameScores = require('./models/DBOsuMultiGameScores')(multiGameScores, Sequelize.DataTypes);
 
 const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 

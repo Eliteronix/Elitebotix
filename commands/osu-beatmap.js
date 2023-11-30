@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -268,38 +268,59 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	let tournamentOccurences = '';
 
-	let queryAttributes = [
-		'matchId',
-		'matchName',
-		'score',
-		'matchStartDate'
-	];
-
-	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
-	const mapScores = await DBOsuMultiScores.findAll({
-		attributes: queryAttributes,
+	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiGameScores');
+	const mapGames = await DBOsuMultiGames.findAll({
+		attributes: ['matchId'],
 		where: {
 			beatmapId: beatmap.beatmapId,
 			tourneyMatch: true,
-			matchName: {
-				[Op.notLike]: 'MOTD:%',
-			},
 			[Op.or]: [
 				{ warmup: false },
 				{ warmup: null }
 			],
-		}
+			scores: {
+				[Op.gt]: 0,
+			},
+		},
+		order: [
+			['matchId', 'DESC'],
+		],
 	});
 
-	mapScores.sort((a, b) => {
-		if (parseInt(a.matchId) > parseInt(b.matchId)) {
-			return -1;
-		}
-		if (parseInt(a.matchId) < parseInt(b.matchId)) {
-			return 1;
-		}
-		return 0;
+	const matchData = await DBOsuMultiMatches.findAll({
+		attributes: ['matchId', 'matchName', 'matchStartDate'],
+		where: {
+			matchId: {
+				[Op.in]: mapGames.map((game) => {
+					return game.matchId;
+				}),
+			},
+		},
+		order: [
+			['matchId', 'DESC'],
+		],
 	});
+
+	//TODO: Populate Scores if necessary
+
+	// populate mapScores with matchName and matchStartDate
+	for (let i = 0; i < mapGames.length; i++) {
+		if (mapGames[i].matchId === matchData[0].matchId) {
+			mapGames[i].matchName = matchData[0].matchName;
+			mapGames[i].matchStartDate = matchData[0].matchStartDate;
+
+			// if matchName starts with MOTD, remove it from mapScores
+			if (mapGames[i].matchName.startsWith('MOTD:')) {
+				mapGames.splice(i, 1);
+				i--;
+			}
+			break;
+		}
+
+		// remove matchData entry if matchId is not the same as the current one
+		matchData.shift();
+		i--;
+	}
 
 	let tournaments = [];
 	let matches = [];

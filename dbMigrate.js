@@ -105,8 +105,10 @@ const { DBOsuMultiScores, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatch
 		if (currentGameId !== multiScoresData[i].gameId) {
 			multiGamesData[multiGamesData.length - 1].scores = currentGameScoreCount;
 			currentGameId = multiScoresData[i].gameId;
-			currentGameScoreCount = 1;
-		} else {
+			currentGameScoreCount = 0;
+		}
+
+		if (parseInt(multiScoresData[i].score) >= 10000) {
 			currentGameScoreCount++;
 		}
 
