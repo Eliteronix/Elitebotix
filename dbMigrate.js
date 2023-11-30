@@ -43,6 +43,8 @@ const { DBOsuMultiScores, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatch
 		]
 	});
 
+	console.log(`Found ${multiScoresData.length} multi scores to migrate... -> Translating...`);
+
 	multiScoresData = multiScoresData.map((multiScore) => multiScore.dataValues);
 
 	// Translate scoringType, teamType and mode to numbers
@@ -84,7 +86,7 @@ const { DBOsuMultiScores, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatch
 		return multiScore;
 	});
 
-	console.log(multiScoresData);
+	console.log('Updated scoringType, teamType and mode... -> Migrating to new scores table...');
 
 	await DBOsuMultiGameScores.bulkCreate(multiScoresData);
 
@@ -93,12 +95,30 @@ const { DBOsuMultiScores, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatch
 	// Reduce to one score per gameId
 	let multiGamesData = [];
 	let gameIds = [];
+	let currentGameId = multiScoresData[0].gameId;
+	let currentGameScoreCount = 1;
 	for (let i = 0; i < multiScoresData.length; i++) {
+		if (i % 1000 === 0 && i) {
+			console.log(`Found ${gameIds.length} games after ${i} scores...`);
+		}
+
+		if (currentGameId !== multiScoresData[i].gameId) {
+			multiGamesData[multiGamesData.length - 1].scores = currentGameScoreCount;
+			currentGameId = multiScoresData[i].gameId;
+			currentGameScoreCount = 1;
+		} else {
+			currentGameScoreCount++;
+		}
+
 		if (!gameIds.includes(multiScoresData[i].gameId)) {
 			gameIds.push(multiScoresData[i].gameId);
 			multiGamesData.push(multiScoresData[i]);
 		}
 	}
+
+	multiGamesData[multiGamesData.length - 1].scores = currentGameScoreCount;
+
+	console.log(`Found ${gameIds.length} games...`);
 
 	await DBOsuMultiGames.bulkCreate(multiGamesData);
 
@@ -107,10 +127,14 @@ const { DBOsuMultiScores, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatch
 	// Reduce to one score per matchId
 	let multiMatchData = [];
 	let matchIds = [];
-	for (let i = 0; i < multiScoresData.length; i++) {
-		if (!matchIds.includes(multiScoresData[i].matchId)) {
-			matchIds.push(multiScoresData[i].matchId);
-			multiMatchData.push(multiScoresData[i]);
+	for (let i = 0; i < multiGamesData.length; i++) {
+		if (i % 1000 === 0 && i) {
+			console.log(`Found ${matchIds.length} matches after ${i} games...`);
+		}
+
+		if (!matchIds.includes(multiGamesData[i].matchId)) {
+			matchIds.push(multiGamesData[i].matchId);
+			multiMatchData.push(multiGamesData[i]);
 		}
 	}
 
