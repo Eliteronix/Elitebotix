@@ -270,7 +270,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiGameScores');
 	const mapGames = await DBOsuMultiGames.findAll({
-		attributes: ['matchId', 'gameId'],
+		attributes: ['matchId', 'gameId', 'scores'],
 		where: {
 			beatmapId: beatmap.beatmapId,
 			tourneyMatch: true,
@@ -351,12 +351,11 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		const mapScores = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId', 'gameId', 'score', 'gameRawMods', 'rawMods', 'freeMod'],
 			where: {
-				beatmapId: beatmap.beatmapId,
-				tourneyMatch: true,
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
+				gameId: {
+					[Op.in]: mapGames.map((game) => {
+						return game.gameId;
+					}),
+				},
 				score: {
 					[Op.gte]: 10000,
 				},
@@ -388,6 +387,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		}
 	}
 
+	//TODO: Number is wrong
 	tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 
 	if (tournaments.length === 0) {

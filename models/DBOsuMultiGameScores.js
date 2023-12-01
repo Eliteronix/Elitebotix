@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
 		beatmapId: DataTypes.INTEGER,
 		evaluation: DataTypes.DECIMAL(10, 5),
 		score: DataTypes.INTEGER,
+		freeMod: DataTypes.BOOLEAN,
 		gameRawMods: DataTypes.INTEGER,
 		rawMods: DataTypes.INTEGER,
 		maxCombo: DataTypes.INTEGER,
