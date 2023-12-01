@@ -312,7 +312,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 				mapGames.splice(i, 1);
 				i--;
 			}
-			break;
+			continue;
 		}
 
 		// remove matchData entry if matchId is not the same as the current one
