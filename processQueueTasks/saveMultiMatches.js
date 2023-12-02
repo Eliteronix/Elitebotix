@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
+const { DBOsuMultiScores, DBProcessQueue, DBOsuMultiMatches, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const { logBroadcastEval } = require('../config.json');
@@ -229,8 +229,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 		let logVerificationProcess = true;
 
 		// Verify matches instead
-		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores verify matches');
-		let incompleteMatch = await DBOsuMultiScores.findOne({
+		logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches verify matches');
+		let incompleteMatch = await DBOsuMultiMatches.findOne({
 			attributes: ['matchId'],
 			where: {
 				tourneyMatch: true,
@@ -387,8 +387,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											});
 										}
 									} else {
-										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
-										await DBOsuMultiScores.update({
+										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update not determinable maidbot match');
+										await DBOsuMultiMatches.update({
 											verifiedBy: 31050083, // Elitebotix
 											verificationComment: 'Not determinable if match was created by MaidBot',
 										}, {
@@ -622,8 +622,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 	}
 
 	if (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm')) {
-		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Last step of verification - ETX or o!mm not verifyable');
-		await DBOsuMultiScores.update({
+		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches Last step of verification - ETX or o!mm not verifyable');
+		await DBOsuMultiMatches.update({
 			verifiedBy: 31050083, // Elitebotix
 			verificationComment: 'Last step of verification - ETX or o!mm not verifyable',
 		}, {
@@ -694,20 +694,21 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 							}
 
 							if (json.events[0].detail.type === 'match-created') {
-								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Find a score by the match creator');
-								let scores = await DBOsuMultiScores.findAll({
+								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores Find a score by the match creator');
+								let scores = await DBOsuMultiGameScores.findAll({
 									attributes: ['score'],
 									where: {
 										matchId: match.id,
 										osuUserId: json.events[0].user_id,
+										score: {
+											[Op.gte]: 10000,
+										},
 									},
 								});
 
-								scores = scores.filter((score) => parseInt(score.score) > 0);
-
 								if (scores.length) {
-									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator played a round - Not determined if valid');
-									await DBOsuMultiScores.update({
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches Match creator played a round - Not determined if valid');
+									await DBOsuMultiMatches.update({
 										verifiedBy: 31050083, // Elitebotix
 										verificationComment: 'Match creator played a round - Not determined if valid',
 										referee: json.events[0].user_id,
@@ -818,13 +819,31 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 
 									if (matchToVerify[0].matchName.toLowerCase().includes('(qualifiers)') || matchToVerify[0].matchName.toLowerCase().includes('(qualifier)') || matchToVerify[0].matchName.toLowerCase().includes('(quals)') || matchToVerify[0].matchName.toLowerCase().includes('(kwalifikacje)') || matchToVerify[0].matchName.toLowerCase().includes('(tryouts)')) {
 										if (mapsPlayed.every((map) => map.amount >= 20)) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Qualifiers all maps played more than 20 times');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Qualifiers all maps played more than 20 times');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Qualifiers all maps played more than 20 times');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Qualifiers all maps played more than 20 times');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -872,8 +891,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												}
 											});
 										} else {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Qualifiers not all maps played more than 20 times');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Qualifiers not all maps played more than 20 times');
+											await DBOsuMultiMatches.update({
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Qualifiers - Not all maps played more than 20 times outside of the lobby',
 												referee: json.events[0].user_id,
@@ -890,13 +909,31 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 										}
 									} else if (otherMatchesWithTheSamePlayers.length && playersInTheOriginalLobby.length > 1) {
 										if (qualsMatchOfTheSamePlayers && qualsMatchOfTheSamePlayers.verifiedAt) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -944,8 +981,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												}
 											});
 										} else if (qualsMatchOfTheSamePlayers && qualsMatchOfTheSamePlayers.verifiedBy) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified');
+											await DBOsuMultiMatches.update({
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified',
 												referee: json.events[0].user_id,
@@ -960,8 +997,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified`);
 											}
 										} else if (qualsMatchOfTheSamePlayers) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified');
+											await DBOsuMultiMatches.update({
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified',
 												referee: json.events[0].user_id,
@@ -976,13 +1013,31 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was not yet verified`);
 											}
 										} else if (otherMatchesWithTheSamePlayers.length > 2 && mapsPlayed.some(map => map.amount > 20)) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -1030,13 +1085,31 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												}
 											});
 										} else if (otherMatchesWithTheSamePlayers.length > 4 && mapsPlayed.some(map => map.amount > 15)) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -1084,13 +1157,31 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												}
 											});
 										} else if (otherMatchesWithTheSamePlayers.length > 6 && mapsPlayed.some(map => map.amount > 10)) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -1138,13 +1229,31 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												}
 											});
 										} else if (otherMatchesWithTheSamePlayers.length > 8 && mapsPlayed.some(map => map.amount > 5)) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -1192,8 +1301,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												}
 											});
 										} else {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update No quals match of the same players - not verifyable');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update No quals match of the same players - not verifyable');
+											await DBOsuMultiMatches.update({
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match reffed by someone else - Not Qualifiers - No quals match of the same players - not verifyable',
 												referee: json.events[0].user_id,
@@ -1209,8 +1318,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											}
 										}
 									} else {
-										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores verification status not determinable');
-										await DBOsuMultiScores.update({
+										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches verification status not determinable');
+										await DBOsuMultiMatches.update({
 											verifiedBy: 31050083, // Elitebotix
 											verificationComment: 'Match reffed by someone else - Verification status not determinable',
 											referee: json.events[0].user_id,
@@ -1227,8 +1336,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 									}
 								}
 							} else {
-								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update not determinable maidbot match');
-								await DBOsuMultiScores.update({
+								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update not determinable maidbot match');
+								await DBOsuMultiMatches.update({
 									verifiedBy: 31050083, // Elitebotix
 									verificationComment: 'Not determinable who created the match',
 								}, {
@@ -1257,8 +1366,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 		.catch(async (err) => {
 			if (err.message === 'Not found') {
 				//If its not found anymore it should be fake because it must be created in a different way
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update fake maidbot match');
-				await DBOsuMultiScores.update({
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update fake maidbot match');
+				await DBOsuMultiMatches.update({
 					verifiedBy: 31050083, // Elitebotix
 					verificationComment: 'match not found - can\'t be determined if fake or not',
 				}, {
@@ -1280,8 +1389,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 }
 
 async function addMissingRefereeInfo(osuApi) {
-	logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores refereeInfoMissing');
-	let refereeInfoMissing = await DBOsuMultiScores.findOne({
+	logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches refereeInfoMissing');
+	let refereeInfoMissing = await DBOsuMultiMatches.findOne({
 		attributes: ['matchId'],
 		where: {
 			tourneyMatch: true,
@@ -1355,8 +1464,8 @@ async function addMissingRefereeInfo(osuApi) {
 							}
 
 							if (json.events[0].detail.type === 'match-created') {
-								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update referee');
-								await DBOsuMultiScores.update({
+								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee');
+								await DBOsuMultiMatches.update({
 									referee: json.events[0].user_id,
 								}, {
 									where: {
@@ -1369,9 +1478,9 @@ async function addMissingRefereeInfo(osuApi) {
 									console.log(`Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}`);
 								}
 							} else {
-								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update unavailable match start referee 2');
-								await DBOsuMultiScores.update({
-									referee: 'Match start unavailable',
+								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update unavailable match start referee 2');
+								await DBOsuMultiMatches.update({
+									referee: -1,
 								}, {
 									where: {
 										matchId: refereeInfoMissing.matchId,
@@ -1397,9 +1506,9 @@ async function addMissingRefereeInfo(osuApi) {
 		})
 		.catch(async (err) => {
 			if (err.message === 'Not found') {
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update unavailable match referee 2');
-				await DBOsuMultiScores.update({
-					referee: 'Match unavailable',
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update unavailable match referee 2');
+				await DBOsuMultiMatches.update({
+					referee: -1,
 				}, {
 					where: {
 						matchId: refereeInfoMissing.matchId,
