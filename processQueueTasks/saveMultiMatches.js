@@ -278,13 +278,31 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 									if (json.events[0].detail.type === 'match-created') {
 										if (json.events[0].user_id === 16173747) {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update maidbot match');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update maidbot match');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: true,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match created by MaidBot',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update maidbot match');
+											await DBOsuMultiGames.update({
+												tourneyMatch: true,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update maidbot match');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: true,
 											}, {
 												where: {
 													matchId: match.id,
@@ -332,13 +350,31 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												}
 											});
 										} else {
-											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update maidbot match');
-											await DBOsuMultiScores.update({
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update maidbot match');
+											await DBOsuMultiMatches.update({
 												tourneyMatch: false,
 												verifiedAt: new Date(),
 												verifiedBy: 31050083, // Elitebotix
 												verificationComment: 'Match not created by MaidBot',
 												referee: json.events[0].user_id,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update maidbot match');
+											await DBOsuMultiGames.update({
+												tourneyMatch: false,
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update maidbot match');
+											await DBOsuMultiGameScores.update({
+												tourneyMatch: false,
 											}, {
 												where: {
 													matchId: match.id,
@@ -416,12 +452,30 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				.catch(async (err) => {
 					if (err.message === 'Not found') {
 						//If its not found anymore it should be fake because it must be created in a different way
-						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update fake maidbot match');
-						await DBOsuMultiScores.update({
+						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update fake maidbot match');
+						await DBOsuMultiMatches.update({
 							tourneyMatch: false,
 							verifiedAt: new Date(),
 							verifiedBy: 31050083, // Elitebotix
 							verificationComment: 'o!mm not found - Fake because MaidBot uses !mp make to create matches',
+						}, {
+							where: {
+								matchId: incompleteMatch.matchId,
+							},
+						});
+
+						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update fake maidbot match');
+						await DBOsuMultiGames.update({
+							tourneyMatch: false,
+						}, {
+							where: {
+								matchId: incompleteMatch.matchId,
+							},
+						});
+
+						logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update fake maidbot match');
+						await DBOsuMultiGameScores.update({
+							tourneyMatch: false,
 						}, {
 							where: {
 								matchId: incompleteMatch.matchId,
@@ -507,13 +561,35 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 
 			if (matchesToVerify.length) {
 				// If there is a match to verify
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores update Elitebotix duel match');
-				await DBOsuMultiScores.update({
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Elitebotix duel match');
+				await DBOsuMultiMatches.update({
 					tourneyMatch: true,
 					verifiedAt: new Date(),
 					verifiedBy: 31050083, // Elitebotix
 					verificationComment: 'Elitebotix Duel Match',
 					referee: 31050083, // Elitebotix
+				}, {
+					where: {
+						matchId: {
+							[Op.in]: matchesToVerify,
+						},
+					},
+				});
+
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Elitebotix duel match');
+				await DBOsuMultiGames.update({
+					tourneyMatch: true,
+				}, {
+					where: {
+						matchId: {
+							[Op.in]: matchesToVerify,
+						},
+					},
+				});
+
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Elitebotix duel match');
+				await DBOsuMultiGameScores.update({
+					tourneyMatch: true,
 				}, {
 					where: {
 						matchId: {
