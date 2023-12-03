@@ -168,8 +168,8 @@ module.exports = {
 async function processIncompleteScores(osuApi, client, processQueueEntry, channelId, secondsToWait) {
 	//Go same if match found and not ended / too long going already
 	//Reimport an old match to clean up the database
-	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores');
-	let incompleteMatchScore = await DBOsuMultiScores.findOne({
+	logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames incomplete scores');
+	let incompleteMatchScore = await DBOsuMultiGames.findOne({
 		attributes: ['id', 'matchId', 'updatedAt'],
 		where: {
 			tourneyMatch: true,
@@ -832,9 +832,22 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 									let weeksAfterMatch = new Date(matchToVerify[0].matchStartDate);
 									weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 56);
 
-									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator did not play a round');
-									let relatedScores = await DBOsuMultiScores.findAll({
-										attributes: ['matchId', 'matchName', 'osuUserId', 'beatmapId', 'verifiedAt', 'verifiedBy'],
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches Match creator did not play a round');
+									let relatedMatches = await DBOsuMultiMatches.findAll({
+										attributes: ['matchId', 'matchName', 'verifiedAt', 'verifiedBy'],
+										where: {
+											matchStartDate: {
+												[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
+											},
+											matchName: {
+												[Op.like]: `${acronym}:%`,
+											},
+										},
+									});
+
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores Match creator did not play a round');
+									let relatedScores = await DBOsuMultiGameScores.findAll({
+										attributes: ['matchId', 'osuUserId', 'beatmapId'],
 										where: {
 											[Op.or]: [
 												{
@@ -848,12 +861,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 													},
 												},
 											],
-											matchStartDate: {
-												[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
-											},
-											matchName: {
-												[Op.like]: `${acronym}:%`,
-											},
 											warmup: false,
 										},
 									});
@@ -884,7 +891,9 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let otherMatch = otherMatchesWithTheSamePlayers.find((match) => match.matchId === score.matchId);
 
 											if (!otherMatch) {
-												otherMatchesWithTheSamePlayers.push({ matchId: score.matchId, matchName: score.matchName, verifiedAt: score.verifiedAt, verifiedBy: score.verifiedBy });
+												let relatedMatch = relatedMatches.find((match) => match.matchId === score.matchId);
+
+												otherMatchesWithTheSamePlayers.push({ matchId: score.matchId, matchName: relatedMatch.matchName, verifiedAt: relatedMatch.verifiedAt, verifiedBy: relatedMatch.verifiedBy });
 											}
 										}
 									}
