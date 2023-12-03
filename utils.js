@@ -8107,8 +8107,8 @@ module.exports = {
 		const path = `./avatars/${osuUserId}.png`;
 
 		try {
-			// Doesn't exist or older than 24 hours
-			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 6)) {
+			// Doesn't exist or older than 48 hours
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
 				await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`);
 				const res = await fetch(`https://s.ppy.sh/a/${osuUserId}`);
 
