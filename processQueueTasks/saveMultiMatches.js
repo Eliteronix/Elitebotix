@@ -1,5 +1,5 @@
 const osu = require('node-osu');
-const { DBOsuMultiScores, DBProcessQueue, DBOsuMultiMatches, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
+const { DBProcessQueue, DBOsuMultiMatches, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
 const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const { logBroadcastEval } = require('../config.json');
@@ -202,21 +202,39 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				await saveOsuMultiScores(match, client);
 			})
 			.catch(async (err) => {
-				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores incomplete scores backup');
-				let incompleteScores = await DBOsuMultiScores.findAll({
-					attributes: ['id', 'warmup', 'maxCombo', 'pp', 'updatedAt'],
+				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames incomplete scores backup');
+				let incompleteGames = await DBOsuMultiGames.findAll({
+					attributes: ['id', 'warmup', 'updatedAt'],
 					where: {
 						matchId: incompleteMatchScore.matchId
 					}
 				});
+
+				logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGameScores incomplete scores backup');
+				let incompleteScores = await DBOsuMultiGameScores.findAll({
+					attributes: ['id', 'maxCombo', 'pp', 'updatedAt'],
+					where: {
+						matchId: incompleteMatchScore.matchId
+					}
+				});
+
 				if (err.message === 'Not found') {
+					for (let i = 0; i < incompleteGames.length; i++) {
+						incompleteGames[i].warmup = false;
+						await incompleteGames[i].save();
+					}
+
 					for (let i = 0; i < incompleteScores.length; i++) {
-						incompleteScores[i].warmup = false;
 						incompleteScores[i].maxCombo = 0;
 						incompleteScores[i].pp = 0;
 						await incompleteScores[i].save();
 					}
 				} else {
+					for (let i = 0; i < incompleteGames.length; i++) {
+						incompleteGames[i].changed('updatedAt', true);
+						await incompleteGames[i].save();
+					}
+
 					for (let i = 0; i < incompleteScores.length; i++) {
 						incompleteScores[i].changed('updatedAt', true);
 						await incompleteScores[i].save();
@@ -542,8 +560,8 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				}
 			}
 
-			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
-			let matchesToVerify = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches');
+			let matchesToVerify = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId'],
 				where: {
 					verifiedAt: null,
@@ -660,9 +678,9 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 }
 
 async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
-	logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores find match to verify');
-	let matchToVerify = await DBOsuMultiScores.findOne({
-		attributes: ['matchId', 'matchName', 'osuUserId'],
+	logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches find match to verify');
+	let matchToVerify = await DBOsuMultiMatches.findOne({
+		attributes: ['matchId', 'matchName', 'matchStartDate'],
 		where: {
 			tourneyMatch: true,
 			verifiedBy: null,
@@ -676,8 +694,9 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 	});
 
 	if (!matchToVerify) {
-		matchToVerify = await DBOsuMultiScores.findOne({
-			attributes: ['matchId', 'matchName', 'osuUserId'],
+		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches find match to verify backup');
+		matchToVerify = await DBOsuMultiMatches.findOne({
+			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {
 				tourneyMatch: true,
 				verifiedBy: null,
@@ -799,9 +818,9 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 										console.log(`Match ${matchToVerify.matchId} unverified - Match creator played a round - Not determined if valid`);
 									}
 								} else {
-									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores Match creator did not play a round - Not determined if valid');
-									let matchToVerify = await DBOsuMultiScores.findAll({
-										attributes: ['matchId', 'matchName', 'osuUserId', 'beatmapId', 'matchStartDate'],
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores Match creator did not play a round - Not determined if valid');
+									let matchToVerifyScores = await DBOsuMultiGameScores.findAll({
+										attributes: ['osuUserId', 'beatmapId'],
 										where: {
 											matchId: match.id,
 										},
@@ -810,8 +829,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 									let mapsPlayed = [];
 									let players = [];
 
-									for (let i = 0; i < matchToVerify.length; i++) {
-										let score = matchToVerify[i];
+									for (let i = 0; i < matchToVerifyScores.length; i++) {
+										let score = matchToVerifyScores[i];
 
 										let map = mapsPlayed.find((map) => map.beatmapId === score.beatmapId);
 
@@ -824,12 +843,12 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 										}
 									}
 
-									let acronym = matchToVerify[0].matchName.replace(/:.*/gm, '');
+									let acronym = matchToVerify.matchName.replace(/:.*/gm, '');
 
-									let weeksBeforeMatch = new Date(matchToVerify[0].matchStartDate);
+									let weeksBeforeMatch = new Date(matchToVerify.matchStartDate);
 									weeksBeforeMatch.setDate(weeksBeforeMatch.getDate() - 56);
 
-									let weeksAfterMatch = new Date(matchToVerify[0].matchStartDate);
+									let weeksAfterMatch = new Date(matchToVerify.matchStartDate);
 									weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 56);
 
 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches Match creator did not play a round');
@@ -845,10 +864,24 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 										},
 									});
 
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames Match creator did not play a round');
+									let relatedGames = await DBOsuMultiGames.findAll({
+										attributes: ['gameId'],
+										where: {
+											matchId: {
+												[Op.in]: relatedMatches.map((match) => match.matchId),
+											},
+											warmup: false,
+										},
+									});
+
 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores Match creator did not play a round');
 									let relatedScores = await DBOsuMultiGameScores.findAll({
 										attributes: ['matchId', 'osuUserId', 'beatmapId'],
 										where: {
+											gameId: {
+												[Op.in]: relatedGames.map((game) => game.gameId),
+											},
 											[Op.or]: [
 												{
 													beatmapId: {
@@ -861,11 +894,10 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 													},
 												},
 											],
-											warmup: false,
 										},
 									});
 
-									let playersInTheOriginalLobby = [...new Set(matchToVerify.map((score) => score.osuUserId))];
+									let playersInTheOriginalLobby = [...new Set(matchToVerifyScores.map((score) => score.osuUserId))];
 
 									let otherPlayersOutsideOfTheLobbyThatPlayedTheSameMaps = [];
 									let otherMatchesWithTheSamePlayers = [];
@@ -902,7 +934,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 
 									let qualsMatchOfTheSamePlayers = otherMatchesWithTheSamePlayers.find((match) => match.matchName.toLowerCase().includes('(qualifiers)') || match.matchName.toLowerCase().includes('(qualifier)') || match.matchName.toLowerCase().includes('(quals)') || match.matchName.toLowerCase().includes('(kwalifikacje)'));
 
-									if (matchToVerify[0].matchName.toLowerCase().includes('(qualifiers)') || matchToVerify[0].matchName.toLowerCase().includes('(qualifier)') || matchToVerify[0].matchName.toLowerCase().includes('(quals)') || matchToVerify[0].matchName.toLowerCase().includes('(kwalifikacje)') || matchToVerify[0].matchName.toLowerCase().includes('(tryouts)')) {
+									if (matchToVerify.matchName.toLowerCase().includes('(qualifiers)') || matchToVerify.matchName.toLowerCase().includes('(qualifier)') || matchToVerify.matchName.toLowerCase().includes('(quals)') || matchToVerify.matchName.toLowerCase().includes('(kwalifikacje)') || matchToVerify.matchName.toLowerCase().includes('(tryouts)')) {
 										if (mapsPlayed.every((map) => map.amount >= 20)) {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Qualifiers all maps played more than 20 times');
 											await DBOsuMultiMatches.update({
