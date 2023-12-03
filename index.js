@@ -442,7 +442,7 @@ async function processOsuWebRequests(client) {
 
 		osuWebRequestQueue = osuWebRequestQueue.filter(item => item !== osuWebRequestQueue[0]);
 
-		await new Promise(resolve => setTimeout(resolve, 5950));
+		await new Promise(resolve => setTimeout(resolve, 5450));
 	}
 
 	setTimeout(() => {
