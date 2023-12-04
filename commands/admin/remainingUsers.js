@@ -6,7 +6,7 @@ module.exports = {
 	name: 'remainingUsers',
 	usage: 'None',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/remainingUsers.js DBOsuMultiScores');
+		logDatabaseQueries(4, 'commands/admin/remainingUsers.js DBDiscordUsers');
 		let count = await DBDiscordUsers.count({
 			where: {
 				osuUserId: {

@@ -1,4 +1,4 @@
-const { DBOsuMultiScores } = require('../../dbObjects');
+const { DBOsuMultiMatches } = require('../../dbObjects');
 const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
@@ -10,8 +10,8 @@ module.exports = {
 		const matchId = args[0];
 		const referee = args[1];
 
-		logDatabaseQueries(4, 'commands/admin/setReferee.js DBOsuMultiScores');
-		let count = await DBOsuMultiScores.update({
+		logDatabaseQueries(4, 'commands/admin/setReferee.js DBOsuMultiMatches');
+		let count = await DBOsuMultiMatches.update({
 			referee: referee,
 		}, {
 			where: {

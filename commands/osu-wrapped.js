@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -7,6 +7,9 @@ const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelSta
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fs = require('fs');
+
+let gameIdsPerYearLowerBound = [];
+let gameIdsPerYearUpperBound = [];
 
 module.exports = {
 	name: 'osu-wrapped',
@@ -164,6 +167,97 @@ module.exports = {
 			year = interaction.options.getInteger('year');
 		}
 
+		let lowerBoundGameId = gameIdsPerYearLowerBound[year];
+		let upperBoundGameId = gameIdsPerYearUpperBound[year];
+
+		if (!lowerBoundGameId || !upperBoundGameId) {
+			logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGames Get gameId lower bound');
+			let lowerBoundGameData = await DBOsuMultiGames.findOne({
+				attributes: ['gameId'],
+				where: {
+					gameEndDate: {
+						[Op.and]: {
+							[Op.gte]: new Date(`${year}-01-01`),
+							[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
+						}
+					},
+					tourneyMatch: true,
+					warmup: {
+						[Op.not]: true,
+					}
+				},
+			});
+
+			if (!lowerBoundGameData) {
+				return interaction.editReply(`\`${year}\` does not have any tournament data.`);
+			}
+
+			lowerBoundGameId = lowerBoundGameData.gameId;
+			gameIdsPerYearLowerBound[year] = lowerBoundGameId;
+
+			logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGames Get gameId upper bound');
+			let upperBoundGameData = await DBOsuMultiGames.findOne({
+				attributes: ['gameId'],
+				where: {
+					gameEndDate: {
+						[Op.and]: {
+							[Op.gte]: new Date(`${year}-01-01`),
+							[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
+						}
+					},
+					tourneyMatch: true,
+					warmup: {
+						[Op.not]: true,
+					}
+				},
+			});
+
+			if (!upperBoundGameData) {
+				return interaction.editReply(`\`${year}\` does not have any tournament data.`);
+			}
+
+			upperBoundGameId = upperBoundGameData.gameId;
+			gameIdsPerYearUpperBound[year] = upperBoundGameId;
+		}
+
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores'); // Just pasted this, continue refactoring below
+		let multiScores = await DBOsuMultiGameScores.findAll({
+			attributes: [
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'teamType',
+				'pp',
+				'beatmapId',
+				'createdAt',
+				'gameStartDate',
+				'osuUserId',
+				'count50',
+				'count100',
+				'count300',
+				'countGeki',
+				'countKatu',
+				'countMiss',
+				'maxCombo',
+				'perfect',
+				'matchName',
+				'mode',
+				'matchId',
+				'gameId',
+				'matchStartDate',
+				'team',
+			],
+			where: {
+				matchId: multiMatches,
+				warmup: {
+					[Op.not]: true,
+				}
+			},
+			order: [
+				['matchStartDate', 'DESC'],
+			],
+		});
+
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 1');
 		let multiMatches = await DBOsuMultiScores.findAll({
 			attributes: ['matchId'],
@@ -192,7 +286,6 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 2');
 		let multiScores = await DBOsuMultiScores.findAll({
 			attributes: [
-				'id',
 				'score',
 				'gameRawMods',
 				'rawMods',

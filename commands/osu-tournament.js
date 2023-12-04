@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiMatches } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -65,8 +65,8 @@ module.exports = {
 			return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
 		}
 
-		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiScores');
-		let userScores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiMatches');
+		let tournamentScores = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {
 				[Op.or]: [
@@ -81,38 +81,30 @@ module.exports = {
 					}
 				],
 				tourneyMatch: true,
-			}
+			},
+			order: [
+				['matchId', 'DESC'],
+			],
 		});
 
-		if (!userScores.length) {
+		if (!tournamentScores.length) {
 			return await interaction.editReply(`No tournament matches found with the acronym \`${acronym.replace(/`/g, '')}\`.`);
 		}
-
-		//Bubblesort userscores by matchId property descending
-		userScores.sort((a, b) => {
-			if (parseInt(a.matchId) > parseInt(b.matchId)) {
-				return -1;
-			}
-			if (parseInt(a.matchId) < parseInt(b.matchId)) {
-				return 1;
-			}
-			return 0;
-		});
 
 		let hideQualifiers = new Date();
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
 		let matchesPlayed = [];
-		for (let i = 0; i < userScores.length; i++) {
+		for (let i = 0; i < tournamentScores.length; i++) {
 			//Push matches for the history txt
-			let date = new Date(userScores[i].matchStartDate);
+			let date = new Date(tournamentScores[i].matchStartDate);
 
-			if (date > hideQualifiers && userScores[i].matchName.toLowerCase().includes('qualifier')) {
-				userScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+			if (date > hideQualifiers && tournamentScores[i].matchName.toLowerCase().includes('qualifier')) {
+				tournamentScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
 			}
 
-			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`)) {
-				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${userScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${userScores[i].matchId}`);
+			if (!matchesPlayed.includes(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${tournamentScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${tournamentScores[i].matchId}`)) {
+				matchesPlayed.push(`${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${tournamentScores[i].matchName} ----- https://osu.ppy.sh/community/matches/${tournamentScores[i].matchId}`);
 			}
 		}
 

@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiGames } = require('../../dbObjects');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { getUserDuelStarRating, logDatabaseQueries, logOsuAPICalls } = require('../../utils');
@@ -78,23 +78,31 @@ module.exports = {
 
 		let processingMessage = await interaction.editReply('Processing...');
 
-		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores duelRatingDevelopment');
-		let oldestScore = await DBOsuMultiScores.findOne({
-			attributes: ['gameEndDate'],
+		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
+		let oldestScore = await DBOsuMultiGameScores.findOne({
+			attributes: ['gameId'],
 			where: {
 				osuUserId: osuUser.osuUserId,
 				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
+				scoringType: 3,
+				mode: 0,
 			},
 			order: [
-				['gameEndDate', 'ASC']
+				['gameId', 'ASC']
 			]
 		});
 
 		if (!oldestScore) {
 			return await processingMessage.edit({ content: 'No scores found for this user', ephemeral: true });
 		}
+
+		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGames duelRatingDevelopment');
+		let oldestGame = await DBOsuMultiGames.findOne({
+			attributes: ['gameEndDate'],
+			where: {
+				gameId: oldestScore.gameId,
+			},
+		});
 
 		let duelRatings = [await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client })];
 
@@ -104,13 +112,13 @@ module.exports = {
 		date.setUTCHours(23, 59, 59, 999);
 
 		let iterator = 0;
-		let startTime = date - oldestScore.gameEndDate;
+		let startTime = date - oldestGame.gameEndDate;
 		let lastUpdate = new Date();
 
-		while (date > oldestScore.gameEndDate) {
+		while (date > oldestGame.gameEndDate) {
 			iterator++;
 			if (new Date() - lastUpdate > 15000) {
-				processingMessage.edit(`Processing... (${iterator} weeks deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+				processingMessage.edit(`Processing... (${iterator} weeks deep | ${(100 - (100 / startTime * (date - oldestGame.gameEndDate))).toFixed(2)}%)`);
 				lastUpdate = new Date();
 			}
 			let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });

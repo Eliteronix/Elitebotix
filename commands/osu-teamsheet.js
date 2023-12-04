@@ -1,6 +1,6 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
-const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets, DBOsuPoolAccess } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuTeamSheets, DBOsuPoolAccess, DBOsuMultiGameScores } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
@@ -586,8 +586,8 @@ module.exports = {
 			},
 		});
 
-		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuMultiScores');
-		let multiScores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuMultiGameScores');
+		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'osuUserId',
 				'beatmapId',
@@ -607,7 +607,7 @@ module.exports = {
 				beatmapId: {
 					[Op.in]: tourneyMaps.map(map => map.beatmapId),
 				},
-				scoringType: 'Score v2',
+				scoringType: 3,
 			},
 		});
 

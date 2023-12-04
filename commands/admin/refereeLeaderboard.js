@@ -1,4 +1,4 @@
-const { DBOsuMultiScores } = require('../../dbObjects');
+const { DBOsuMultiMatches } = require('../../dbObjects');
 const { logDatabaseQueries, getOsuPlayerName } = require('../../utils');
 const { Op } = require('sequelize');
 
@@ -6,16 +6,15 @@ module.exports = {
 	name: 'refereeLeaderboard',
 	usage: 'None',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiScores');
-		const refereesPerMatch = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiMatches');
+		const refereesPerMatch = await DBOsuMultiMatches.findAll({
 			attributes: [
 				'referee',
 			],
 			where: {
 				tourneyMatch: true,
-				warmup: false,
 				referee: {
-					[Op.not]: 'Match unavailable',
+					[Op.gt]: 0,
 				},
 			},
 			group: ['referee', 'matchId'],

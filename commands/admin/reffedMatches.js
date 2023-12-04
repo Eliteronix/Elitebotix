@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBDiscordUsers } = require('../../dbObjects');
+const { DBDiscordUsers, DBOsuMultiMatches } = require('../../dbObjects');
 const { logDatabaseQueries, logOsuAPICalls } = require('../../utils');
 const { Op } = require('sequelize');
 const { daysHidingQualifiers } = require('../../config.json');
@@ -54,12 +54,11 @@ module.exports = {
 		}
 
 
-		logDatabaseQueries(4, 'commands/admin/reffedMatches.js DBOsuMultiScores');
-		const reffedScores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/admin/reffedMatches.js DBOsuMultiMatches');
+		const reffedScores = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {
 				tourneyMatch: true,
-				warmup: false,
 				referee: osuUser.osuUserId,
 			},
 			group: ['matchId', 'matchName', 'matchStartDate'],

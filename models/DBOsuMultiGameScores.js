@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		matchId: DataTypes.INTEGER,
 		gameId: DataTypes.INTEGER,
+		tourneyMatch: DataTypes.BOOLEAN,
 		scoringType: DataTypes.INTEGER,
 		mode: DataTypes.INTEGER,
 		beatmapId: DataTypes.INTEGER,
@@ -34,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
 		indexes: [
 			{
 				unique: false,
-				fields: ['osuUserId', 'matchId', 'gameId', 'beatmapId', 'mode', 'score']
+				fields: ['osuUserId', 'matchId', 'gameId', 'tourneyMatch', 'beatmapId', 'mode', 'score']
 			}
 		]
 	});
