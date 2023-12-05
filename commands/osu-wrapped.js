@@ -240,46 +240,32 @@ module.exports = {
 				'countMiss',
 				'maxCombo',
 				'perfect',
-				'matchName',
+				// 'matchName',
 				'mode',
 				'matchId',
 				'gameId',
-				'matchStartDate',
+				// 'matchStartDate',
 				'team',
 			],
 			where: {
 				matchId: multiMatches,
-				warmup: {
-					[Op.not]: true,
-				}
-			},
-			order: [
-				['matchStartDate', 'DESC'],
-			],
-		});
-
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 1');
-		let multiMatches = await DBOsuMultiScores.findAll({
-			attributes: ['matchId'],
-			where: {
-				osuUserId: osuUser.osuUserId,
-				gameEndDate: {
+				gameId: {
 					[Op.and]: {
-						[Op.gte]: new Date(`${year}-01-01`),
-						[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
+						[Op.gte]: lowerBoundGameId,
+						[Op.lte]: upperBoundGameId,
 					}
 				},
 				tourneyMatch: true,
-				warmup: {
-					[Op.not]: true,
-				}
+				// warmup: {
+				// 	[Op.not]: true,
+				// }
 			},
-			group: ['matchId'],
+			order: [
+				['matchId', 'DESC'],
+			],
 		});
 
-		multiMatches = multiMatches.map(match => match.matchId);
-
-		if (multiMatches.length === 0) {
+		if (multiScores.length === 0) {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
 		}
 
