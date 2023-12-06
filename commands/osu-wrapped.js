@@ -186,6 +186,9 @@ module.exports = {
 						[Op.not]: true,
 					}
 				},
+				order: [
+					['gameId', 'ASC']
+				]
 			});
 
 			if (!lowerBoundGameData) {
@@ -210,6 +213,9 @@ module.exports = {
 						[Op.not]: true,
 					}
 				},
+				order: [
+					['gameId', 'DESC']
+				]
 			});
 
 			if (!upperBoundGameData) {
@@ -220,7 +226,29 @@ module.exports = {
 			gameIdsPerYearUpperBound[year] = upperBoundGameId;
 		}
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores');
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores matches played');
+		let multiMatchesPlayed = await DBOsuMultiGameScores.findAll({
+			attributes: ['matchId'],
+			where: {
+				osuUserId: osuUser.osuUserId,
+				gameId: {
+					[Op.and]: {
+						[Op.gte]: lowerBoundGameId,
+						[Op.lte]: upperBoundGameId,
+					}
+				},
+				tourneyMatch: true,
+				score: {
+					[Op.gt]: 10000,
+				},
+			},
+		});
+
+		if (multiMatchesPlayed.length === 0) {
+			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
+		}
+
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores all scores');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'score',
@@ -244,23 +272,17 @@ module.exports = {
 				'team',
 			],
 			where: {
-				osuUserId: osuUser.osuUserId,
-				gameId: {
-					[Op.and]: {
-						[Op.gte]: lowerBoundGameId,
-						[Op.lte]: upperBoundGameId,
-					}
+				matchId: {
+					[Op.in]: multiMatchesPlayed.map(match => match.matchId),
 				},
-				tourneyMatch: true,
+				score: {
+					[Op.gt]: 10000,
+				},
 			},
 			order: [
 				['matchId', 'DESC'],
 			],
 		});
-
-		if (multiScores.length === 0) {
-			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
-		}
 
 		// Get games
 		let gameIds = [...new Set(multiScores.map(score => score.gameId))];
@@ -272,16 +294,14 @@ module.exports = {
 				gameId: {
 					[Op.in]: gameIds,
 				},
+				warmup: {
+					[Op.not]: true,
+				},
 			},
 			order: [
 				['gameId', 'DESC'],
 			],
 		});
-
-		let warmupGames = multiGames.filter(game => game.warmup).map(game => game.gameId);
-
-		// Remove warmup games
-		multiScores = multiScores.filter(score => !warmupGames.includes(score.gameId));
 
 		// Add the game data to the scores
 		for (let i = 0; i < multiScores.length; i++) {
@@ -310,6 +330,9 @@ module.exports = {
 			where: {
 				matchId: {
 					[Op.in]: matchIds,
+				},
+				matchName: {
+					[Op.notLike]: '%scrim%',
 				},
 			},
 		});
@@ -348,9 +371,9 @@ module.exports = {
 		let gameId = multiScores[0].gameId;
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim')) {
-				continue;
-			}
+			// if (multiScores[i].matchName.toLowerCase().includes('scrim')) { // TODO: Test if the sequelize query is enough
+			// 	continue;
+			// }
 
 			if (new Date() - lastUpdate > 15000) {
 				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
@@ -375,18 +398,18 @@ module.exports = {
 					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+				let ownScore = gameScores.find(score => score.osuUserId === parseInt(osuUser.osuUserId));
 
-				if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head' && ownScore) {
-					let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+				if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
+					let otherScore = gameScores.find(score => score.osuUserId !== parseInt(osuUser.osuUserId));
 
 					if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 						matchesWon++;
 					} else {
 						matchesLost++;
 					}
-				} else if (gameScores[0].teamType === 'Team vs') {
-					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+				} else if (gameScores[0].teamType === 2) {
+					let ownScores = matchScores.filter(score => score.osuUserId === parseInt(osuUser.osuUserId));
 
 					let team = ownScores[0].team;
 
@@ -417,18 +440,18 @@ module.exports = {
 					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+				let ownScore = gameScores.find(score => score.osuUserId === parseInt(osuUser.osuUserId));
 
 				if (ownScore) {
-					if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head') {
-						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
+						let otherScore = gameScores.find(score => score.osuUserId !== parseInt(osuUser.osuUserId));
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							gamesWon++;
 						} else {
 							gamesLost++;
 						}
-					} else if (gameScores[0].teamType === 'Team vs') {
+					} else if (gameScores[0].teamType === 2) {
 						let team = ownScore.team;
 
 						let ownTeamScore = 0;
@@ -451,7 +474,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
+			if (multiScores[i].osuUserId !== parseInt(osuUser.osuUserId)) {
 				let mostPlayedWithPlayer = mostPlayedWith.find(player => player.osuUserId === multiScores[i].osuUserId);
 
 				if (mostPlayedWithPlayer) {
@@ -469,7 +492,7 @@ module.exports = {
 					});
 				}
 			} else {
-				if (parseInt(multiScores[i].score) > 10000 && multiScores[i].teamType !== 'Tag Team vs' && multiScores[i].teamType !== 'Tag Co-op') {
+				if (multiScores[i].teamType !== 3 && multiScores[i].teamType !== 1) {
 					if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
 						multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
 					}
