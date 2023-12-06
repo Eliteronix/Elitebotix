@@ -244,6 +244,7 @@ module.exports = {
 				'team',
 			],
 			where: {
+				osuUserId: osuUser.osuUserId,
 				gameId: {
 					[Op.and]: {
 						[Op.gte]: lowerBoundGameId,
