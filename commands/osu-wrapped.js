@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGames, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -220,17 +220,15 @@ module.exports = {
 			gameIdsPerYearUpperBound[year] = upperBoundGameId;
 		}
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores'); // Just pasted this, continue refactoring below
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'score',
 				'gameRawMods',
 				'rawMods',
-				'teamType',
 				'pp',
 				'beatmapId',
 				'createdAt',
-				'gameStartDate',
 				'osuUserId',
 				'count50',
 				'count100',
@@ -240,15 +238,12 @@ module.exports = {
 				'countMiss',
 				'maxCombo',
 				'perfect',
-				// 'matchName',
 				'mode',
 				'matchId',
 				'gameId',
-				// 'matchStartDate',
 				'team',
 			],
 			where: {
-				matchId: multiMatches,
 				gameId: {
 					[Op.and]: {
 						[Op.gte]: lowerBoundGameId,
@@ -256,9 +251,6 @@ module.exports = {
 					}
 				},
 				tourneyMatch: true,
-				// warmup: {
-				// 	[Op.not]: true,
-				// }
 			},
 			order: [
 				['matchId', 'DESC'],
@@ -269,43 +261,71 @@ module.exports = {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
 		}
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiScores 2');
-		let multiScores = await DBOsuMultiScores.findAll({
-			attributes: [
-				'score',
-				'gameRawMods',
-				'rawMods',
-				'teamType',
-				'pp',
-				'beatmapId',
-				'createdAt',
-				'gameStartDate',
-				'osuUserId',
-				'count50',
-				'count100',
-				'count300',
-				'countGeki',
-				'countKatu',
-				'countMiss',
-				'maxCombo',
-				'perfect',
-				'matchName',
-				'mode',
-				'matchId',
-				'gameId',
-				'matchStartDate',
-				'team',
-			],
+		// Get games
+		let gameIds = [...new Set(multiScores.map(score => score.gameId))];
+
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGames Get warmup games');
+		let multiGames = await DBOsuMultiGames.findAll({
+			attributes: ['gameId', 'warmup', 'gameStartDate', 'teamType'],
 			where: {
-				matchId: multiMatches,
-				warmup: {
-					[Op.not]: true,
-				}
+				gameId: {
+					[Op.in]: gameIds,
+				},
 			},
 			order: [
-				['matchStartDate', 'DESC'],
+				['gameId', 'DESC'],
 			],
 		});
+
+		let warmupGames = multiGames.filter(game => game.warmup).map(game => game.gameId);
+
+		// Remove warmup games
+		multiScores = multiScores.filter(score => !warmupGames.includes(score.gameId));
+
+		// Add the game data to the scores
+		for (let i = 0; i < multiScores.length; i++) {
+			let game = multiGames.find(game => game.gameId === multiScores[i].gameId);
+
+			if (!game) {
+				multiScores.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			multiScores[i].gameStartDate = game.gameStartDate;
+			multiScores[i].teamType = game.teamType;
+		}
+
+		// Get the match data
+		let matchIds = [...new Set(multiScores.map(score => score.matchId))];
+
+		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiMatches');
+		let multiMatches = await DBOsuMultiMatches.findAll({
+			attributes: [
+				'matchId',
+				'matchName',
+				'matchStartDate',
+			],
+			where: {
+				matchId: {
+					[Op.in]: matchIds,
+				},
+			},
+		});
+
+		// Add the match data to the scores
+		for (let i = 0; i < multiScores.length; i++) {
+			let match = multiMatches.find(match => match.matchId === multiScores[i].matchId);
+
+			if (!match) {
+				multiScores.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			multiScores[i].matchName = match.matchName;
+			multiScores[i].matchStartDate = match.matchStartDate;
+		}
 
 		let matchesChecked = [];
 		let matchesWon = 0;
