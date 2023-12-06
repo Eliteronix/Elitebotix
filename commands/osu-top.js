@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores, DBOsuGuildTrackers, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -1212,16 +1212,10 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 }
 
 async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
-	let modeName = getGameModeName(mode);
-	modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
-
-	if (modeName === 'Catch') {
-		modeName = 'Catch the Beat';
-	}
 
 	let where = {
 		osuUserId: osuUserId,
-		mode: modeName,
+		mode: mode,
 		tourneyMatch: true,
 		score: {
 			[Op.gte]: 10000,
@@ -1229,12 +1223,12 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 	};
 
 	if (mixed) {
-		where.scoringType = 'Score v2';
+		where.scoringType = 3;
 	}
 
 	//Get all scores from tournaments
-	logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiScores 1');
-	let multiScores = await DBOsuMultiScores.findAll({
+	logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiGameScores');
+	let multiScores = await DBOsuMultiGameScores.findAll({
 		attributes: [
 			'id',
 			'score',
@@ -1244,7 +1238,6 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 			'pp',
 			'beatmapId',
 			'createdAt',
-			'gameStartDate',
 			'osuUserId',
 			'count50',
 			'count100',
@@ -1261,7 +1254,7 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 	});
 
 	for (let i = 0; i < multiScores.length; i++) {
-		if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
+		if (multiScores[i].teamType === 1 || multiScores[i].teamType === 3) {
 			multiScores.splice(i, 1);
 			i--;
 		}

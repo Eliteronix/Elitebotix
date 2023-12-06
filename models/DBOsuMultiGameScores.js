@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
 		countKatu: DataTypes.INTEGER,
 		countGeki: DataTypes.INTEGER,
 		perfect: DataTypes.BOOLEAN,
+		teamType: DataTypes.INTEGER,
 		team: DataTypes.STRING,
 		pp: DataTypes.DECIMAL(10, 3),
 		paranoid: true,
