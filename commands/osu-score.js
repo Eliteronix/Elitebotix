@@ -1,9 +1,10 @@
-﻿const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+﻿const { DBDiscordUsers, DBOsuMultiGames, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../dbObjects');
 const osu = require('node-osu');
 const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getBeatmapModeId, getModBits, multiToBanchoScore, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-score',
@@ -498,10 +499,12 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 		logOsuAPICalls('commands/osu-score.js getUser tournaments');
 		const osuUser = await osuApi.getUser({ u: username, m: mode });
 
-		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiScores');
-		const beatmapScores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiGameScores');
+		const beatmapScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'id',
+				'matchId',
+				'gameId',
 				'score',
 				'gameRawMods',
 				'rawMods',
@@ -509,7 +512,6 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				'pp',
 				'beatmapId',
 				'createdAt',
-				'gameStartDate',
 				'osuUserId',
 				'count50',
 				'count100',
@@ -519,28 +521,62 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				'countMiss',
 				'maxCombo',
 				'perfect',
-				'matchName',
 				'mode',
 			],
 			where: {
 				beatmapId: beatmap.beatmapId,
-				scoringType: 'Score v2'
-			}
+				scoringType: 3,
+				score: {
+					[Op.gte]: 10000,
+				},
+			},
+			order: [['score', 'DESC']],
 		});
 
-		beatmapScores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
+		let gameIds = [...new Set(beatmapScores.map((item) => item.gameId))];
+
+		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiGames');
+		const games = await DBOsuMultiGames.findAll({
+			attributes: [
+				'gameId',
+				'gameStartDate',
+			],
+			where: {
+				gameId: {
+					[Op.in]: gameIds,
+				},
+			},
+		});
+
+		let matchIds = [...new Set(beatmapScores.map((item) => item.matchId))];
+
+		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiMatches');
+		const matches = await DBOsuMultiMatches.findAll({
+			attributes: [
+				'matchId',
+				'matchName',
+			],
+			where: {
+				matchId: {
+					[Op.in]: matchIds,
+				},
+			},
+		});
+
+		// Add game start date and match name to beatmapScores
+		for (let i = 0; i < beatmapScores.length; i++) {
+			let game = games.find((game) => game.gameId === beatmapScores[i].gameId);
+			let match = matches.find((match) => match.matchId === beatmapScores[i].matchId);
+
+			beatmapScores[i].gameStartDate = game.gameStartDate;
+			beatmapScores[i].matchName = match.matchName;
+		}
 
 		const userScores = [];
 
 		let userScoreAmount = 0;
 
 		for (let i = 0; i < beatmapScores.length; i++) {
-			if (parseInt(beatmapScores[i].score) < 10000) {
-				beatmapScores.splice(i, 1);
-				i--;
-				continue;
-			}
-
 			if (beatmapScores[i].osuUserId === osuUser.id) {
 				userScoreAmount++;
 				if (mods === 'best' && userScores.length === 0 || mods === 'all'
