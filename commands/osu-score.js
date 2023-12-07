@@ -508,7 +508,6 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				'score',
 				'gameRawMods',
 				'rawMods',
-				'teamType',
 				'pp',
 				'beatmapId',
 				'createdAt',
@@ -540,6 +539,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			attributes: [
 				'gameId',
 				'gameStartDate',
+				'teamType',
 			],
 			where: {
 				gameId: {
@@ -569,6 +569,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			let match = matches.find((match) => match.matchId === beatmapScores[i].matchId);
 
 			beatmapScores[i].gameStartDate = game.gameStartDate;
+			beatmapScores[i].teamType = game.teamType;
 			beatmapScores[i].matchName = match.matchName;
 		}
 
@@ -577,7 +578,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 		let userScoreAmount = 0;
 
 		for (let i = 0; i < beatmapScores.length; i++) {
-			if (beatmapScores[i].osuUserId === osuUser.id) {
+			if (beatmapScores[i].osuUserId === parseInt(osuUser.id)) {
 				userScoreAmount++;
 				if (mods === 'best' && userScores.length === 0 || mods === 'all'
 					|| mods !== 'best' && mods !== 'all' && getModBits(mods) === parseInt(beatmapScores[i].rawMods) + parseInt(beatmapScores[i].gameRawMods)
