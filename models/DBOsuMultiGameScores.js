@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
 		teamType: DataTypes.INTEGER,
 		team: DataTypes.STRING,
 		pp: DataTypes.DECIMAL(10, 3),
+		warmup: DataTypes.BOOLEAN,
 		paranoid: true,
 	}, {
 		indexes: [

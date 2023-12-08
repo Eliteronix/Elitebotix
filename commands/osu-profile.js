@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -351,29 +351,21 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
-				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiScores 1');
-				let userScores = await DBOsuMultiScores.findAll({
-					attributes: ['score'],
+				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiGameScores');
+				let userScore = await DBOsuMultiGameScores.findOne({
+					attributes: ['id'],
 					where: {
 						osuUserId: user.id,
 						score: {
 							[Op.gte]: 10000
 						},
-						[Op.or]: [
-							{ warmup: false },
-							{ warmup: null }
-						],
+						warmup: {
+							[Op.not]: true
+						}
 					}
 				});
 
-				for (let i = 0; i < userScores.length; i++) {
-					if (parseInt(userScores[i].score) <= 10000) {
-						userScores.splice(i, 1);
-						i--;
-					}
-				}
-
-				if (userScores.length) {
+				if (userScore) {
 					await sentMessage.react('<:master:951396806653255700>');
 					await sentMessage.react('🆚');
 					await sentMessage.react('📊');
