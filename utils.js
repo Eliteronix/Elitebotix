@@ -8259,7 +8259,7 @@ module.exports = {
 
 		if (logWebRequests) {
 			// eslint-disable-next-line no-console
-			console.log('Permission granted for web request:', request.replace('https://',''), randomString);
+			console.log('Permission granted:', request.replace('https://',''), randomString);
 		}
 
 		return;
