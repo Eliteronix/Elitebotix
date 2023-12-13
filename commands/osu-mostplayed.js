@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -410,10 +410,9 @@ module.exports = {
 			let mostplayed = null;
 
 			if (interaction.options.getBoolean('dontfiltermm')) {
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 1');
-				mostplayed = await DBOsuMultiScores.findAll({
-					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 1');
+				mostplayed = await DBOsuMultiGames.findAll({
+					attributes: ['beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 					where: {
 						warmup: false,
 						beatmapId: {
@@ -421,18 +420,27 @@ module.exports = {
 						},
 					},
 					group: ['beatmapId'],
-					order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
+					order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
 				});
 			} else {
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 2');
-				mostplayed = await DBOsuMultiScores.findAll({
-					attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 2');
+				let mostplayedGrouped = await DBOsuMultiGames.findAll({
+					attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 					where: {
 						warmup: false,
 						beatmapId: {
 							[Op.gt]: 0,
 						},
+					},
+					group: ['matchId', 'beatmapId'],
+					order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
+				});
+
+				let matchIds = [...new Set(mostplayedGrouped.map(item => item.matchId))];
+
+				let matchMakingMatchData = await DBOsuMultiMatches.findAll({
+					where: {
+						matchId: matchIds,
 						matchName: {
 							[Op.and]: {
 								[Op.notLike]: 'ETX%:%',
@@ -440,16 +448,41 @@ module.exports = {
 							}
 						},
 					},
-					group: ['beatmapId'],
-					order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
 				});
+
+				let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
+
+				// Filter out matches that are not in the match making queue
+				mostplayedGrouped = mostplayedGrouped.filter(item => matchMakingMatchIds.includes(item.matchId));
+
+				// Sum up the playcount of the same beatmap in different matches
+				mostplayed = [];
+				let mostplayedBeatmapIds = [];
+
+				for (let i = 0; i < mostplayedGrouped.length; i++) {
+					let index = mostplayedBeatmapIds.indexOf(mostplayedGrouped[i].beatmapId);
+
+					if (index !== -1) {
+						mostplayed[index].playcount = mostplayedGrouped[i].dataValues.playcount + mostplayed[index].playcount;
+					} else {
+						mostplayed.push({
+							beatmapId: mostplayedGrouped[i].beatmapId,
+							playcount: mostplayedGrouped[i].dataValues.playcount,
+						});
+
+						mostplayedBeatmapIds.push(mostplayedGrouped[i].beatmapId);
+					}
+				}
+
+				// Sort by playcount
+				mostplayed.sort((a, b) => b.playcount - a.playcount);
 			}
 
 			let data = [];
 			for (let i = 0; i < mostplayed.length; i++) {
 				data.push({
 					beatmapId: mostplayed[i].beatmapId,
-					playcount: mostplayed[i].dataValues.playcount,
+					playcount: mostplayed[i].playcount,
 				});
 			}
 
@@ -833,20 +866,22 @@ async function drawMostPlayed(input, server, mode, limit) {
 			}
 		}
 	} else if (server === 'tournaments') {
-		//TODO: add attributes and logdatabasequeries
-		logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiScores 3');
-		let multiScores = await DBOsuMultiScores.findAll({
-			where: { osuUserId: user.id },
+		logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGameScores 3');
+		let multiScores = await DBOsuMultiGameScores.findAll({
+			attributes: ['beatmapId', 'mode'],
+			where: {
+				osuUserId: user.id,
+				score: {
+					[Op.gte]: 10000
+				},
+				tourneyMatch: true
+			},
 		});
 
 		let mostplayed = [];
 		let beatmapIds = [];
 
 		for (let i = 0; i < multiScores.length; i++) {
-			if (parseInt(multiScores[i].score) < 10000 || !multiScores[i].tourneyMatch) {
-				continue;
-			}
-
 			if (mode && mode !== multiScores[i].mode) {
 				continue;
 			}
