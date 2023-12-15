@@ -200,7 +200,7 @@ function readyDiscord() {
 		status: 'online',  //You can show online, idle....
 		activities: [{
 			name: 'with /help',  //The message shown
-			type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
+			//type: 'PLAYING' //PLAYING: WATCHING: LISTENING: STREAMING:
 		}]
 	});
 
