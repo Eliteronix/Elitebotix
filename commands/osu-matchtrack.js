@@ -5,7 +5,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -155,16 +155,14 @@ module.exports = {
 							//Nothing
 						});
 
-					logDatabaseQueries(4, 'commands/osu-matchtrack.js DBOsuMultiScores');
-					let warmups = await DBOsuMultiScores.findAll({
-						attributes: ['gameId'],
+					logDatabaseQueries(4, 'commands/osu-matchtrack.js DBOsuMultiGames');
+					let warmups = await DBOsuMultiGames.count({
 						where: {
 							matchId: matchID,
 							warmup: {
 								[Op.ne]: false,
 							}
-						},
-						group: ['gameId'],
+						}
 					});
 
 					let matchScoreCommand = require('./osu-matchscore.js');
@@ -182,7 +180,7 @@ module.exports = {
 							},
 							getInteger: (string) => {
 								if (string === 'warmups') {
-									return warmups.length;
+									return warmups;
 								}
 							},
 							getNumber: () => {
