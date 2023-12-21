@@ -5294,7 +5294,7 @@ module.exports = {
 		return playerName;
 	},
 	calculateGrade(mode, counts, modBits) {
-		if (mode === 'Standard') {
+		if (mode === 0) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5319,7 +5319,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 'Taiko') {
+		} else if (mode === 1) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5343,7 +5343,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 'Catch the Beat') {
+		} else if (mode === 2) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 2);
@@ -5367,7 +5367,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 'Mania') {
+		} else if (mode === 3) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 3);
