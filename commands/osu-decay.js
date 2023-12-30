@@ -214,6 +214,7 @@ module.exports = {
 				}
 			} catch (error) {
 				// Do nothing
+				console.error('osu-decay.js | compareUser' + error);
 			}
 		}
 
