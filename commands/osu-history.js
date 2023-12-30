@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores, DBDuelRatingHistory } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiScores, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiGames } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -710,18 +710,26 @@ module.exports = {
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 			// Create rank history graph
-			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
-			let oldestScore = await DBOsuMultiScores.findOne({
-				attributes: ['gameEndDate'],
+			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
+			let oldestScore = await DBOsuMultiGameScores.findOne({
+				attributes: ['gameId'],
 				where: {
 					osuUserId: osuUser.osuUserId,
 					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard',
+					scoringType: 3,
+					mode: 0,
 				},
 				order: [
-					['gameEndDate', 'ASC']
+					['gameId', 'ASC']
 				]
+			});
+
+			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGames duelRatingDevelopment');
+			let oldestGame = await DBOsuMultiGames.findOne({
+				attributes: ['gameEndDate'],
+				where: {
+					gameId: oldestScore.gameId,
+				},
 			});
 
 			// Get the user's duel ratings
@@ -744,12 +752,12 @@ module.exports = {
 			});
 
 			let iterator = 0;
-			let startTime = date - oldestScore.gameEndDate;
+			let startTime = date - oldestGame.gameEndDate;
 
-			while (date > oldestScore.gameEndDate) {
+			while (date > oldestGame.gameEndDate) {
 				iterator++;
 				if (new Date() - lastUpdate > 15000) {
-					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestGame.gameEndDate))).toFixed(2)}%)`);
 					lastUpdate = new Date();
 				}
 
