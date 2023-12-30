@@ -182,6 +182,7 @@ module.exports = {
 		let compareUsers = [];
 
 		while (discordUsers.length > 0 && compareUsers.length < 5) {
+			console.log(user.name, decayRank, discordUsers.length, compareUsers.length);
 			let index = 0;
 			let difference = Infinity;
 
