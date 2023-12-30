@@ -213,8 +213,11 @@ module.exports = {
 					discordUsers.splice(index, 1);
 				}
 			} catch (error) {
-				// Do nothing
-				console.error('osu-decay.js | compareUser' + error);
+				if (error.message === 'Not found') {
+					discordUsers.splice(index, 1);
+				} else {
+					console.error('osu-decay.js | compareUser' + error);
+				}
 			}
 		}
 
