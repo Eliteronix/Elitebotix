@@ -71,8 +71,6 @@ module.exports = {
 
 		let username = interaction.options.getString('username');
 
-		console.log(username);
-
 		if (username === null) {
 			logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 1');
 			let discordUser = await DBDiscordUsers.findOne({
@@ -113,8 +111,6 @@ module.exports = {
 			username = discordUser.osuUserId;
 		}
 
-		console.log(username);
-
 		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -133,8 +129,6 @@ module.exports = {
 		}
 
 		let decayRank = interaction.options.getInteger('rank');
-
-		console.log(decayRank);
 
 		if (Number(user.pp.rank) >= decayRank) {
 			return await interaction.editReply(`${user.name} is already above #${humanReadable(decayRank)} (Currently: #${humanReadable(user.pp.rank)}).`);
@@ -175,8 +169,6 @@ module.exports = {
 			order: [['osuRank', 'ASC']],
 		});
 
-		console.log(discordUsers.length);
-
 		discordUsers = discordUsers.map(discordUser => {
 			return {
 				osuUserId: discordUser.osuUserId,
@@ -190,7 +182,6 @@ module.exports = {
 		let compareUsers = [];
 
 		while (discordUsers.length > 0 && compareUsers.length < 5) {
-			console.log(user.name, decayRank, discordUsers.length, compareUsers.length);
 			let index = 0;
 			let difference = Infinity;
 
