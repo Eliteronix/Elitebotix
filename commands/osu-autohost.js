@@ -370,7 +370,7 @@ module.exports = {
 			]
 		});
 
-		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiScores');
+		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiGameScores');
 		const player1Scores = await DBOsuMultiGameScores.findAll({
 			attributes: ['beatmapId'],
 			where: {
