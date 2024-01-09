@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
+const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
 const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause, logOsuAPICalls } = require('../utils');
@@ -859,30 +859,47 @@ module.exports = {
 				return await interaction.editReply(`Could not find user \`${player.replace(/`/g, '')}\`.`);
 			}
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
-			let userScores = await DBOsuMultiScores.findAll({
-				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores tournament');
+			let userScores = await DBOsuMultiGameScores.findAll({
+				attributes: ['matchId'],
 				where: {
 					osuUserId: user.id,
 					tourneyMatch: true,
-					verifiedAt: null,
-					matchEndDate: {
-						[Op.not]: null,
-					},
 					matchId: {
 						[Op.notIn]: matchIdsGettingProcessed,
 					},
 				},
-				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				group: ['matchId'],
 			});
 
 			if (userScores.length === 0) {
 				return await interaction.editReply(`No scores found for the player \`${player.replace(/`/g, '')}\`.`);
 			}
 
-			userScores.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches tournament');
+			let matches = await DBOsuMultiMatches.findAll({
+				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				where: {
+					tourneyMatch: true,
+					verifiedAt: null,
+					matchEndDate: {
+						[Op.not]: null,
+					},
+					matchId: {
+						[Op.in]: userScores.map((score) => score.matchId),
+					},
+				},
+				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				order: [
+					['matchId', 'DESC'],
+				],
+			});
 
-			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
+			if (matches.length === 0) {
+				return await interaction.editReply(`No matches found for the player \`${player.replace(/`/g, '')}\`.`);
+			}
+
+			let matchesPlayed = matches.map((match) => `${(new Date(match.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(match.matchStartDate).getUTCFullYear()} - ${match.matchName} - ${match.verificationComment} ----- https://osu.ppy.sh/community/matches/${match.matchId}`);
 
 			// eslint-disable-next-line no-undef
 			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${user.id}.txt` });
