@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
 const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -4909,9 +4909,26 @@ module.exports = {
 
 		catchMaps = catchMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update catcch');
-		updated = await DBOsuMultiScores.update({
-			mode: 'Catch the Beat',
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update catcch');
+		updated = await DBOsuMultiGames.update({
+			mode: 2,
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: catchMaps
+				},
+				mode: {
+					[Op.not]: 2
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Catch the Beat games that were in the wrong mode`);
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update catcch');
+		updated = await DBOsuMultiGameScores.update({
+			mode: 2,
 			pp: null,
 		}, {
 			where: {
@@ -4919,7 +4936,7 @@ module.exports = {
 					[Op.in]: catchMaps
 				},
 				mode: {
-					[Op.not]: 'Catch the Beat'
+					[Op.not]: 2
 				}
 			}
 		});
@@ -4931,9 +4948,26 @@ module.exports = {
 
 		maniaMaps = maniaMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update mania');
-		updated = await DBOsuMultiScores.update({
-			mode: 'Mania',
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update mania');
+		updated = await DBOsuMultiGames.update({
+			mode: 3,
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: maniaMaps
+				},
+				mode: {
+					[Op.not]: 3
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Mania games that were in the wrong mode`);
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update mania');
+		updated = await DBOsuMultiGameScores.update({
+			mode: 3,
 			pp: null,
 		}, {
 			where: {
@@ -4941,7 +4975,7 @@ module.exports = {
 					[Op.in]: maniaMaps
 				},
 				mode: {
-					[Op.not]: 'Mania'
+					[Op.not]: 3
 				}
 			}
 		});
@@ -4953,8 +4987,8 @@ module.exports = {
 		let weeksAgo = new Date();
 		weeksAgo.setDate(weeksAgo.getDate() - 58);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries reset unverified');
-		updated = await DBOsuMultiScores.update({
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset unverified');
+		updated = await DBOsuMultiMatches.update({
 			verifiedBy: null,
 		}, {
 			where: {
@@ -9111,26 +9145,36 @@ async function messageUserWithRetries(user, interaction, content) {
 }
 
 async function getOsuMapInfo(dbBeatmap) {
-	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores getOsuMapInfo');
-	const mapScores = await DBOsuMultiScores.findAll({
-		attributes: ['matchName'],
+	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores getOsuMapInfo');
+	const mapScores = await DBOsuMultiGameScores.findAll({
+		attributes: ['matchId'],
 		where: {
 			beatmapId: dbBeatmap.beatmapId,
+			tourneyMatch: true,
+			warmup: {
+				[Op.not]: true
+			}
+		}
+	});
+
+	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches getOsuMapInfo');
+	const matches = await DBOsuMultiMatches.findAll({
+		attributes: ['matchName'],
+		where: {
+			matchId: {
+				[Op.in]: mapScores.map(score => score.matchId)
+			},
 			tourneyMatch: true,
 			matchName: {
 				[Op.notLike]: 'MOTD:%',
 			},
-			[Op.or]: [
-				{ warmup: false },
-				{ warmup: null }
-			],
 		}
 	});
 
 	let tournaments = [];
 
-	for (let i = 0; i < mapScores.length; i++) {
-		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
+	for (let i = 0; i < matches.length; i++) {
+		let acronym = matches[i].matchName.replace(/:.+/gm, '');
 
 		if (tournaments.indexOf(acronym) === -1) {
 			tournaments.push(acronym);

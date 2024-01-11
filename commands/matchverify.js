@@ -622,7 +622,7 @@ module.exports = {
 
 					interaction.guild.channels.cache.get(channelId).send({ content: `\`\`\`${tourneyMatchChangedString}diff\n${validString} Valid: ${valid}\nComment: ${comment}\`\`\`https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`, allowedMentions: { 'users': [] } });
 
-					await interaction.followUp(`Updated ${gamesUpdated} games and ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
+					await interaction.followUp(`Updated ${gamesUpdated[0]} games and ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
 				} catch (error) {
 					if (error.message !== 'Invalid Webhook Token') {
 						console.error(error);
