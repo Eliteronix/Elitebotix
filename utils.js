@@ -4887,9 +4887,26 @@ module.exports = {
 
 		taikoMaps = taikoMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update taiko');
-		let updated = await DBOsuMultiScores.update({
-			mode: 'Taiko',
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update taiko');
+		let updated = await DBOsuMultiGames.update({
+			mode: 1,
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: taikoMaps
+				},
+				mode: {
+					[Op.not]: 1
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Taiko games that were in the wrong mode`);
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update taiko');
+		updated = await DBOsuMultiGameScores.update({
+			mode: 1,
 			pp: null,
 		}, {
 			where: {
@@ -4897,7 +4914,7 @@ module.exports = {
 					[Op.in]: taikoMaps
 				},
 				mode: {
-					[Op.not]: 'Taiko'
+					[Op.not]: 1
 				}
 			}
 		});
