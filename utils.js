@@ -3047,15 +3047,28 @@ module.exports = {
 		const lastHalfYear = new Date();
 		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
 
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiScores pastHalfYearScoreCount');
-		const pastHalfYearScoreCount = await DBOsuMultiScores.count({
+		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiGames pastHalfYearScoreCount');
+		const gameIdHalfYearAgo = await DBOsuMultiGames.findOne({
+			attributes: ['gameId'],
+			where: {
+				gameEndDate: {
+					[Op.gte]: lastHalfYear
+				}
+			},
+			order: [
+				['gameId', 'ASC']
+			]
+		});
+
+		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiGameScores pastHalfYearScoreCount');
+		const pastHalfYearScoreCount = await DBOsuMultiGameScores.count({
 			where: {
 				osuUserId: input.osuUserId,
 				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
-				gameEndDate: {
-					[Op.gte]: lastHalfYear
+				scoringType: 3,
+				mode: 0,
+				gameId: {
+					[Op.gte]: gameIdHalfYearAgo.gameId
 				}
 			}
 		});
