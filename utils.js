@@ -4512,9 +4512,9 @@ module.exports = {
 				if (dbBeatmap) {
 					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
 
-					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores pp update');
+					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores pp update');
 					try {
-						await DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+						await DBOsuMultiGameScores.update({ pp: pp }, { where: { id: inputScore.id } });
 					} catch (e) {
 						//Nothing
 					}
@@ -7540,7 +7540,7 @@ module.exports = {
 									],
 									where: {
 										osuUserId: osuUser.osuUserId,
-										mode: 'Standard',
+										mode: 0,
 										tourneyMatch: true,
 										score: {
 											[Op.gte]: 10000
@@ -7549,7 +7549,7 @@ module.exports = {
 								});
 
 								for (let j = 0; j < multiScores.length; j++) {
-									if (parseInt(multiScores[j].score) <= 10000 || multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+									if (multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
 										multiScores.splice(j, 1);
 										j--;
 									}
