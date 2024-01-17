@@ -28,7 +28,7 @@
 		"prom-client": "^14.1.1",
 		"rosu-pp": "^0.9.3",
 		"sequelize": "^6.26.0",
-		"sqlite3": "^5.1.2",
+		"sqlite3": "^5.1.7",
 		"tmi.js": "^1.8.5",
 		"weather-js": "^2.0.0"
 	},
