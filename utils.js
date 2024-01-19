@@ -6963,7 +6963,7 @@ module.exports = {
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					// eslint-disable-next-line no-undef
-					const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					// eslint-disable-next-line no-undef
 					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
@@ -7514,8 +7514,8 @@ module.exports = {
 							if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 								// console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 								//Get all scores from tournaments
-								logDatabaseQueries(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
-								let multiScores = await DBOsuMultiScores.findAll({
+								logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores processOsuTrack tournamentTopPlays');
+								let multiScores = await DBOsuMultiGameScores.findAll({
 									attributes: [
 										'id',
 										'score',
@@ -7525,7 +7525,6 @@ module.exports = {
 										'pp',
 										'beatmapId',
 										'createdAt',
-										'gameStartDate',
 										'osuUserId',
 										'count50',
 										'count100',
@@ -7535,8 +7534,9 @@ module.exports = {
 										'countMiss',
 										'maxCombo',
 										'perfect',
-										'matchName',
 										'mode',
+										'gameId',
+										'matchId',
 									],
 									where: {
 										osuUserId: osuUser.osuUserId,
@@ -7548,8 +7548,39 @@ module.exports = {
 									}
 								});
 
+								logDatabaseQueries(2, 'utils.js DBOsuMultiGames processOsuTrack tournamentTopPlays game data');
+								let multiGames = await DBOsuMultiGames.findAll({
+									attributes: [
+										'matchId',
+										'gameId',
+										'gameStartDate',
+									],
+									where: {
+										gameId: {
+											[Op.in]: multiScores.map(score => score.gameId)
+										}
+									}
+								});
+
+								logDatabaseQueries(2, 'utils.js DBOsuMultiMatches processOsuTrack tournamentTopPlays match data');
+								let multiMatches = await DBOsuMultiMatches.findAll({
+									attributes: [
+										'matchId',
+										'matchName',
+									],
+									where: {
+										matchId: {
+											[Op.in]: multiGames.map(game => game.matchId)
+										}
+									}
+								});
+
 								for (let j = 0; j < multiScores.length; j++) {
-									if (multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+									let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
+
+									let game = multiGames.find(game => game.gameId === multiScores[j].gameId);
+
+									if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1 || !match || !game) {
 										multiScores.splice(j, 1);
 										j--;
 									}

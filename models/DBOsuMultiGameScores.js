@@ -32,12 +32,14 @@ module.exports = (sequelize, DataTypes) => {
 		team: DataTypes.STRING,
 		pp: DataTypes.DECIMAL(10, 3),
 		warmup: DataTypes.BOOLEAN,
+		gameStartDate: DataTypes.DATE,
+		gameEndDate: DataTypes.DATE,
 		paranoid: true,
 	}, {
 		indexes: [
 			{
 				unique: false,
-				fields: ['osuUserId', 'matchId', 'gameId', 'tourneyMatch', 'beatmapId', 'mode', 'score']
+				fields: ['osuUserId', 'matchId', 'gameId', 'tourneyMatch', 'beatmapId', 'mode', 'score', 'gameStartDate', 'gameEndDate']
 			}
 		]
 	});
