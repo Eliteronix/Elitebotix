@@ -8,9 +8,6 @@ const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fs = require('fs');
 
-let gameIdsPerYearLowerBound = [];
-let gameIdsPerYearUpperBound = [];
-
 module.exports = {
 	name: 'osu-wrapped',
 	description: 'Sums up the year in osu! for a user',
@@ -167,74 +164,15 @@ module.exports = {
 			year = interaction.options.getInteger('year');
 		}
 
-		let lowerBoundGameId = gameIdsPerYearLowerBound[year];
-		let upperBoundGameId = gameIdsPerYearUpperBound[year];
-
-		if (!lowerBoundGameId || !upperBoundGameId) {
-			logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGames Get gameId lower bound');
-			let lowerBoundGameData = await DBOsuMultiGames.findOne({
-				attributes: ['gameId'],
-				where: {
-					gameEndDate: {
-						[Op.and]: {
-							[Op.gte]: new Date(`${year}-01-01`),
-							[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
-						}
-					},
-					tourneyMatch: true,
-					warmup: {
-						[Op.not]: true,
-					}
-				},
-				order: [
-					['gameId', 'ASC']
-				]
-			});
-
-			if (!lowerBoundGameData) {
-				return interaction.editReply(`\`${year}\` does not have any tournament data.`);
-			}
-
-			lowerBoundGameId = lowerBoundGameData.gameId;
-			gameIdsPerYearLowerBound[year] = lowerBoundGameId;
-
-			logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGames Get gameId upper bound');
-			let upperBoundGameData = await DBOsuMultiGames.findOne({
-				attributes: ['gameId'],
-				where: {
-					gameEndDate: {
-						[Op.and]: {
-							[Op.gte]: new Date(`${year}-01-01`),
-							[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
-						}
-					},
-					tourneyMatch: true,
-					warmup: {
-						[Op.not]: true,
-					}
-				},
-				order: [
-					['gameId', 'DESC']
-				]
-			});
-
-			if (!upperBoundGameData) {
-				return interaction.editReply(`\`${year}\` does not have any tournament data.`);
-			}
-
-			upperBoundGameId = upperBoundGameData.gameId;
-			gameIdsPerYearUpperBound[year] = upperBoundGameId;
-		}
-
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores matches played');
 		let multiMatchesPlayed = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId'],
 			where: {
 				osuUserId: osuUser.osuUserId,
-				gameId: {
+				gameEndDate: {
 					[Op.and]: {
-						[Op.gte]: lowerBoundGameId,
-						[Op.lte]: upperBoundGameId,
+						[Op.gte]: new Date(`${year}-01-01`),
+						[Op.lte]: new Date(`${year}-12-31 23:59:59.999 UTC`),
 					}
 				},
 				tourneyMatch: true,

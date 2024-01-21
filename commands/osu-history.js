@@ -218,6 +218,7 @@ module.exports = {
 				'mode',
 				'matchId',
 				'gameId',
+				'gameStartDate',
 				'team',
 			],
 			where: {
@@ -233,22 +234,11 @@ module.exports = {
 			],
 		});
 
-		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGames 1');
-		let multiGames = await DBOsuMultiGames.findAll({
-			attributes: ['gameId', 'gameStartDate'],
-			where: {
-				gameId: multiScores.map(score => score.gameId),
-			},
-		});
-
 		for (let i = 0; i < multiScores.length; i++) {
 			let match = multiMatches.find(match => match.matchId === multiScores[i].matchId);
-			let game = multiGames.find(game => game.gameId === multiScores[i].gameId);
 
 			multiScores[i].matchName = match.matchName;
 			multiScores[i].matchStartDate = match.matchStartDate;
-
-			multiScores[i].gameStartDate = game.gameStartDate;
 		}
 
 		let onlymatchhistory = false;
@@ -762,7 +752,7 @@ module.exports = {
 			// Create rank history graph
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
 			let oldestScore = await DBOsuMultiGameScores.findOne({
-				attributes: ['gameId'],
+				attributes: ['gameEndDate'],
 				where: {
 					osuUserId: osuUser.osuUserId,
 					tourneyMatch: true,
@@ -772,14 +762,6 @@ module.exports = {
 				order: [
 					['gameId', 'ASC']
 				]
-			});
-
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGames duelRatingDevelopment');
-			let oldestGame = await DBOsuMultiGames.findOne({
-				attributes: ['gameEndDate'],
-				where: {
-					gameId: oldestScore.gameId,
-				},
 			});
 
 			// Get the user's duel ratings
@@ -802,12 +784,12 @@ module.exports = {
 			});
 
 			let iterator = 0;
-			let startTime = date - oldestGame.gameEndDate;
+			let startTime = date - oldestScore.gameEndDate;
 
-			while (date > oldestGame.gameEndDate) {
+			while (date > oldestScore.gameEndDate) {
 				iterator++;
 				if (new Date() - lastUpdate > 15000) {
-					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestGame.gameEndDate))).toFixed(2)}%)`);
+					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
 					lastUpdate = new Date();
 				}
 

@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiGames } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -463,7 +463,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/osu-schedule.js DBOsuMultiGameScores');
 			const allScores = await DBOsuMultiGameScores.findAll({
-				attributes: ['gameId'],
+				attributes: ['gameStartDate'],
 				where: {
 					osuUserId: users[i],
 					score: {
@@ -472,29 +472,19 @@ module.exports = {
 				}
 			});
 
-			logDatabaseQueries(4, 'commands/osu-schedule.js DBOsuMultiGames');
-			const allGames = await DBOsuMultiGames.findAll({
-				attributes: ['gameStartDate'],
-				where: {
-					gameId: {
-						[Op.in]: allScores.map(score => score.gameId)
-					}
-				}
-			});
-
-			for (let j = 0; j < allGames.length; j++) {
-				if (weekday != 7 && new Date(allGames[j].gameStartDate).getUTCDay() != weekday) {
-					allGames.splice(j, 1);
+			for (let j = 0; j < allScores.length; j++) {
+				if (weekday != 7 && new Date(allScores[j].gameStartDate).getUTCDay() != weekday) {
+					allScores.splice(j, 1);
 					j--;
 				}
 			}
 
 			for (let j = 0; j < 24; j++) {
 				let count = 0;
-				for (let k = 0; k < allGames.length; k++) {
-					if (new Date(allGames[k].gameStartDate).getUTCHours() === j) {
+				for (let k = 0; k < allScores.length; k++) {
+					if (new Date(allScores[k].gameStartDate).getUTCHours() === j) {
 						count++;
-						allGames.splice(k, 1);
+						allScores.splice(k, 1);
 						k--;
 					}
 				}

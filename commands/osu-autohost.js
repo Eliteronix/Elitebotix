@@ -357,27 +357,14 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiGames Get gameId');
-		let threeMonthsAgoGameId = await DBOsuMultiGames.findOne({
-			attributes: ['gameId'],
-			where: {
-				gameStartDate: {
-					[Op.gte]: threeMonthsAgo,
-				}
-			},
-			order: [
-				['gameId', 'ASC']
-			]
-		});
-
 		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiGameScores');
 		const player1Scores = await DBOsuMultiGameScores.findAll({
 			attributes: ['beatmapId'],
 			where: {
 				osuUserId: commandUser.osuUserId,
 				mode: 0,
-				gameId: {
-					[Op.gte]: threeMonthsAgoGameId.gameId,
+				gameStartDate: {
+					[Op.gte]: threeMonthsAgo,
 				}
 			}
 		});

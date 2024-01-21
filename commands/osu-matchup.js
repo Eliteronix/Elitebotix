@@ -1,13 +1,12 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGames, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
-const { Sequelize } = require('sequelize');
 
 module.exports = {
 	name: 'osu-matchup',
@@ -771,19 +770,6 @@ module.exports = {
 
 		let beatmaps = [];
 
-		// Find the lowest gameId in the timeframe
-		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuMultiGames');
-		const lowestGameId = await DBOsuMultiGames.findOne({
-			attributes: [
-				[Sequelize.fn('MIN', Sequelize.col('gameId')), 'gameId']
-			],
-			where: {
-				gameEndDate: {
-					[Op.gte]: timeframe
-				}
-			}
-		});
-
 		//Loop throught team one and get all their multi scores
 		for (let i = 0; i < team1.length; i++) {
 			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiGameScores 1User${i + 1}`);
@@ -809,8 +795,8 @@ module.exports = {
 					warmup: {
 						[Op.not]: true
 					},
-					gameId: {
-						[Op.gte]: lowestGameId.gameId
+					gameEndDate: {
+						[Op.gte]: timeframe
 					}
 				},
 				order: [['gameId', 'DESC']],
@@ -914,8 +900,8 @@ module.exports = {
 					warmup: {
 						[Op.not]: true
 					},
-					gameId: {
-						[Op.gte]: lowestGameId.gameId
+					gameEndDate: {
+						[Op.gte]: timeframe
 					},
 					beatmapId: {
 						[Op.in]: beatmaps.map(b => b.beatmapId)

@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -266,7 +266,7 @@ module.exports = {
 					'id',
 					'score',
 					'matchId',
-					'gameId',
+					'gameStartDate',
 					'gameRawMods',
 					'rawMods',
 					'teamType',
@@ -302,21 +302,6 @@ module.exports = {
 				return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
 			}
 
-			let gameIds = [...new Set(multiScores.map(score => score.gameId))];
-
-			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiGames');
-			let multiGames = await DBOsuMultiGames.findAll({
-				attributes: [
-					'gameId',
-					'gameStartDate',
-				],
-				where: {
-					gameId: {
-						[Op.in]: gameIds
-					},
-				},
-			});
-
 			let matchIds = [...new Set(multiScores.map(score => score.matchId))];
 
 			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiMatches');
@@ -335,10 +320,8 @@ module.exports = {
 			for (let i = 0; i < multiScores.length; i++) {
 				let score = multiScores[i];
 
-				let game = multiGames.find(game => game.gameId === score.gameId);
 				let match = multiMatches.find(match => match.matchId === score.matchId);
 
-				score.gameStartDate = game.gameStartDate;
 				score.matchName = match.matchName;
 			}
 

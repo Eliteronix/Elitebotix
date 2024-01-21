@@ -1,4 +1,4 @@
-﻿const { DBDiscordUsers, DBOsuMultiGames, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../dbObjects');
+﻿const { DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../dbObjects');
 const osu = require('node-osu');
 const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, getBeatmapModeId, getModBits, multiToBanchoScore, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -504,7 +504,6 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			attributes: [
 				'id',
 				'matchId',
-				'gameId',
 				'score',
 				'gameRawMods',
 				'rawMods',
@@ -521,6 +520,8 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				'maxCombo',
 				'perfect',
 				'mode',
+				'gameStartDate',
+				'teamType',
 			],
 			where: {
 				beatmapId: beatmap.beatmapId,
@@ -530,22 +531,6 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				},
 			},
 			order: [['score', 'DESC']],
-		});
-
-		let gameIds = [...new Set(beatmapScores.map((item) => item.gameId))];
-
-		logDatabaseQueries(4, 'commands/osu-score.js DBOsuMultiGames');
-		const games = await DBOsuMultiGames.findAll({
-			attributes: [
-				'gameId',
-				'gameStartDate',
-				'teamType',
-			],
-			where: {
-				gameId: {
-					[Op.in]: gameIds,
-				},
-			},
 		});
 
 		let matchIds = [...new Set(beatmapScores.map((item) => item.matchId))];
@@ -565,11 +550,8 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 
 		// Add game start date and match name to beatmapScores
 		for (let i = 0; i < beatmapScores.length; i++) {
-			let game = games.find((game) => game.gameId === beatmapScores[i].gameId);
 			let match = matches.find((match) => match.matchId === beatmapScores[i].matchId);
 
-			beatmapScores[i].gameStartDate = game.gameStartDate;
-			beatmapScores[i].teamType = game.teamType;
 			beatmapScores[i].matchName = match.matchName;
 		}
 

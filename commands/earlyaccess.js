@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
+const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores } = require('../dbObjects');
 const { developers, salesmen, showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuBeatmap, getIDFromPotentialOsuLink } = require('../utils');
@@ -114,29 +114,12 @@ module.exports = {
 			//Get all the scores for the map
 			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores tournamentDifficulty');
 			let scores = await DBOsuMultiGameScores.findAll({
-				attributes: ['osuUserId', 'score', 'rawMods', 'gameRawMods', 'warmup', 'gameId'],
+				attributes: ['osuUserId', 'score', 'rawMods', 'gameRawMods', 'warmup', 'gameStartDate'],
 				where: {
 					beatmapId: beatmapId,
 					freeMod: false,
 				}
 			});
-
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGames tournamentDifficulty');
-			let games = await DBOsuMultiGames.findAll({
-				attributes: ['gameId', 'gameStartDate'],
-				where: {
-					gameId: {
-						[Op.in]: scores.map(s => s.gameId),
-					},
-				}
-			});
-
-			// add the game start date to the scores
-			for (let i = 0; i < scores.length; i++) {
-				let game = games.find(g => g.gameId === scores[i].gameId);
-
-				scores[i].gameStartDate = game.gameStartDate;
-			}
 
 			let plays = [];
 

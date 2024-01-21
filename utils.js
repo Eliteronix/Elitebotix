@@ -3047,19 +3047,6 @@ module.exports = {
 		const lastHalfYear = new Date();
 		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
 
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiGames pastHalfYearScoreCount');
-		const gameIdHalfYearAgo = await DBOsuMultiGames.findOne({
-			attributes: ['gameId'],
-			where: {
-				gameEndDate: {
-					[Op.gte]: lastHalfYear
-				}
-			},
-			order: [
-				['gameId', 'ASC']
-			]
-		});
-
 		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiGameScores pastHalfYearScoreCount');
 		const pastHalfYearScoreCount = await DBOsuMultiGameScores.count({
 			where: {
@@ -3067,8 +3054,8 @@ module.exports = {
 				tourneyMatch: true,
 				scoringType: 3,
 				mode: 0,
-				gameId: {
-					[Op.gte]: gameIdHalfYearAgo.gameId
+				gameEndDate: {
+					[Op.gte]: lastHalfYear
 				}
 			}
 		});
@@ -6963,7 +6950,7 @@ module.exports = {
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					// eslint-disable-next-line no-undef
-					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					// eslint-disable-next-line no-undef
 					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
@@ -7535,7 +7522,7 @@ module.exports = {
 										'maxCombo',
 										'perfect',
 										'mode',
-										'gameId',
+										'gameStartDate',
 										'matchId',
 									],
 									where: {
@@ -7548,20 +7535,6 @@ module.exports = {
 									}
 								});
 
-								logDatabaseQueries(2, 'utils.js DBOsuMultiGames processOsuTrack tournamentTopPlays game data');
-								let multiGames = await DBOsuMultiGames.findAll({
-									attributes: [
-										'matchId',
-										'gameId',
-										'gameStartDate',
-									],
-									where: {
-										gameId: {
-											[Op.in]: multiScores.map(score => score.gameId)
-										}
-									}
-								});
-
 								logDatabaseQueries(2, 'utils.js DBOsuMultiMatches processOsuTrack tournamentTopPlays match data');
 								let multiMatches = await DBOsuMultiMatches.findAll({
 									attributes: [
@@ -7570,7 +7543,7 @@ module.exports = {
 									],
 									where: {
 										matchId: {
-											[Op.in]: multiGames.map(game => game.matchId)
+											[Op.in]: multiScores.map(score => score.matchId)
 										}
 									}
 								});
@@ -7578,9 +7551,7 @@ module.exports = {
 								for (let j = 0; j < multiScores.length; j++) {
 									let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
 
-									let game = multiGames.find(game => game.gameId === multiScores[j].gameId);
-
-									if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1 || !match || !game) {
+									if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1 || !match) {
 										multiScores.splice(j, 1);
 										j--;
 									}
