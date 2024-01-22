@@ -415,6 +415,8 @@ module.exports = {
 														lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
 													}
 
+													console.log(lastMessageType, lastMessage);
+
 													await lastMessage.react('<:COMPARE:827974793365159997>');
 													await lastMessage.react('🗺️');
 													await lastMessage.react('🥇');
