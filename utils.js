@@ -5461,22 +5461,18 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
-		const playerScores = await DBOsuMultiScores.findAll({
+		module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiGameScores player scores');
+		const playerScores = await DBOsuMultiGameScores.findAll({
 			attributes: ['osuUserId', 'beatmapId', 'gameStartDate'],
 			where: {
 				osuUserId: {
 					[Op.in]: users.map(user => user.osuUserId),
 				},
 				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
+				mode: 0,
+				warmup: {
+					[Op.not]: true,
+				}
 			}
 		});
 
