@@ -4814,11 +4814,11 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiScores = new Sequelize('database', 'username', 'password', {
+		const multiMatches = new Sequelize('database', 'username', 'password', {
 			host: 'localhost',
 			dialect: 'sqlite',
 			logging: false,
-			storage: 'databases/multiScores.sqlite',
+			storage: 'databases/multiMatches.sqlite',
 			retry: {
 				max: 15, // Maximum retry 15 times
 				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -4827,9 +4827,133 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 10) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates');
-			let result = await multiScores.query(
-				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id)',
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
+			let result = await multiMatches.query(
+				'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
+			);
+
+			iterations++;
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let matchIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (matchIds.indexOf(result[0][i].matchId) === -1) {
+						matchIds.push(result[0][i].matchId);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiMatches.findOne({
+							attributes: ['id', 'matchId', 'updatedAt'],
+							where: {
+								id: result[0][i].id
+							}
+						});
+
+						deleted++;
+
+						// eslint-disable-next-line no-console
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'updatedAt', duplicate.updatedAt);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate scores`);
+
+		duplicates = true;
+		deleted = 0;
+		iterations = 0;
+
+		const multiGames = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'databases/multiGames.sqlite',
+			retry: {
+				max: 15, // Maximum retry 15 times
+				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+			},
+		});
+
+		while (duplicates && iterations < 10) {
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates');
+			let result = await multiGames.query(
+				'SELECT * FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
+			);
+
+			iterations++;
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let gameIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (gameIds.indexOf(result[0][i].gameId) === -1) {
+						gameIds.push(result[0][i].gameId);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiGames.findOne({
+							attributes: ['id', 'matchId', 'gameId', 'updatedAt'],
+							where: {
+								id: result[0][i].id
+							}
+						});
+
+						deleted++;
+
+						// eslint-disable-next-line no-console
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'updatedAt', duplicate.updatedAt);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate scores`);
+
+		duplicates = true;
+		deleted = 0;
+		iterations = 0;
+
+		const multiGameScores = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'databases/multiGameScores.sqlite',
+			retry: {
+				max: 15, // Maximum retry 15 times
+				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+			},
+		});
+
+		while (duplicates && iterations < 10) {
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates');
+			let result = await multiGameScores.query(
+				'SELECT * FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
 
 			iterations++;
@@ -4844,9 +4968,9 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuMultiScores.findOne({
-							attributes: ['id', 'matchId', 'gameId', 'osuUserId', 'matchStartDate', 'updatedAt'],
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiGameScores.findOne({
+							attributes: ['id', 'matchId', 'gameId', 'osuUserId', 'updatedAt'],
 							where: {
 								id: result[0][i].id
 							}
@@ -4855,7 +4979,7 @@ module.exports = {
 						deleted++;
 
 						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 						try {
@@ -5029,13 +5153,28 @@ module.exports = {
 			},
 		});
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
-		updated = await DBOsuMultiScores.update({
+		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
+		updated = await DBOsuMultiGames.update({
 			warmup: null,
 		}, {
 			where: {
-				matchEndDate: null,
-				tourneyMatch: true,
+				matchId: {
+					[Op.in]: matchesWithoutEndDate.map(match => match.matchId)
+				},
+				warmup: {
+					[Op.not]: null
+				}
+			}
+		});
+
+		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
+		updated = await DBOsuMultiGameScores.update({
+			warmup: null,
+		}, {
+			where: {
+				matchId: {
+					[Op.in]: matchesWithoutEndDate.map(match => match.matchId)
+				},
 				warmup: {
 					[Op.not]: null
 				}
