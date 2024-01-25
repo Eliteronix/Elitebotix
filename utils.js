@@ -5020,6 +5020,15 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
 
+		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
+		let matchesWithoutEndDate = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
+			where: {
+				matchEndDate: null,
+				tourneyMatch: true,
+			},
+		});
+
 		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		updated = await DBOsuMultiScores.update({
 			warmup: null,
