@@ -4069,14 +4069,14 @@ module.exports = {
 					return;
 				}
 
-				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores lastMultiScore');
-				let lastMultiScore = await DBOsuMultiScores.findOne({
-					attributes: ['matchId', 'matchName', 'matchEndDate'],
+				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores lastMultiScore');
+				let lastMultiScore = await DBOsuMultiGameScores.findOne({
+					attributes: ['matchId'],
 					where: {
 						osuUserId: discordUser.osuUserId
 					},
 					order: [
-						['gameStartDate', 'DESC']
+						['gameId', 'DESC']
 					]
 				});
 
@@ -4084,11 +4084,19 @@ module.exports = {
 					return;
 				}
 
-				if (lastMultiScore.matchEndDate) {
-					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches lastMultiScore');
+				let lastMultiMatch = await DBOsuMultiMatches.findOne({
+					attributes: ['matchName', 'matchEndDate'],
+					where: {
+						matchId: lastMultiScore.matchId
+					},
+				});
+
+				if (lastMultiMatch.matchEndDate) {
+					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiMatch.matchId}`);
 				}
 
-				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiMatch.matchId}`);
 			}
 
 			if (msg === '!whatishappiness') {
