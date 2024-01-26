@@ -4532,8 +4532,8 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries missingUsers');
-		let missingUsers = await DBOsuMultiScores.findAll({
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries missingUsers');
+		let missingUsers = await DBOsuMultiGameScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
 				osuUserId: {
@@ -4573,29 +4573,62 @@ module.exports = {
 			return;
 		}
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries mostplayed');
-		let mostplayed = await DBOsuMultiScores.findAll({
-			attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
+		let mostplayed = await DBOsuMultiGames.findAll({
+			attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 			where: {
 				warmup: false,
 				beatmapId: {
 					[Op.gt]: 0,
 				},
-				matchName: {
-					[Op.and]: {
-						[Op.notLike]: 'ETX%:%',
-						[Op.notLike]: 'o!mm%:%',
-					}
-				},
 				tourneyMatch: true,
 			},
-			group: ['beatmapId'],
-			order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
+			group: ['matchId', 'beatmapId'],
+			order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
 		});
 
+		let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
+		let matchMakingMatchData = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
+			where: {
+				matchId: matchIds,
+				matchName: {
+					[Op.and]: {
+						[Op.like]: 'ETX%:%',
+						[Op.like]: 'o!mm%:%',
+					}
+				},
+			},
+		});
+
+		let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
+
+		// Filter out matches that are in matchMakingMatchIds
+		mostplayed = mostplayed.filter(item => !matchMakingMatchIds.includes(item.matchId));
+
+		let mostPlayedBeatmaps = [];
+		let mostplayedBeatmapIds = [];
+
+		for (let i = 0; i < mostplayed.length; i++) {
+			let index = mostplayedBeatmapIds.indexOf(mostplayed[i].beatmapId);
+
+			if (index !== -1) {
+				mostPlayedBeatmaps[index].playcount = mostplayed[i].dataValues.playcount + mostPlayedBeatmaps[index].playcount;
+			} else {
+				mostPlayedBeatmaps.push({
+					beatmapId: mostplayed[i].beatmapId,
+					playcount: mostplayed[i].dataValues.playcount,
+				});
+
+				mostplayedBeatmapIds.push(mostplayed[i].beatmapId);
+			}
+		}
+
 		// Filter out maps that have less than 250 plays
-		let popular = mostplayed.filter(map => map.dataValues.playcount > 250);
-		popular = popular.map(map => map.dataValues.beatmapId);
+		let popular = mostPlayedBeatmaps.filter(map => map.playcount > 250);
+		popular = popular.map(map => map.beatmapId);
 
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');

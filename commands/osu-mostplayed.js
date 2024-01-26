@@ -418,6 +418,7 @@ module.exports = {
 						beatmapId: {
 							[Op.gt]: 0,
 						},
+						tourneyMatch: true,
 					},
 					group: ['beatmapId'],
 					order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
@@ -431,6 +432,7 @@ module.exports = {
 						beatmapId: {
 							[Op.gt]: 0,
 						},
+						tourneyMatch: true,
 					},
 					group: ['matchId', 'beatmapId'],
 					order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
@@ -438,13 +440,15 @@ module.exports = {
 
 				let matchIds = [...new Set(mostplayedGrouped.map(item => item.matchId))];
 
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiMatches 2');
 				let matchMakingMatchData = await DBOsuMultiMatches.findAll({
+					attributes: ['matchId'],
 					where: {
 						matchId: matchIds,
 						matchName: {
 							[Op.and]: {
-								[Op.notLike]: 'ETX%:%',
-								[Op.notLike]: 'o!mm%:%',
+								[Op.like]: 'ETX%:%',
+								[Op.like]: 'o!mm%:%',
 							}
 						},
 					},
@@ -453,7 +457,7 @@ module.exports = {
 				let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
 
 				// Filter out matches that are not in the match making queue
-				mostplayedGrouped = mostplayedGrouped.filter(item => matchMakingMatchIds.includes(item.matchId));
+				mostplayedGrouped = mostplayedGrouped.filter(item => !matchMakingMatchIds.includes(item.matchId));
 
 				// Sum up the playcount of the same beatmap in different matches
 				mostplayed = [];
