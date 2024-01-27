@@ -2757,23 +2757,23 @@ module.exports = {
 	},
 	getScoreModpool(dbScore) {
 		//Evaluate with which mods the game was played
-		if (dbScore.freeMod || dbScore.rawMods !== '0') {
+		if (dbScore.freeMod || dbScore.rawMods !== 0) {
 			return 'FM';
 		}
 
-		if (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1') {
+		if (dbScore.gameRawMods === 0 || dbScore.gameRawMods === 1) {
 			return 'NM';
 		}
 
-		if (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9') {
+		if (dbScore.gameRawMods === 8 || dbScore.gameRawMods === 9) {
 			return 'HD';
 		}
 
-		if (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17') {
+		if (dbScore.gameRawMods === 16 || dbScore.gameRawMods === 17) {
 			return 'HR';
 		}
 
-		if (parseInt(dbScore.gameRawMods) > 63 && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
+		if (dbScore.gameRawMods > 63 && (dbScore.gameRawMods === 64 || dbScore.gameRawMods === 65 || dbScore.gameRawMods === 576 || dbScore.gameRawMods === 577)) {
 			return 'DT';
 		}
 
@@ -3083,33 +3083,31 @@ module.exports = {
 		}
 
 		//Get the tournament data either limited by the date
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
-		let userScores = await DBOsuMultiScores.findAll({
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores getUserDuelStarRating');
+		let userScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'gameId',
 				'beatmapId',
 				'score',
 				'matchId',
-				'matchName',
-				'matchStartDate',
 				'gameRawMods',
 				'rawMods',
 				'count300',
 				'count100',
 				'count50',
-				'countMiss',
-				'verifiedBy',
-				'verifiedAt'
+				'countMiss'
 			],
 			where: {
 				osuUserId: input.osuUserId,
 				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
+				scoringType: 3,
+				mode: 0,
+				score: {
+					[Op.gt]: 10000
+				},
+				warmup: {
+					[Op.not]: true
+				},
 				[Op.and]: [
 					{
 						gameEndDate: {
@@ -3120,7 +3118,28 @@ module.exports = {
 						gameEndDate: {
 							[Op.gte]: startDate
 						}
-					},
+					}
+				]
+			},
+			order: [
+				['gameId', 'DESC']
+			]
+		});
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches getUserDuelStarRating');
+		let userMatches = await DBOsuMultiMatches.findAll({
+			attributes: [
+				'matchId',
+				'matchName',
+				'matchStartDate',
+				'verifiedBy',
+				'verifiedAt'
+			],
+			where: {
+				matchId: {
+					[Op.in]: userScores.map(score => score.matchId)
+				},
+				[Op.and]: [
 					{
 						[Op.not]: [
 							{
@@ -3143,22 +3162,27 @@ module.exports = {
 			}
 		});
 
-		//Sort it by game ID
-		userScores.sort((a, b) => {
-			return parseInt(b.gameId) - parseInt(a.gameId);
-		});
+		//Add the match data to the scores
+		for (let i = 0; i < userScores.length; i++) {
+			let match = userMatches.find(match => match.matchId === userScores[i].matchId);
+
+			if (!match) {
+				userScores.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			userScores[i].matchName = match.matchName;
+			userScores[i].matchStartDate = match.matchStartDate;
+			userScores[i].verifiedBy = match.verifiedBy;
+			userScores[i].verifiedAt = match.verifiedAt;
+		}
 
 		// Get the modpool ratios for the first 100 maps for later
 		const modPoolAmounts = [0, 0, 0, 0, 0];
 
 		//Get ratio of modPools played maps
 		for (let i = 0; i < userScores.length && i < 100; i++) {
-			if (parseInt(userScores[i].score) <= 10000) {
-				userScores.splice(i, 1);
-				i--;
-				continue;
-			}
-
 			modPoolAmounts[modPools.indexOf(module.exports.getScoreModpool(userScores[i]))]++;
 		}
 
@@ -3169,14 +3193,8 @@ module.exports = {
 			const userMapIds = [];
 			const userMaps = [];
 
-			// Don't count plays with more than 10% misses
+			// Don't count plays with more than 15% misses
 			for (let i = 0; i < userScores.length; i++) {
-				if (parseInt(userScores[i].score) <= 10000) {
-					userScores.splice(i, 1);
-					i--;
-					continue;
-				}
-
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
 				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
