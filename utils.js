@@ -2594,21 +2594,39 @@ module.exports = {
 								let doubleTimeMap = false;
 								let freeModMap = false;
 
-								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiScores getOsuBeatmap');
-								let tourneyScores = await DBOsuMultiScores.findAll({
-									attributes: ['gameRawMods', 'rawMods', 'freeMod'],
+								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiGameScores getOsuBeatmap');
+								let tourneyScores = await DBOsuMultiGameScores.findAll({
+									attributes: ['gameRawMods', 'rawMods', 'freeMod', 'matchId'],
 									where: {
 										beatmapId: beatmaps[0].id,
 										tourneyMatch: true,
+										warmup: {
+											[Op.not]: true,
+										},
+									}
+								});
+
+								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiMatches getOsuBeatmap');
+								let tourneyMatches = await DBOsuMultiMatches.findAll({
+									attributes: ['matchId'],
+									where: {
+										matchId: {
+											[Op.in]: tourneyScores.map(x => x.matchId),
+										},
 										matchName: {
 											[Op.notLike]: 'MOTD:%',
 										},
-										[Op.or]: [
-											{ warmup: false },
-											{ warmup: null }
-										],
 									}
 								});
+
+								for (let i = 0; i < tourneyScores.length; i++) {
+									let match = tourneyMatches.find(x => x.matchId === tourneyScores[i].matchId);
+
+									if (!match) {
+										tourneyScores.splice(i, 1);
+										i--;
+									}
+								}
 
 								if (tourneyScores.length > 0) {
 									tourneyMap = true;
