@@ -1722,6 +1722,8 @@ module.exports = {
 			}
 		});
 
+		let games = [];
+
 		for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 			//Define if the game is freemod or not
 			let freeMod = false;
@@ -1761,6 +1763,25 @@ module.exports = {
 			let warmup = warmupCheckResult.warmup;
 
 			let warmupDecidedByAmount = warmupCheckResult.byAmount;
+
+			games.push({
+				matchId: match.id,
+				gameId: match.games[gameIndex].id,
+				tourneyMatch: tourneyMatch,
+				// scoringType: DataTypes.INTEGER,
+				// mode: DataTypes.INTEGER,
+				beatmapId: match.games[gameIndex].beatmapId.toString(),
+				// gameRawMods: DataTypes.INTEGER,
+				// gameStartDate: DataTypes.DATE,
+				// gameEndDate: DataTypes.DATE,
+				// freeMod: DataTypes.BOOLEAN,
+				// forceMod: DataTypes.BOOLEAN,
+				// warmup: DataTypes.BOOLEAN,
+				// warmupDecidedByAmount: DataTypes.BOOLEAN,
+				// teamType: DataTypes.INTEGER,
+				// scores: DataTypes.INTEGER,
+			});
+			console.log('this is just here to throw an error so that I can find it right away, not gonna be deployed');
 
 			for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 				//Calculate evaluation
@@ -1972,6 +1993,32 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 			}
+		}
+
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Get existing match');
+		let existingMatch = await DBOsuMultiMatches.findOne({
+			attributes: ['id', 'matchName', 'tourneyMatch', 'matchStartDate', 'matchEndDate'],
+			where: {
+				matchId: match.id,
+			}
+		});
+
+		if (existingMatch) {
+			existingMatch.matchName = match.name;
+			existingMatch.tourneyMatch = tourneyMatch;
+			existingMatch.matchStartDate = match.raw_start;
+			existingMatch.matchEndDate = match.raw_end;
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Update existing match');
+			await existingMatch.save();
+		} else {
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Create new match');
+			await DBOsuMultiMatches.create({
+				matchId: match.id,
+				matchName: match.name,
+				tourneyMatch: tourneyMatch,
+				matchStartDate: match.raw_start,
+				matchEndDate: match.raw_end,
+			});
 		}
 
 		//Set the tournament flags on the corresponding beatmaps
