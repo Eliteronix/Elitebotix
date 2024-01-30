@@ -1750,12 +1750,22 @@ module.exports = {
 			}
 		});
 
+		// Adapt the timespan to make sure the matches are included
+		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
+		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
+
 		let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
 			where: {
 				matchName: {
 					[Op.like]: `%${acronym}%:%`,
-				}
+				},
+				matchStartDate: {
+					[Op.gte]: weeksPrior
+				},
+				matchEndDate: {
+					[Op.lte]: weeksAfter
+				},
 			}
 		});
 
@@ -2066,6 +2076,23 @@ module.exports = {
 
 		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Get existing games');
 		let existingGames = await DBOsuMultiGames.findAll({
+			attributes: [
+				'id',
+				'gameId',
+				'tourneyMatch',
+				'scoringType',
+				'mode',
+				'beatmapId',
+				'gameRawMods',
+				'gameStartDate',
+				'gameEndDate',
+				'freeMod',
+				'forceMod',
+				'warmup',
+				'warmupDecidedByAmount',
+				'teamType',
+				'scores'
+			],
 			where: {
 				matchId: match.id,
 			}
@@ -2104,7 +2131,13 @@ module.exports = {
 
 		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Get existing match');
 		let existingMatch = await DBOsuMultiMatches.findOne({
-			attributes: ['id', 'matchName', 'tourneyMatch', 'matchStartDate', 'matchEndDate'],
+			attributes: [
+				'id',
+				'matchName',
+				'tourneyMatch',
+				'matchStartDate',
+				'matchEndDate'
+			],
 			where: {
 				matchId: match.id,
 			}
