@@ -2046,16 +2046,13 @@ module.exports = {
 								}
 							}
 
-							console.log('Still something to do here - throws error thanks to linter');
-							//Set back warmup flag if it was set by amount
-							for (let i = 0; i < sameTournamentMatches.length; i++) {
-								if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
-									&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentMatches[i].beatmapId)
-									&& sameTournamentMatches[i].matchId != match.id
-									|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
-									&& sameTournamentMatches[i].matchId != match.id) {
-									sameTournamentMatches[i].warmup = null;
-									await sameTournamentMatches[i].save();
+							//Set back warmup flag if it was set by amount | warmup = false is always gonna get reset | the rest only if the map was played
+							for (let i = 0; i < sameTournamentGames.length; i++) {
+								if (sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup !== null
+									&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentGames[i].beatmapId)
+									|| sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup === false) {
+									sameTournamentGames[i].warmup = null;
+									await sameTournamentGames[i].save();
 								}
 							}
 
@@ -2077,7 +2074,7 @@ module.exports = {
 		let newGames = [];
 
 		for (let i = 0; i < games.length; i++) {
-			let existingGame = existingGames.find(x => x.gameId === games[i].gameId);
+			let existingGame = existingGames.find(x => x.gameId === parseInt(games[i].gameId));
 
 			if (existingGame) {
 				existingGame.tourneyMatch = games[i].tourneyMatch;
