@@ -1764,46 +1764,81 @@ module.exports = {
 
 			let warmupDecidedByAmount = warmupCheckResult.byAmount;
 
+			let gameScores = [];
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				gameScores.push(match.games[gameIndex].scores[i]);
+			}
+
+			gameScores.sort((a, b) => {
+				return parseInt(b.score) - parseInt(a.score);
+			});
+
+			for (let i = 0; i < gameScores.length; i++) {
+				if (parseInt(gameScores[i].score) < 10000) {
+					gameScores.splice(i, 1);
+					i--;
+				}
+			}
+
+			let scoringType = null;
+
+			if (match.games[gameIndex].scoringType === 'Score') {
+				scoringType = 0;
+			} else if (match.games[gameIndex].scoringType === 'Accuracy') {
+				scoringType = 1;
+			} else if (match.games[gameIndex].scoringType === 'Combo') {
+				scoringType = 2;
+			} else if (match.games[gameIndex].scoringType === 'Score v2') {
+				scoringType = 3;
+			}
+
+			let mode = null;
+
+			if (match.games[gameIndex].mode === 'Standard') {
+				mode = 0;
+			} else if (match.games[gameIndex].mode === 'Taiko') {
+				mode = 1;
+			} else if (match.games[gameIndex].mode === 'Catch the Beat') {
+				mode = 2;
+			} else if (match.games[gameIndex].mode === 'Mania') {
+				mode = 3;
+			}
+
+			let teamType = null;
+
+			if (match.games[gameIndex].teamType === 'Head to Head') {
+				teamType = 0;
+			} else if (match.games[gameIndex].teamType === 'Tag Co-op') {
+				teamType = 1;
+			} else if (match.games[gameIndex].teamType === 'Team vs') {
+				teamType = 2;
+			} else if (match.games[gameIndex].teamType === 'Tag Team vs') {
+				teamType = 3;
+			}
+
 			games.push({
 				matchId: match.id,
 				gameId: match.games[gameIndex].id,
 				tourneyMatch: tourneyMatch,
-				// scoringType: DataTypes.INTEGER,
-				// mode: DataTypes.INTEGER,
-				beatmapId: match.games[gameIndex].beatmapId.toString(),
-				// gameRawMods: DataTypes.INTEGER,
-				// gameStartDate: DataTypes.DATE,
-				// gameEndDate: DataTypes.DATE,
-				// freeMod: DataTypes.BOOLEAN,
-				// forceMod: DataTypes.BOOLEAN,
-				// warmup: DataTypes.BOOLEAN,
-				// warmupDecidedByAmount: DataTypes.BOOLEAN,
-				// teamType: DataTypes.INTEGER,
-				// scores: DataTypes.INTEGER,
+				scoringType: scoringType,
+				mode: mode,
+				beatmapId: match.games[gameIndex].beatmapId,
+				gameRawMods: match.games[gameIndex].raw_mods,
+				gameStartDate: match.games[gameIndex].raw_start,
+				gameEndDate: match.games[gameIndex].raw_end,
+				freeMod: freeMod,
+				forceMod: forceMod,
+				warmup: warmup,
+				warmupDecidedByAmount: warmupDecidedByAmount,
+				teamType: teamType,
+				scores: gameScores.length,
 			});
-			console.log('this is just here to throw an error so that I can find it right away, not gonna be deployed');
 
 			for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 				//Calculate evaluation
 				let evaluation = null;
 
-				let gameScores = [];
-				for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
-					gameScores.push(match.games[gameIndex].scores[i]);
-				}
-
 				if (gameScores.length > 1) {
-					gameScores.sort((a, b) => {
-						return parseInt(b.score) - parseInt(a.score);
-					});
-
-					for (let i = 0; i < gameScores.length; i++) {
-						if (parseInt(gameScores[i].score) < 10000) {
-							gameScores.splice(i, 1);
-							i--;
-						}
-					}
-
 					let sortedScores = [];
 					for (let j = 0; j < gameScores.length; j++) {
 						//Remove the own score to make it odd for the middle score
@@ -1862,8 +1897,8 @@ module.exports = {
 							matchId: match.id,
 							matchName: match.name,
 							gameId: match.games[gameIndex].id,
-							scoringType: match.games[gameIndex].scoringType,
-							mode: match.games[gameIndex].mode,
+							scoringType: scoringType,
+							mode: mode,
 							beatmapId: match.games[gameIndex].beatmapId.toString(),
 							tourneyMatch: tourneyMatch,
 							evaluation: evaluation,
@@ -1886,7 +1921,7 @@ module.exports = {
 							countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
 							countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
 							perfect: match.games[gameIndex].scores[scoreIndex].perfect,
-							teamType: match.games[gameIndex].teamType,
+							teamType: teamType,
 							team: match.games[gameIndex].scores[scoreIndex].team,
 						});
 					} else if (existingScore.warmup === null || !existingScore.matchEndDate) {
@@ -1902,8 +1937,8 @@ module.exports = {
 						existingScore.matchId = match.id;
 						existingScore.matchName = match.name;
 						existingScore.gameId = match.games[gameIndex].id;
-						existingScore.scoringType = match.games[gameIndex].scoringType;
-						existingScore.mode = match.games[gameIndex].mode;
+						existingScore.scoringType = scoringType;
+						existingScore.mode = mode;
 						existingScore.beatmapId = match.games[gameIndex].beatmapId;
 						existingScore.evaluation = evaluation;
 						existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
@@ -1925,7 +1960,7 @@ module.exports = {
 						existingScore.countKatu = match.games[gameIndex].scores[scoreIndex].counts.katu;
 						existingScore.countGeki = match.games[gameIndex].scores[scoreIndex].counts.geki;
 						existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
-						existingScore.teamType = match.games[gameIndex].teamType;
+						existingScore.teamType = teamType;
 						existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
 						await existingScore.save();
 
@@ -1993,6 +2028,44 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 			}
+		}
+
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Get existing games');
+		let existingGames = await DBOsuMultiGames.findAll({
+			where: {
+				matchId: match.id,
+			}
+		});
+
+		let newGames = [];
+
+		for (let i = 0; i < games.length; i++) {
+			let existingGame = existingGames.find(x => x.gameId === games[i].gameId);
+
+			if (existingGame) {
+				existingGame.tourneyMatch = games[i].tourneyMatch;
+				existingGame.scoringType = games[i].scoringType;
+				existingGame.mode = games[i].mode;
+				existingGame.beatmapId = games[i].beatmapId;
+				existingGame.gameRawMods = games[i].gameRawMods;
+				existingGame.gameStartDate = games[i].gameStartDate;
+				existingGame.gameEndDate = games[i].gameEndDate;
+				existingGame.freeMod = games[i].freeMod;
+				existingGame.forceMod = games[i].forceMod;
+				existingGame.warmup = games[i].warmup;
+				existingGame.warmupDecidedByAmount = games[i].warmupDecidedByAmount;
+				existingGame.teamType = games[i].teamType;
+				existingGame.scores = games[i].scores;
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Update existing game');
+				await existingGame.save();
+			} else {
+				newGames.push(games[i]);
+			}
+		}
+
+		if (newGames.length) {
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Create new games');
+			await DBOsuMultiGames.bulkCreate(newGames);
 		}
 
 		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Get existing match');
