@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
 const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -1698,29 +1698,75 @@ module.exports = {
 		let weeksAfter = new Date(match.raw_start);
 		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
-		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
-		let sameTournamentMatches = await DBOsuMultiScores.findAll({
-			attributes: ['id', 'osuUserId', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGameScores existing Scores');
+		let existingScores = await DBOsuMultiGameScores.findAll({
+			attributes: [
+				'id',
+				'osuUserId',
+				'matchId',
+				'gameId',
+				'beatmapId',
+				'scoringType',
+				'mode',
+				'tourneyMatch',
+				'evaluation',
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'gameStartDate',
+				'gameEndDate',
+				'freeMod',
+				'warmup',
+				'maxCombo',
+				'count50',
+				'count100',
+				'count300',
+				'countMiss',
+				'countKatu',
+				'countGeki',
+				'perfect',
+				'teamType',
+				'team',
+			],
 			where: {
-				[Op.or]: [
-					{
-						matchName: {
-							[Op.like]: `%${acronym}%:%`,
-						},
-						gameStartDate: {
-							[Op.gte]: weeksPrior
-						},
-						gameEndDate: {
-							[Op.lte]: weeksAfter
-						},
-						tourneyMatch: true
-					},
-					{
-						matchId: match.id,
-					}
-				],
+				matchId: match.id,
 			}
 		});
+
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames warmup detection same tourney');
+		let sameTournamentGames = await DBOsuMultiGames.findAll({
+			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+			where: {
+				gameStartDate: {
+					[Op.gte]: weeksPrior
+				},
+				gameEndDate: {
+					[Op.lte]: weeksAfter
+				},
+				tourneyMatch: true,
+				matchId: {
+					[Op.not]: match.id
+				}
+			}
+		});
+
+		let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
+			where: {
+				matchName: {
+					[Op.like]: `%${acronym}%:%`,
+				}
+			}
+		});
+
+		for (let i = 0; i < sameTournamentGames.length; i++) {
+			let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
+
+			if (!match) {
+				sameTournamentGames.splice(i, 1);
+				i--;
+			}
+		}
 
 		let games = [];
 
@@ -1758,7 +1804,7 @@ module.exports = {
 				}
 			}
 
-			let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches);
+			let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames);
 
 			let warmup = warmupCheckResult.warmup;
 
@@ -1874,11 +1920,11 @@ module.exports = {
 
 					let existingScore = null;
 
-					for (let i = 0; i < sameTournamentMatches.length; i++) {
-						if (sameTournamentMatches[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
-							&& sameTournamentMatches[i].matchId == match.id
-							&& sameTournamentMatches[i].gameId == match.games[gameIndex].id) {
-							existingScore = sameTournamentMatches[i];
+					for (let i = 0; i < existingScores.length; i++) {
+						if (existingScores[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
+							&& existingScores[i].matchId == match.id
+							&& existingScores[i].gameId == match.games[gameIndex].id) {
+							existingScore = existingScores[i];
 							break;
 						}
 					}
@@ -1895,7 +1941,6 @@ module.exports = {
 						newScores.push({
 							osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 							matchId: match.id,
-							matchName: match.name,
 							gameId: match.games[gameIndex].id,
 							scoringType: scoringType,
 							mode: mode,
@@ -1905,14 +1950,10 @@ module.exports = {
 							score: match.games[gameIndex].scores[scoreIndex].score,
 							gameRawMods: match.games[gameIndex].raw_mods.toString(),
 							rawMods: scoreMods.toString(),
-							matchStartDate: match.raw_start,
-							matchEndDate: match.raw_end,
 							gameStartDate: match.games[gameIndex].raw_start,
 							gameEndDate: match.games[gameIndex].raw_end,
 							freeMod: freeMod,
-							forceMod: forceMod,
 							warmup: warmup,
-							warmupDecidedByAmount: warmupDecidedByAmount,
 							maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
 							count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
 							count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
@@ -1935,7 +1976,6 @@ module.exports = {
 
 						existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
 						existingScore.matchId = match.id;
-						existingScore.matchName = match.name;
 						existingScore.gameId = match.games[gameIndex].id;
 						existingScore.scoringType = scoringType;
 						existingScore.mode = mode;
@@ -1944,14 +1984,10 @@ module.exports = {
 						existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
 						existingScore.gameRawMods = match.games[gameIndex].raw_mods;
 						existingScore.rawMods = scoreMods;
-						existingScore.matchStartDate = match.raw_start;
-						existingScore.matchEndDate = match.raw_end;
 						existingScore.gameStartDate = match.games[gameIndex].raw_start;
 						existingScore.gameEndDate = match.games[gameIndex].raw_end;
 						existingScore.freeMod = freeMod;
-						existingScore.forceMod = forceMod;
 						existingScore.warmup = warmup;
-						existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
 						existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 						existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
 						existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
@@ -1992,8 +2028,8 @@ module.exports = {
 			let created = false;
 			while (!created) {
 				try {
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores create');
-					await DBOsuMultiScores.bulkCreate(newScores)
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores create');
+					await DBOsuMultiGameScores.bulkCreate(newScores)
 						.then(async (scores) => {
 							for (let i = 0; i < scores.length; i++) {
 								if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
@@ -2010,6 +2046,7 @@ module.exports = {
 								}
 							}
 
+							console.log('Still something to do here - throws error thanks to linter');
 							//Set back warmup flag if it was set by amount
 							for (let i = 0; i < sameTournamentMatches.length; i++) {
 								if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
@@ -9349,7 +9386,7 @@ function getMiddleScore(scores) {
 	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
 }
 
-async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches, crossCheck) {
+async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames, crossCheck) {
 
 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
@@ -9361,9 +9398,9 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 
 	let sameMapSameTournamentScore = null;
 
-	for (let i = 0; i < sameTournamentMatches.length; i++) {
-		if (sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId && sameTournamentMatches[i].matchId != match.id) {
-			sameMapSameTournamentScore = sameTournamentMatches[i];
+	for (let i = 0; i < sameTournamentGames.length; i++) {
+		if (sameTournamentGames[i].beatmapId == match.games[gameIndex].beatmapId) {
+			sameMapSameTournamentScore = sameTournamentGames[i];
 			break;
 		}
 	}
@@ -9413,7 +9450,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 	//Check if the first map was not a warmup
 	if (gameIndex === 1 && !crossCheck) {
 		// console.log('Crosscheck for first map no warmup:');
-		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, sameTournamentMatches, true);
+		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, sameTournamentGames, true);
 
 		//Return not a warmup if the first map was not a warmup
 		if (firstMapWarmup.warmup === false) {
@@ -9425,7 +9462,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 	//Check if the second map is a warmup
 	if (gameIndex === 0 && match.games.length > 1 && !crossCheck) {
 		// console.log('Crosscheck for second map warmup:');
-		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, sameTournamentMatches, true);
+		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, sameTournamentGames, true);
 
 		//Return not a warmup if the first map was not a warmup
 		if (secondMapWarmup.warmup === true) {
@@ -9436,9 +9473,9 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 
 	//Check for unique matchIds
 	let matchIds = [];
-	for (let i = 0; i < sameTournamentMatches.length; i++) {
-		if (!matchIds.includes(sameTournamentMatches[i].matchId) && sameTournamentMatches[i].matchId != match.id) {
-			matchIds.push(sameTournamentMatches[i].matchId);
+	for (let i = 0; i < sameTournamentGames.length; i++) {
+		if (!matchIds.includes(sameTournamentGames[i].matchId)) {
+			matchIds.push(sameTournamentGames[i].matchId);
 		}
 	}
 
