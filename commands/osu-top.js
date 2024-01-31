@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
@@ -975,7 +975,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 
 	for (let i = 0; i < beatmaps.length && i < limit; i++) {
 		for (let j = 0; j < scores.length; j++) {
-			if (beatmaps[i].beatmapId === scores[j].beatmapId) {
+			if (beatmaps[i].beatmapId === scores[j].beatmapId.toString()) {
 				sortedScores.push(scores[j]);
 			}
 		}
@@ -1247,10 +1247,23 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 			'countMiss',
 			'maxCombo',
 			'perfect',
-			'matchName',
 			'mode',
+			'matchId',
 		],
 		where: where
+	});
+
+	logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiMatches 2');
+	let multiMatches = await DBOsuMultiMatches.findAll({
+		attributes: [
+			'matchId',
+			'matchName',
+		],
+		where: {
+			matchId: {
+				[Op.in]: multiScores.map(score => score.matchId)
+			}
+		}
 	});
 
 	for (let i = 0; i < multiScores.length; i++) {
@@ -1258,6 +1271,8 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 			multiScores.splice(i, 1);
 			i--;
 		}
+
+		multiScores[i].matchName = multiMatches.find(match => match.matchId === multiScores[i].matchId).matchName;
 	}
 
 	//Translate the scores to bancho scores
@@ -1320,7 +1335,7 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 	});
 
 	for (let i = 0; i < multiScores.length; i++) {
-		let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === multiScores[i].beatmapId);
+		let dbBeatmap = dbBeatmaps.find(dbBeatmap => parseInt(dbBeatmap.beatmapId) === multiScores[i].beatmapId);
 
 		multiScores[i].beatmap = await getOsuBeatmap({ beatmapId: multiScores[i].beatmapId, beatmap: dbBeatmap });
 
