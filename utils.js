@@ -5134,7 +5134,7 @@ module.exports = {
 		}
 
 		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate scores`);
+		console.log(`Cleaned up ${deleted} duplicate matches`);
 
 		duplicates = true;
 		deleted = 0;
@@ -5196,7 +5196,7 @@ module.exports = {
 		}
 
 		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate scores`);
+		console.log(`Cleaned up ${deleted} duplicate games`);
 
 		duplicates = true;
 		deleted = 0;
