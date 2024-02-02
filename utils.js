@@ -4824,7 +4824,9 @@ module.exports = {
 			let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId'],
 				where: {
-					matchId: matchIds,
+					matchId: {
+						[Op.in:] matchIds
+					},
 					matchName: {
 						[Op.and]: {
 							[Op.like]: 'ETX%:%',
