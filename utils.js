@@ -4804,106 +4804,106 @@ module.exports = {
 			return;
 		}
 
-		/*	module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
-			let mostplayed = await DBOsuMultiGames.findAll({
-				attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
-				where: {
-					warmup: false,
-					beatmapId: {
-						[Op.gt]: 0,
-					},
-					tourneyMatch: true,
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
+		let mostplayed = await DBOsuMultiGames.findAll({
+			attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
+			where: {
+				warmup: false,
+				beatmapId: {
+					[Op.gt]: 0,
 				},
-				group: ['matchId', 'beatmapId'],
-				order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
-			});
-	
-			let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
-	
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
-			let matchMakingMatchData = await DBOsuMultiMatches.findAll({
-				attributes: ['matchId'],
-				where: {
-					matchId: {
-						[Op.in:] matchIds
-					},
-					matchName: {
-						[Op.and]: {
-							[Op.like]: 'ETX%:%',
-							[Op.like]: 'o!mm%:%',
-						}
-					},
+				tourneyMatch: true,
+			},
+			group: ['matchId', 'beatmapId'],
+			order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
+		});
+
+		let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
+		let matchMakingMatchData = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
+			where: {
+				matchId: {
+					[Op.in]: matchIds
 				},
-			});
-	
-			let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
-	
-			// Filter out matches that are in matchMakingMatchIds
-			mostplayed = mostplayed.filter(item => !matchMakingMatchIds.includes(item.matchId));
-	
-			let mostPlayedBeatmaps = [];
-			let mostplayedBeatmapIds = [];
-	
-			for (let i = 0; i < mostplayed.length; i++) {
-				let index = mostplayedBeatmapIds.indexOf(mostplayed[i].beatmapId);
-	
-				if (index !== -1) {
-					mostPlayedBeatmaps[index].playcount = mostplayed[i].dataValues.playcount + mostPlayedBeatmaps[index].playcount;
-				} else {
-					mostPlayedBeatmaps.push({
-						beatmapId: mostplayed[i].beatmapId,
-						playcount: mostplayed[i].dataValues.playcount,
-					});
-	
-					mostplayedBeatmapIds.push(mostplayed[i].beatmapId);
-				}
+				matchName: {
+					[Op.and]: {
+						[Op.like]: 'ETX%:%',
+						[Op.like]: 'o!mm%:%',
+					}
+				},
+			},
+		});
+
+		let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
+
+		// Filter out matches that are in matchMakingMatchIds
+		mostplayed = mostplayed.filter(item => !matchMakingMatchIds.includes(item.matchId));
+
+		let mostPlayedBeatmaps = [];
+		let mostplayedBeatmapIds = [];
+
+		for (let i = 0; i < mostplayed.length; i++) {
+			let index = mostplayedBeatmapIds.indexOf(mostplayed[i].beatmapId);
+
+			if (index !== -1) {
+				mostPlayedBeatmaps[index].playcount = mostplayed[i].dataValues.playcount + mostPlayedBeatmaps[index].playcount;
+			} else {
+				mostPlayedBeatmaps.push({
+					beatmapId: mostplayed[i].beatmapId,
+					playcount: mostplayed[i].dataValues.playcount,
+				});
+
+				mostplayedBeatmapIds.push(mostplayed[i].beatmapId);
 			}
-	
-			// Filter out maps that have less than 250 plays
-			let popular = mostPlayedBeatmaps.filter(map => map.playcount > 250);
-			popular = popular.map(map => map.beatmapId);
-	
-			// Update beatmap data
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
-			let update = await DBOsuBeatmaps.update({
-				popular: true
-			}, {
-				where: {
-					beatmapId: {
-						[Op.in]: popular
-					},
-					popular: {
-						[Op.not]: true
-					}
+		}
+
+		// Filter out maps that have less than 250 plays
+		let popular = mostPlayedBeatmaps.filter(map => map.playcount > 250);
+		popular = popular.map(map => map.beatmapId);
+
+		// Update beatmap data
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
+		let update = await DBOsuBeatmaps.update({
+			popular: true
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: popular
 				},
-				silent: true
-			});
-	
-			// eslint-disable-next-line no-console
-			console.log(`Marked ${update[0]} new beatmaps as popular`);
-	
-			// Filter out maps that have less than 100 plays
-			let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
-			usedOften = usedOften.map(map => map.dataValues.beatmapId);
-	
-			// Update beatmap data
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
-			update = await DBOsuBeatmaps.update({
-				usedOften: true
-			}, {
-				where: {
-					beatmapId: {
-						[Op.in]: usedOften
-					},
-					usedOften: {
-						[Op.not]: true
-					}
+				popular: {
+					[Op.not]: true
+				}
+			},
+			silent: true
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Marked ${update[0]} new beatmaps as popular`);
+
+		// Filter out maps that have less than 100 plays
+		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
+		usedOften = usedOften.map(map => map.dataValues.beatmapId);
+
+		// Update beatmap data
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
+		update = await DBOsuBeatmaps.update({
+			usedOften: true
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: usedOften
 				},
-				silent: true
-			});
-	
-			// eslint-disable-next-line no-console
-			console.log(`Marked ${update[0]} new beatmaps as used often`);*/
+				usedOften: {
+					[Op.not]: true
+				}
+			},
+			silent: true
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
 			return;
