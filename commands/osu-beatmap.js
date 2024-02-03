@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -268,51 +268,72 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	let tournamentOccurences = '';
 
-	let queryAttributes = [
-		'matchId',
-		'matchName',
-		'score',
-		'matchStartDate'
-	];
-
-	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiScores');
-	const mapScores = await DBOsuMultiScores.findAll({
-		attributes: queryAttributes,
+	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiGameScores');
+	const mapGames = await DBOsuMultiGames.findAll({
+		attributes: ['matchId', 'gameId', 'scores'],
 		where: {
 			beatmapId: beatmap.beatmapId,
 			tourneyMatch: true,
-			matchName: {
-				[Op.notLike]: 'MOTD:%',
-			},
 			[Op.or]: [
 				{ warmup: false },
 				{ warmup: null }
 			],
-		}
+			scores: {
+				[Op.gt]: 0,
+			},
+		},
+		order: [
+			['matchId', 'DESC'],
+		],
 	});
 
-	mapScores.sort((a, b) => {
-		if (parseInt(a.matchId) > parseInt(b.matchId)) {
-			return -1;
-		}
-		if (parseInt(a.matchId) < parseInt(b.matchId)) {
-			return 1;
-		}
-		return 0;
+	const matchData = await DBOsuMultiMatches.findAll({
+		attributes: ['matchId', 'matchName', 'matchStartDate'],
+		where: {
+			matchId: {
+				[Op.in]: mapGames.map((game) => {
+					return game.matchId;
+				}),
+			},
+		},
+		order: [
+			['matchId', 'DESC'],
+		],
 	});
+
+	// populate mapScores with matchName and matchStartDate
+	for (let i = 0; i < mapGames.length; i++) {
+		if (mapGames[i].matchId === matchData[0].matchId) {
+			mapGames[i].matchName = matchData[0].matchName;
+			mapGames[i].matchStartDate = matchData[0].matchStartDate;
+
+			// if matchName starts with MOTD, remove it from mapScores
+			if (mapGames[i].matchName.startsWith('MOTD:')) {
+				mapGames.splice(i, 1);
+				i--;
+			}
+			continue;
+		}
+
+		// remove matchData entry if matchId is not the same as the current one
+		matchData.shift();
+		i--;
+	}
 
 	let tournaments = [];
-	let matches = [];
+	let totalScores = 0;
 	let matchMakingScores = 0;
 
 	let hideQualifiers = new Date();
 	hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
-	for (let i = 0; i < mapScores.length; i++) {
-		let acronym = mapScores[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
+	for (let i = 0; i < mapGames.length; i++) {
+		let acronym = mapGames[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
 
-		if (mapScores[i].matchName.startsWith('ETX') || mapScores[i].matchName.startsWith('o!mm')) {
-			matchMakingScores++;
+		totalScores += mapGames[i].scores;
+
+		if (mapGames[i].matchName.startsWith('ETX') || mapGames[i].matchName.startsWith('o!mm')) {
+			matchMakingScores += mapGames[i].scores;
 		}
 
 		if (tournaments.indexOf(acronym) === -1) {
@@ -322,21 +343,52 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		if (!tournament) {
 			continue;
 		}
-
-		let modPool = getScoreModpool(mapScores[i]);
-
-		let date = new Date(mapScores[i].matchStartDate);
-		let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
-
-		if (date > hideQualifiers && mapScores[i].matchName.toLowerCase().includes('qualifier')) {
-			mapScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
-			mapScores[i].score = 'XXXXXX';
-		}
-
-		matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
 	}
 
-	tournamentOccurences = `The map was played ${mapScores.length} times (${mapScores.length - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
+	let matches = [];
+	if (tournament) {
+		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiGameScores');
+		const mapScores = await DBOsuMultiGameScores.findAll({
+			attributes: ['matchId', 'gameId', 'score', 'gameRawMods', 'rawMods', 'freeMod'],
+			where: {
+				gameId: {
+					[Op.in]: mapGames.map((game) => {
+						return game.gameId;
+					}),
+				},
+				score: {
+					[Op.gte]: 10000,
+				},
+			},
+			order: [
+				['matchId', 'DESC'],
+			],
+		});
+
+		for (let i = 0; i < mapScores.length; i++) {
+			let correspondingGame = mapGames.find((game) => {
+				return game.gameId === mapScores[i].gameId;
+			});
+
+			mapScores[i].matchStartDate = correspondingGame.matchStartDate;
+			mapScores[i].matchName = correspondingGame.matchName;
+
+			let modPool = getScoreModpool(mapScores[i]);
+
+			let date = new Date(mapScores[i].matchStartDate);
+			let dateReadable = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()}`;
+
+			if (date > hideQualifiers && mapScores[i].matchName.toLowerCase().includes('qualifier')) {
+				mapScores[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+				mapScores[i].score = 'XXXXXX';
+			}
+
+			matches.push(`${dateReadable}: ${modPool} - ${humanReadable(mapScores[i].score)} - ${mapScores[i].matchName}  - https://osu.ppy.sh/community/matches/${mapScores[i].matchId}`);
+		}
+	}
+
+	//TODO: Number is wrong
+	tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 
 	if (tournaments.length === 0) {
 		tournamentOccurences = 'The map was never played in any tournaments.';

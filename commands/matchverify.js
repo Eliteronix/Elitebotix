@@ -1,4 +1,4 @@
-const { DBOsuMultiScores, DBDiscordUsers, DBDuelRatingHistory } = require('../dbObjects');
+const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
 const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause, logOsuAPICalls } = require('../utils');
@@ -222,8 +222,8 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores list');
-			let matchNames = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list');
+			let matchNames = await DBOsuMultiMatches.findAll({
 				Attributes: ['matchName'],
 				where: {
 					matchEndDate: {
@@ -260,8 +260,8 @@ module.exports = {
 				return a.count - b.count;
 			});
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores list unverifiedScores');
-			let unverifiedScores = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list unverifiedScores');
+			let unverifiedScores = await DBOsuMultiMatches.findAll({
 				Attributes: ['matchId', 'matchName'],
 				where: {
 					matchEndDate: {
@@ -394,8 +394,8 @@ module.exports = {
 				description: 'The following scores have not been verified yet.',
 			};
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores list unverifiedScoresLeft');
-			let unverifiedScoresLeft = await DBOsuMultiScores.count({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list unverifiedMatchesLeft');
+			let unverifiedMatchesLeft = await DBOsuMultiMatches.count({
 				where: {
 					matchEndDate: {
 						[Op.not]: null,
@@ -415,7 +415,7 @@ module.exports = {
 					}
 
 					unverifiedScoresEmbed.footer = {
-						text: `There are ${humanReadable(unverifiedScoresLeft.length)} unverified matches left.`,
+						text: `There are ${humanReadable(unverifiedMatchesLeft.length)} unverified matches left.`,
 					};
 
 					unverifiedScoresEmbed.fields = [];
@@ -475,9 +475,17 @@ module.exports = {
 				try {
 					let matchId = getIDFromPotentialOsuLink(matchIds[matchIndex]);
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores update scores');
-					let scores = await DBOsuMultiScores.findAll({
-						attributes: ['osuUserId', 'matchId', 'tourneyMatch', 'matchStartDate'],
+					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches update match');
+					let match = await DBOsuMultiMatches.findOne({
+						attributes: ['matchId', 'matchName', 'matchStartDate'],
+						where: {
+							matchId: matchId,
+						},
+					});
+
+					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores update scores');
+					let scores = await DBOsuMultiGameScores.findAll({
+						attributes: ['osuUserId', 'tourneyMatch'],
 						where: {
 							matchId: matchId,
 						},
@@ -507,15 +515,15 @@ module.exports = {
 						if (!updatedUsers.includes(score.osuUserId)) {
 							updatedUsers.push(score.osuUserId);
 						}
-
-						if (score.tourneyMatch !== valid) {
-							tourneyMatchChanged = true;
-							tourneyMatchChangedString = 'ini\n[Changed]``````';
-						}
 					}
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores update update');
-					await DBOsuMultiScores.update({
+					if (match.tourneyMatch !== valid) {
+						tourneyMatchChanged = true;
+						tourneyMatchChangedString = 'ini\n[Changed]``````';
+					}
+
+					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches update');
+					await DBOsuMultiMatches.update({
 						tourneyMatch: valid,
 						verifiedAt: new Date(),
 						verifiedBy: discordUser.osuUserId,
@@ -539,6 +547,30 @@ module.exports = {
 						},
 					});
 
+					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGames update');
+					let gamesUpdated = await DBOsuMultiGames.update({
+						tourneyMatch: valid,
+					}, {
+						where: {
+							matchId: matchId,
+							tourneyMatch: {
+								[Op.not]: valid,
+							},
+						},
+					});
+
+					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores update');
+					await DBOsuMultiGameScores.update({
+						tourneyMatch: valid,
+					}, {
+						where: {
+							matchId: matchId,
+							tourneyMatch: {
+								[Op.not]: valid,
+							},
+						},
+					});
+
 					if (tourneyMatchChanged) {
 						logDatabaseQueries(4, 'commands/matchverify.js DBDuelRatingHistory update ratingHistories');
 						let ratingHistories = await DBDuelRatingHistory.findAll({
@@ -558,7 +590,7 @@ module.exports = {
 							ratingHistoryDate.setUTCMonth(ratingHistory.month - 1);
 							ratingHistoryDate.setUTCFullYear(ratingHistory.year);
 
-							if (ratingHistoryDate > new Date(scores[0].matchStartDate)) {
+							if (ratingHistoryDate > new Date(match.matchStartDate)) {
 								await ratingHistory.destroy();
 							}
 						}
@@ -590,7 +622,7 @@ module.exports = {
 
 					interaction.guild.channels.cache.get(channelId).send({ content: `\`\`\`${tourneyMatchChangedString}diff\n${validString} Valid: ${valid}\nComment: ${comment}\`\`\`https://osu.ppy.sh/mp/${matchId} was verified by ${interaction.user.username}#${interaction.user.discriminator} (<@${interaction.user.id}> | <https://osu.ppy.sh/users/${discordUser.osuUserId}>)`, allowedMentions: { 'users': [] } });
 
-					await interaction.followUp(`Updated ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
+					await interaction.followUp(`Updated ${gamesUpdated[0]} games and ${scores.length} scores for https://osu.ppy.sh/mp/${matchId}`);
 				} catch (error) {
 					if (error.message !== 'Invalid Webhook Token') {
 						console.error(error);
@@ -610,24 +642,35 @@ module.exports = {
 			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let acronym = interaction.options.getString('acronym');
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores check');
-			let scores = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores check');
+			let scores = await DBOsuMultiGameScores.findAll({
 				attributes: ['matchId', 'matchName', 'beatmapId', 'osuUserId', 'gameId', 'matchStartDate'],
 				where: {
 					matchId: matchId,
 				},
+				order: [
+					['gameId', 'ASC'],
+				],
 			});
 
 			if (scores.length === 0) {
 				return await interaction.editReply(`No scores found for https://osu.ppy.sh/mp/${matchId}`);
 			}
 
-			scores.sort((a, b) => {
-				return a.gameId - b.gameId;
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches check');
+			let match = await DBOsuMultiMatches.findOne({
+				attributes: ['matchName', 'matchStartDate'],
+				where: {
+					matchId: matchId,
+				},
 			});
 
+			if (!match) {
+				return await interaction.editReply(`No match found for https://osu.ppy.sh/mp/${matchId}`);
+			}
+
 			if (!acronym) {
-				acronym = scores[0].matchName.replace(/:.*/gm, '');
+				acronym = match.matchName.replace(/:.*/gm, '');
 			}
 
 			let mapsPlayed = [];
@@ -645,14 +688,27 @@ module.exports = {
 				}
 			}
 
-			let weeksBeforeMatch = new Date(scores[0].matchStartDate);
+			let weeksBeforeMatch = new Date(match.matchStartDate);
 			weeksBeforeMatch.setDate(weeksBeforeMatch.getDate() - 21);
 
-			let weeksAfterMatch = new Date(scores[0].matchStartDate);
+			let weeksAfterMatch = new Date(match.matchStartDate);
 			weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 21);
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores check relatedScores');
-			let relatedScores = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches check relatedMatches');
+			let relatedMatches = await DBOsuMultiMatches.findAll({
+				attributes: ['matchId'],
+				where: {
+					matchStartDate: {
+						[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
+					},
+					matchName: {
+						[Op.like]: `${acronym}:%`,
+					},
+				},
+			});
+
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores check relatedScores');
+			let relatedScores = await DBOsuMultiGameScores.findAll({
 				attributes: ['matchId', 'beatmapId', 'osuUserId'],
 				where: {
 					[Op.or]: [
@@ -667,11 +723,8 @@ module.exports = {
 							},
 						},
 					],
-					matchStartDate: {
-						[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
-					},
-					matchName: {
-						[Op.like]: `${acronym}:%`,
+					matchId: {
+						[Op.in]: relatedMatches.map((match) => match.matchId),
 					},
 				},
 			});
@@ -740,8 +793,8 @@ module.exports = {
 
 			await interaction.followUp({ embeds: [embed] });
 		} else if (interaction.options.getSubcommand() === 'leaderboard') {
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores leaderboard');
-			let counts = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches leaderboard');
+			let counts = await DBOsuMultiMatches.findAll({
 				attributes: ['verifiedBy', 'matchId'],
 				where: {
 					verifiedAt: {
@@ -800,8 +853,8 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'tournament') {
 			let acronym = interaction.options.getString('acronym', true);
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
-			let userScores = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches tournament');
+			let userScores = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
 				where: {
 					[Op.or]: [
@@ -825,13 +878,14 @@ module.exports = {
 					},
 				},
 				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				order: [
+					['matchId', 'DESC'],
+				],
 			});
 
 			if (userScores.length === 0) {
 				return await interaction.editReply(`No scores found for the acronym \`${acronym.replace(/`/g, '')}\`.`);
 			}
-
-			userScores.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
 
 			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
 
@@ -859,30 +913,47 @@ module.exports = {
 				return await interaction.editReply(`Could not find user \`${player.replace(/`/g, '')}\`.`);
 			}
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiScores tournament');
-			let userScores = await DBOsuMultiScores.findAll({
-				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores tournament');
+			let userScores = await DBOsuMultiGameScores.findAll({
+				attributes: ['matchId'],
 				where: {
 					osuUserId: user.id,
 					tourneyMatch: true,
-					verifiedAt: null,
-					matchEndDate: {
-						[Op.not]: null,
-					},
 					matchId: {
 						[Op.notIn]: matchIdsGettingProcessed,
 					},
 				},
-				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				group: ['matchId'],
 			});
 
 			if (userScores.length === 0) {
 				return await interaction.editReply(`No scores found for the player \`${player.replace(/`/g, '')}\`.`);
 			}
 
-			userScores.sort((a, b) => parseInt(b.matchId) - parseInt(a.matchId));
+			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches tournament');
+			let matches = await DBOsuMultiMatches.findAll({
+				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				where: {
+					tourneyMatch: true,
+					verifiedAt: null,
+					matchEndDate: {
+						[Op.not]: null,
+					},
+					matchId: {
+						[Op.in]: userScores.map((score) => score.matchId),
+					},
+				},
+				group: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
+				order: [
+					['matchId', 'DESC'],
+				],
+			});
 
-			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
+			if (matches.length === 0) {
+				return await interaction.editReply(`No matches found for the player \`${player.replace(/`/g, '')}\`.`);
+			}
+
+			let matchesPlayed = matches.map((match) => `${(new Date(match.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(match.matchStartDate).getUTCFullYear()} - ${match.matchName} - ${match.verificationComment} ----- https://osu.ppy.sh/community/matches/${match.matchId}`);
 
 			// eslint-disable-next-line no-undef
 			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${user.id}.txt` });

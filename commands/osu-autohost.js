@@ -1,6 +1,6 @@
 const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBDiscordUsers, DBOsuMultiScores, DBProcessQueue, } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBOsuMultiGames, DBOsuMultiGameScores, } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -357,15 +357,12 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		//TODO: Attributes
-		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiScores');
-		const player1Scores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/osu-autohost.js DBOsuMultiGameScores');
+		const player1Scores = await DBOsuMultiGameScores.findAll({
+			attributes: ['beatmapId'],
 			where: {
 				osuUserId: commandUser.osuUserId,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
+				mode: 0,
 				gameStartDate: {
 					[Op.gte]: threeMonthsAgo,
 				}

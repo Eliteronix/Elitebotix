@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
-const { DBOsuMultiScores, DBDiscordUsers, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
@@ -592,17 +592,14 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
-				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiScores');
-				const userScores = await DBOsuMultiScores.findAll({
+				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiGameScores');
+				let userScores = await DBOsuMultiGameScores.findAll({
 					attributes: [
 						'score',
 						'mode',
 						'scoringType',
-						'warmup',
 						'tourneyMatch',
 						'evaluation',
-						'matchStartDate',
-						'matchName',
 						'matchId',
 						'gameRawMods',
 						'rawMods',
@@ -614,31 +611,71 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 						score: {
 							[Op.gte]: 10000
 						},
-						[Op.or]: [
-							{ warmup: false },
-							{ warmup: null }
-						],
 					}
 				});
 
-				for (let i = 0; i < userScores.length; i++) {
-					if (parseInt(userScores[i].score) <= 10000) {
-						userScores.splice(i, 1);
-						i--;
-					}
-				}
-
 				//Remove userScores which don't fit the criteria
 				for (let i = 0; i < userScores.length; i++) {
-					if (userScores[i].mode !== 'Standard'
-						|| scoringType === 'v2' && userScores[i].scoringType !== 'Score v2'
-						|| scoringType === 'v1' && userScores[i].scoringType !== 'Score'
+					if (userScores[i].mode !== 0
+						|| scoringType === 'v2' && userScores[i].scoringType !== 3
+						|| scoringType === 'v1' && userScores[i].scoringType !== 0
 						|| tourneyMatch && !userScores[i].tourneyMatch
 						|| userScores[i].evaluation === null) {
 						userScores.splice(i, 1);
 						i--;
 					}
 				}
+
+				// Get all gameIds from the userScores
+				let gameIds = [...new Set(userScores.map(score => score.gameId))];
+
+				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiGames');
+				const userWarmupGames = await DBOsuMultiGames.findAll({
+					attributes: [
+						'gameId',
+						'warmup',
+					],
+					where: {
+						gameId: {
+							[Op.in]: gameIds
+						},
+						warmup: true
+					}
+				});
+
+				let userWarmupGameIds = userWarmupGames.map(game => game.gameId);
+
+				//Remove userScores which are warmups
+				for (let i = 0; i < userScores.length; i++) {
+					if (userWarmupGameIds.includes(userScores[i].gameId)) {
+						userScores.splice(i, 1);
+						i--;
+					}
+				}
+
+				// Get all match data
+				let matchIds = [...new Set(userScores.map(score => score.matchId))];
+
+				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiMatches');
+				const matches = await DBOsuMultiMatches.findAll({
+					attributes: [
+						'matchId',
+						'matchName',
+						'matchStartDate',
+					],
+					where: {
+						matchId: {
+							[Op.in]: matchIds
+						}
+					}
+				});
+
+				// Add match data to userScores
+				userScores.forEach(score => {
+					let match = matches.find(match => match.matchId === score.matchId);
+					score.matchName = match.matchName;
+					score.matchStartDate = match.matchStartDate;
+				});
 
 				if (!userScores.length) {
 					content = `${content}; No multi/tourney-scores found in the database for ${user.name} - skipping modpool evaluation\n${user.name}: <https://osu.ppy.sh/users/${user.id}>`;

@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores } = require('../../dbObjects');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { getUserDuelStarRating, logDatabaseQueries, logOsuAPICalls } = require('../../utils');
@@ -78,17 +78,17 @@ module.exports = {
 
 		let processingMessage = await interaction.editReply('Processing...');
 
-		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiScores duelRatingDevelopment');
-		let oldestScore = await DBOsuMultiScores.findOne({
-			attributes: ['gameEndDate'],
+		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
+		let oldestScore = await DBOsuMultiGameScores.findOne({
+			attributes: ['gameId', 'gameEndDate'],
 			where: {
 				osuUserId: osuUser.osuUserId,
 				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
+				scoringType: 3,
+				mode: 0,
 			},
 			order: [
-				['gameEndDate', 'ASC']
+				['gameId', 'ASC']
 			]
 		});
 

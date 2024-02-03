@@ -1,6 +1,6 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
-const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuMultiScores, DBOsuTeamSheets, DBOsuPoolAccess } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuTeamSheets, DBOsuPoolAccess, DBOsuMultiGameScores } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
@@ -586,8 +586,8 @@ module.exports = {
 			},
 		});
 
-		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuMultiScores');
-		let multiScores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuMultiGameScores');
+		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'osuUserId',
 				'beatmapId',
@@ -607,18 +607,18 @@ module.exports = {
 				beatmapId: {
 					[Op.in]: tourneyMaps.map(map => map.beatmapId),
 				},
-				scoringType: 'Score v2',
+				scoringType: 3,
 			},
 		});
 
 		for (let i = 0; i < players.length; i++) {
-			let multiPlayerScores = multiScores.filter(score => score.osuUserId === players[i].osuUserId);
+			let multiPlayerScores = multiScores.filter(score => score.osuUserId === parseInt(players[i].osuUserId));
 
 			let finalMultiPlayerScores = multiPlayerScores.map(score => {
 				let soloScoreFormat = {
 					beatmapId: score.beatmapId,
 					score: score.score,
-					beatmapHash: tourneyMaps.find(map => map.beatmapId === score.beatmapId).hash,
+					beatmapHash: tourneyMaps.find(map => parseInt(map.beatmapId) === score.beatmapId).hash,
 					mods: parseInt(score.gameRawMods) + parseInt(score.rawMods),
 					count50: score.count50,
 					count100: score.count100,
@@ -630,7 +630,7 @@ module.exports = {
 				return soloScoreFormat;
 			});
 
-			finalMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps.find(map => map.beatmapId === score.beatmapId).modPool));
+			finalMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps.find(map => parseInt(map.beatmapId) === score.beatmapId).modPool));
 
 			let soloPlayerScores = localScores.filter(score => {
 				if (score.uploaderId === players[i].osuUserId) {
@@ -644,7 +644,7 @@ module.exports = {
 				let soloScores = soloPlayerScores.filter(score => score.beatmapHash === tourneyMaps[j].hash);
 
 				let soloScoresWithoutMultiScores = soloScores.filter(score => {
-					let existingMultiPlayerScoresForMap = multiPlayerScores.filter(multiScore => multiScore.beatmapId === tourneyMaps[j].beatmapId);
+					let existingMultiPlayerScoresForMap = multiPlayerScores.filter(multiScore => multiScore.beatmapId === parseInt(tourneyMaps[j].beatmapId));
 
 					let existingMultiPlayerScore = existingMultiPlayerScoresForMap.find(multiScore => parseInt(multiScore.count50) === score.count50 && parseInt(multiScore.count100) === score.count100 && parseInt(multiScore.count300) === score.count300 && parseInt(multiScore.countMiss) === score.countMiss && parseInt(multiScore.score) === score.score && (parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) === score.mods || parseInt(multiScore.rawMods) + parseInt(multiScore.gameRawMods) + 536870912 === score.mods));
 
@@ -707,13 +707,13 @@ module.exports = {
 
 				let localV2Scores = soloScoresWithoutMultiScores.filter(score => score.scoringType === 'Local');
 
-				let existingMultiPlayerScoresForMap = multiPlayerScores.filter(multiScore => multiScore.beatmapId === tourneyMaps[j].beatmapId);
+				let existingMultiPlayerScoresForMap = multiPlayerScores.filter(multiScore => multiScore.beatmapId === parseInt(tourneyMaps[j].beatmapId));
 
 				if (localV2Scores.length > 0 || existingMultiPlayerScoresForMap.length > 0) {
 					soloScoresWithoutMultiScores = soloScoresWithoutMultiScores.filter(score => score.scoringType === 'Local');
 				}
 
-				let finalMapMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool) && score.beatmapId === tourneyMaps[j].beatmapId);
+				let finalMapMultiPlayerScores = finalMultiPlayerScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool) && score.beatmapId === parseInt(tourneyMaps[j].beatmapId));
 
 				let playerMapScores = soloScoresWithoutMultiScores.concat(finalMapMultiPlayerScores);
 
@@ -1060,7 +1060,7 @@ module.exports = {
 						ctx.strokeStyle = '#FFFFFF';
 						ctx.lineWidth = 4;
 						ctx.strokeRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 14, 33);
-					} else if (playerScores[k].scoringType === 'Score v2') {
+					} else if (playerScores[k].scoringType === 3) {
 						if (!legendItems.includes('Score v2')) {
 							legendItems.push('Score v2');
 						}

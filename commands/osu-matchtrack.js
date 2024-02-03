@@ -5,7 +5,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const Discord = require('discord.js');
 const Canvas = require('canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
-const { DBOsuMultiScores } = require('../dbObjects');
+const { DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -155,16 +155,14 @@ module.exports = {
 							//Nothing
 						});
 
-					logDatabaseQueries(4, 'commands/osu-matchtrack.js DBOsuMultiScores');
-					let warmups = await DBOsuMultiScores.findAll({
-						attributes: ['gameId'],
+					logDatabaseQueries(4, 'commands/osu-matchtrack.js DBOsuMultiGames');
+					let warmups = await DBOsuMultiGames.count({
 						where: {
 							matchId: matchID,
 							warmup: {
 								[Op.ne]: false,
 							}
-						},
-						group: ['gameId'],
+						}
 					});
 
 					let matchScoreCommand = require('./osu-matchscore.js');
@@ -182,7 +180,7 @@ module.exports = {
 							},
 							getInteger: (string) => {
 								if (string === 'warmups') {
-									return warmups.length;
+									return warmups;
 								}
 							},
 							getNumber: () => {
@@ -704,15 +702,6 @@ async function getResultImage(event, users) {
 		}
 
 		// Draw the grade
-		let mode = 'Standard';
-		if (scores[i].mode_int === 1) {
-			mode = 'Taiko';
-		} else if (scores[i].mode_int === 2) {
-			mode = 'Catch the Beat';
-		} else if (scores[i].mode_int === 3) {
-			mode = 'Mania';
-		}
-
 		let counts = {
 			'300': scores[i].statistics.count_300,
 			'100': scores[i].statistics.count_100,
@@ -735,7 +724,7 @@ async function getResultImage(event, users) {
 
 		let modBits = getModBits(mods.join(''));
 
-		let grade = calculateGrade(mode, counts, modBits);
+		let grade = calculateGrade(scores[i].mode_int, counts, modBits);
 
 		let gradeImage = await Canvas.loadImage(getRankImage(grade));
 
@@ -782,7 +771,7 @@ async function getResultImage(event, users) {
 		ctx.font = 'bold 10px comfortaa, sans-serif';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#F0DBE4';
-		if (mode === 'Mania') {
+		if (scores[i].mode_int === 3) {
 			ctx.fillText('MAX', 618, 350 + i * 75);
 			ctx.fillStyle = '#FFFFFF';
 			ctx.fillText(humanReadable(scores[i].statistics.count_geki.toString()), 645, 350 + i * 75);

@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores } = require('../dbObjects');
 const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const Discord = require('discord.js');
 const osu = require('node-osu');
@@ -27,177 +27,6 @@ module.exports = {
 			'en-US': 'Allows you to join the \'Maps of the Day\' competition!',
 		})
 		.setDMPermission(true)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName('register')
-				.setNameLocalizations({
-					'de': 'registrieren',
-					'en-GB': 'register',
-					'en-US': 'register',
-				})
-				.setDescription('Register for the daily Maps of the Day competition')
-				.setDescriptionLocalizations({
-					'de': 'Registriere dich für das tägliche Maps of the Day Turnier',
-					'en-GB': 'Register for the daily Maps of the Day competition',
-					'en-US': 'Register for the daily Maps of the Day competition',
-				})
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName('unregister')
-				.setNameLocalizations({
-					'de': 'abmelden',
-					'en-GB': 'unregister',
-					'en-US': 'unregister',
-				})
-				.setDescription('Unregister from the daily Maps of the Day competition')
-				.setDescriptionLocalizations({
-					'de': 'Meld dich vom täglichen Maps of the Day Turnier ab',
-					'en-GB': 'Unregister from the daily Maps of the Day competition',
-					'en-US': 'Unregister from the daily Maps of the Day competition',
-				})
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName('server')
-				.setNameLocalizations({
-					'de': 'server',
-					'en-GB': 'server',
-					'en-US': 'server',
-				})
-				.setDescription('Get a link to the server of the daily Maps of the Day competition')
-				.setDescriptionLocalizations({
-					'de': 'Erhalte einen Link zum Server des täglichen Maps of the Day Turniers',
-					'en-GB': 'Get a link to the server of the daily Maps of the Day competition',
-					'en-US': 'Get a link to the server of the daily Maps of the Day competition',
-				})
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName('mute')
-				.setNameLocalizations({
-					'de': 'stumme',
-					'en-GB': 'mute',
-					'en-US': 'mute',
-				})
-				.setDescription('Mute the MOTD messages for the specified amount')
-				.setDescriptionLocalizations({
-					'de': 'Stumme die MOTD Nachrichten für die angegebene Zeit',
-					'en-GB': 'Mute the MOTD messages for the specified amount',
-					'en-US': 'Mute the MOTD messages for the specified amount',
-				})
-				.addIntegerOption(option =>
-					option
-						.setName('years')
-						.setNameLocalizations({
-							'de': 'jahre',
-							'en-GB': 'years',
-							'en-US': 'years',
-						})
-						.setDescription('The years until the messages should be re-enabled')
-						.setDescriptionLocalizations({
-							'de': 'Die Jahre bis die Nachrichten wieder aktiviert werden',
-							'en-GB': 'The years until the messages should be re-enabled',
-							'en-US': 'The years until the messages should be re-enabled',
-						})
-						.setRequired(false)
-				)
-				.addIntegerOption(option =>
-					option
-						.setName('months')
-						.setNameLocalizations({
-							'de': 'monate',
-							'en-GB': 'months',
-							'en-US': 'months',
-						})
-						.setDescription('The months until the messages should be re-enabled')
-						.setDescriptionLocalizations({
-							'de': 'Die Monate bis die Nachrichten wieder aktiviert werden',
-							'en-GB': 'The months until the messages should be re-enabled',
-							'en-US': 'The months until the messages should be re-enabled',
-						})
-						.setRequired(false)
-				)
-				.addIntegerOption(option =>
-					option
-						.setName('weeks')
-						.setNameLocalizations({
-							'de': 'wochen',
-							'en-GB': 'weeks',
-							'en-US': 'weeks',
-						})
-						.setDescription('The weeks until the messages should be re-enabled')
-						.setDescriptionLocalizations({
-							'de': 'Die Wochen bis die Nachrichten wieder aktiviert werden',
-							'en-GB': 'The weeks until the messages should be re-enabled',
-							'en-US': 'The weeks until the messages should be re-enabled',
-						})
-						.setRequired(false)
-				)
-				.addIntegerOption(option =>
-					option
-						.setName('days')
-						.setNameLocalizations({
-							'de': 'tage',
-							'en-GB': 'days',
-							'en-US': 'days',
-						})
-						.setDescription('The days until the messages should be re-enabled')
-						.setDescriptionLocalizations({
-							'de': 'Die Tage bis die Nachrichten wieder aktiviert werden',
-							'en-GB': 'The days until the messages should be re-enabled',
-							'en-US': 'The days until the messages should be re-enabled',
-						})
-						.setRequired(false)
-				)
-				.addIntegerOption(option =>
-					option
-						.setName('hours')
-						.setNameLocalizations({
-							'de': 'stunden',
-							'en-GB': 'hours',
-							'en-US': 'hours',
-						})
-						.setDescription('The hours until the messages should be re-enabled')
-						.setDescriptionLocalizations({
-							'de': 'Die Stunden bis die Nachrichten wieder aktiviert werden',
-							'en-GB': 'The hours until the messages should be re-enabled',
-							'en-US': 'The hours until the messages should be re-enabled',
-						})
-						.setRequired(false)
-				)
-				.addIntegerOption(option =>
-					option
-						.setName('minutes')
-						.setNameLocalizations({
-							'de': 'minuten',
-							'en-GB': 'minutes',
-							'en-US': 'minutes',
-						})
-						.setDescription('The minutes until the messages should be re-enabled')
-						.setDescriptionLocalizations({
-							'de': 'Die Minuten bis die Nachrichten wieder aktiviert werden',
-							'en-GB': 'The minutes until the messages should be re-enabled',
-							'en-US': 'The minutes until the messages should be re-enabled',
-						})
-						.setRequired(false)
-				)
-		)
-		.addSubcommand(subcommand =>
-			subcommand
-				.setName('unmute')
-				.setNameLocalizations({
-					'de': 'entstummen',
-					'en-GB': 'unmute',
-					'en-US': 'unmute',
-				})
-				.setDescription('Unmute the MOTD messages')
-				.setDescriptionLocalizations({
-					'de': 'Entstumme die MOTD Nachrichten',
-					'en-GB': 'Unmute the MOTD messages',
-					'en-US': 'Unmute the MOTD messages',
-				})
-		)
 		.addSubcommand(subcommand =>
 			subcommand
 				.setName('custom-fixed-players')
@@ -622,12 +451,6 @@ module.exports = {
 		),
 	async execute(msg, args, interaction, additionalObjects) {
 		//TODO: Remove message code and replace with interaction code
-		let years = 0;
-		let months = 0;
-		let weeks = 0;
-		let days = 0;
-		let hours = 0;
-		let minutes = 0;
 		let lowerStarLimit = 0;
 		let higherStarLimit = 10;
 		let scoreversion = 0;
@@ -650,19 +473,7 @@ module.exports = {
 			args = [interaction.options.getSubcommand()];
 
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'years') {
-					years = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'months') {
-					months = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'weeks') {
-					weeks = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'days') {
-					days = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'hours') {
-					hours = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'minutes') {
-					minutes = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'lowerstars') {
+				if (interaction.options._hoistedOptions[i].name === 'lowerstars') {
 					lowerStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
 				} else if (interaction.options._hoistedOptions[i].name === 'higherstars') {
 					higherStarLimit = parseFloat(interaction.options._hoistedOptions[i].value);
@@ -753,212 +564,7 @@ module.exports = {
 		}
 
 
-		if (args[0].toLowerCase() === 'server') {
-			if (msg.id) {
-				return sendMessage(msg, 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the MOTD role!\nEverything else will be done automatically when you registered!');
-			}
-			return interaction.followUp({ content: 'The discord server for the competition can be found here: <https://discord.com/invite/Asz5Gfe>\nAfter joining be sure to head to <#801000891750547496> and assign yourself the MOTD role!\nEverything else will be done automatically when you registered!', ephemeral: true });
-		} else if (args[0].toLowerCase() === 'register') {
-			//get discordUser from db
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 1');
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
-
-			if (discordUser && discordUser.osuUserId) {
-				if (discordUser.osuMOTDRegistered) {
-					if (msg.id) {
-						return sendMessage(msg, `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (</osu-motd server:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
-					}
-					return interaction.followUp({ content: `You are already registered for the \`Maps of the Day\` competition.\nBe sure to join the server if you didn't already. (</osu-motd server:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`, ephemeral: true });
-				}
-				if (discordUser.osuVerified) {
-					discordUser.osuMOTDRegistered = true;
-					discordUser.osuMOTDlastRoundPlayed = null;
-					discordUser.osuMOTDMuted = false;
-					discordUser.osuMOTDerrorFirstOccurence = null;
-					discordUser.osuMOTDmutedUntil = null;
-					discordUser.save();
-					if (msg.id) {
-						return sendMessage(msg, `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (</osu-motd server:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`);
-					}
-					return interaction.followUp({ content: `You successfully registered for the \`Maps of the Day\` competition.\nBe sure to join the server and read <#834833321438740490> if you didn't already. (</osu-motd server:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>)\nOther than that be sure to have DMs open for me so that I can send you updates for the competition!`, ephemeral: true });
-				} else {
-					if (msg.id) {
-						return sendMessage(msg, `It seems like you don't have your connected osu! account verified.\nPlease use </osu-link verify:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> to send a verification code to your osu! dms, follow the instructions and try again afterwards.`);
-					}
-					return interaction.followUp({ content: `It seems like you don't have your connected osu! account verified.\nPlease use </osu-link verify:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to send a verification code to your osu! dms, follow the instructions and try again afterwards.`, ephemeral: true });
-				}
-			} else {
-				if (msg.id) {
-					return sendMessage(msg, `It seems like you don't have your osu! account connected to the bot.\nPlease use </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect you account and verify it.`);
-				}
-				return interaction.followUp({ content: `It seems like you don't have your osu! account connected to the bot.\nPlease use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect you account and verify it.`, ephemeral: true });
-			}
-		} else if (args[0].toLowerCase() === 'unregister') {
-			//get discordUser from db
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 2');
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
-
-			if (discordUser && discordUser.osuMOTDRegistered) {
-				discordUser.osuMOTDRegistered = false;
-				discordUser.save();
-				if (msg.id) {
-					return sendMessage(msg, `You have been unregistered from the \`Maps of the Day\` competition.\nStill thank you for showing interest!\nYou can always register again by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
-				}
-				return interaction.followUp({ content: `You have been unregistered from the \`Maps of the Day\` competition.\nStill thank you for showing interest!\nYou can always register again by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
-			} else {
-				if (msg.id) {
-					return sendMessage(msg, `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
-				}
-				return interaction.followUp({ content: `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
-			}
-		} else if (args[0].toLowerCase() === 'mute') {
-			//get discordUser from db
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 3');
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
-
-			if (discordUser && discordUser.osuMOTDRegistered) {
-				if (discordUser.osuMOTDMuted) {
-					if (args[1]) {
-						for (let i = 0; i < args.length; i++) {
-							let splice = true;
-							if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
-								years += parseInt(args[i].replace('y', ''));
-							} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
-								months += parseInt(args[i].replace('mo', ''));
-							} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
-								weeks += parseInt(args[i].replace('w', ''));
-							} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
-								days += parseInt(args[i].replace('d', ''));
-							} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
-								hours += parseInt(args[i].replace('h', ''));
-							} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
-								minutes += parseInt(args[i].replace('m', ''));
-							} else {
-								splice = false;
-							}
-
-							if (splice) {
-								args.splice(i, 1);
-								i--;
-							}
-						}
-						let now = new Date();
-						let date = new Date();
-						date.setUTCFullYear(date.getUTCFullYear() + years);
-						date.setUTCMonth(date.getUTCMonth() + months);
-						date.setUTCDate(date.getUTCDate() + weeks * 7 + days);
-						date.setUTCHours(date.getUTCHours() + hours);
-						date.setUTCMinutes(date.getUTCMinutes() + minutes);
-
-						if (now !== date) {
-							discordUser.osuMOTDmutedUntil = date;
-							discordUser.save();
-						}
-					}
-					if (msg.id) {
-						return sendMessage(msg, `The \`Maps of the Day\` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use </osu-motd unmute:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`);
-					}
-					return interaction.followUp({ content: `The \`Maps of the Day\` competition has already been muted for you - the time has been updated if a period was specified.\nTo receive messages and pings again use </osu-motd unmute:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`, ephemeral: true });
-				} else {
-					if (args[1]) {
-						let years = 0;
-						let months = 0;
-						let weeks = 0;
-						let days = 0;
-						let hours = 0;
-						let minutes = 0;
-
-						for (let i = 0; i < args.length; i++) {
-							let splice = true;
-							if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
-								years += parseInt(args[i].replace('y', ''));
-							} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
-								months += parseInt(args[i].replace('mo', ''));
-							} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
-								weeks += parseInt(args[i].replace('w', ''));
-							} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
-								days += parseInt(args[i].replace('d', ''));
-							} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
-								hours += parseInt(args[i].replace('h', ''));
-							} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
-								minutes += parseInt(args[i].replace('m', ''));
-							} else {
-								splice = false;
-							}
-
-							if (splice) {
-								args.splice(i, 1);
-								i--;
-							}
-						}
-						let now = new Date();
-						let date = new Date();
-						date.setUTCFullYear(date.getUTCFullYear() + years);
-						date.setUTCMonth(date.getUTCMonth() + months);
-						date.setUTCDate(date.getUTCDate() + weeks * 7 + days);
-						date.setUTCHours(date.getUTCHours() + hours);
-						date.setUTCMinutes(date.getUTCMinutes() + minutes);
-
-						if (now !== date) {
-							discordUser.osuMOTDmutedUntil = date;
-						} else {
-							date.setUTCDate(date.getUTCDate() + 7);
-							discordUser.osuMOTDmutedUntil = date;
-						}
-					}
-
-					discordUser.osuMOTDMuted = true;
-					discordUser.save();
-					if (msg.id) {
-						return sendMessage(msg, `The \`Maps of the Day\` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use </osu-motd unmute:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`);
-					}
-					return interaction.followUp({ content: `The \`Maps of the Day\` competition has been muted for you. You will not receive messages and pings anymore but will still appear on the leaderboard.\nTo receive messages and pings again use </osu-motd unmute:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>.`, ephemeral: true });
-				}
-			} else {
-				if (msg.id) {
-					return sendMessage(msg, `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
-				}
-				return interaction.followUp({ content: `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
-			}
-		} else if (args[0].toLowerCase() === 'unmute') {
-			//get discordUser from db
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 4');
-			const discordUser = await DBDiscordUsers.findOne({
-				where: { userId: msg.author.id },
-			});
-
-			if (discordUser && discordUser.osuMOTDRegistered) {
-				if (discordUser.osuMOTDMuted) {
-					discordUser.osuMOTDMuted = false;
-					discordUser.osuMOTDmutedUntil = null;
-					discordUser.save();
-					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition has been unmuted for you. You will start receiving messages again.');
-					}
-					return interaction.followUp({ content: 'The `Maps of the Day` competition has been unmuted for you. You will start receiving messages again.', ephemeral: true });
-				} else {
-					if (msg.id) {
-						return sendMessage(msg, 'The `Maps of the Day` competition was not muted for you.');
-					}
-					return interaction.followUp({ content: 'The `Maps of the Day` competition was not muted for you.', ephemeral: true });
-				}
-			} else {
-				if (msg.id) {
-					return sendMessage(msg, `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`);
-				}
-				return interaction.followUp({ content: `You aren't signed up for the \`Maps of the Day\` competition at the moment.\nYou can always register by using </osu-motd register:${interaction.client.slashCommandData.find(command => command.name === 'osu-motd').id}>!`, ephemeral: true });
-			}
-		} else if (args[0].toLowerCase() === 'custom-fixed-players') {
+		if (args[0].toLowerCase() === 'custom-fixed-players') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
 				return msg.reply(`Please use </osu-motd custom-fixed-players:${msg.client.slashCommandData.find(command => command.name === 'osu-motd').id}> to set up the custom MOTD`);
@@ -1120,15 +726,14 @@ module.exports = {
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
 							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 1');
-							const multiScores = await DBOsuMultiScores.findAll({
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 1');
+							const multiScores = await DBOsuMultiGameScores.findAll({
 								where: {
 									tourneyMatch: true,
 									beatmapId: dbBeatmap.beatmapId,
-									[Op.or]: [
-										{ warmup: false },
-										{ warmup: null }
-									],
+									warmup: {
+										[Op.not]: true
+									}
 								}
 							});
 
@@ -1231,15 +836,14 @@ module.exports = {
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
 							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 2');
-							const multiScores = await DBOsuMultiScores.findAll({
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 2');
+							const multiScores = await DBOsuMultiGameScores.findAll({
 								where: {
 									tourneyMatch: true,
 									beatmapId: dbBeatmap.beatmapId,
-									[Op.or]: [
-										{ warmup: false },
-										{ warmup: null }
-									],
+									warmup: {
+										[Op.not]: true
+									}
 								}
 							});
 
@@ -1446,15 +1050,14 @@ module.exports = {
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
 							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 3');
-							const multiScores = await DBOsuMultiScores.findAll({
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 3');
+							const multiScores = await DBOsuMultiGameScores.findAll({
 								where: {
 									tourneyMatch: true,
 									beatmapId: dbBeatmap.beatmapId,
-									[Op.or]: [
-										{ warmup: false },
-										{ warmup: null }
-									],
+									warmup: {
+										[Op.not]: true
+									}
 								}
 							});
 
@@ -1557,15 +1160,14 @@ module.exports = {
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
 							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiScores 4');
-							const multiScores = await DBOsuMultiScores.findAll({
+							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 4');
+							const multiScores = await DBOsuMultiGameScores.findAll({
 								where: {
 									tourneyMatch: true,
 									beatmapId: dbBeatmap.beatmapId,
-									[Op.or]: [
-										{ warmup: false },
-										{ warmup: null }
-									],
+									warmup: {
+										[Op.not]: true
+									}
 								}
 							});
 
@@ -1785,14 +1387,3 @@ module.exports = {
 		}
 	},
 };
-
-function sendMessage(msg, content) {
-	msg.author.send(content)
-		.then(() => {
-			if (msg.channel.type === Discord.ChannelType.DM) return;
-			msg.reply('I\'ve sent you a DM with some info!');
-		})
-		.catch(() => {
-			msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
-		});
-}

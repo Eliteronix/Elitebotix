@@ -1,4 +1,4 @@
-const { DBOsuMultiScores } = require('../../dbObjects');
+const { DBOsuMultiMatches } = require('../../dbObjects');
 const { Op } = require('sequelize');
 const { getOsuPlayerName, logDatabaseQueries } = require('../../utils');
 
@@ -13,8 +13,8 @@ module.exports = {
 		const argument = interaction.options.getString('argument');
 
 		if (argument === 'incomplete') {
-			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores incomplete');
-			let count = await DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiMatches incomplete');
+			let count = await DBOsuMultiMatches.update({
 				verifiedBy: null,
 				verificationComment: null,
 			}, {
@@ -28,8 +28,8 @@ module.exports = {
 
 			return await interaction.editReply(`Reset all ${count} incomplete Elitebotix verifications.`);
 		} else if (argument === 'all') {
-			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores all');
-			let count = await DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiMatches all');
+			let count = await DBOsuMultiMatches.update({
 				verifiedBy: null,
 				verifiedAt: null,
 				verificationComment: null,
@@ -43,8 +43,8 @@ module.exports = {
 
 			return await interaction.editReply(`Reset all ${count} Elitebotix verifications.`);
 		} else if (argument === 'o!mm incomplete') {
-			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores all');
-			let count = await DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiMatches all');
+			let count = await DBOsuMultiMatches.update({
 				verifiedBy: null,
 				verifiedAt: null,
 				verificationComment: null,
@@ -59,8 +59,8 @@ module.exports = {
 
 			return await interaction.editReply(`Reset all ${count} o!mm incomplete Elitebotix verifications.`);
 		} else {
-			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiScores osuUserId');
-			let count = await DBOsuMultiScores.update({
+			logDatabaseQueries(4, 'commands/admin/resetVerified.js DBOsuMultiMatches osuUserId');
+			let count = await DBOsuMultiMatches.update({
 				verifiedBy: null,
 				verifiedAt: null,
 				verificationComment: null,

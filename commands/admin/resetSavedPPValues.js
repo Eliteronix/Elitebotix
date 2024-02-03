@@ -1,4 +1,4 @@
-const { DBOsuMultiScores } = require('../../dbObjects');
+const { DBOsuMultiGameScores } = require('../../dbObjects');
 const { humanReadable, logDatabaseQueries } = require('../../utils');
 const { Op } = require('sequelize');
 
@@ -6,8 +6,8 @@ module.exports = {
 	name: 'resetSavedPPValues',
 	usage: 'None',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/resetSavedPPValues.js DBOsuMultiScores');
-		let count = await DBOsuMultiScores.update({
+		logDatabaseQueries(4, 'commands/admin/resetSavedPPValues.js DBOsuMultiGameScores');
+		let count = await DBOsuMultiGameScores.update({
 			pp: null,
 		}, {
 			where: {

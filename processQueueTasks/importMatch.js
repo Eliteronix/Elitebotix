@@ -1,6 +1,6 @@
 const { saveOsuMultiScores, logDatabaseQueries, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const osu = require('node-osu');
-const { DBOsuMultiScores, DBProcessQueue } = require('../dbObjects');
+const { DBProcessQueue, DBOsuMultiMatches } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
 const { Op } = require('sequelize');
 
@@ -105,8 +105,8 @@ module.exports = {
 				//Match has not been completed yet / 6 hours didn't pass
 				await saveOsuMultiScores(match, client);
 
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiScores');
-				let playedRounds = DBOsuMultiScores.count({
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches');
+				let playedRounds = DBOsuMultiMatches.count({
 					where: {
 						matchId: matchId,
 					}

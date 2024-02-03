@@ -1,7 +1,7 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { getOsuPlayerName, logDatabaseQueries, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getGameModeName, getAdditionalOsuInfo } = require('../utils');
-const { DBOsuMultiScores, DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
+const { getOsuPlayerName, logDatabaseQueries, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getAdditionalOsuInfo } = require('../utils');
+const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../dbObjects');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
@@ -287,8 +287,8 @@ module.exports = {
 				}
 
 				//Get all scores from tournaments
-				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiScores');
-				let multiScores = await DBOsuMultiScores.findAll({
+				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiGameScores');
+				let multiScores = await DBOsuMultiGameScores.findAll({
 					attributes: [
 						'id',
 						'score',
@@ -298,7 +298,6 @@ module.exports = {
 						'pp',
 						'beatmapId',
 						'createdAt',
-						'gameStartDate',
 						'osuUserId',
 						'count50',
 						'count100',
@@ -308,15 +307,40 @@ module.exports = {
 						'countMiss',
 						'maxCombo',
 						'perfect',
-						'matchName',
 						'mode',
+						'gameStartDate',
+						'matchId',
 					],
 					where: {
 						osuUserId: osuUserId,
-						mode: 'Standard',
+						mode: 0,
 						tourneyMatch: true,
+						score: {
+							[Op.gte]: 10000,
+						},
 					}
 				});
+
+				let matchIds = [...new Set(multiScores.map(score => score.matchId))];
+
+				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiMatches');
+				let multiMatches = await DBOsuMultiMatches.findAll({
+					attributes: [
+						'matchId',
+						'matchName',
+					],
+					where: {
+						matchId: {
+							[Op.in]: matchIds,
+						},
+					}
+				});
+
+				for (let j = 0; j < multiScores.length; j++) {
+					let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
+
+					multiScores[j].matchName = match.matchName;
+				}
 
 				if (new Date() - lastUpdate > 15000) {
 					processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${file.length})...`);
@@ -329,13 +353,13 @@ module.exports = {
 						lastUpdate = new Date();
 					}
 
-					if (parseInt(multiScores[j].score) <= 10000 && getMods(parseInt(multiScores[j].gameRawMods) + parseInt(multiScores[j].rawMods)).includes('RX')) {
+					if (getMods(parseInt(multiScores[j].gameRawMods) + parseInt(multiScores[j].rawMods)).includes('RX')) {
 						multiScores.splice(j, 1);
 						j--;
 						continue;
 					}
 
-					if (parseInt(multiScores[j].score) <= 10000 || multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+					if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1) {
 						multiScores.splice(j, 1);
 						j--;
 						continue;
@@ -793,26 +817,20 @@ module.exports = {
 };
 
 async function getTournamentTopPlayData(osuUserId, mode) {
-	let modeName = getGameModeName(mode);
-	modeName = modeName.substring(0, 1).toUpperCase() + modeName.substring(1);
-
-	if (modeName === 'Catch') {
-		modeName = 'Catch the Beat';
-	}
 
 	let where = {
 		osuUserId: osuUserId,
-		mode: modeName,
+		mode: mode,
 		tourneyMatch: true,
 		score: {
 			[Op.gte]: 10000,
 		},
-		scoringType: 'Score v2',
+		scoringType: 3,
 	};
 
 	//Get all scores from tournaments
-	logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiScores 1');
-	let multiScores = await DBOsuMultiScores.findAll({
+	logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiGameScores 1');
+	let multiScores = await DBOsuMultiGameScores.findAll({
 		attributes: [
 			'id',
 			'score',
@@ -822,7 +840,6 @@ async function getTournamentTopPlayData(osuUserId, mode) {
 			'pp',
 			'beatmapId',
 			'createdAt',
-			'gameStartDate',
 			'osuUserId',
 			'count50',
 			'count100',
@@ -832,14 +849,36 @@ async function getTournamentTopPlayData(osuUserId, mode) {
 			'countMiss',
 			'maxCombo',
 			'perfect',
-			'matchName',
 			'mode',
+			'gameStartDate',
+			'matchId',
 		],
 		where: where
 	});
 
+	let matchIds = [...new Set(multiScores.map(score => score.matchId))];
+
+	logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiMatches 1');
+	let multiMatches = await DBOsuMultiMatches.findAll({
+		attributes: [
+			'matchId',
+			'matchName',
+		],
+		where: {
+			matchId: {
+				[Op.in]: matchIds,
+			},
+		}
+	});
+
+	for (let j = 0; j < multiScores.length; j++) {
+		let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
+
+		multiScores[j].matchName = match.matchName;
+	}
+
 	for (let i = 0; i < multiScores.length; i++) {
-		if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].teamType === 'Tag Team vs' || multiScores[i].teamType === 'Tag Co-op') {
+		if (multiScores[i].teamType === 3 || multiScores[i].teamType === 1) {
 			multiScores.splice(i, 1);
 			i--;
 		}

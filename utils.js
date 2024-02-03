@@ -1,4 +1,4 @@
-const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBOsuMultiScores, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers } = require('./dbObjects');
+const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
 const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
@@ -1698,29 +1698,87 @@ module.exports = {
 		let weeksAfter = new Date(match.raw_start);
 		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
-		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiScores warmup detection same tourney');
-		let sameTournamentMatches = await DBOsuMultiScores.findAll({
-			attributes: ['id', 'osuUserId', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGameScores existing Scores');
+		let existingScores = await DBOsuMultiGameScores.findAll({
+			attributes: [
+				'id',
+				'osuUserId',
+				'matchId',
+				'gameId',
+				'beatmapId',
+				'scoringType',
+				'mode',
+				'tourneyMatch',
+				'evaluation',
+				'score',
+				'gameRawMods',
+				'rawMods',
+				'gameStartDate',
+				'gameEndDate',
+				'freeMod',
+				'warmup',
+				'maxCombo',
+				'count50',
+				'count100',
+				'count300',
+				'countMiss',
+				'countKatu',
+				'countGeki',
+				'perfect',
+				'teamType',
+				'team',
+			],
 			where: {
-				[Op.or]: [
-					{
-						matchName: {
-							[Op.like]: `%${acronym}%:%`,
-						},
-						gameStartDate: {
-							[Op.gte]: weeksPrior
-						},
-						gameEndDate: {
-							[Op.lte]: weeksAfter
-						},
-						tourneyMatch: true
-					},
-					{
-						matchId: match.id,
-					}
-				],
+				matchId: match.id,
 			}
 		});
+
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames warmup detection same tourney');
+		let sameTournamentGames = await DBOsuMultiGames.findAll({
+			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+			where: {
+				gameStartDate: {
+					[Op.gte]: weeksPrior
+				},
+				gameEndDate: {
+					[Op.lte]: weeksAfter
+				},
+				tourneyMatch: true,
+				matchId: {
+					[Op.not]: match.id
+				}
+			}
+		});
+
+		// Adapt the timespan to make sure the matches are included
+		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
+		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
+
+		let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
+			where: {
+				matchName: {
+					[Op.like]: `%${acronym}%:%`,
+				},
+				matchStartDate: {
+					[Op.gte]: weeksPrior
+				},
+				matchEndDate: {
+					[Op.lte]: weeksAfter
+				},
+			}
+		});
+
+		for (let i = 0; i < sameTournamentGames.length; i++) {
+			let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
+
+			if (!match) {
+				sameTournamentGames.splice(i, 1);
+				i--;
+			}
+		}
+
+		let games = [];
 
 		for (let gameIndex = 0; gameIndex < match.games.length; gameIndex++) {
 			//Define if the game is freemod or not
@@ -1756,33 +1814,87 @@ module.exports = {
 				}
 			}
 
-			let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches);
+			let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames);
 
 			let warmup = warmupCheckResult.warmup;
 
 			let warmupDecidedByAmount = warmupCheckResult.byAmount;
 
+			let gameScores = [];
+			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
+				gameScores.push(match.games[gameIndex].scores[i]);
+			}
+
+			gameScores.sort((a, b) => {
+				return parseInt(b.score) - parseInt(a.score);
+			});
+
+			for (let i = 0; i < gameScores.length; i++) {
+				if (parseInt(gameScores[i].score) < 10000) {
+					gameScores.splice(i, 1);
+					i--;
+				}
+			}
+
+			let scoringType = null;
+
+			if (match.games[gameIndex].scoringType === 'Score') {
+				scoringType = 0;
+			} else if (match.games[gameIndex].scoringType === 'Accuracy') {
+				scoringType = 1;
+			} else if (match.games[gameIndex].scoringType === 'Combo') {
+				scoringType = 2;
+			} else if (match.games[gameIndex].scoringType === 'Score v2') {
+				scoringType = 3;
+			}
+
+			let mode = null;
+
+			if (match.games[gameIndex].mode === 'Standard') {
+				mode = 0;
+			} else if (match.games[gameIndex].mode === 'Taiko') {
+				mode = 1;
+			} else if (match.games[gameIndex].mode === 'Catch the Beat') {
+				mode = 2;
+			} else if (match.games[gameIndex].mode === 'Mania') {
+				mode = 3;
+			}
+
+			let teamType = null;
+
+			if (match.games[gameIndex].teamType === 'Head to Head') {
+				teamType = 0;
+			} else if (match.games[gameIndex].teamType === 'Tag Co-op') {
+				teamType = 1;
+			} else if (match.games[gameIndex].teamType === 'Team vs') {
+				teamType = 2;
+			} else if (match.games[gameIndex].teamType === 'Tag Team vs') {
+				teamType = 3;
+			}
+
+			games.push({
+				matchId: match.id,
+				gameId: match.games[gameIndex].id,
+				tourneyMatch: tourneyMatch,
+				scoringType: scoringType,
+				mode: mode,
+				beatmapId: match.games[gameIndex].beatmapId,
+				gameRawMods: match.games[gameIndex].raw_mods,
+				gameStartDate: match.games[gameIndex].raw_start,
+				gameEndDate: match.games[gameIndex].raw_end,
+				freeMod: freeMod,
+				forceMod: forceMod,
+				warmup: warmup,
+				warmupDecidedByAmount: warmupDecidedByAmount,
+				teamType: teamType,
+				scores: gameScores.length,
+			});
+
 			for (let scoreIndex = 0; scoreIndex < match.games[gameIndex].scores.length; scoreIndex++) {
 				//Calculate evaluation
 				let evaluation = null;
 
-				let gameScores = [];
-				for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
-					gameScores.push(match.games[gameIndex].scores[i]);
-				}
-
 				if (gameScores.length > 1) {
-					gameScores.sort((a, b) => {
-						return parseInt(b.score) - parseInt(a.score);
-					});
-
-					for (let i = 0; i < gameScores.length; i++) {
-						if (parseInt(gameScores[i].score) < 10000) {
-							gameScores.splice(i, 1);
-							i--;
-						}
-					}
-
 					let sortedScores = [];
 					for (let j = 0; j < gameScores.length; j++) {
 						//Remove the own score to make it odd for the middle score
@@ -1818,11 +1930,11 @@ module.exports = {
 
 					let existingScore = null;
 
-					for (let i = 0; i < sameTournamentMatches.length; i++) {
-						if (sameTournamentMatches[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
-							&& sameTournamentMatches[i].matchId == match.id
-							&& sameTournamentMatches[i].gameId == match.games[gameIndex].id) {
-							existingScore = sameTournamentMatches[i];
+					for (let i = 0; i < existingScores.length; i++) {
+						if (existingScores[i].osuUserId == match.games[gameIndex].scores[scoreIndex].userId
+							&& existingScores[i].matchId == match.id
+							&& existingScores[i].gameId == match.games[gameIndex].id) {
+							existingScore = existingScores[i];
 							break;
 						}
 					}
@@ -1839,24 +1951,19 @@ module.exports = {
 						newScores.push({
 							osuUserId: match.games[gameIndex].scores[scoreIndex].userId,
 							matchId: match.id,
-							matchName: match.name,
 							gameId: match.games[gameIndex].id,
-							scoringType: match.games[gameIndex].scoringType,
-							mode: match.games[gameIndex].mode,
+							scoringType: scoringType,
+							mode: mode,
 							beatmapId: match.games[gameIndex].beatmapId.toString(),
 							tourneyMatch: tourneyMatch,
 							evaluation: evaluation,
 							score: match.games[gameIndex].scores[scoreIndex].score,
 							gameRawMods: match.games[gameIndex].raw_mods.toString(),
 							rawMods: scoreMods.toString(),
-							matchStartDate: match.raw_start,
-							matchEndDate: match.raw_end,
 							gameStartDate: match.games[gameIndex].raw_start,
 							gameEndDate: match.games[gameIndex].raw_end,
 							freeMod: freeMod,
-							forceMod: forceMod,
 							warmup: warmup,
-							warmupDecidedByAmount: warmupDecidedByAmount,
 							maxCombo: match.games[gameIndex].scores[scoreIndex].maxCombo,
 							count50: match.games[gameIndex].scores[scoreIndex].counts['50'],
 							count100: match.games[gameIndex].scores[scoreIndex].counts['100'],
@@ -1865,7 +1972,7 @@ module.exports = {
 							countKatu: match.games[gameIndex].scores[scoreIndex].counts.katu,
 							countGeki: match.games[gameIndex].scores[scoreIndex].counts.geki,
 							perfect: match.games[gameIndex].scores[scoreIndex].perfect,
-							teamType: match.games[gameIndex].teamType,
+							teamType: teamType,
 							team: match.games[gameIndex].scores[scoreIndex].team,
 						});
 					} else if (existingScore.warmup === null || !existingScore.matchEndDate) {
@@ -1879,23 +1986,18 @@ module.exports = {
 
 						existingScore.osuUserId = match.games[gameIndex].scores[scoreIndex].userId;
 						existingScore.matchId = match.id;
-						existingScore.matchName = match.name;
 						existingScore.gameId = match.games[gameIndex].id;
-						existingScore.scoringType = match.games[gameIndex].scoringType;
-						existingScore.mode = match.games[gameIndex].mode;
+						existingScore.scoringType = scoringType;
+						existingScore.mode = mode;
 						existingScore.beatmapId = match.games[gameIndex].beatmapId;
 						existingScore.evaluation = evaluation;
 						existingScore.score = match.games[gameIndex].scores[scoreIndex].score;
 						existingScore.gameRawMods = match.games[gameIndex].raw_mods;
 						existingScore.rawMods = scoreMods;
-						existingScore.matchStartDate = match.raw_start;
-						existingScore.matchEndDate = match.raw_end;
 						existingScore.gameStartDate = match.games[gameIndex].raw_start;
 						existingScore.gameEndDate = match.games[gameIndex].raw_end;
 						existingScore.freeMod = freeMod;
-						existingScore.forceMod = forceMod;
 						existingScore.warmup = warmup;
-						existingScore.warmupDecidedByAmount = warmupDecidedByAmount;
 						existingScore.maxCombo = match.games[gameIndex].scores[scoreIndex].maxCombo;
 						existingScore.count50 = match.games[gameIndex].scores[scoreIndex].counts['50'];
 						existingScore.count100 = match.games[gameIndex].scores[scoreIndex].counts['100'];
@@ -1904,7 +2006,7 @@ module.exports = {
 						existingScore.countKatu = match.games[gameIndex].scores[scoreIndex].counts.katu;
 						existingScore.countGeki = match.games[gameIndex].scores[scoreIndex].counts.geki;
 						existingScore.perfect = match.games[gameIndex].scores[scoreIndex].perfect;
-						existingScore.teamType = match.games[gameIndex].teamType;
+						existingScore.teamType = teamType;
 						existingScore.team = match.games[gameIndex].scores[scoreIndex].team;
 						await existingScore.save();
 
@@ -1936,8 +2038,8 @@ module.exports = {
 			let created = false;
 			while (!created) {
 				try {
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores create');
-					await DBOsuMultiScores.bulkCreate(newScores)
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores create');
+					await DBOsuMultiGameScores.bulkCreate(newScores)
 						.then(async (scores) => {
 							for (let i = 0; i < scores.length; i++) {
 								if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
@@ -1954,15 +2056,13 @@ module.exports = {
 								}
 							}
 
-							//Set back warmup flag if it was set by amount
-							for (let i = 0; i < sameTournamentMatches.length; i++) {
-								if (sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup !== null
-									&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentMatches[i].beatmapId)
-									&& sameTournamentMatches[i].matchId != match.id
-									|| sameTournamentMatches[i].warmupDecidedByAmount && sameTournamentMatches[i].warmup === false
-									&& sameTournamentMatches[i].matchId != match.id) {
-									sameTournamentMatches[i].warmup = null;
-									await sameTournamentMatches[i].save();
+							//Set back warmup flag if it was set by amount | warmup = false is always gonna get reset | the rest only if the map was played
+							for (let i = 0; i < sameTournamentGames.length; i++) {
+								if (sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup !== null
+									&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentGames[i].beatmapId)
+									|| sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup === false) {
+									sameTournamentGames[i].warmup = null;
+									await sameTournamentGames[i].save();
 								}
 							}
 
@@ -1972,6 +2072,93 @@ module.exports = {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
 			}
+		}
+
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Get existing games');
+		let existingGames = await DBOsuMultiGames.findAll({
+			attributes: [
+				'id',
+				'gameId',
+				'tourneyMatch',
+				'scoringType',
+				'mode',
+				'beatmapId',
+				'gameRawMods',
+				'gameStartDate',
+				'gameEndDate',
+				'freeMod',
+				'forceMod',
+				'warmup',
+				'warmupDecidedByAmount',
+				'teamType',
+				'scores'
+			],
+			where: {
+				matchId: match.id,
+			}
+		});
+
+		let newGames = [];
+
+		for (let i = 0; i < games.length; i++) {
+			let existingGame = existingGames.find(x => x.gameId === parseInt(games[i].gameId));
+
+			if (existingGame) {
+				existingGame.tourneyMatch = games[i].tourneyMatch;
+				existingGame.scoringType = games[i].scoringType;
+				existingGame.mode = games[i].mode;
+				existingGame.beatmapId = games[i].beatmapId;
+				existingGame.gameRawMods = games[i].gameRawMods;
+				existingGame.gameStartDate = games[i].gameStartDate;
+				existingGame.gameEndDate = games[i].gameEndDate;
+				existingGame.freeMod = games[i].freeMod;
+				existingGame.forceMod = games[i].forceMod;
+				existingGame.warmup = games[i].warmup;
+				existingGame.warmupDecidedByAmount = games[i].warmupDecidedByAmount;
+				existingGame.teamType = games[i].teamType;
+				existingGame.scores = games[i].scores;
+				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Update existing game');
+				await existingGame.save();
+			} else {
+				newGames.push(games[i]);
+			}
+		}
+
+		if (newGames.length) {
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Create new games');
+			await DBOsuMultiGames.bulkCreate(newGames);
+		}
+
+		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Get existing match');
+		let existingMatch = await DBOsuMultiMatches.findOne({
+			attributes: [
+				'id',
+				'matchName',
+				'tourneyMatch',
+				'matchStartDate',
+				'matchEndDate'
+			],
+			where: {
+				matchId: match.id,
+			}
+		});
+
+		if (existingMatch) {
+			existingMatch.matchName = match.name;
+			existingMatch.tourneyMatch = tourneyMatch;
+			existingMatch.matchStartDate = match.raw_start;
+			existingMatch.matchEndDate = match.raw_end;
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Update existing match');
+			await existingMatch.save();
+		} else {
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Create new match');
+			await DBOsuMultiMatches.create({
+				matchId: match.id,
+				matchName: match.name,
+				tourneyMatch: tourneyMatch,
+				matchStartDate: match.raw_start,
+				matchEndDate: match.raw_end,
+			});
 		}
 
 		//Set the tournament flags on the corresponding beatmaps
@@ -2594,21 +2781,39 @@ module.exports = {
 								let doubleTimeMap = false;
 								let freeModMap = false;
 
-								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiScores getOsuBeatmap');
-								let tourneyScores = await DBOsuMultiScores.findAll({
-									attributes: ['gameRawMods', 'rawMods', 'freeMod'],
+								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiGameScores getOsuBeatmap');
+								let tourneyScores = await DBOsuMultiGameScores.findAll({
+									attributes: ['gameRawMods', 'rawMods', 'freeMod', 'matchId'],
 									where: {
 										beatmapId: beatmaps[0].id,
 										tourneyMatch: true,
+										warmup: {
+											[Op.not]: true,
+										},
+									}
+								});
+
+								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiMatches getOsuBeatmap');
+								let tourneyMatches = await DBOsuMultiMatches.findAll({
+									attributes: ['matchId'],
+									where: {
+										matchId: {
+											[Op.in]: tourneyScores.map(x => x.matchId),
+										},
 										matchName: {
 											[Op.notLike]: 'MOTD:%',
 										},
-										[Op.or]: [
-											{ warmup: false },
-											{ warmup: null }
-										],
 									}
 								});
+
+								for (let i = 0; i < tourneyScores.length; i++) {
+									let match = tourneyMatches.find(x => x.matchId === tourneyScores[i].matchId);
+
+									if (!match) {
+										tourneyScores.splice(i, 1);
+										i--;
+									}
+								}
 
 								if (tourneyScores.length > 0) {
 									tourneyMap = true;
@@ -2757,23 +2962,23 @@ module.exports = {
 	},
 	getScoreModpool(dbScore) {
 		//Evaluate with which mods the game was played
-		if (dbScore.freeMod || dbScore.rawMods !== '0') {
+		if (dbScore.freeMod || dbScore.rawMods !== 0) {
 			return 'FM';
 		}
 
-		if (dbScore.gameRawMods === '0' || dbScore.gameRawMods === '1') {
+		if (dbScore.gameRawMods === 0 || dbScore.gameRawMods === 1) {
 			return 'NM';
 		}
 
-		if (dbScore.gameRawMods === '8' || dbScore.gameRawMods === '9') {
+		if (dbScore.gameRawMods === 8 || dbScore.gameRawMods === 9) {
 			return 'HD';
 		}
 
-		if (dbScore.gameRawMods === '16' || dbScore.gameRawMods === '17') {
+		if (dbScore.gameRawMods === 16 || dbScore.gameRawMods === 17) {
 			return 'HR';
 		}
 
-		if (parseInt(dbScore.gameRawMods) > 63 && (dbScore.gameRawMods === '64' || dbScore.gameRawMods === '65' || dbScore.gameRawMods === '576' || dbScore.gameRawMods === '577')) {
+		if (dbScore.gameRawMods > 63 && (dbScore.gameRawMods === 64 || dbScore.gameRawMods === 65 || dbScore.gameRawMods === 576 || dbScore.gameRawMods === 577)) {
 			return 'DT';
 		}
 
@@ -3047,13 +3252,13 @@ module.exports = {
 		const lastHalfYear = new Date();
 		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
 
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiScores pastHalfYearScoreCount');
-		const pastHalfYearScoreCount = await DBOsuMultiScores.count({
+		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiGameScores pastHalfYearScoreCount');
+		const pastHalfYearScoreCount = await DBOsuMultiGameScores.count({
 			where: {
 				osuUserId: input.osuUserId,
 				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
+				scoringType: 3,
+				mode: 0,
 				gameEndDate: {
 					[Op.gte]: lastHalfYear
 				}
@@ -3083,33 +3288,31 @@ module.exports = {
 		}
 
 		//Get the tournament data either limited by the date
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores getUserDuelStarRating');
-		let userScores = await DBOsuMultiScores.findAll({
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores getUserDuelStarRating');
+		let userScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'gameId',
 				'beatmapId',
 				'score',
 				'matchId',
-				'matchName',
-				'matchStartDate',
 				'gameRawMods',
 				'rawMods',
 				'count300',
 				'count100',
 				'count50',
-				'countMiss',
-				'verifiedBy',
-				'verifiedAt'
+				'countMiss'
 			],
 			where: {
 				osuUserId: input.osuUserId,
 				tourneyMatch: true,
-				scoringType: 'Score v2',
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
+				scoringType: 3,
+				mode: 0,
+				score: {
+					[Op.gt]: 10000
+				},
+				warmup: {
+					[Op.not]: true
+				},
 				[Op.and]: [
 					{
 						gameEndDate: {
@@ -3120,7 +3323,28 @@ module.exports = {
 						gameEndDate: {
 							[Op.gte]: startDate
 						}
-					},
+					}
+				]
+			},
+			order: [
+				['gameId', 'DESC']
+			]
+		});
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches getUserDuelStarRating');
+		let userMatches = await DBOsuMultiMatches.findAll({
+			attributes: [
+				'matchId',
+				'matchName',
+				'matchStartDate',
+				'verifiedBy',
+				'verifiedAt'
+			],
+			where: {
+				matchId: {
+					[Op.in]: userScores.map(score => score.matchId)
+				},
+				[Op.and]: [
 					{
 						[Op.not]: [
 							{
@@ -3143,22 +3367,27 @@ module.exports = {
 			}
 		});
 
-		//Sort it by game ID
-		userScores.sort((a, b) => {
-			return parseInt(b.gameId) - parseInt(a.gameId);
-		});
+		//Add the match data to the scores
+		for (let i = 0; i < userScores.length; i++) {
+			let match = userMatches.find(match => match.matchId === userScores[i].matchId);
+
+			if (!match) {
+				userScores.splice(i, 1);
+				i--;
+				continue;
+			}
+
+			userScores[i].matchName = match.matchName;
+			userScores[i].matchStartDate = match.matchStartDate;
+			userScores[i].verifiedBy = match.verifiedBy;
+			userScores[i].verifiedAt = match.verifiedAt;
+		}
 
 		// Get the modpool ratios for the first 100 maps for later
 		const modPoolAmounts = [0, 0, 0, 0, 0];
 
 		//Get ratio of modPools played maps
 		for (let i = 0; i < userScores.length && i < 100; i++) {
-			if (parseInt(userScores[i].score) <= 10000) {
-				userScores.splice(i, 1);
-				i--;
-				continue;
-			}
-
 			modPoolAmounts[modPools.indexOf(module.exports.getScoreModpool(userScores[i]))]++;
 		}
 
@@ -3169,14 +3398,8 @@ module.exports = {
 			const userMapIds = [];
 			const userMaps = [];
 
-			// Don't count plays with more than 10% misses
+			// Don't count plays with more than 15% misses
 			for (let i = 0; i < userScores.length; i++) {
-				if (parseInt(userScores[i].score) <= 10000) {
-					userScores.splice(i, 1);
-					i--;
-					continue;
-				}
-
 				let totalHits = parseInt(userScores[i].count300) + parseInt(userScores[i].count100) + parseInt(userScores[i].count50) + parseInt(userScores[i].countMiss);
 
 				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
@@ -4069,14 +4292,14 @@ module.exports = {
 					return;
 				}
 
-				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores lastMultiScore');
-				let lastMultiScore = await DBOsuMultiScores.findOne({
-					attributes: ['matchId', 'matchName', 'matchEndDate'],
+				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores lastMultiScore');
+				let lastMultiScore = await DBOsuMultiGameScores.findOne({
+					attributes: ['matchId'],
 					where: {
 						osuUserId: discordUser.osuUserId
 					},
 					order: [
-						['gameStartDate', 'DESC']
+						['gameId', 'DESC']
 					]
 				});
 
@@ -4084,11 +4307,19 @@ module.exports = {
 					return;
 				}
 
-				if (lastMultiScore.matchEndDate) {
-					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches lastMultiScore');
+				let lastMultiMatch = await DBOsuMultiMatches.findOne({
+					attributes: ['matchName', 'matchEndDate'],
+					where: {
+						matchId: lastMultiScore.matchId
+					},
+				});
+
+				if (lastMultiMatch.matchEndDate) {
+					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiMatch.matchId}`);
 				}
 
-				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiScore.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
+				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiMatch.matchId}`);
 			}
 
 			if (msg === '!whatishappiness') {
@@ -4499,9 +4730,9 @@ module.exports = {
 				if (dbBeatmap) {
 					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
 
-					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores pp update');
+					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores pp update');
 					try {
-						await DBOsuMultiScores.update({ pp: pp }, { where: { id: inputScore.id } });
+						await DBOsuMultiGameScores.update({ pp: pp }, { where: { id: inputScore.id } });
 					} catch (e) {
 						//Nothing
 					}
@@ -4532,8 +4763,8 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries missingUsers');
-		let missingUsers = await DBOsuMultiScores.findAll({
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries missingUsers');
+		let missingUsers = await DBOsuMultiGameScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
 				osuUserId: {
@@ -4573,71 +4804,106 @@ module.exports = {
 			return;
 		}
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries mostplayed');
-		let mostplayed = await DBOsuMultiScores.findAll({
-			attributes: ['beatmapId', [Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'playcount']],
-			where: {
-				warmup: false,
-				beatmapId: {
-					[Op.gt]: 0,
-				},
-				matchName: {
-					[Op.and]: {
-						[Op.notLike]: 'ETX%:%',
-						[Op.notLike]: 'o!mm%:%',
-					}
-				},
-				tourneyMatch: true,
-			},
-			group: ['beatmapId'],
-			order: [[Sequelize.fn('COUNT', Sequelize.col('beatmapId')), 'DESC']],
-		});
+		// module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
+		// let mostplayed = await DBOsuMultiGames.findAll({
+		// 	attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
+		// 	where: {
+		// 		warmup: false,
+		// 		beatmapId: {
+		// 			[Op.gt]: 0,
+		// 		},
+		// 		tourneyMatch: true,
+		// 	},
+		// 	group: ['matchId', 'beatmapId'],
+		// 	order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
+		// });
 
-		// Filter out maps that have less than 250 plays
-		let popular = mostplayed.filter(map => map.dataValues.playcount > 250);
-		popular = popular.map(map => map.dataValues.beatmapId);
+		// let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
 
-		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
-		let update = await DBOsuBeatmaps.update({
-			popular: true
-		}, {
-			where: {
-				beatmapId: {
-					[Op.in]: popular
-				},
-				popular: {
-					[Op.not]: true
-				}
-			},
-			silent: true
-		});
+		// module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
+		// let matchMakingMatchData = await DBOsuMultiMatches.findAll({
+		// 	attributes: ['matchId'],
+		// 	where: {
+		// 		matchId: {
+		// 			[Op.in]: matchIds
+		// 		},
+		// 		matchName: {
+		// 			[Op.and]: {
+		// 				[Op.like]: 'ETX%:%',
+		// 				[Op.like]: 'o!mm%:%',
+		// 			}
+		// 		},
+		// 	},
+		// });
 
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} new beatmaps as popular`);
+		// let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
 
-		// Filter out maps that have less than 100 plays
-		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
-		usedOften = usedOften.map(map => map.dataValues.beatmapId);
+		// // Filter out matches that are in matchMakingMatchIds
+		// mostplayed = mostplayed.filter(item => !matchMakingMatchIds.includes(item.matchId));
 
-		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
-		update = await DBOsuBeatmaps.update({
-			usedOften: true
-		}, {
-			where: {
-				beatmapId: {
-					[Op.in]: usedOften
-				},
-				usedOften: {
-					[Op.not]: true
-				}
-			},
-			silent: true
-		});
+		// let mostPlayedBeatmaps = [];
+		// let mostplayedBeatmapIds = [];
 
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} new beatmaps as used often`);
+		// for (let i = 0; i < mostplayed.length; i++) {
+		// 	let index = mostplayedBeatmapIds.indexOf(mostplayed[i].beatmapId);
+
+		// 	if (index !== -1) {
+		// 		mostPlayedBeatmaps[index].playcount = mostplayed[i].dataValues.playcount + mostPlayedBeatmaps[index].playcount;
+		// 	} else {
+		// 		mostPlayedBeatmaps.push({
+		// 			beatmapId: mostplayed[i].beatmapId,
+		// 			playcount: mostplayed[i].dataValues.playcount,
+		// 		});
+
+		// 		mostplayedBeatmapIds.push(mostplayed[i].beatmapId);
+		// 	}
+		// }
+
+		// // Filter out maps that have less than 250 plays
+		// let popular = mostPlayedBeatmaps.filter(map => map.playcount > 250);
+		// popular = popular.map(map => map.beatmapId);
+
+		// // Update beatmap data
+		// module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
+		// let update = await DBOsuBeatmaps.update({
+		// 	popular: true
+		// }, {
+		// 	where: {
+		// 		beatmapId: {
+		// 			[Op.in]: popular
+		// 		},
+		// 		popular: {
+		// 			[Op.not]: true
+		// 		}
+		// 	},
+		// 	silent: true
+		// });
+
+		// // eslint-disable-next-line no-console
+		// console.log(`Marked ${update[0]} new beatmaps as popular`);
+
+		// // Filter out maps that have less than 100 plays
+		// let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
+		// usedOften = usedOften.map(map => map.dataValues.beatmapId);
+
+		// // Update beatmap data
+		// module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
+		// update = await DBOsuBeatmaps.update({
+		// 	usedOften: true
+		// }, {
+		// 	where: {
+		// 		beatmapId: {
+		// 			[Op.in]: usedOften
+		// 		},
+		// 		usedOften: {
+		// 			[Op.not]: true
+		// 		}
+		// 	},
+		// 	silent: true
+		// });
+
+		// // eslint-disable-next-line no-console
+		// console.log(`Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
 			return;
@@ -4814,11 +5080,11 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiScores = new Sequelize('database', 'username', 'password', {
+		const multiMatches = new Sequelize('database', 'username', 'password', {
 			host: 'localhost',
 			dialect: 'sqlite',
 			logging: false,
-			storage: 'databases/multiScores.sqlite',
+			storage: 'databases/multiMatches.sqlite',
 			retry: {
 				max: 15, // Maximum retry 15 times
 				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -4827,9 +5093,133 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 10) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates');
-			let result = await multiScores.query(
-				'SELECT * FROM DBOsuMultiScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiScores as a WHERE a.osuUserId = DBOsuMultiScores.osuUserId AND a.matchId = DBOsuMultiScores.matchId AND a.gameId = DBOsuMultiScores.gameId AND a.id <> DBOsuMultiScores.id)',
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
+			let result = await multiMatches.query(
+				'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
+			);
+
+			iterations++;
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let matchIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (matchIds.indexOf(result[0][i].matchId) === -1) {
+						matchIds.push(result[0][i].matchId);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiMatches.findOne({
+							attributes: ['id', 'matchId', 'updatedAt'],
+							where: {
+								id: result[0][i].id
+							}
+						});
+
+						deleted++;
+
+						// eslint-disable-next-line no-console
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'updatedAt', duplicate.updatedAt);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate matches`);
+
+		duplicates = true;
+		deleted = 0;
+		iterations = 0;
+
+		const multiGames = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'databases/multiGames.sqlite',
+			retry: {
+				max: 15, // Maximum retry 15 times
+				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+			},
+		});
+
+		while (duplicates && iterations < 10) {
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates');
+			let result = await multiGames.query(
+				'SELECT * FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
+			);
+
+			iterations++;
+
+			duplicates = result[0].length;
+
+			if (result[0].length) {
+				let gameIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (gameIds.indexOf(result[0][i].gameId) === -1) {
+						gameIds.push(result[0][i].gameId);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiGames.findOne({
+							attributes: ['id', 'matchId', 'gameId', 'updatedAt'],
+							where: {
+								id: result[0][i].id
+							}
+						});
+
+						deleted++;
+
+						// eslint-disable-next-line no-console
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'updatedAt', duplicate.updatedAt);
+
+						await new Promise(resolve => setTimeout(resolve, 500));
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
+
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate games`);
+
+		duplicates = true;
+		deleted = 0;
+		iterations = 0;
+
+		const multiGameScores = new Sequelize('database', 'username', 'password', {
+			host: 'localhost',
+			dialect: 'sqlite',
+			logging: false,
+			storage: 'databases/multiGameScores.sqlite',
+			retry: {
+				max: 15, // Maximum retry 15 times
+				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+			},
+		});
+
+		while (duplicates && iterations < 10) {
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates');
+			let result = await multiGameScores.query(
+				'SELECT * FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
 
 			iterations++;
@@ -4844,9 +5234,9 @@ module.exports = {
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuMultiScores.findOne({
-							attributes: ['id', 'matchId', 'gameId', 'osuUserId', 'matchStartDate', 'updatedAt'],
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiGameScores.findOne({
+							attributes: ['id', 'matchId', 'gameId', 'osuUserId', 'updatedAt'],
 							where: {
 								id: result[0][i].id
 							}
@@ -4855,7 +5245,7 @@ module.exports = {
 						deleted++;
 
 						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'matchStartDate', duplicate.matchStartDate, 'updatedAt', duplicate.updatedAt);
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'updatedAt', duplicate.updatedAt);
 
 						await new Promise(resolve => setTimeout(resolve, 500));
 						try {
@@ -4887,9 +5277,26 @@ module.exports = {
 
 		taikoMaps = taikoMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update taiko');
-		let updated = await DBOsuMultiScores.update({
-			mode: 'Taiko',
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update taiko');
+		let updated = await DBOsuMultiGames.update({
+			mode: 1,
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: taikoMaps
+				},
+				mode: {
+					[Op.not]: 1
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Taiko games that were in the wrong mode`);
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update taiko');
+		updated = await DBOsuMultiGameScores.update({
+			mode: 1,
 			pp: null,
 		}, {
 			where: {
@@ -4897,7 +5304,7 @@ module.exports = {
 					[Op.in]: taikoMaps
 				},
 				mode: {
-					[Op.not]: 'Taiko'
+					[Op.not]: 1
 				}
 			}
 		});
@@ -4909,9 +5316,26 @@ module.exports = {
 
 		catchMaps = catchMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update catcch');
-		updated = await DBOsuMultiScores.update({
-			mode: 'Catch the Beat',
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update catcch');
+		updated = await DBOsuMultiGames.update({
+			mode: 2,
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: catchMaps
+				},
+				mode: {
+					[Op.not]: 2
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Catch the Beat games that were in the wrong mode`);
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update catcch');
+		updated = await DBOsuMultiGameScores.update({
+			mode: 2,
 			pp: null,
 		}, {
 			where: {
@@ -4919,7 +5343,7 @@ module.exports = {
 					[Op.in]: catchMaps
 				},
 				mode: {
-					[Op.not]: 'Catch the Beat'
+					[Op.not]: 2
 				}
 			}
 		});
@@ -4931,9 +5355,26 @@ module.exports = {
 
 		maniaMaps = maniaMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries update mania');
-		updated = await DBOsuMultiScores.update({
-			mode: 'Mania',
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update mania');
+		updated = await DBOsuMultiGames.update({
+			mode: 3,
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: maniaMaps
+				},
+				mode: {
+					[Op.not]: 3
+				}
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Updated ${updated[0]} Mania games that were in the wrong mode`);
+
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update mania');
+		updated = await DBOsuMultiGameScores.update({
+			mode: 3,
 			pp: null,
 		}, {
 			where: {
@@ -4941,7 +5382,7 @@ module.exports = {
 					[Op.in]: maniaMaps
 				},
 				mode: {
-					[Op.not]: 'Mania'
+					[Op.not]: 3
 				}
 			}
 		});
@@ -4953,8 +5394,8 @@ module.exports = {
 		let weeksAgo = new Date();
 		weeksAgo.setDate(weeksAgo.getDate() - 58);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries reset unverified');
-		updated = await DBOsuMultiScores.update({
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset unverified');
+		updated = await DBOsuMultiMatches.update({
 			verifiedBy: null,
 		}, {
 			where: {
@@ -4969,13 +5410,37 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
-		updated = await DBOsuMultiScores.update({
-			warmup: null,
-		}, {
+		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
+		let matchesWithoutEndDate = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
 			where: {
 				matchEndDate: null,
 				tourneyMatch: true,
+			},
+		});
+
+		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
+		updated = await DBOsuMultiGames.update({
+			warmup: null,
+		}, {
+			where: {
+				matchId: {
+					[Op.in]: matchesWithoutEndDate.map(match => match.matchId)
+				},
+				warmup: {
+					[Op.not]: null
+				}
+			}
+		});
+
+		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
+		updated = await DBOsuMultiGameScores.update({
+			warmup: null,
+		}, {
+			where: {
+				matchId: {
+					[Op.in]: matchesWithoutEndDate.map(match => match.matchId)
+				},
 				warmup: {
 					[Op.not]: null
 				}
@@ -5294,7 +5759,7 @@ module.exports = {
 		return playerName;
 	},
 	calculateGrade(mode, counts, modBits) {
-		if (mode === 'Standard') {
+		if (mode === 0) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5319,7 +5784,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 'Taiko') {
+		} else if (mode === 1) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5343,7 +5808,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 'Catch the Beat') {
+		} else if (mode === 2) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 2);
@@ -5367,7 +5832,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 'Mania') {
+		} else if (mode === 3) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 3);
@@ -5410,22 +5875,18 @@ module.exports = {
 		let threeMonthsAgo = new Date();
 		threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-		module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiScores player scores');
-		const playerScores = await DBOsuMultiScores.findAll({
+		module.exports.logDatabaseQueries(4, 'utils.js createDuelMatch DBOsuMultiGameScores player scores');
+		const playerScores = await DBOsuMultiGameScores.findAll({
 			attributes: ['osuUserId', 'beatmapId', 'gameStartDate'],
 			where: {
 				osuUserId: {
 					[Op.in]: users.map(user => user.osuUserId),
 				},
 				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
-				mode: 'Standard',
-				[Op.or]: [
-					{ warmup: false },
-					{ warmup: null }
-				],
+				mode: 0,
+				warmup: {
+					[Op.not]: true,
+				}
 			}
 		});
 
@@ -6899,7 +7360,7 @@ module.exports = {
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					// eslint-disable-next-line no-undef
-					const { DBOsuGuildTrackers, DBOsuMultiScores } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					// eslint-disable-next-line no-undef
 					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
@@ -7450,8 +7911,8 @@ module.exports = {
 							if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 								// console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 								//Get all scores from tournaments
-								logDatabaseQueries(2, 'utils.js DBOsuMultiScores processOsuTrack tournamentTopPlays');
-								let multiScores = await DBOsuMultiScores.findAll({
+								logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores processOsuTrack tournamentTopPlays');
+								let multiScores = await DBOsuMultiGameScores.findAll({
 									attributes: [
 										'id',
 										'score',
@@ -7461,7 +7922,6 @@ module.exports = {
 										'pp',
 										'beatmapId',
 										'createdAt',
-										'gameStartDate',
 										'osuUserId',
 										'count50',
 										'count100',
@@ -7471,12 +7931,13 @@ module.exports = {
 										'countMiss',
 										'maxCombo',
 										'perfect',
-										'matchName',
 										'mode',
+										'gameStartDate',
+										'matchId',
 									],
 									where: {
 										osuUserId: osuUser.osuUserId,
-										mode: 'Standard',
+										mode: 0,
 										tourneyMatch: true,
 										score: {
 											[Op.gte]: 10000
@@ -7484,8 +7945,23 @@ module.exports = {
 									}
 								});
 
+								logDatabaseQueries(2, 'utils.js DBOsuMultiMatches processOsuTrack tournamentTopPlays match data');
+								let multiMatches = await DBOsuMultiMatches.findAll({
+									attributes: [
+										'matchId',
+										'matchName',
+									],
+									where: {
+										matchId: {
+											[Op.in]: multiScores.map(score => score.matchId)
+										}
+									}
+								});
+
 								for (let j = 0; j < multiScores.length; j++) {
-									if (parseInt(multiScores[j].score) <= 10000 || multiScores[j].teamType === 'Tag Team vs' || multiScores[j].teamType === 'Tag Co-op') {
+									let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
+
+									if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1 || !match) {
 										multiScores.splice(j, 1);
 										j--;
 									}
@@ -8942,7 +9418,7 @@ function getMiddleScore(scores) {
 	return (parseInt(scores[0]) + parseInt(scores[1])) / 2;
 }
 
-async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches, crossCheck) {
+async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames, crossCheck) {
 
 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
@@ -8954,9 +9430,9 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 
 	let sameMapSameTournamentScore = null;
 
-	for (let i = 0; i < sameTournamentMatches.length; i++) {
-		if (sameTournamentMatches[i].beatmapId == match.games[gameIndex].beatmapId && sameTournamentMatches[i].matchId != match.id) {
-			sameMapSameTournamentScore = sameTournamentMatches[i];
+	for (let i = 0; i < sameTournamentGames.length; i++) {
+		if (sameTournamentGames[i].beatmapId == match.games[gameIndex].beatmapId) {
+			sameMapSameTournamentScore = sameTournamentGames[i];
 			break;
 		}
 	}
@@ -9006,7 +9482,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 	//Check if the first map was not a warmup
 	if (gameIndex === 1 && !crossCheck) {
 		// console.log('Crosscheck for first map no warmup:');
-		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, sameTournamentMatches, true);
+		let firstMapWarmup = await checkWarmup(match, 0, tourneyMatch, sameTournamentGames, true);
 
 		//Return not a warmup if the first map was not a warmup
 		if (firstMapWarmup.warmup === false) {
@@ -9018,7 +9494,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 	//Check if the second map is a warmup
 	if (gameIndex === 0 && match.games.length > 1 && !crossCheck) {
 		// console.log('Crosscheck for second map warmup:');
-		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, sameTournamentMatches, true);
+		let secondMapWarmup = await checkWarmup(match, 1, tourneyMatch, sameTournamentGames, true);
 
 		//Return not a warmup if the first map was not a warmup
 		if (secondMapWarmup.warmup === true) {
@@ -9029,9 +9505,9 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentMatches
 
 	//Check for unique matchIds
 	let matchIds = [];
-	for (let i = 0; i < sameTournamentMatches.length; i++) {
-		if (!matchIds.includes(sameTournamentMatches[i].matchId) && sameTournamentMatches[i].matchId != match.id) {
-			matchIds.push(sameTournamentMatches[i].matchId);
+	for (let i = 0; i < sameTournamentGames.length; i++) {
+		if (!matchIds.includes(sameTournamentGames[i].matchId)) {
+			matchIds.push(sameTournamentGames[i].matchId);
 		}
 	}
 
@@ -9111,26 +9587,36 @@ async function messageUserWithRetries(user, interaction, content) {
 }
 
 async function getOsuMapInfo(dbBeatmap) {
-	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiScores getOsuMapInfo');
-	const mapScores = await DBOsuMultiScores.findAll({
-		attributes: ['matchName'],
+	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores getOsuMapInfo');
+	const mapScores = await DBOsuMultiGameScores.findAll({
+		attributes: ['matchId'],
 		where: {
 			beatmapId: dbBeatmap.beatmapId,
+			tourneyMatch: true,
+			warmup: {
+				[Op.not]: true
+			}
+		}
+	});
+
+	module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches getOsuMapInfo');
+	const matches = await DBOsuMultiMatches.findAll({
+		attributes: ['matchName'],
+		where: {
+			matchId: {
+				[Op.in]: mapScores.map(score => score.matchId)
+			},
 			tourneyMatch: true,
 			matchName: {
 				[Op.notLike]: 'MOTD:%',
 			},
-			[Op.or]: [
-				{ warmup: false },
-				{ warmup: null }
-			],
 		}
 	});
 
 	let tournaments = [];
 
-	for (let i = 0; i < mapScores.length; i++) {
-		let acronym = mapScores[i].matchName.replace(/:.+/gm, '');
+	for (let i = 0; i < matches.length; i++) {
+		let acronym = matches[i].matchName.replace(/:.+/gm, '');
 
 		if (tournaments.indexOf(acronym) === -1) {
 			tournaments.push(acronym);

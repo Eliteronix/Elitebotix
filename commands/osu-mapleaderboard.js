@@ -1,10 +1,11 @@
-const { DBDiscordUsers, DBOsuMultiScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('canvas');
 const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries, getBeatmapCover, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-mapleaderboard',
@@ -259,18 +260,19 @@ module.exports = {
 				}
 			}
 		} else if (server === 'tournaments') {
-			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiScores');
-			let multiScores = await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiGameScores');
+			let multiScores = await DBOsuMultiGameScores.findAll({
 				attributes: [
 					'id',
 					'score',
+					'matchId',
+					'gameStartDate',
 					'gameRawMods',
 					'rawMods',
 					'teamType',
 					'pp',
 					'beatmapId',
 					'createdAt',
-					'gameStartDate',
 					'osuUserId',
 					'count50',
 					'count100',
@@ -280,19 +282,48 @@ module.exports = {
 					'countMiss',
 					'maxCombo',
 					'perfect',
-					'matchName',
 					'mode',
 				],
 				where: {
 					beatmapId: dbBeatmap.beatmapId,
-					scoringType: 'Score v2',
-					tourneyMatch: true
-				}
+					scoringType: 3,
+					tourneyMatch: true,
+					score: {
+						[Op.gt]: 10000
+					},
+				},
+				order: [
+					['score', 'DESC'],
+					['gameId', 'ASC']
+				],
 			});
 
-			multiScores = multiScores.sort((a, b) => {
-				return parseInt(b.score) - parseInt(a.score);
+			if (!multiScores.length) {
+				return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
+			}
+
+			let matchIds = [...new Set(multiScores.map(score => score.matchId))];
+
+			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiMatches');
+			let multiMatches = await DBOsuMultiMatches.findAll({
+				attributes: [
+					'matchId',
+					'matchName',
+				],
+				where: {
+					matchId: {
+						[Op.in]: matchIds
+					},
+				},
 			});
+
+			for (let i = 0; i < multiScores.length; i++) {
+				let score = multiScores[i];
+
+				let match = multiMatches.find(match => match.matchId === score.matchId);
+
+				score.matchName = match.matchName;
+			}
 
 			let addedUserScores = [];
 
@@ -301,10 +332,6 @@ module.exports = {
 			}
 
 			for (let i = 0; i < multiScores.length; i++) {
-				if (parseInt(multiScores[i].score) < 10000) {
-					break;
-				}
-
 				//Check mods
 				if (interaction.options.getString('mods')) {
 					if (parseInt(multiScores[i].gameRawMods) + parseInt(multiScores[i].rawMods) !== modBits &&
@@ -483,7 +510,7 @@ module.exports = {
 				ctx.drawImage(gradeS, 60, 210, 32, 16);
 			} else if (topScore.rank === 'X') {
 				ctx.drawImage(gradeSS, 60, 210, 32, 16);
-			} else if (topScore.grade === 'S') {
+			} else if (topScore.rank === 'S') {
 				ctx.drawImage(gradeS, 60, 210, 32, 16);
 			} else if (topScore.rank === 'A') {
 				ctx.drawImage(gradeA, 60, 210, 32, 16);

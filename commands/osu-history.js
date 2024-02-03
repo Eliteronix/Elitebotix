@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiScores, DBDuelRatingHistory } = require('../dbObjects');
+const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -135,7 +135,7 @@ module.exports = {
 		};
 
 		if (discordUser) {
-			osuUser.osuUserId = discordUser.osuUserId;
+			osuUser.osuUserId = parseInt(discordUser.osuUserId);
 			osuUser.osuName = discordUser.osuName;
 		}
 
@@ -152,7 +152,7 @@ module.exports = {
 			try {
 				logOsuAPICalls('commands/osu-history.js');
 				const user = await osuApi.getUser({ u: username });
-				osuUser.osuUserId = user.id;
+				osuUser.osuUserId = parseInt(user.id);
 				osuUser.osuName = user.name;
 			} catch (error) {
 				return interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
@@ -160,30 +160,43 @@ module.exports = {
 		}
 
 		// Gather all the data
-		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 1');
-		let multiMatches = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores 1');
+		let multiMatchIds = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId'],
 			where: {
 				osuUserId: osuUser.osuUserId,
 				tourneyMatch: true,
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
-				},
 				warmup: {
 					[Op.not]: true,
+				},
+				score: {
+					[Op.gte]: 10000,
 				}
 			},
 			group: ['matchId'],
 		});
 
-		multiMatches = multiMatches.map(match => match.matchId);
+		multiMatchIds = multiMatchIds.map(match => match.matchId);
 
-		if (multiMatches.length === 0) {
+		if (multiMatchIds.length === 0) {
 			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
-		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 2');
-		let multiScores = await DBOsuMultiScores.findAll({
+		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 2');
+		let multiMatches = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId', 'matchName', 'matchStartDate'],
+			where: {
+				matchId: {
+					[Op.in]: multiMatchIds
+				},
+				matchName: {
+					[Op.notLike]: 'MOTD:%',
+				},
+			},
+		});
+
+		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores 2');
+		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'id',
 				'score',
@@ -193,7 +206,6 @@ module.exports = {
 				'pp',
 				'beatmapId',
 				'createdAt',
-				'gameStartDate',
 				'osuUserId',
 				'count50',
 				'count100',
@@ -203,23 +215,31 @@ module.exports = {
 				'countMiss',
 				'maxCombo',
 				'perfect',
-				'matchName',
 				'mode',
 				'matchId',
 				'gameId',
-				'matchStartDate',
+				'gameStartDate',
 				'team',
 			],
 			where: {
-				matchId: multiMatches,
-				// warmup: {
-				// 	[Op.not]: true,
-				// }
+				matchId: {
+					[Op.in]: multiMatches.map(match => match.matchId)
+				},
+				score: {
+					[Op.gte]: 10000,
+				}
 			},
 			order: [
-				['matchStartDate', 'DESC'],
+				['matchId', 'DESC'],
 			],
 		});
+
+		for (let i = 0; i < multiScores.length; i++) {
+			let match = multiMatches.find(match => match.matchId === multiScores[i].matchId);
+
+			multiScores[i].matchName = match.matchName;
+			multiScores[i].matchStartDate = match.matchStartDate;
+		}
 
 		let onlymatchhistory = false;
 
@@ -280,7 +300,7 @@ module.exports = {
 				}
 			}
 
-			if (parseInt(multiScores[i].score) <= 10000 || multiScores[i].matchName.toLowerCase().includes('scrim') || multiScores[i].warmup) {
+			if (multiScores[i].matchName.toLowerCase().includes('scrim') || multiScores[i].warmup) {
 				continue;
 			}
 
@@ -323,7 +343,7 @@ module.exports = {
 
 				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
-				if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head' && ownScore) {
+				if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
 					let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
 					try {
@@ -335,7 +355,7 @@ module.exports = {
 					} catch (error) {
 						console.error(error, ownScore, otherScore, multiScores[i].matchId);
 					}
-				} else if (gameScores[0].teamType === 'Team vs') {
+				} else if (gameScores[0].teamType === 2) {
 					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 					let team = ownScores[0].team;
@@ -370,7 +390,7 @@ module.exports = {
 				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
 				if (ownScore) {
-					if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head') {
+					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
 						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
@@ -378,7 +398,7 @@ module.exports = {
 						} else {
 							gamesLost++;
 						}
-					} else if (gameScores[0].teamType === 'Team vs') {
+					} else if (gameScores[0].teamType === 2) {
 						let team = ownScore.team;
 
 						let ownTeamScore = 0;
@@ -413,7 +433,7 @@ module.exports = {
 
 					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
-					if (gameScores.length === 2 && gameScores[0].teamType === 'Head to Head' && ownScore) {
+					if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
 						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
 						try {
@@ -425,7 +445,7 @@ module.exports = {
 						} catch (error) {
 							console.error(error, ownScore, otherScore, multiScores[i].matchId);
 						}
-					} else if (gameScores[0].teamType === 'Team vs') {
+					} else if (gameScores[0].teamType === 2) {
 						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 						let team = ownScores[0].team;
@@ -485,7 +505,7 @@ module.exports = {
 					}
 				}
 			} else {
-				if (multiScores[i].teamType !== 'Tag Team vs' && multiScores[i].teamType !== 'Tag Co-op') {
+				if (multiScores[i].teamType !== 3 && multiScores[i].teamType !== 1) {
 					if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
 						multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
 					}
@@ -523,7 +543,7 @@ module.exports = {
 			}
 
 			if (interaction.options.getBoolean('showtournamentdetails')) {
-				if (multiScores[i].teamType === 'Team vs' && (!tourneyEntry || !tourneyEntry.teammates.includes(multiScores[i].osuUserId))) {
+				if (multiScores[i].teamType === 2 && (!tourneyEntry || !tourneyEntry.teammates.includes(multiScores[i].osuUserId))) {
 					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 					let team = ownScores[0].team;
@@ -566,18 +586,38 @@ module.exports = {
 			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym.replaceAll('\'', '\\\'')))].filter(acronym => acronym.length > 0);
 
 			try {
-				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
-				let tourneyScores = await DBOsuMultiScores.findAll({
-					attributes: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
+				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 3');
+				let tourneyMatches = await DBOsuMultiMatches.findAll({
+					attributes: ['matchId', 'matchName', 'matchStartDate'],
 					where: {
 						tourneyMatch: true,
 						matchName: {
 							[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
 						},
 					},
-					group: ['matchId', 'matchName', 'teamType', 'beatmapId', 'matchStartDate'],
+					group: ['matchId', 'matchName', 'matchStartDate'],
 					order: [['matchStartDate', 'DESC']],
 				});
+
+				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGames 3');
+				let tourneyScores = await DBOsuMultiGames.findAll({
+					attributes: ['matchId', 'teamType', 'beatmapId'],
+					where: {
+						tourneyMatch: true,
+						matchId: {
+							[Op.in]: tourneyMatches.map(match => match.matchId),
+						}
+					},
+					group: ['matchId', 'teamType', 'beatmapId'],
+					order: [['matchId', 'DESC']],
+				});
+
+				for (let i = 0; i < tourneyScores.length; i++) {
+					let match = tourneyMatches.find(match => match.matchId === tourneyScores[i].matchId);
+
+					tourneyScores[i].matchName = match.matchName;
+					tourneyScores[i].matchStartDate = match.matchStartDate;
+				}
 
 				for (let i = 0; i < tourneysPlayed.length; i++) {
 					if (new Date() - lastUpdate > 15000) {
@@ -651,7 +691,7 @@ module.exports = {
 						let matchesToFindOutFormat = tourneyScores.filter(score => !score.matchName.includes('Qualifiers'));
 
 						if (matchesToFindOutFormat.length > 0) {
-							if (matchesToFindOutFormat[0].teamType === 'Head to Head') {
+							if (matchesToFindOutFormat[0].teamType === 0) {
 								tourneysPlayed[i].team = 'Solo';
 							}
 
@@ -710,17 +750,17 @@ module.exports = {
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 			// Create rank history graph
-			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiScores 3');
-			let oldestScore = await DBOsuMultiScores.findOne({
+			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
+			let oldestScore = await DBOsuMultiGameScores.findOne({
 				attributes: ['gameEndDate'],
 				where: {
 					osuUserId: osuUser.osuUserId,
 					tourneyMatch: true,
-					scoringType: 'Score v2',
-					mode: 'Standard',
+					scoringType: 3,
+					mode: 0,
 				},
 				order: [
-					['gameEndDate', 'ASC']
+					['gameId', 'ASC']
 				]
 			});
 

@@ -81,16 +81,49 @@ const elitiriData = new Sequelize('database', 'username', 'password', {
 	},
 });
 
-const multiScores = new Sequelize('database', 'username', 'password', {
+const multiMatches = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/multiScores.sqlite',
+	storage: 'databases/multiMatches.sqlite',
 	retry: {
-		max: 15, // Maximum retry 15 times
+		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
 		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
 	},
+	pool: {
+		max: 7,
+	}
+});
+
+const multiGames = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/multiGames.sqlite',
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
+});
+
+const multiGameScores = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: 'databases/multiGameScores.sqlite',
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
 });
 
 const beatmaps = new Sequelize('database', 'username', 'password', {
@@ -148,7 +181,11 @@ require('./models/DBElitiriCupStaff')(elitiriData, Sequelize.DataTypes);
 require('./models/DBElitiriCupSubmissions')(elitiriData, Sequelize.DataTypes);
 require('./models/DBElitiriCupLobbies')(elitiriData, Sequelize.DataTypes);
 
-require('./models/DBOsuMultiScores')(multiScores, Sequelize.DataTypes);
+require('./models/DBOsuMultiMatches')(multiMatches, Sequelize.DataTypes);
+
+require('./models/DBOsuMultiGames')(multiGames, Sequelize.DataTypes);
+
+require('./models/DBOsuMultiGameScores')(multiGameScores, Sequelize.DataTypes);
 
 require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 
@@ -202,11 +239,27 @@ require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 // 	})
 // 	.catch(console.error);
 
-multiScores.sync({ alter: true })
+multiMatches.sync({ alter: true })
 	.then(async () => {
 		// eslint-disable-next-line no-console
-		console.log('multiScores database synced');
-		multiScores.close();
+		console.log('multiMatches database synced');
+		multiMatches.close();
+	})
+	.catch(console.error);
+
+multiGames.sync({ alter: true })
+	.then(async () => {
+		// eslint-disable-next-line no-console
+		console.log('multiGames database synced');
+		multiGames.close();
+	})
+	.catch(console.error);
+
+multiGameScores.sync({ alter: true })
+	.then(async () => {
+		// eslint-disable-next-line no-console
+		console.log('multiGameScores database synced');
+		multiGameScores.close();
 	})
 	.catch(console.error);
 

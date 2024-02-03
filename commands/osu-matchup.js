@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { DBDiscordUsers, DBOsuMultiScores, DBOsuBeatmaps } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('canvas');
@@ -772,8 +772,8 @@ module.exports = {
 
 		//Loop throught team one and get all their multi scores
 		for (let i = 0; i < team1.length; i++) {
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 1User${i + 1}`);
-			scoresTeam1.push(await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiGameScores 1User${i + 1}`);
+			let userScores = await DBOsuMultiGameScores.findAll({
 				attributes: [
 					'beatmapId',
 					'score',
@@ -785,31 +785,56 @@ module.exports = {
 					'osuUserId',
 					'gameId',
 					'matchId',
-					'matchName',
-					'matchStartDate',
 				],
 				where: {
 					osuUserId: team1[i],
-					mode: 'Standard',
+					mode: 0,
 					score: {
 						[Op.gte]: 10000
 					},
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
+					warmup: {
+						[Op.not]: true
+					},
 					gameEndDate: {
 						[Op.gte]: timeframe
 					}
 				},
-				order: [['gameEndDate', 'DESC']],
-			}));
+				order: [['gameId', 'DESC']],
+			});
+
+			let matchIds = [...new Set(userScores.map(s => s.matchId))];
+
+			//Get the match data for the scores
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiMatches 1User${i + 1}`);
+			let matches = await DBOsuMultiMatches.findAll({
+				attributes: [
+					'matchId',
+					'matchName',
+					'matchStartDate',
+				],
+				where: {
+					matchId: {
+						[Op.in]: matchIds
+					}
+				}
+			});
+
+			//Add the match data to the scores
+			for (let j = 0; j < userScores.length; j++) {
+				let match = matches.find(m => m.matchId === userScores[j].matchId);
+
+				if (match) {
+					userScores[j].matchName = match.matchName;
+					userScores[j].matchStartDate = match.matchStartDate;
+				}
+			}
+
+			scoresTeam1.push(userScores);
 
 			//Remove userScores which don't fit the criteria
 			for (let j = 0; j < scoresTeam1[i].length; j++) {
-				if (parseInt(scoresTeam1[i][j].score) <= 10000
-					|| scoringType === 'v2' && scoresTeam1[i][j].scoringType !== 'Score v2'
-					|| scoringType === 'v1' && scoresTeam1[i][j].scoringType !== 'Score'
+				if (scoringType === 'v2' && scoresTeam1[i][j].scoringType !== 3
+					|| scoringType === 'v1' && scoresTeam1[i][j].scoringType !== 0
 					|| tourneyMatch && !scoresTeam1[i][j].tourneyMatch) {
 					scoresTeam1[i].splice(j, 1);
 					j--;
@@ -821,7 +846,7 @@ module.exports = {
 				let modPool = getScoreModpool(scoresTeam1[i][j]);
 
 				let scoreVersion = 'V1';
-				if (scoresTeam1[i][j].scoringType === 'Score v2') {
+				if (scoresTeam1[i][j].scoringType === 3) {
 					scoreVersion = 'V2';
 				}
 
@@ -852,8 +877,8 @@ module.exports = {
 
 		//Loop throught team two and get all their multi scores
 		for (let i = 0; i < team2.length; i++) {
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiScores 2User${i + 1}`);
-			scoresTeam2.push(await DBOsuMultiScores.findAll({
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiGameScores 2User${i + 1}`);
+			let userScores = await DBOsuMultiGameScores.findAll({
 				attributes: [
 					'beatmapId',
 					'score',
@@ -865,19 +890,16 @@ module.exports = {
 					'osuUserId',
 					'gameId',
 					'matchId',
-					'matchName',
-					'matchStartDate',
 				],
 				where: {
 					osuUserId: team2[i],
-					mode: 'Standard',
+					mode: 0,
 					score: {
 						[Op.gte]: 10000
 					},
-					[Op.or]: [
-						{ warmup: false },
-						{ warmup: null }
-					],
+					warmup: {
+						[Op.not]: true
+					},
 					gameEndDate: {
 						[Op.gte]: timeframe
 					},
@@ -885,14 +907,42 @@ module.exports = {
 						[Op.in]: beatmaps.map(b => b.beatmapId)
 					}
 				},
-				order: [['gameEndDate', 'DESC']],
-			}));
+				order: [['gameId', 'DESC']],
+			});
+
+			let matchIds = [...new Set(userScores.map(s => s.matchId))];
+
+			//Get the match data for the scores
+			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiMatches 1User${i + 1}`);
+			let matches = await DBOsuMultiMatches.findAll({
+				attributes: [
+					'matchId',
+					'matchName',
+					'matchStartDate',
+				],
+				where: {
+					matchId: {
+						[Op.in]: matchIds
+					}
+				}
+			});
+
+			//Add the match data to the scores
+			for (let j = 0; j < userScores.length; j++) {
+				let match = matches.find(m => m.matchId === userScores[j].matchId);
+
+				if (match) {
+					userScores[j].matchName = match.matchName;
+					userScores[j].matchStartDate = match.matchStartDate;
+				}
+			}
+
+			scoresTeam2.push(userScores);
 
 			//Remove userScores which don't fit the criteria
 			for (let j = 0; j < scoresTeam2[i].length; j++) {
-				if (parseInt(scoresTeam2[i][j].score) <= 10000
-					|| scoringType === 'v2' && scoresTeam2[i][j].scoringType !== 'Score v2'
-					|| scoringType === 'v1' && scoresTeam2[i][j].scoringType !== 'Score'
+				if (scoringType === 'v2' && scoresTeam2[i][j].scoringType !== 3
+					|| scoringType === 'v1' && scoresTeam2[i][j].scoringType !== 0
 					|| tourneyMatch && !scoresTeam2[i][j].tourneyMatch) {
 					scoresTeam2[i].splice(j, 1);
 					j--;
@@ -904,7 +954,7 @@ module.exports = {
 				let modPool = getScoreModpool(scoresTeam2[i][j]);
 
 				let scoreVersion = 'V1';
-				if (scoresTeam2[i][j].scoringType === 'Score v2') {
+				if (scoresTeam2[i][j].scoringType === 3) {
 					scoreVersion = 'V2';
 				}
 
@@ -1012,7 +1062,7 @@ module.exports = {
 
 			//Evaluate if it was played with Score v2 or not (0 = v1, 1 = v2)
 			let scoreVersion = 0;
-			if (team1GameScores[0].scoringType === 'Score v2') {
+			if (team1GameScores[0].scoringType === 3) {
 				scoreVersion = 1;
 			}
 

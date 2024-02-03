@@ -66,11 +66,23 @@ const guildsAccessInTheLastMinute = new client.Gauge({
 });
 register.registerMetric(guildsAccessInTheLastMinute);
 
-const multiScoresAccessInTheLastMinute = new client.Gauge({
-	name: 'multi_scores_access_in_the_last_minute',
-	help: 'Multi scores access in the last minute',
+const multiMatchesAccessInTheLastMinute = new client.Gauge({
+	name: 'multi_matches_access_in_the_last_minute',
+	help: 'Multi matches access in the last minute',
 });
-register.registerMetric(multiScoresAccessInTheLastMinute);
+register.registerMetric(multiMatchesAccessInTheLastMinute);
+
+const multiGamesAccessInTheLastMinute = new client.Gauge({
+	name: 'multi_games_access_in_the_last_minute',
+	help: 'Multi games access in the last minute',
+});
+register.registerMetric(multiGamesAccessInTheLastMinute);
+
+const multiGameScoresAccessInTheLastMinute = new client.Gauge({
+	name: 'multi_game_scores_access_in_the_last_minute',
+	help: 'Multi game scores access in the last minute',
+});
+register.registerMetric(multiGameScoresAccessInTheLastMinute);
 
 const osuDataAccessInTheLastMinute = new client.Gauge({
 	name: 'osu_data_access_in_the_last_minute',
@@ -310,10 +322,20 @@ manager.spawn()
 						setTimeout(() => {
 							guildsAccessInTheLastMinute.dec();
 						}, 60000);
-					} else if (message.includes('DBOsuMultiScores')) {
-						multiScoresAccessInTheLastMinute.inc();
+					} else if (message.includes('DBOsuMultiMatches')) {
+						multiMatchesAccessInTheLastMinute.inc();
 						setTimeout(() => {
-							multiScoresAccessInTheLastMinute.dec();
+							multiMatchesAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBOsuMultiGames')) {
+						multiGamesAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							multiGamesAccessInTheLastMinute.dec();
+						}, 60000);
+					} else if (message.includes('DBOsuMultiGameScores')) {
+						multiGameScoresAccessInTheLastMinute.inc();
+						setTimeout(() => {
+							multiGameScoresAccessInTheLastMinute.dec();
 						}, 60000);
 					} else if (message.includes('DBMOTDPoints')
 						|| message.includes('DBOsuTourneyFollows')
