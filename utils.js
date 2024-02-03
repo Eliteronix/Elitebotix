@@ -1733,48 +1733,52 @@ module.exports = {
 			}
 		});
 
-		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames warmup detection same tourney');
-		let sameTournamentGames = await DBOsuMultiGames.findAll({
-			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
-			where: {
-				gameStartDate: {
-					[Op.gte]: weeksPrior
-				},
-				gameEndDate: {
-					[Op.lte]: weeksAfter
-				},
-				tourneyMatch: true,
-				matchId: {
-					[Op.not]: match.id
+		let sameTournamentGames = null;
+
+		if (!noWarmUpAcronyms.includes(acronym)) {
+			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames warmup detection same tourney');
+			sameTournamentGames = await DBOsuMultiGames.findAll({
+				attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+				where: {
+					gameStartDate: {
+						[Op.gte]: weeksPrior
+					},
+					gameEndDate: {
+						[Op.lte]: weeksAfter
+					},
+					tourneyMatch: true,
+					matchId: {
+						[Op.not]: match.id
+					}
 				}
-			}
-		});
+			});
 
-		// Adapt the timespan to make sure the matches are included
-		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
-		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
+			// Adapt the timespan to make sure the matches are included
+			weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
+			weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
 
-		let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
-			attributes: ['matchId'],
-			where: {
-				matchName: {
-					[Op.like]: `%${acronym}%:%`,
-				},
-				matchStartDate: {
-					[Op.gte]: weeksPrior
-				},
-				matchEndDate: {
-					[Op.lte]: weeksAfter
-				},
-			}
-		});
+			let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
+				attributes: ['matchId'],
+				where: {
+					matchName: {
+						[Op.like]: `%${acronym}%:%`,
+					},
+					matchStartDate: {
+						[Op.gte]: weeksPrior
+					},
+					matchEndDate: {
+						[Op.lte]: weeksAfter
+					},
+				}
+			});
 
-		for (let i = 0; i < sameTournamentGames.length; i++) {
-			let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
+			for (let i = 0; i < sameTournamentGames.length; i++) {
+				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
 
-			if (!match) {
-				sameTournamentGames.splice(i, 1);
-				i--;
+				if (!match) {
+					sameTournamentGames.splice(i, 1);
+					i--;
+				}
 			}
 		}
 
@@ -1814,11 +1818,17 @@ module.exports = {
 				}
 			}
 
-			let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames);
+			let warmup = false;
 
-			let warmup = warmupCheckResult.warmup;
+			let warmupDecidedByAmount = false;
 
-			let warmupDecidedByAmount = warmupCheckResult.byAmount;
+			if (!noWarmUpAcronyms.includes(acronym)) {
+				let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames);
+
+				warmup = warmupCheckResult.warmup;
+
+				warmupDecidedByAmount = warmupCheckResult.byAmount;
+			}
 
 			let gameScores = [];
 			for (let i = 0; i < match.games[gameIndex].scores.length; i++) {
@@ -2041,28 +2051,31 @@ module.exports = {
 					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores create');
 					await DBOsuMultiGameScores.bulkCreate(newScores)
 						.then(async (scores) => {
-							for (let i = 0; i < scores.length; i++) {
-								if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
-									let modPool = module.exports.getScoreModpool(scores[i]);
+							// Update warmup flags if needed
+							if (!noWarmUpAcronyms.includes(acronym)) {
+								for (let i = 0; i < scores.length; i++) {
+									if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
+										let modPool = module.exports.getScoreModpool(scores[i]);
 
-									let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === modPool);
+										let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === modPool);
 
-									if (!existingEntry) {
-										beatmapModPools.push({
-											beatmapId: scores[i].beatmapId,
-											modPool: modPool,
-										});
+										if (!existingEntry) {
+											beatmapModPools.push({
+												beatmapId: scores[i].beatmapId,
+												modPool: modPool,
+											});
+										}
 									}
 								}
-							}
 
-							//Set back warmup flag if it was set by amount | warmup = false is always gonna get reset | the rest only if the map was played
-							for (let i = 0; i < sameTournamentGames.length; i++) {
-								if (sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup !== null
-									&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentGames[i].beatmapId)
-									|| sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup === false) {
-									sameTournamentGames[i].warmup = null;
-									await sameTournamentGames[i].save();
+								//Set back warmup flag if it was set by amount | warmup = false is always gonna get reset | the rest only if the map was played
+								for (let i = 0; i < sameTournamentGames.length; i++) {
+									if (sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup !== null
+										&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentGames[i].beatmapId)
+										|| sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup === false) {
+										sameTournamentGames[i].warmup = null;
+										await sameTournamentGames[i].save();
+									}
 								}
 							}
 
