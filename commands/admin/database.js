@@ -27,40 +27,47 @@ module.exports = {
 		}
 	},
 	async execute(interaction) {
-		let data = [];
-
 		let dbTableName = interaction.options.getString('argument');
 		let dbListPromise = null;
 
-		try {
-			logDatabaseQueries(4, `commands/db.js ${dbTableName}`);
-			dbListPromise = eval(`const { ${dbTableName} } = require('../../dbObjects'); ${dbTableName}.findAll()`);
-		} catch (error) {
-			return await interaction.editReply(`Table ${dbTableName} not found`);
-		}
-
-		let dbList = await dbListPromise;
-
-		if (dbList.length === 0) {
-			return await interaction.editReply(`No entries found in ${dbTableName}`);
-		}
-
-		for (let i = 0; i < dbList.length; i++) {
-			data.push(dbList[i].dataValues);
-
-			if (i % 10000 === 0 && i > 0 || dbList.length - 1 === i) {
-				const developerUser = await interaction.client.users.cache.find(user => user.id === interaction.user.id);
-				let csv = new ObjectsToCsv(data);
-				csv = await csv.toString();
-				// eslint-disable-next-line no-undef
-				const buffer = Buffer.from(csv);
-				//Create as an attachment
-				// eslint-disable-next-line no-undef
-				const attachment = new Discord.AttachmentBuilder(buffer, { name: `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv` });
-				// eslint-disable-next-line no-undef
-				await developerUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
-				data = [];
+		let notDone = true;
+		let dataIndex = 0;
+		let noData = true;
+		while (notDone) {
+			try {
+				logDatabaseQueries(4, `commands/db.js ${dbTableName}`);
+				dbListPromise = eval(`const { ${dbTableName} } = require('../../dbObjects'); const { Op } = require('sequelize'); ${dbTableName}.findAll({ where: { [Op.and]: [{ id: {[Op.gte]: ${dataIndex * 10000}} }, { id: {[Op.lt]: ${(dataIndex + 1) * 10000}} }] } })`);
+			} catch (error) {
+				console.error(error);
+				return await interaction.editReply(`Table ${dbTableName} not found`);
 			}
+
+			let dbList = await dbListPromise;
+
+			if (dbList.length === 0) {
+				notDone = false;
+
+				if (noData) {
+					return await interaction.editReply(`No entries found in ${dbTableName}`);
+				} else {
+					break;
+				}
+			}
+
+			noData = false;
+
+			const developerUser = await interaction.client.users.cache.find(user => user.id === interaction.user.id);
+			let csv = new ObjectsToCsv(dbList.map(entry => entry.dataValues));
+			csv = await csv.toString();
+			// eslint-disable-next-line no-undef
+			const buffer = Buffer.from(csv);
+			//Create as an attachment
+			// eslint-disable-next-line no-undef
+			const attachment = new Discord.AttachmentBuilder(buffer, { name: `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv` });
+			// eslint-disable-next-line no-undef
+			await developerUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
+
+			dataIndex++;
 		}
 
 		return await interaction.editReply(`Sent ${dbTableName} to your DMs`);
