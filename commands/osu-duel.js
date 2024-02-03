@@ -1352,7 +1352,6 @@ module.exports = {
 				} catch (error) {
 					if (error.message !== 'Unknown Message' && error.message !== 'Missing Permissions') {
 						console.error(error);
-						console.log(interaction.client);
 					}
 				}
 				return;
