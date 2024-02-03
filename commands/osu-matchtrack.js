@@ -180,7 +180,7 @@ module.exports = {
 							},
 							getInteger: (string) => {
 								if (string === 'warmups') {
-									return warmups;
+									return Math.min(warmups, 2);
 								}
 							},
 							getNumber: () => {
