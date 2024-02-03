@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
-const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls, noWarmUpAcronyms } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -9423,7 +9423,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames, 
 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 	//Matches without warmups
-	if (!tourneyMatch || gameIndex > 1 || acronym === 'etx' || acronym === 'etx teams' || acronym === 'o!mm ranked' || acronym === 'o!mm private' || acronym === 'o!mm team ranked' || acronym === 'o!mm team private' || acronym === 'motd') {
+	if (!tourneyMatch || gameIndex > 1 || noWarmUpAcronyms.includes(acronym)) {
 		// console.log('Not a warmup due to naming / map #');
 		return { warmup: false, byAmount: false };
 	}
