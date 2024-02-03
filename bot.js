@@ -228,21 +228,25 @@ function readyDiscord() {
 	const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
 
 	(async () => {
-		try {
-			// eslint-disable-next-line no-console
-			console.log(`Started refreshing ${commands.length} application (/) commands.`);
+		let notDone = true;
+		while (notDone) {
+			try {
+				// eslint-disable-next-line no-console
+				console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-			const data = await rest.put(
-				Routes.applicationCommands(client.user.id),
-				{ body: commands },
-			);
+				const data = await rest.put(
+					Routes.applicationCommands(client.user.id),
+					{ body: commands },
+				);
 
-			// eslint-disable-next-line no-console
-			console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+				// eslint-disable-next-line no-console
+				console.log(`Successfully reloaded ${data.length} application (/) commands.`);
 
-			client.slashCommandData = data;
-		} catch (error) {
-			console.error(error);
+				client.slashCommandData = data;
+				notDone = false;
+			} catch (error) {
+				console.error('bot.js | Set application commands' + error);
+			}
 		}
 	})();
 
