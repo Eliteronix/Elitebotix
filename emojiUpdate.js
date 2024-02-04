@@ -28,7 +28,7 @@ module.exports = async function (oldEmoji, newEmoji) {
 				const owner = await newEmoji.client.users.fetch(newEmoji.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${newEmoji.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
-			console.error(error);
+			console.error('emojiUpdate.js | logging' + error);
 		}
 
 		const changeEmbed = new Discord.EmbedBuilder()

@@ -29,7 +29,7 @@ module.exports = async function (guildBan) {
 				const owner = await guildBan.guild.client.users.fetch(guildBan.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${guildBan.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
-			console.error(error);
+			console.error('guildBanAdd.js | logging' + error);
 		}
 
 		const changeEmbed = new Discord.EmbedBuilder()

@@ -121,7 +121,7 @@ module.exports = async function (client, bancho, message) {
 			ownStarRating = ownStarRating.total;
 		} catch (e) {
 			if (e !== 'No standard plays') {
-				console.error(e);
+				console.error('gotBanchoPrivateMessage.js | process duel rating for queue' + e);
 			}
 		}
 

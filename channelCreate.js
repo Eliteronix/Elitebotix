@@ -32,7 +32,7 @@ module.exports = async function (channel) {
 				const owner = await channel.client.users.fetch(channel.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${channel.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
-			console.error(error);
+			console.error('channelCreate.js | logging' + error);
 		}
 
 		const changeEmbed = new Discord.EmbedBuilder()

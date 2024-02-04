@@ -24,6 +24,6 @@ module.exports = async function (guild) {
 			}
 		}
 	} catch (error) {
-		console.error(error);
+		console.error('guildCreate.js | added message' + error);
 	}
 };
