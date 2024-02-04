@@ -32,7 +32,7 @@ module.exports = async function (msg) {
 				const owner = await msg.client.users.fetch(msg.guild.ownerId);
 				return owner.send(`It seems like the logging channel on the guild \`${msg.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
-			console.error(error);
+			console.error('messageDelete.js | logging' + error);
 		}
 
 		let content = 'None';

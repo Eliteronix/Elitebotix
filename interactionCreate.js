@@ -105,14 +105,14 @@ module.exports = async function (client, bancho, interaction) {
 		const command = interaction.client.commands.get(interaction.commandName);
 
 		if (!command) {
-			console.error(`No command matching ${interaction.commandName} was found.`);
+			console.error(`interactionCreate.js | No command matching ${interaction.commandName} was found.`);
 			return;
 		}
 
 		try {
 			await command.autocomplete(interaction);
 		} catch (error) {
-			console.error(error);
+			console.error('interactionCreate.js | autocomplete' + error);
 		}
 	}
 };

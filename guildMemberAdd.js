@@ -34,7 +34,7 @@ module.exports = async function (member) {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 					return owner.send(`I could not send a welcome message for a new user into the channel \`${guildWelcomeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
-					return console.error(e);
+					return console.error('guildMemberAdd.js | welcome message' + e);
 				}
 			}
 		}
@@ -50,7 +50,7 @@ module.exports = async function (member) {
 					const owner = await member.message.client.users.fetch(member.guild.ownerId);
 					return owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
-				console.error(error);
+				console.error('guildMemberAdd.js | logging' + error);
 			}
 
 			const changeEmbed = new Discord.EmbedBuilder()
@@ -91,7 +91,7 @@ module.exports = async function (member) {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 					return owner.send(`I could not assign an autorole to a new user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 				} else {
-					return console.error(e);
+					return console.error('guildMemberAdd.js | autoroles' + e);
 				}
 			}
 		} else {

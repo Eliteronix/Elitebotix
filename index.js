@@ -372,7 +372,7 @@ manager.spawn()
 							runningTournamentMatches.set(processQueueTasks);
 						})
 						.catch(error => {
-							console.error(error);
+							console.error('index.js | importMatch' + error);
 						});
 				} else if (typeof message === 'string' && message.startsWith('discorduser')) {
 					let discordUser = uniqueDiscordUsersList.find(user => user.id === message.split(' ')[1]);
@@ -422,7 +422,7 @@ manager.spawn()
 		});
 	})
 	.catch(error => {
-		console.error(error);
+		console.error('index.js | shard spawn' + error);
 	});
 
 setInterval(() => {
