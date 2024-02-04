@@ -361,7 +361,7 @@ async function executeProcessQueue(client, bancho) {
 	try {
 		await executeNextProcessQueueTask(client, bancho);
 	} catch (e) {
-		console.error(e);
+		console.error('bot.js | executeNextProcessQueueTask' + e);
 	}
 
 	setTimeout(() => {
@@ -373,7 +373,7 @@ async function cleanUpDuplicates() {
 	try {
 		await cleanUpDuplicateEntries();
 	} catch (e) {
-		console.error(e);
+		console.error('bot.js | cleanUpDuplicates' + e);
 	}
 
 	setTimeout(() => {
@@ -385,7 +385,7 @@ async function startJiraCardSync(client) {
 	try {
 		await syncJiraCards(client);
 	} catch (e) {
-		console.error(e);
+		console.error('bot.js | syncJiraCards' + e);
 	}
 
 	setTimeout(() => {
@@ -397,7 +397,7 @@ async function getForumPosts(client) {
 	try {
 		await createNewForumPostRecords(client);
 	} catch (e) {
-		console.error(e);
+		console.error('bot.js | createNewForumPostRecords' + e);
 	}
 
 	setTimeout(() => {
@@ -409,7 +409,7 @@ async function checkOsuTracks(client) {
 	try {
 		await processOsuTrack(client);
 	} catch (e) {
-		console.error(e);
+		console.error('bot.js | processOsuTrack' + e);
 	}
 
 	setTimeout(() => {
@@ -442,7 +442,7 @@ async function resetSaveMultiMatches() {
 			console.log(`Reset ${task.task} task`);
 		}
 	} catch (e) {
-		console.error(e);
+		console.error('bot.js | resetSaveMultiMatches' + e);
 	}
 
 	setTimeout(() => {
