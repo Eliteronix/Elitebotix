@@ -8211,15 +8211,13 @@ module.exports = {
 			// wait for either the recentactivities to resolve or reject after a 180s timeout
 			await new Promise((resolve, reject) => {
 				setTimeout(() => {
-					console.log('Timeout in osu! track - reject');
-					reject();
+					reject('Timeout in osu! track - reject');
 				}, 180000);
 
 				Promise.all([recentActivities]).then(() => {
 					resolve();
 				}).catch(() => {
-					console.log('error in osu! track - reject');
-					reject();
+					reject('error in osu! track - reject');
 				});
 			});
 

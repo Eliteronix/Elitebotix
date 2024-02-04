@@ -409,7 +409,7 @@ async function checkOsuTracks(client) {
 	try {
 		await processOsuTrack(client);
 	} catch (e) {
-		console.error('bot.js | processOsuTrack' + e);
+		console.error('bot.js | processOsuTrack ' + e);
 	}
 
 	setTimeout(() => {
