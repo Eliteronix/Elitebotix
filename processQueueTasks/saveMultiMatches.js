@@ -1487,6 +1487,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 				await DBOsuMultiMatches.update({
 					verifiedBy: 31050083, // Elitebotix
 					verificationComment: 'match not found - can\'t be determined if fake or not',
+					referee: -1,
 				}, {
 					where: {
 						matchId: matchToVerify.matchId,
