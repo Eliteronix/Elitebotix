@@ -21,9 +21,9 @@ module.exports = {
 
 		await interaction.followUp(`Games with missing data (without duplicate matches): ${gamesWithMissingData.length}`);
 
-		gamesWithMissingData = gamesWithMissingData.map(game => game.gameId);
+		gamesWithMissingData = gamesWithMissingData.slice(0, 5000);
 
-		gamesWithMissingData.slice(0, 1000);
+		gamesWithMissingData = gamesWithMissingData.map(game => game.gameId);
 
 		await interaction.followUp(`Grabbing scores for ${gamesWithMissingData.length} games.`);
 
