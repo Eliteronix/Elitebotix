@@ -23,7 +23,7 @@ module.exports = {
 
 		gamesWithMissingData = gamesWithMissingData.map(game => game.gameId);
 
-		gamesWithMissingData.slice(0, 5000);
+		gamesWithMissingData.slice(0, 2500);
 
 		let scores = await DBOsuMultiGameScores.findAll({
 			where: {
