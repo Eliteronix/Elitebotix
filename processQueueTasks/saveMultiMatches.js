@@ -691,6 +691,9 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 				[Op.in]: client.knownSuspiciousMatches,
 			}
 		},
+		order: [
+			['matchId', 'ASC']
+		]
 	});
 
 	if (!matchToVerify) {
@@ -704,6 +707,9 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 					[Op.not]: null,
 				},
 			},
+			order: [
+				['matchId', 'ASC']
+			]
 		});
 	}
 
