@@ -133,7 +133,12 @@ module.exports = {
 					if (args[0] === 'f') {
 						if (discordUser) {
 							discordUser.weatherDegreeType = 'F';
-							discordUser.save();
+							await discordUser.save();
+						} else {
+							await DBDiscordUsers.create({
+								userId: msg.author.id,
+								weatherDegreeType: 'F'
+							});
 						}
 
 						return interaction.editReply('Set weather degree type to `Fahrenheit`');
@@ -142,7 +147,12 @@ module.exports = {
 					} else if (args[0] == 'c') {
 						if (discordUser) {
 							discordUser.weatherDegreeType = 'C';
-							discordUser.save();
+							await discordUser.save();
+						} else {
+							await DBDiscordUsers.create({
+								userId: msg.author.id,
+								weatherDegreeType: 'C'
+							});
 						}
 
 						return interaction.editReply('Set weather degree type to `Celsius`');
@@ -171,12 +181,16 @@ module.exports = {
 
 								if (discordUser) {
 									discordUser.weatherLocation = weatherLocation;
-									discordUser.save();
+									await discordUser.save();
+								} else {
+									await DBDiscordUsers.create({
+										userId: msg.author.id,
+										weatherDegreeType: 'C',
+										weatherLocation: weatherLocation
+									});
 								}
 
 								interaction.editReply(`Set weather location to \`${weatherLocation}\``);
-
-
 							}).catch(err => {
 								throw err;
 							});
