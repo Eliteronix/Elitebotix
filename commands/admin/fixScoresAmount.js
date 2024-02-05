@@ -25,6 +25,8 @@ module.exports = {
 
 		gamesWithMissingData.slice(0, 2500);
 
+		await interaction.followUp(`Grabbing scores for ${gamesWithMissingData.length} games.`);
+
 		let scores = await DBOsuMultiGameScores.findAll({
 			where: {
 				gameId: {
@@ -36,6 +38,8 @@ module.exports = {
 			},
 			group: ['gameId', 'osuUserId'],
 		});
+
+		await interaction.followUp(`Scores grabbed: ${scores.length}`);
 
 		let gameScoreAmounts = [];
 
