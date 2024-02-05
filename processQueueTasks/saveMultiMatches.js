@@ -262,7 +262,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 				},
 			},
 			order: [
-				['updatedAt', 'ASC']
+				['matchId', 'ASC']
 			]
 		});
 
