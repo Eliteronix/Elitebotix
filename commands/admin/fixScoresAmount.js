@@ -23,7 +23,7 @@ module.exports = {
 
 		gamesWithMissingData = gamesWithMissingData.map(game => game.gameId);
 
-		gamesWithMissingData.slice(0, 2500);
+		gamesWithMissingData.slice(0, 1000);
 
 		await interaction.followUp(`Grabbing scores for ${gamesWithMissingData.length} games.`);
 
