@@ -45,11 +45,13 @@ module.exports = {
 
 		for (let i = 0; i < gamesWithMissingData.length; i++) {
 			let game = gamesWithMissingData[i];
-			let gameScores = scores.filter(score => score.gameId === game);
+			let scoresCount = scores.length;
+			scores = scores.filter(score => score.gameId !== game);
+			scoresCount = scoresCount - scores.length;
 
 			gameScoreAmounts.push({
 				gameId: game,
-				amount: gameScores.length,
+				amount: scoresCount,
 			});
 		}
 
