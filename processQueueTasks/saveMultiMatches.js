@@ -1588,18 +1588,35 @@ async function addMissingRefereeInfo(osuApi) {
 							}
 
 							if (json.events[0].detail.type === 'match-created') {
-								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee');
-								await DBOsuMultiMatches.update({
-									referee: json.events[0].user_id,
-								}, {
-									where: {
-										matchId: match.id,
-									},
-								});
+								// Don't ask me how but for some reason the user_id can be null?????
+								if (json.events[0].user_id) {
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee');
+									await DBOsuMultiMatches.update({
+										referee: json.events[0].user_id,
+									}, {
+										where: {
+											matchId: match.id,
+										},
+									});
 
-								if (logRefereeInfoMissing) {
-									// eslint-disable-next-line no-console
-									console.log(`Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}`);
+									if (logRefereeInfoMissing) {
+										// eslint-disable-next-line no-console
+										console.log(`Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}`);
+									}
+								} else {
+									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee is null');
+									await DBOsuMultiMatches.update({
+										referee: -1,
+									}, {
+										where: {
+											matchId: refereeInfoMissing.matchId,
+										},
+									});
+
+									if (logRefereeInfoMissing) {
+										// eslint-disable-next-line no-console
+										console.log(`Referee is null ${refereeInfoMissing.matchId}`);
+									}
 								}
 							} else {
 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update unavailable match start referee 2');
