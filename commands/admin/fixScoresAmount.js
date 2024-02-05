@@ -30,6 +30,9 @@ module.exports = {
 				gameId: {
 					[Op.in]: gamesWithMissingData
 				},
+				score: {
+					[Op.gte]: 10000
+				}
 			},
 			group: ['gameId', 'osuUserId'],
 		});
