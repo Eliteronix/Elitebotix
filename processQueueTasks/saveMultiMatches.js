@@ -1524,7 +1524,7 @@ async function addMissingRefereeInfo(osuApi) {
 			referee: null,
 		},
 		order: [
-			['updatedAt', 'DESC'],
+			['matchId', 'ASC'],
 		],
 	});
 
