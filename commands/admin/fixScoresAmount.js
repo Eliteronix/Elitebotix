@@ -21,7 +21,7 @@ module.exports = {
 
 		await interaction.followUp(`Games with missing data (without duplicate matches): ${gamesWithMissingData.length}`);
 
-		gamesWithMissingData = gamesWithMissingData.slice(0, 5000);
+		gamesWithMissingData = gamesWithMissingData.slice(0, 10000);
 
 		gamesWithMissingData = gamesWithMissingData.map(game => game.gameId);
 
