@@ -76,7 +76,11 @@ module.exports = {
 				}
 			});
 
-			await interaction.followUp(`Updated ${updated} games with ${scoresAmount} scores each`);
+			try {
+				await interaction.followUp(`Updated ${updated} games with ${scoresAmount} scores each`);
+			} catch (error) {
+				await interaction.channel.send(`Updated ${updated} games with ${scoresAmount} scores each`);
+			}
 
 			gameScoreAmounts = gameScoreAmounts.filter(game => game.amount !== scoresAmount);
 		}
