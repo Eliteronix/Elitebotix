@@ -44,6 +44,10 @@ module.exports = {
 		let gameScoreAmounts = [];
 
 		for (let i = 0; i < gamesWithMissingData.length; i++) {
+			if (i % 250 === 0) {
+				await new Promise(resolve => setTimeout(resolve, 1000));
+			}
+
 			let game = gamesWithMissingData[i];
 			let scoresCount = scores.length;
 			scores = scores.filter(score => score.gameId !== game);
