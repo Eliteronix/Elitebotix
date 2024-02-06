@@ -1249,6 +1249,7 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 			'perfect',
 			'mode',
 			'matchId',
+			'gameStartDate',
 		],
 		where: where
 	});
