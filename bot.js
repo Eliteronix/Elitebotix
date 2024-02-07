@@ -317,9 +317,11 @@ client.on('interactionCreate', interaction => {
 client.on('error', console.error);
 
 setTimeout(() => {
+	console.log(`[${client.shardId}] Check if the bot is in the wrong cluster: ${wrongCluster(client)}`);
 	if (wrongCluster(client)) {
 		return;
 	}
+	console.log(`[${client.shardId}] Bot in correct cluster, starting regular checks.`);
 	cleanUpDuplicates();
 	getForumPosts(client);
 	checkOsuTracks(client);
