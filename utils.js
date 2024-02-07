@@ -5904,13 +5904,21 @@ module.exports = {
 		});
 
 		for (let i = 0; i < users.length; i++) {
-			const currentPlayerScores = playerScores.filter(score => score.osuUserId === users[i].osuUserId);
+			const currentPlayerScores = playerScores.filter(score => score.osuUserId == users[i].osuUserId);
 
 			for (let j = 0; j < currentPlayerScores.length; j++) {
+				if (users[i].osuUserId == 4280363 && currentPlayerScores[j].beatmapId == 2719372) {
+					console.log(currentPlayerScores[j]);
+				}
 				if (currentPlayerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(currentPlayerScores[j].beatmapId)) {
+					if (users[i].osuUserId == 4280363 && currentPlayerScores[j].beatmapId == 2719372) {
+						console.log('Map added to avoidMaps');
+					}
 					avoidMaps.push(currentPlayerScores[j].beatmapId);
 				}
 
+				//TODO: Just noticed different issue with maps played multiple times because it will count as multiple people having played them
+				//      Will have to remove duplicates
 				if (beatmapIds.includes(currentPlayerScores[j].beatmapId)) {
 					beatmaps[beatmapIds.indexOf(currentPlayerScores[j].beatmapId)].count++;
 				} else {
