@@ -320,6 +320,10 @@ setTimeout(() => {
 	if (wrongCluster(client)) {
 		return;
 	}
+
+	// eslint-disable-next-line no-console
+	console.log('Starting regular tasks...');
+
 	cleanUpDuplicates();
 	getForumPosts(client);
 	checkOsuTracks(client);
