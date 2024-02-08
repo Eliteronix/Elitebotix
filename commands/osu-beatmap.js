@@ -429,7 +429,9 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 			return;
 		} catch (error) {
-			console.error(error, interaction, beatmap, tournament, accuracy);
+			if (error.message !== 'Unknown Message') {
+				console.error(error, interaction, beatmap, tournament, accuracy);
+			}
 			return;
 		}
 	}
