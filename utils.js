@@ -6532,7 +6532,13 @@ module.exports = {
 					// Get all messages and delete
 					let messages = await textChannel.messages.fetch({ limit: 100 });
 
-					await textChannel.bulkDelete(messages);
+					try {
+						await textChannel.bulkDelete(messages);
+					} catch (error) {
+						if (error.message !== 'Unknown Message') {
+							throw error;
+						}
+					}
 
 					// Send new message
 					let players = [];
