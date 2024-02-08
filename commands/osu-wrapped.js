@@ -352,23 +352,28 @@ module.exports = {
 				} else if (gameScores[0].teamType === 2) {
 					let ownScores = matchScores.filter(score => score.osuUserId === parseInt(osuUser.osuUserId));
 
-					let team = ownScores[0].team;
+					try {
+						let team = ownScores[0].team;
 
-					let ownTeamScore = 0;
-					let otherTeamScore = 0;
+						let ownTeamScore = 0;
+						let otherTeamScore = 0;
 
-					for (let j = 0; j < gameScores.length; j++) {
-						if (gameScores[j].team === team) {
-							ownTeamScore += parseInt(gameScores[j].score);
-						} else {
-							otherTeamScore += parseInt(gameScores[j].score);
+						for (let j = 0; j < gameScores.length; j++) {
+							if (gameScores[j].team === team) {
+								ownTeamScore += parseInt(gameScores[j].score);
+							} else {
+								otherTeamScore += parseInt(gameScores[j].score);
+							}
 						}
-					}
 
-					if (ownTeamScore > otherTeamScore) {
-						matchesWon++;
-					} else {
-						matchesLost++;
+						if (ownTeamScore > otherTeamScore) {
+							matchesWon++;
+						} else {
+							matchesLost++;
+						}
+					} catch (error) {
+						console.error(ownScores, matchScores);
+						console.error(error);
 					}
 				}
 			}
