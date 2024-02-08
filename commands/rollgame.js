@@ -1,5 +1,6 @@
 const { populateMsgFromInteraction } = require('../utils');
 const { PermissionsBitField, EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
 	name: 'rollgame',
@@ -29,7 +30,16 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.reply('Rollgame is being started');
+			try {
+				await interaction.reply('Rollgame is being started');
+			} catch (error) {
+				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+					console.error(error);
+				}
+				const timestamps = interaction.client.cooldowns.get(this.name);
+				timestamps.delete(interaction.user.id);
+				return;
+			}
 		}
 
 		let players = [msg.author.id];
