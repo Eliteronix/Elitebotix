@@ -5054,6 +5054,8 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
+				// eslint-disable-next-line no-console
+				console.log(`Found ${result[0].length} duplicate beatmaps`);
 				let beatmapIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (beatmapIds.indexOf(`${result[0][i].beatmapId}-${result[0][i].mods}`) === -1) {
@@ -5116,6 +5118,8 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
+				// eslint-disable-next-line no-console
+				console.log(`Found ${result[0].length} duplicate matches`);
 				let matchIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (matchIds.indexOf(result[0][i].matchId) === -1) {
@@ -5178,6 +5182,8 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
+				// eslint-disable-next-line no-console
+				console.log(`Found ${result[0].length} duplicate games`);
 				let gameIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (gameIds.indexOf(result[0][i].gameId) === -1) {
@@ -5240,6 +5246,8 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
+				// eslint-disable-next-line no-console
+				console.log(`Found ${result[0].length} duplicate scores`);
 				let gameIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (gameIds.indexOf(`${result[0][i].gameId}-${result[0][i].osuUserId}`) === -1) {
