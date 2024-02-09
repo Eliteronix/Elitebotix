@@ -6832,6 +6832,7 @@ module.exports = {
 			});
 	},
 	async getValidTournamentBeatmap(input) {
+		console.log('getValidTournamentBeatmap', input.avoidMaps);
 		//Set the mode
 		let mode = 'Standard';
 
@@ -8268,6 +8269,7 @@ module.exports = {
 		}
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
+		console.log('getNextMap', avoidMaps);
 		let nextMap = null;
 		if (modPool === 'NM') {
 			nextMap = await module.exports.getValidTournamentBeatmap({
