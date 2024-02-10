@@ -31,12 +31,12 @@ module.exports = {
 		let dbListPromise = null;
 
 		let notDone = true;
-		let dataIndex = 0;
 		let noData = true;
+		let newIdLimit = 0;
 		while (notDone) {
 			try {
 				logDatabaseQueries(4, `commands/db.js ${dbTableName}`);
-				dbListPromise = eval(`const { ${dbTableName} } = require('../../dbObjects'); const { Op } = require('sequelize'); ${dbTableName}.findAll({ where: { [Op.and]: [{ id: {[Op.gte]: ${dataIndex * 10000}} }, { id: {[Op.lt]: ${(dataIndex + 1) * 10000}} }] } })`);
+				dbListPromise = eval(`const { ${dbTableName} } = require('../../dbObjects'); const { Op } = require('sequelize'); ${dbTableName}.findAll({ where: { id: {[Op.gt]: ${newIdLimit}} }, limit: 10000 })`);
 			} catch (error) {
 				console.error(error);
 				return await interaction.editReply(`Table ${dbTableName} not found`);
@@ -67,7 +67,7 @@ module.exports = {
 			// eslint-disable-next-line no-undef
 			await developerUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
 
-			dataIndex++;
+			newIdLimit = dbList[dbList.length - 1].id;
 		}
 
 		return await interaction.editReply(`Sent ${dbTableName} to your DMs`);
