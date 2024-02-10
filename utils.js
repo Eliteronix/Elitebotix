@@ -4817,6 +4817,8 @@ module.exports = {
 			return;
 		}
 
+		// eslint-disable-next-line no-console
+		console.log('Getting most played maps and matches');
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
 		let mostplayed = await DBOsuMultiGames.findAll({
 			attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
@@ -4833,6 +4835,8 @@ module.exports = {
 
 		let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
 
+		// eslint-disable-next-line no-console
+		console.log('Getting most played matchIds for matchMaking');
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
 		let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
