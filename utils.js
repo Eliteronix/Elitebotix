@@ -4862,7 +4862,7 @@ module.exports = {
 		let mostplayedBeatmapIds = [];
 
 		for (let i = 0; i < mostplayed.length; i++) {
-			if (i % 1000 === 0 && i) {
+			if (i % 100000 === 0 && i) {
 				// eslint-disable-next-line no-console
 				console.log(`${i} / ${mostplayed.length} mostplayed entries processed`);
 			}
