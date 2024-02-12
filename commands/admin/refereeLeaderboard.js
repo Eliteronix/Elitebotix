@@ -1,5 +1,5 @@
 const { DBOsuMultiMatches } = require('../../dbObjects');
-const { logDatabaseQueries, getOsuPlayerName } = require('../../utils');
+const { logDatabaseQueries, getOsuPlayerName, humanReadable } = require('../../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -45,7 +45,7 @@ module.exports = {
 				],
 			});
 
-			additionalInfo = `There are ${refereesToBeDetermined} matches from <t:${Date.parse(oldestMissingMatch.matchStartDate) / 1000}:f> till <t:${Date.parse(youngestMissingMatch.matchStartDate) / 1000}:f> that are still missing referee info.\n`;
+			additionalInfo = `There are ${humanReadable(refereesToBeDetermined)} matches from <t:${Date.parse(oldestMissingMatch.matchStartDate) / 1000}:f> till <t:${Date.parse(youngestMissingMatch.matchStartDate) / 1000}:f> that are still missing referee info.\n`;
 		}
 
 		logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiMatches find all referees per match');
