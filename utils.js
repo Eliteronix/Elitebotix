@@ -5463,6 +5463,9 @@ module.exports = {
 			}
 		});
 
+		// eslint-disable-next-line no-console
+		console.log(`Reset ${updated[0]} games without matchEndDates warmup flag`);
+
 		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		updated = await DBOsuMultiGameScores.update({
 			warmup: null,
@@ -5478,55 +5481,7 @@ module.exports = {
 		});
 
 		// eslint-disable-next-line no-console
-		console.log(`Reset ${updated[0]} scores' without matchEndDates warmup flag`);
-
-		while (duplicates && iterations < 10) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
-			let result = await multiMatches.query(
-				'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
-			);
-
-			iterations++;
-
-			duplicates = result[0].length;
-
-			if (result[0].length) {
-				// eslint-disable-next-line no-console
-				console.log(`Found ${result[0].length} duplicate matches`);
-				let matchIds = [];
-				for (let i = 0; i < result[0].length; i++) {
-					if (matchIds.indexOf(result[0][i].matchId) === -1) {
-						matchIds.push(result[0][i].matchId);
-
-						await new Promise(resolve => setTimeout(resolve, 500));
-
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuMultiMatches.findOne({
-							attributes: ['id', 'matchId', 'updatedAt'],
-							where: {
-								id: result[0][i].id
-							}
-						});
-
-						deleted++;
-
-						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'updatedAt', duplicate.updatedAt);
-
-						await new Promise(resolve => setTimeout(resolve, 500));
-						try {
-							await duplicate.destroy();
-						} catch (e) {
-							console.error(e);
-						}
-					}
-				}
-			}
-			await new Promise(resolve => setTimeout(resolve, 10000));
-		}
-
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate matches`);
+		console.log(`Reset ${updated[0]} scores without matchEndDates warmup flag`);
 	},
 	wrongCluster(client, id) {
 		let clusterAmount = client.totalShards;
