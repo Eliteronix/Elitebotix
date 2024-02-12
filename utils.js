@@ -5116,53 +5116,53 @@ module.exports = {
 			},
 		});
 
-		// while (duplicates && iterations < 10) {
-		// 	module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
-		// 	let result = await multiMatches.query(
-		// 		'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
-		// 	);
+		while (duplicates && iterations < 10) {
+			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
+			let result = await multiMatches.query(
+				'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
+			);
 
-		// 	iterations++;
+			iterations++;
 
-		// 	duplicates = result[0].length;
+			duplicates = result[0].length;
 
-		// 	if (result[0].length) {
-		// 		// eslint-disable-next-line no-console
-		// 		console.log(`Found ${result[0].length} duplicate matches`);
-		// 		let matchIds = [];
-		// 		for (let i = 0; i < result[0].length; i++) {
-		// 			if (matchIds.indexOf(result[0][i].matchId) === -1) {
-		// 				matchIds.push(result[0][i].matchId);
+			if (result[0].length) {
+				// eslint-disable-next-line no-console
+				console.log(`Found ${result[0].length} duplicate matches`);
+				let matchIds = [];
+				for (let i = 0; i < result[0].length; i++) {
+					if (matchIds.indexOf(result[0][i].matchId) === -1) {
+						matchIds.push(result[0][i].matchId);
 
-		// 				await new Promise(resolve => setTimeout(resolve, 500));
+						await new Promise(resolve => setTimeout(resolve, 100));
 
-		// 				module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
-		// 				let duplicate = await DBOsuMultiMatches.findOne({
-		// 					attributes: ['id', 'matchId', 'updatedAt'],
-		// 					where: {
-		// 						id: result[0][i].id
-		// 					}
-		// 				});
+						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
+						let duplicate = await DBOsuMultiMatches.findOne({
+							attributes: ['id', 'matchId', 'updatedAt'],
+							where: {
+								id: result[0][i].id
+							}
+						});
 
-		// 				deleted++;
+						deleted++;
 
-		// 				// eslint-disable-next-line no-console
-		// 				console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'updatedAt', duplicate.updatedAt);
+						// eslint-disable-next-line no-console
+						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'updatedAt', duplicate.updatedAt);
 
-		// 				await new Promise(resolve => setTimeout(resolve, 500));
-		// 				try {
-		// 					await duplicate.destroy();
-		// 				} catch (e) {
-		// 					console.error(e);
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	await new Promise(resolve => setTimeout(resolve, 10000));
-		// }
+						await new Promise(resolve => setTimeout(resolve, 100));
+						try {
+							await duplicate.destroy();
+						} catch (e) {
+							console.error(e);
+						}
+					}
+				}
+			}
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
 
-		// // eslint-disable-next-line no-console
-		// console.log(`Cleaned up ${deleted} duplicate matches`);
+		// eslint-disable-next-line no-console
+		console.log(`Cleaned up ${deleted} duplicate matches`);
 
 		duplicates = true;
 		deleted = 0;
