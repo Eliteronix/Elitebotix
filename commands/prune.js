@@ -21,6 +21,7 @@ module.exports = {
 			'en-GB': 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
 			'en-US': 'Deletes the specified amount of messages; Messages have to be less than 2 weeks old',
 		})
+		.setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
 		.addIntegerOption(option =>
 			option.setName('amount')
 				.setNameLocalizations({
