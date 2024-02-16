@@ -4941,8 +4941,6 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} beatmaps as not used often again`);
 
-		console.log('length of usedOften', usedOften.length);
-
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
 		update = await DBOsuBeatmaps.update({
@@ -7099,8 +7097,6 @@ module.exports = {
 			limit: 2500,
 		});
 
-		console.log(beatmaps.length)
-
 		// if (modPool === 'HR') {
 		// 	console.log('Found', beatmaps.length, 'maps');
 		// }
@@ -7116,7 +7112,7 @@ module.exports = {
 				input.upperBound = 9.9;
 			}
 			// if (modPool === 'HR') {
-			console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+			// console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
 			// }
 		}
 
