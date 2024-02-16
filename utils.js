@@ -4836,7 +4836,7 @@ module.exports = {
 		let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
 
 		// eslint-disable-next-line no-console
-		console.log('Getting most played matchIds for matchMaking');
+		console.log(`Getting most played matchIds for matchMaking for ${matchIds.length} matches`);
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
 		let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
@@ -4855,6 +4855,9 @@ module.exports = {
 		});
 
 		let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
+
+		// eslint-disable-next-line no-console
+		console.log(`Matchmaking matches: ${matchMakingMatchIds.length}`);
 
 		// Filter out matches that are in matchMakingMatchIds
 		mostplayed = mostplayed.filter(item => !matchMakingMatchIds.includes(item.matchId));
