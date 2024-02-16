@@ -7106,6 +7106,8 @@ module.exports = {
 			limit: 2500,
 		});
 
+		console.log(beatmaps.length)
+
 		// if (modPool === 'HR') {
 		// 	console.log('Found', beatmaps.length, 'maps');
 		// }
