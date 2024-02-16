@@ -7282,7 +7282,7 @@ module.exports = {
 				input.upperBound = 9.9;
 			}
 			// if (modPool === 'HR') {
-			// 	console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
+			console.log('Increased SR range to', input.lowerBound, '-', input.upperBound);
 			// }
 		}
 
