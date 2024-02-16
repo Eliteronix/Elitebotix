@@ -4851,6 +4851,7 @@ module.exports = {
 					}
 				},
 			},
+			group: ['matchId']
 		});
 
 		let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
