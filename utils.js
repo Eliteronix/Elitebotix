@@ -4845,7 +4845,7 @@ module.exports = {
 					[Op.in]: matchIds
 				},
 				matchName: {
-					[Op.and]: {
+					[Op.or]: {
 						[Op.like]: 'ETX%:%',
 						[Op.like]: 'o!mm%:%',
 					}
