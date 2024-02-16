@@ -4887,27 +4887,8 @@ module.exports = {
 		popular = popular.map(map => map.beatmapId);
 
 		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
-		let update = await DBOsuBeatmaps.update({
-			popular: true
-		}, {
-			where: {
-				beatmapId: {
-					[Op.in]: popular
-				},
-				popular: {
-					[Op.not]: true
-				}
-			},
-			silent: true
-		});
-
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} new beatmaps as popular`);
-
-		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not popular');
-		update = await DBOsuBeatmaps.update({
+		let update = await DBOsuBeatmaps.update({
 			popular: false
 		}, {
 			where: {
@@ -4924,20 +4905,16 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} beatmaps as not popular again`);
 
-		// Filter out maps that have less than 100 plays
-		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
-		usedOften = usedOften.map(map => map.dataValues.beatmapId);
-
 		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
 		update = await DBOsuBeatmaps.update({
-			usedOften: true
+			popular: true
 		}, {
 			where: {
 				beatmapId: {
-					[Op.in]: usedOften
+					[Op.in]: popular
 				},
-				usedOften: {
+				popular: {
 					[Op.not]: true
 				}
 			},
@@ -4945,7 +4922,11 @@ module.exports = {
 		});
 
 		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} new beatmaps as used often`);
+		console.log(`Marked ${update[0]} new beatmaps as popular`);
+
+		// Filter out maps that have less than 100 plays
+		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
+		usedOften = usedOften.map(map => map.dataValues.beatmapId);
 
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not usedOften');
@@ -4965,6 +4946,25 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} beatmaps as not used often again`);
+
+		// Update beatmap data
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
+		update = await DBOsuBeatmaps.update({
+			usedOften: true
+		}, {
+			where: {
+				beatmapId: {
+					[Op.in]: usedOften
+				},
+				usedOften: {
+					[Op.not]: true
+				}
+			},
+			silent: true
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
 			return;
