@@ -4859,34 +4859,25 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Matchmaking matches: ${matchMakingMatchIds.length}`);
 
-		// Filter out matches that are in matchMakingMatchIds
-		mostplayed = mostplayed.filter(item => !matchMakingMatchIds.includes(item.matchId));
-
-		let mostPlayedBeatmaps = [];
-		let mostplayedBeatmapIds = [];
-
-		for (let i = 0; i < mostplayed.length; i++) {
-			if (i % 100000 === 0 && i) {
-				// eslint-disable-next-line no-console
-				console.log(`${i} / ${mostplayed.length} mostplayed entries processed`);
-			}
-
-			let index = mostplayedBeatmapIds.indexOf(mostplayed[i].beatmapId);
-
-			if (index !== -1) {
-				mostPlayedBeatmaps[index].playcount = mostplayed[i].dataValues.playcount + mostPlayedBeatmaps[index].playcount;
-			} else {
-				mostPlayedBeatmaps.push({
-					beatmapId: mostplayed[i].beatmapId,
-					playcount: mostplayed[i].dataValues.playcount,
-				});
-
-				mostplayedBeatmapIds.push(mostplayed[i].beatmapId);
-			}
-		}
+		// Get playcount for all matches that are not in matchMakingMatchIds
+		mostplayed = await DBOsuMultiGames.findAll({
+			attributes: ['beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
+			where: {
+				warmup: false,
+				beatmapId: {
+					[Op.gt]: 0,
+				},
+				tourneyMatch: true,
+				matchId: {
+					[Op.notIn]: matchMakingMatchIds
+				},
+			},
+			group: ['beatmapId'],
+			order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
+		});
 
 		// Filter out maps that have less than 250 plays
-		let popular = mostPlayedBeatmaps.filter(map => map.playcount > 250);
+		let popular = mostplayed.filter(map => map.dataValues.playcount > 250);
 		popular = popular.map(map => map.beatmapId);
 
 		// Update beatmap data
@@ -4929,7 +4920,7 @@ module.exports = {
 
 		// Filter out maps that have less than 100 plays
 		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
-		usedOften = usedOften.map(map => map.dataValues.beatmapId);
+		usedOften = usedOften.map(map => map.beatmapId);
 
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not usedOften');
