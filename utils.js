@@ -7068,7 +7068,7 @@ module.exports = {
 			},
 		};
 
-		if (input.upperBound - input.lowerBound > 3) {
+		if (input.upperBound - input.lowerBound > 2) {
 			delete where.usedOften;
 			console.error('Removed usedOften');
 		}
