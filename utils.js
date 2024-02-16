@@ -7025,250 +7025,86 @@ module.exports = {
 			'bpm',
 		];
 
+		const where = {
+			mode: mode,
+			usedOften: true,
+			approvalStatus: {
+				[Op.in]: rankedStatus,
+			},
+			starRating: {
+				[Op.and]: {
+					[Op.gte]: lowerBound,
+					[Op.lte]: upperBound,
+				}
+			},
+			circleSize: {
+				[Op.and]: {
+					[Op.gte]: lowerCircleSize,
+					[Op.lte]: upperCircleSize,
+				}
+			},
+			approachRate: {
+				[Op.and]: {
+					[Op.gte]: lowerApproach,
+					[Op.lte]: upperApproach,
+				}
+			},
+			drainLength: {
+				[Op.and]: {
+					[Op.gte]: lowerDrain,
+					[Op.lte]: upperDrain,
+				}
+			},
+			beatmapId: {
+				[Op.notIn]: finalAvoidList,
+			},
+			notDownloadable: {
+				[Op.not]: true,
+			},
+			audioUnavailable: {
+				[Op.not]: true,
+			},
+		};
+
+		if (input.upperBound - input.lowerBound > 3) {
+			delete where.usedOften;
+			console.error('Removed usedOften');
+		}
+
 		let beatmaps = null;
 		if (modPool === 'NM') {
-			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap NM');
-			beatmaps = await DBOsuBeatmaps.findAll({
-				attributes: beatmapAttributes,
-				where: {
-					noModMap: true,
-					mode: mode,
-					mods: 0,
-					usedOften: true,
-					approvalStatus: {
-						[Op.in]: rankedStatus,
-					},
-					starRating: {
-						[Op.and]: {
-							[Op.gte]: lowerBound,
-							[Op.lte]: upperBound,
-						}
-					},
-					circleSize: {
-						[Op.and]: {
-							[Op.gte]: lowerCircleSize,
-							[Op.lte]: upperCircleSize,
-						}
-					},
-					approachRate: {
-						[Op.and]: {
-							[Op.gte]: lowerApproach,
-							[Op.lte]: upperApproach,
-						}
-					},
-					drainLength: {
-						[Op.and]: {
-							[Op.gte]: lowerDrain,
-							[Op.lte]: upperDrain,
-						}
-					},
-					beatmapId: {
-						[Op.notIn]: finalAvoidList,
-					},
-					notDownloadable: {
-						[Op.not]: true,
-					},
-					audioUnavailable: {
-						[Op.not]: true,
-					},
-				},
-				limit: 2500,
-			});
+			where.noModMap = true;
+			where.mods = 0;
 		} else if (modPool === 'HD') {
-			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap HD');
+			where.hiddenMap = true;
+			where.mods = 0;
+
 			let HDLowerBound = lowerBound - 0.8;
 			let HDUpperBound = upperBound - 0.1;
-			beatmaps = await DBOsuBeatmaps.findAll({
-				attributes: beatmapAttributes,
-				where: {
-					hiddenMap: true,
-					mode: mode,
-					mods: 0,
-					usedOften: true,
-					approvalStatus: {
-						[Op.in]: rankedStatus,
-					},
-					starRating: {
-						[Op.and]: {
-							[Op.gte]: HDLowerBound,
-							[Op.lte]: HDUpperBound,
-						}
-					},
-					circleSize: {
-						[Op.and]: {
-							[Op.gte]: lowerCircleSize,
-							[Op.lte]: upperCircleSize,
-						}
-					},
-					approachRate: {
-						[Op.and]: {
-							[Op.gte]: lowerApproach,
-							[Op.lte]: upperApproach,
-						}
-					},
-					drainLength: {
-						[Op.and]: {
-							[Op.gte]: lowerDrain,
-							[Op.lte]: upperDrain,
-						}
-					},
-					beatmapId: {
-						[Op.notIn]: finalAvoidList,
-					},
-					notDownloadable: {
-						[Op.not]: true,
-					},
-					audioUnavailable: {
-						[Op.not]: true,
-					},
-				},
-				limit: 2500,
-			});
+
+			where.starRating = {
+				[Op.and]: {
+					[Op.gte]: HDLowerBound,
+					[Op.lte]: HDUpperBound,
+				}
+			};
 		} else if (modPool === 'HR') {
-			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap HR');
-			beatmaps = await DBOsuBeatmaps.findAll({
-				attributes: beatmapAttributes,
-				where: {
-					hardRockMap: true,
-					mode: mode,
-					mods: 16,
-					usedOften: true,
-					approvalStatus: {
-						[Op.in]: rankedStatus,
-					},
-					starRating: {
-						[Op.and]: {
-							[Op.gte]: lowerBound,
-							[Op.lte]: upperBound,
-						}
-					},
-					circleSize: {
-						[Op.and]: {
-							[Op.gte]: lowerCircleSize,
-							[Op.lte]: upperCircleSize,
-						}
-					},
-					approachRate: {
-						[Op.and]: {
-							[Op.gte]: lowerApproach,
-							[Op.lte]: upperApproach,
-						}
-					},
-					drainLength: {
-						[Op.and]: {
-							[Op.gte]: lowerDrain,
-							[Op.lte]: upperDrain,
-						}
-					},
-					beatmapId: {
-						[Op.notIn]: finalAvoidList,
-					},
-					notDownloadable: {
-						[Op.not]: true,
-					},
-					audioUnavailable: {
-						[Op.not]: true,
-					},
-				},
-				limit: 2500,
-			});
+			where.hardRockMap = true;
+			where.mods = 16;
 		} else if (modPool === 'DT') {
-			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap DT');
-			beatmaps = await DBOsuBeatmaps.findAll({
-				attributes: beatmapAttributes,
-				where: {
-					doubleTimeMap: true,
-					mode: mode,
-					mods: 64,
-					usedOften: true,
-					approvalStatus: {
-						[Op.in]: rankedStatus,
-					},
-					starRating: {
-						[Op.and]: {
-							[Op.gte]: lowerBound,
-							[Op.lte]: upperBound,
-						}
-					},
-					circleSize: {
-						[Op.and]: {
-							[Op.gte]: lowerCircleSize,
-							[Op.lte]: upperCircleSize,
-						}
-					},
-					approachRate: {
-						[Op.and]: {
-							[Op.gte]: lowerApproach,
-							[Op.lte]: upperApproach,
-						}
-					},
-					drainLength: {
-						[Op.and]: {
-							[Op.gte]: lowerDrain,
-							[Op.lte]: upperDrain,
-						}
-					},
-					beatmapId: {
-						[Op.notIn]: finalAvoidList,
-					},
-					notDownloadable: {
-						[Op.not]: true,
-					},
-					audioUnavailable: {
-						[Op.not]: true,
-					},
-				},
-				limit: 2500,
-			});
+			where.doubleTimeMap = true;
+			where.mods = 64;
 		} else if (modPool === 'FM') {
-			module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap FM');
-			beatmaps = await DBOsuBeatmaps.findAll({
-				attributes: beatmapAttributes,
-				where: {
-					freeModMap: true,
-					mode: mode,
-					mods: 0,
-					usedOften: true,
-					approvalStatus: {
-						[Op.in]: rankedStatus,
-					},
-					starRating: {
-						[Op.and]: {
-							[Op.gte]: lowerBound,
-							[Op.lte]: upperBound,
-						}
-					},
-					circleSize: {
-						[Op.and]: {
-							[Op.gte]: lowerCircleSize,
-							[Op.lte]: upperCircleSize,
-						}
-					},
-					approachRate: {
-						[Op.and]: {
-							[Op.gte]: lowerApproach,
-							[Op.lte]: upperApproach,
-						}
-					},
-					drainLength: {
-						[Op.and]: {
-							[Op.gte]: lowerDrain,
-							[Op.lte]: upperDrain,
-						}
-					},
-					beatmapId: {
-						[Op.notIn]: finalAvoidList,
-					},
-					notDownloadable: {
-						[Op.not]: true,
-					},
-					audioUnavailable: {
-						[Op.not]: true,
-					},
-				},
-				limit: 2500,
-			});
+			where.freeModMap = true;
+			where.mods = 0;
 		}
+
+		module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap');
+		beatmaps = await DBOsuBeatmaps.findAll({
+			attributes: beatmapAttributes,
+			where: where,
+			limit: 2500,
+		});
 
 		// if (modPool === 'HR') {
 		// 	console.log('Found', beatmaps.length, 'maps');
