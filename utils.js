@@ -4950,6 +4950,8 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} beatmaps as not used often again`);
 
+		console.log('length of usedOften', usedOften.length);
+
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
 		update = await DBOsuBeatmaps.update({
