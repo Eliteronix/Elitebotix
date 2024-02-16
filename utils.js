@@ -4905,6 +4905,25 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} new beatmaps as popular`);
 
+		// Update beatmap data
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not popular');
+		update = await DBOsuBeatmaps.update({
+			popular: false
+		}, {
+			where: {
+				beatmapId: {
+					[Op.notIn]: popular
+				},
+				popular: {
+					[Op.not]: false
+				}
+			},
+			silent: true
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Marked ${update[0]} beatmaps as not popular again`);
+
 		// Filter out maps that have less than 100 plays
 		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
 		usedOften = usedOften.map(map => map.dataValues.beatmapId);
@@ -4927,6 +4946,25 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log(`Marked ${update[0]} new beatmaps as used often`);
+
+		// Update beatmap data
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not usedOften');
+		update = await DBOsuBeatmaps.update({
+			usedOften: false
+		}, {
+			where: {
+				beatmapId: {
+					[Op.notIn]: usedOften
+				},
+				usedOften: {
+					[Op.not]: false
+				}
+			},
+			silent: true
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Marked ${update[0]} beatmaps as not used often again`);
 
 		if (date.getUTCHours() > 0 && !manually) {
 			return;
