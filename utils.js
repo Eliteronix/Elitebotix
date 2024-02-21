@@ -2081,6 +2081,9 @@ module.exports = {
 
 							created = true;
 						});
+
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores create');
+					await DBOsuMultiGameScores.bulkCreate(newScores);
 				} catch (e) {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
@@ -5280,7 +5283,7 @@ module.exports = {
 		while (duplicates && iterations < 10) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates');
 			let result = await multiGameScores.query(
-				'SELECT * FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
+				'SELECT id, matchId, gameId, osuUserId, updatedAt FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
 
 			iterations++;
@@ -5291,34 +5294,40 @@ module.exports = {
 				// eslint-disable-next-line no-console
 				console.log(`Found ${result[0].length} duplicate scores`);
 				let gameIds = [];
+				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (gameIds.indexOf(`${result[0][i].gameId}-${result[0][i].osuUserId}`) === -1) {
 						gameIds.push(`${result[0][i].gameId}-${result[0][i].osuUserId}`);
 
-						await new Promise(resolve => setTimeout(resolve, 500));
-
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuMultiGameScores.findOne({
-							attributes: ['id', 'matchId', 'gameId', 'osuUserId', 'updatedAt'],
-							where: {
-								id: result[0][i].id
-							}
-						});
+						deleteIds.push(result[0][i].id);
 
 						deleted++;
 
 						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'osuUserId', duplicate.osuUserId, 'updatedAt', duplicate.updatedAt);
-
-						await new Promise(resolve => setTimeout(resolve, 500));
-						try {
-							await duplicate.destroy();
-						} catch (e) {
-							console.error(e);
-						}
+						console.log('#', deleted, 'iteration', iterations, 'matchId', result[0][i].matchId, 'gameId', result[0][i].gameId, 'osuUserId', result[0][i].osuUserId, 'updatedAt', result[0][i].updatedAt);
 					}
 				}
+
+				try {
+					// eslint-disable-next-line no-console
+					console.log(`Deleting ${deleteIds.length} duplicate scores`);
+
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates delete');
+					await DBOsuMultiGameScores.destroy({
+						where: {
+							id: {
+								[Op.in]: deleteIds
+							}
+						}
+					});
+
+					// eslint-disable-next-line no-console
+					console.log(`Deleted ${deleteIds.length} duplicate scores`);
+				} catch (e) {
+					console.error(e);
+				}
 			}
+
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
