@@ -6894,7 +6894,7 @@ module.exports = {
 			});
 	},
 	async getValidTournamentBeatmap(input) {
-		if (avoidMaps) {
+		if (input.avoidMaps) {
 			console.log('getValidTournamentBeatmap', input.avoidMaps.includes(2719372));
 		}
 		//Set the mode
