@@ -6885,7 +6885,9 @@ module.exports = {
 			});
 	},
 	async getValidTournamentBeatmap(input) {
-		console.log('getValidTournamentBeatmap', input.avoidMaps);
+		if (avoidMaps) {
+			console.log('getValidTournamentBeatmap', input.avoidMaps.includes(2719372));
+		}
 		//Set the mode
 		let mode = 'Standard';
 
@@ -8158,7 +8160,9 @@ module.exports = {
 		}
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
-		console.log('getNextMap', avoidMaps);
+		if (avoidMaps) {
+			console.log('getNextMap', avoidMaps.includes(2719372));
+		}
 		let nextMap = null;
 		if (modPool === 'NM') {
 			nextMap = await module.exports.getValidTournamentBeatmap({
