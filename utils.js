@@ -2081,9 +2081,6 @@ module.exports = {
 
 							created = true;
 						});
-
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores create');
-					await DBOsuMultiGameScores.bulkCreate(newScores);
 				} catch (e) {
 					await new Promise(resolve => setTimeout(resolve, 5000));
 				}
