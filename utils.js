@@ -7105,6 +7105,14 @@ module.exports = {
 			limit: 2500,
 		});
 
+		let debugMap = beatmaps.find(beatmap => beatmap.beatmapId === 2719372);
+
+		if (debugMap) {
+			console.log('getValidTournamentBeatmap Beatmaps array', true);
+		} else {
+			console.log('getValidTournamentBeatmap Beatmaps array', false);
+		}
+
 		// if (modPool === 'HR') {
 		// 	console.log('Found', beatmaps.length, 'maps');
 		// }
