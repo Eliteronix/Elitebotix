@@ -223,6 +223,14 @@ module.exports = {
 				let lastMessage = null;
 				let lastMessageType = 'mapresult';
 
+				let client = null;
+
+				if (msg.client) {
+					client = msg.client;
+				} else {
+					client = interaction.client;
+				}
+
 				while (!stop) {
 					try {
 						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, msg.client);
@@ -392,7 +400,7 @@ module.exports = {
 
 													lastMessage = await msg.channel.send({ embeds: [embed] });
 												} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
-													let attachment = await getResultImage(json.events[i], json.users, msg.client);
+													let attachment = await getResultImage(json.events[i], json.users, client);
 													let currentScore = '';
 													if (redScore + blueScore > 0) {
 														currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
@@ -421,7 +429,7 @@ module.exports = {
 												} else if (json.events[i].detail.type === 'other') {
 													if (lastMessageType !== 'playing') {
 														let modBits = getModBits(json.events[i].game.mods.join(''));
-														let attachment = await getPlayingImage(json.events[i], json.users, msg.client);
+														let attachment = await getPlayingImage(json.events[i], json.users, client);
 														let currentScore = '';
 														if (redScore + blueScore > 0) {
 															currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
