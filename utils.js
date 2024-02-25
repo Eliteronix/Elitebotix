@@ -5966,13 +5966,7 @@ module.exports = {
 			const currentPlayerScores = playerScores.filter(score => score.osuUserId == users[i].osuUserId);
 
 			for (let j = 0; j < currentPlayerScores.length; j++) {
-				if (users[i].osuUserId == 4280363 && currentPlayerScores[j].beatmapId == 2719372) {
-					console.log(currentPlayerScores[j]);
-				}
 				if (currentPlayerScores[j].gameStartDate > threeMonthsAgo && !avoidMaps.includes(currentPlayerScores[j].beatmapId)) {
-					if (users[i].osuUserId == 4280363 && currentPlayerScores[j].beatmapId == 2719372) {
-						console.log('Map added to avoidMaps');
-					}
 					avoidMaps.push(currentPlayerScores[j].beatmapId);
 				}
 
@@ -6891,9 +6885,6 @@ module.exports = {
 			});
 	},
 	async getValidTournamentBeatmap(input) {
-		if (input.avoidMaps) {
-			console.log('getValidTournamentBeatmap', input.avoidMaps.includes(2719372));
-		}
 		//Set the mode
 		let mode = 'Standard';
 
@@ -7104,14 +7095,6 @@ module.exports = {
 			where: where,
 			limit: 2500,
 		});
-
-		let debugMap = beatmaps.find(beatmap => beatmap.beatmapId === 2719372);
-
-		if (debugMap) {
-			console.log('getValidTournamentBeatmap Beatmaps array', true);
-		} else {
-			console.log('getValidTournamentBeatmap Beatmaps array', false);
-		}
 
 		// if (modPool === 'HR') {
 		// 	console.log('Found', beatmaps.length, 'maps');
@@ -8174,9 +8157,6 @@ module.exports = {
 		}
 	},
 	async getNextMap(modPool, lowerBound, upperBound, onlyRanked, avoidMaps) {
-		if (avoidMaps) {
-			console.log('getNextMap', avoidMaps.includes(2719372));
-		}
 		let nextMap = null;
 		if (modPool === 'NM') {
 			nextMap = await module.exports.getValidTournamentBeatmap({
