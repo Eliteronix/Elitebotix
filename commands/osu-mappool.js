@@ -721,7 +721,7 @@ module.exports = {
 
 			await DBOsuMappools.bulkCreate(mappool);
 
-			const mappoolImage = await createMappoolImage(mappool);
+			const mappoolImage = await createMappoolImage(mappool, interaction.client);
 
 			let links = mappool.map(map => {
 				let modPool = getMods(map.modPool);
@@ -833,7 +833,7 @@ module.exports = {
 				return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.`);
 			}
 
-			const mappoolImage = await createMappoolImage(mappool);
+			const mappoolImage = await createMappoolImage(mappool, interaction.client);
 
 			let links = mappool.map(map => {
 				let modPool = getMods(map.modPool);
@@ -1128,7 +1128,7 @@ module.exports = {
 
 				await DBOsuMappools.bulkCreate(mappool);
 
-				let mappoolImage = await createMappoolImage(mappool);
+				let mappoolImage = await createMappoolImage(mappool, interaction.client);
 
 				let links = mappool.map(map => {
 					let modPool = getMods(map.modPool);
@@ -1195,7 +1195,7 @@ function checkViableModpool(modPool) {
 	return { mods: getModBits(modPool), FM: FM, TB: false };
 }
 
-async function createMappoolImage(mappool) {
+async function createMappoolImage(mappool, client) {
 	// Draw the image
 	const canvasWidth = 908;
 	const canvasHeight = mappool.length * 100 + 8;
@@ -1296,7 +1296,7 @@ async function createMappoolImage(mappool) {
 		ctx.fillText(`${tourneyMaps[i].modPool}${tourneyMaps[i].modPoolCount}`, 54, 66 + 100 * i, 75);
 
 		// Draw the map image
-		const mapImage = await getBeatmapSlimcover(tourneyMaps[i].beatmapsetId, tourneyMaps[i].beatmapId);
+		const mapImage = await getBeatmapSlimcover(tourneyMaps[i].beatmapsetId, tourneyMaps[i].beatmapId, client);
 		ctx.drawImage(mapImage, 106, 6 + 100 * i, 396, 96);
 
 		// Draw a white border

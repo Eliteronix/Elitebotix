@@ -225,7 +225,7 @@ module.exports = {
 
 				while (!stop) {
 					try {
-						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
+						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, msg.client);
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -252,7 +252,7 @@ module.exports = {
 									}
 
 									while (json.first_event_id !== json.events[0].id) {
-										await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
+										await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`, msg.client);
 										let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 											.then(async (res) => {
 												let htmlCode = await res.text();
@@ -392,7 +392,7 @@ module.exports = {
 
 													lastMessage = await msg.channel.send({ embeds: [embed] });
 												} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
-													let attachment = await getResultImage(json.events[i], json.users);
+													let attachment = await getResultImage(json.events[i], json.users, msg.client);
 													let currentScore = '';
 													if (redScore + blueScore > 0) {
 														currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
@@ -421,7 +421,7 @@ module.exports = {
 												} else if (json.events[i].detail.type === 'other') {
 													if (lastMessageType !== 'playing') {
 														let modBits = getModBits(json.events[i].game.mods.join(''));
-														let attachment = await getPlayingImage(json.events[i], json.users);
+														let attachment = await getPlayingImage(json.events[i], json.users, msg.client);
 														let currentScore = '';
 														if (redScore + blueScore > 0) {
 															currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
@@ -521,7 +521,7 @@ module.exports = {
 	},
 };
 
-async function getResultImage(event, users) {
+async function getResultImage(event, users, client) {
 	let scores = [];
 	let teamModeHeight = 0;
 	let blueScore = 0;
@@ -605,7 +605,7 @@ async function getResultImage(event, users) {
 	}
 
 	try {
-		const beatmapCover = await getBeatmapSlimcover(event.game.beatmap.beatmapset.id, event.game.beatmap.id);
+		const beatmapCover = await getBeatmapSlimcover(event.game.beatmap.beatmapset.id, event.game.beatmap.id, client);
 
 		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
 	} catch (e) {
@@ -653,7 +653,7 @@ async function getResultImage(event, users) {
 		ctx.clip();
 
 		try {
-			const avatar = await getAvatar(scores[i].user_id);
+			const avatar = await getAvatar(scores[i].user_id, client);
 
 			ctx.drawImage(avatar, 35, 305 + i * 75, 55, 55);
 		} catch (e) {
@@ -852,7 +852,7 @@ async function getResultImage(event, users) {
 	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }
 
-async function getPlayingImage(event) {
+async function getPlayingImage(event, client) {
 	const canvasWidth = 1000;
 	const canvasHeight = 300 + 15;
 
@@ -897,7 +897,7 @@ async function getPlayingImage(event) {
 	}
 
 	try {
-		const beatmapCover = await getBeatmapSlimcover(event.game.beatmap.beatmapset.id, event.game.beatmap.id);
+		const beatmapCover = await getBeatmapSlimcover(event.game.beatmap.beatmapset.id, event.game.beatmap.id, client);
 
 		ctx.drawImage(beatmapCover, 25, 25, 950, 178);
 	} catch (e) {

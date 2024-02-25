@@ -756,7 +756,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	for (let i = 0; i < 5; i++) {
 		for (let j = 0; j < 5; j++) {
 			try {
-				let beatmapImage = await getMapListCover(mappool[i * 5 + j].beatmapsetId, mappool[i * 5 + j].beatmapId);
+				let beatmapImage = await getMapListCover(mappool[i * 5 + j].beatmapsetId, mappool[i * 5 + j].beatmapId, message.client);
 				ctx.drawImage(beatmapImage, 5 + (5 + 250) * j, 5 + (5 + 250) * i, 250, 250);
 			} catch (e) {
 				//Nothing

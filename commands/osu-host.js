@@ -384,7 +384,7 @@ module.exports = {
 						multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
 					}
 
-					multiScores[j] = await multiToBanchoScore(multiScores[j]);
+					multiScores[j] = await multiToBanchoScore(multiScores[j], interaction.client);
 
 					if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
 						multiScores.splice(j, 1);
@@ -652,7 +652,7 @@ module.exports = {
 
 				let banchoTopPlays = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 });
 
-				let topPlayData = await getTournamentTopPlayData(osuUserId, 0);
+				let topPlayData = await getTournamentTopPlayData(osuUserId, 0, interaction.client);
 
 				let tournamentTopPlays = topPlayData.scores;
 
@@ -816,7 +816,7 @@ module.exports = {
 	},
 };
 
-async function getTournamentTopPlayData(osuUserId, mode) {
+async function getTournamentTopPlayData(osuUserId, mode, client) {
 
 	let where = {
 		osuUserId: osuUserId,
@@ -892,7 +892,7 @@ async function getTournamentTopPlayData(osuUserId, mode) {
 		if (parseInt(multiScores[i].rawMods) % 2 === 1) {
 			multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 		}
-		multiScores[i] = await multiToBanchoScore(multiScores[i]);
+		multiScores[i] = await multiToBanchoScore(multiScores[i], client);
 
 		if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
 			multiScores.splice(i, 1);

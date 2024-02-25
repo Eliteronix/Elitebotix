@@ -1331,7 +1331,7 @@ module.exports = {
 		ctx.clip();
 
 		//Draw a shape onto the main canvas
-		let avatar = await getAvatar(team1[0]);
+		let avatar = await getAvatar(team1[0], interaction.client);
 		ctx.drawImage(avatar, 10, 10, 160, 160);
 
 		//Restore old context
@@ -1351,7 +1351,7 @@ module.exports = {
 		ctx.clip();
 
 		//Draw a shape onto the main canvas
-		avatar = await getAvatar(team2[0]);
+		avatar = await getAvatar(team2[0], interaction.client);
 		ctx.drawImage(avatar, 830, 10, 160, 160);
 
 		let files = [];

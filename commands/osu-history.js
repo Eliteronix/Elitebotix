@@ -517,7 +517,7 @@ module.exports = {
 						multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 					}
 
-					let banchoScore = await multiToBanchoScore(multiScores[i]);
+					let banchoScore = await multiToBanchoScore(multiScores[i], interaction.client);
 
 					if (banchoScore.pp && parseFloat(banchoScore.pp) < 2000 && parseFloat(banchoScore.pp)) {
 						tourneyPPPlays.push(banchoScore);
@@ -1015,7 +1015,7 @@ module.exports = {
 			ctx.clip();
 
 			//Draw a shape onto the main canvas in the middle 
-			const avatar = await getAvatar(osuUser.osuUserId);
+			const avatar = await getAvatar(osuUser.osuUserId, interaction.client);
 			ctx.drawImage(avatar, 350, 125, 250, 250);
 
 			//Create as an attachment

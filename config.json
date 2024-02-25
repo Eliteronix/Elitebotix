@@ -13,7 +13,6 @@
 	"traceOsuAPICalls": false,
 	"showUnknownInteractionError": false,
 	"logBroadcastEval": false,
-	"logWebRequests": false,
 	"noWarmUpAcronyms": [
 		"etx",
 		"etx teams",

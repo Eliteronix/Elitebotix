@@ -350,7 +350,7 @@ module.exports = {
 				if (!addedUserScores.includes(multiScores[i].osuUserId)) {
 					addedUserScores.push(multiScores[i].osuUserId);
 
-					let banchoScore = await multiToBanchoScore(multiScores[i]);
+					let banchoScore = await multiToBanchoScore(multiScores[i], interaction.client);
 
 					scoresArray.push(banchoScore);
 
@@ -418,7 +418,7 @@ module.exports = {
 			ctx.clip();
 			ctx.globalCompositeOperation = 'source-over';
 
-			beatmapImage = await getBeatmapCover(beatmap.beatmapsetId, beatmap.beatmapId);
+			beatmapImage = await getBeatmapCover(beatmap.beatmapsetId, beatmap.beatmapId, interaction.client);
 			ctx.drawImage(beatmapImage, 0, canvas.height / 6.25, canvas.width, beatmapImage.height / beatmapImage.width * canvas.width);
 
 			ctx.drawImage(beatmapImage, 0, 0);
@@ -473,7 +473,7 @@ module.exports = {
 			let topScore = mapScores[0];
 			roundedRect(ctx, 50, 165, 800, 80, 500 / 70, '70', '57', '63', 0.75);
 
-			let topScoreUserImage = await getAvatar(topScore.user.id);
+			let topScoreUserImage = await getAvatar(topScore.user.id, interaction.client);
 
 			roundedRect(ctx, 100, 175, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
 			ctx.save();
@@ -596,7 +596,7 @@ module.exports = {
 				let topScore = userScore.score;
 				roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
 
-				let topScoreUserImage = await getAvatar(topScore.user.id);
+				let topScoreUserImage = await getAvatar(topScore.user.id, interaction.client);
 
 				roundedRect(ctx, 100, 175 + 90, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
 				ctx.save();

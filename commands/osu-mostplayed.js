@@ -557,7 +557,7 @@ module.exports = {
 				ctx.save();
 				ctx.clip();
 				try {
-					let beatmapImage = await getMapListCover(dataOnPage[i].beatmapsetId, dataOnPage[i].beatmapId);
+					let beatmapImage = await getMapListCover(dataOnPage[i].beatmapsetId, dataOnPage[i].beatmapId, interaction.client);
 					ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
 				} catch (err) {
 					// Nothing
@@ -678,7 +678,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 
 				elements = await drawTitle(elements, server);
 
-				elements = await drawMostPlayed(elements, server, mode, limit);
+				elements = await drawMostPlayed(elements, server, mode, limit, msg.client);
 
 				await drawFooter(elements);
 
@@ -743,7 +743,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 
 				elements = await drawTitle(elements, server);
 
-				elements = await drawMostPlayed(elements, server, mode, limit);
+				elements = await drawMostPlayed(elements, server, mode, limit, msg.client);
 
 				await drawFooter(elements);
 
@@ -764,7 +764,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 	}
 }
 
-async function drawMostPlayed(input, server, mode, limit) {
+async function drawMostPlayed(input, server, mode, limit, client) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -772,7 +772,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 	let link;
 	let showLimit = limit;
 	if (server === 'bancho') {
-		await awaitWebRequestPermission(`https://osu.ppy.sh/users/${user.id}/beatmapsets/most_played?limit=${limit}`);
+		await awaitWebRequestPermission(`https://osu.ppy.sh/users/${user.id}/beatmapsets/most_played?limit=${limit}`, client);
 		link = await fetch(`https://osu.ppy.sh/users/${user.id}/beatmapsets/most_played?limit=${limit}`).then(res => res.json());
 
 		for (let i = 0; i < link.length && i < showLimit; i++) {
@@ -784,7 +784,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 			ctx.save();
 			ctx.clip();
 			try {
-				let beatmapImage = await getMapListCover(link[i].beatmapset.id, link[i].beatmap.id);
+				let beatmapImage = await getMapListCover(link[i].beatmapset.id, link[i].beatmap.id, client);
 				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
 			} catch (err) {
 				// Nothing
@@ -835,7 +835,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 				ctx.save();
 				ctx.clip();
 				try {
-					let beatmapImage = await getMapListCover(beatmaps[j].beatmapsetId, beatmaps[j].beatmapId);
+					let beatmapImage = await getMapListCover(beatmaps[j].beatmapsetId, beatmaps[j].beatmapId, client);
 					ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
 				} catch (err) {
 					// Nothing
@@ -920,7 +920,7 @@ async function drawMostPlayed(input, server, mode, limit) {
 				// draw another rectangle for the image
 				roundedRect(ctx, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38, 500 / 70, '70', '57', '63', 0.75);
 				ctx.clip();
-				let beatmapImage = await getMapListCover(beatmap.beatmapsetId, beatmap.beatmapId);
+				let beatmapImage = await getMapListCover(beatmap.beatmapsetId, beatmap.beatmapId, client);
 				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
 				ctx.font = 'bold 18px comfortaa, sans-serif';
 				ctx.fillStyle = '#FF66AB';

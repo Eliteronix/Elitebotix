@@ -905,7 +905,7 @@ module.exports = {
 			ctx.fillText(players[i].osuName, 604 + 240 + 400 * i, 75, 275);
 
 			// Draw the avatar
-			let avatar = await getAvatar(players[i].osuUserId);
+			let avatar = await getAvatar(players[i].osuUserId, interaction.client);
 			ctx.drawImage(avatar, 604 + 400 * i + 10, 4 + 10, 80, 80);
 		}
 
@@ -975,7 +975,7 @@ module.exports = {
 			ctx.fillText(`${tourneyMaps[i].modPool}${tourneyMaps[i].modPoolCount}`, 54, 66 + 100 * (i + 1), 75);
 
 			// Draw the map image
-			const mapImage = await getMapListCover(tourneyMaps[i].beatmapsetId, tourneyMaps[i].beatmapId);
+			const mapImage = await getMapListCover(tourneyMaps[i].beatmapsetId, tourneyMaps[i].beatmapId, interaction.client);
 			ctx.drawImage(mapImage, 106, 6 + 100 * (i + 1), 96, 96);
 
 			// Draw a white border

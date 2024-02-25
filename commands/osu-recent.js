@@ -330,6 +330,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 					user: user,
 					server: server,
 					mapRank: mapRank,
+					client: interaction.client,
 				};
 
 				const scoreCard = await scoreCardAttachment(input);
@@ -414,6 +415,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 							mode: mode,
 							user: user,
 							server: server,
+							client: interaction.client,
 						};
 
 						const scoreCard = await scoreCardAttachment(input);
@@ -559,6 +561,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 			user: user,
 			server: server,
 			mapRank: gatariScore.top,
+			client: interaction.client,
 		};
 
 		const scoreCard = await scoreCardAttachment(input);

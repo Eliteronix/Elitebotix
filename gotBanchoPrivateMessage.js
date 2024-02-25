@@ -62,10 +62,10 @@ module.exports = async function (client, bancho, message) {
 		await message.user.fetchFromAPI();
 		bancho.lastUserMaps.set(message.user.id.toString(), { beatmapId: beatmapId, modBits: modBits });
 
-		let firstPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo);
-		let secondPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 98.00, 0, beatmap.maxCombo);
-		let thirdPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo);
-		let fourthPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo);
+		let firstPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo, client);
+		let secondPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 98.00, 0, beatmap.maxCombo, client);
+		let thirdPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo, client);
+		let fourthPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo, client);
 
 		let mods = getMods(beatmap.mods);
 
@@ -356,10 +356,10 @@ module.exports = async function (client, bancho, message) {
 
 		bancho.lastUserMaps.set(message.user.id.toString(), { beatmapId: oldBeatmap.beatmapId, modBits: modBits });
 
-		let firstPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo);
-		let secondPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 98.00, 0, beatmap.maxCombo);
-		let thirdPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo);
-		let fourthPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo);
+		let firstPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 95.00, 0, beatmap.maxCombo, client);
+		let secondPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 98.00, 0, beatmap.maxCombo, client);
+		let thirdPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo, client);
+		let fourthPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo, client);
 
 		mods = getMods(beatmap.mods);
 
@@ -388,7 +388,7 @@ module.exports = async function (client, bancho, message) {
 
 		let beatmap = await getOsuBeatmap({ beatmapId: oldBeatmap.beatmapId, modBits: oldBeatmap.modBits });
 
-		let accPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, acc, 0, beatmap.maxCombo);
+		let accPP = await getOsuPP(beatmap.beatmapId, beatmap.mods, acc, 0, beatmap.maxCombo, client);
 
 		let mods = getMods(beatmap.mods);
 

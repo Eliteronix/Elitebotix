@@ -316,13 +316,13 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 				elements = await drawFooter(elements, server);
 
-				await drawAvatar(elements, server);
+				await drawAvatar(elements, server, interaction.client);
 
 				//Create as an attachment
 				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
 
 				if (showGraph) {
-					let graph = await getRankHistoryGraph(user.id, mode);
+					let graph = await getRankHistoryGraph(user.id, mode, interaction.client);
 					if (graph) {
 						files.push(graph);
 					}
@@ -413,7 +413,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 				elements = await drawFooter(elements, server);
 
-				await drawAvatar(elements, server);
+				await drawAvatar(elements, server, interaction.client);
 
 				//Create as an attachment
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
@@ -526,7 +526,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 		elements = await drawFooter(elements, server);
 
-		await drawAvatar(elements, server);
+		await drawAvatar(elements, server, interaction.client);
 
 		//Create as an attachment
 		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
@@ -800,7 +800,7 @@ async function drawBadges(input, server, client) {
 			xOffset = xOffset + (8 - additionalInfo.badges.length) * 44;
 		}
 		for (let i = 0; i < additionalInfo.badges.length && i < 8; i++) {
-			const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
+			const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''), client);
 			ctx.drawImage(badge, xOffset + (i * 88), 290, 86, 40);
 		}
 	}
@@ -861,7 +861,7 @@ async function drawFooter(input, server) {
 	return output;
 }
 
-async function drawAvatar(input, server) {
+async function drawAvatar(input, server, client) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
@@ -882,7 +882,7 @@ async function drawAvatar(input, server) {
 	} else if (server === 'gatari') {
 		avatar = await Canvas.loadImage(`https://a.gatari.pw/${user.id}`);
 	} else {
-		avatar = await getAvatar(user.id);
+		avatar = await getAvatar(user.id, client);
 	}
 
 	ctx.drawImage(avatar, canvas.width / 2 - canvas.height / 4, canvas.height / 4 + yOffset, canvas.height / 2, canvas.height / 2);
@@ -891,7 +891,7 @@ async function drawAvatar(input, server) {
 	return output;
 }
 
-async function getRankHistoryGraph(osuUserId, mode) {
+async function getRankHistoryGraph(osuUserId, mode, client) {
 	mode = getGameModeName(mode);
 
 	if (mode === 'standard') {
@@ -900,7 +900,7 @@ async function getRankHistoryGraph(osuUserId, mode) {
 		mode = 'fruits';
 	}
 
-	await awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/${mode}`);
+	await awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/${mode}`, client);
 	let history = await fetch(`https://osu.ppy.sh/users/${osuUserId}/${mode}`)
 		.then(async (res) => {
 			let htmlCode = await res.text();

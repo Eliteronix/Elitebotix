@@ -1278,7 +1278,7 @@ module.exports = {
 				}
 
 				for (let i = 0; i < additionalInfo.badges.length && i < 6; i++) {
-					const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''));
+					const badge = await getBadgeImage(additionalInfo.badges[i].image_url.replace('https://assets.ppy.sh/profile-badges/', ''), interaction.client);
 					ctx.drawImage(badge, 10, 60 + i * 44 + yOffset, 86, 40);
 				}
 
@@ -1305,7 +1305,7 @@ module.exports = {
 				ctx.clip();
 
 				//Draw a shape onto the main canvas
-				const avatar = await getAvatar(osuUser.id);
+				const avatar = await getAvatar(osuUser.id, interaction.client);
 				ctx.drawImage(avatar, 110, 90, 160, 160);
 
 				if (historicalUserDuelStarRatings.length < 2) {

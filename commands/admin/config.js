@@ -6,7 +6,7 @@ module.exports = {
 	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused(true);
 
-		const options = [{ name: 'show', value: 'show' }, { name: `traceOsuAPICalls ${!config.traceOsuAPICalls}`, value: `traceOsuAPICalls ${!config.traceOsuAPICalls}` }, { name: `logBroadcastEval ${!config.logBroadcastEval}`, value: `logBroadcastEval ${!config.logBroadcastEval}` }, { name: `logWebRequests ${!config.logWebRequests}`, value: `logWebRequests ${!config.logWebRequests}` }];
+		const options = [{ name: 'show', value: 'show' }, { name: `traceOsuAPICalls ${!config.traceOsuAPICalls}`, value: `traceOsuAPICalls ${!config.traceOsuAPICalls}` }, { name: `logBroadcastEval ${!config.logBroadcastEval}`, value: `logBroadcastEval ${!config.logBroadcastEval}` }];
 
 
 
@@ -66,20 +66,6 @@ module.exports = {
 				});
 
 				await interaction.followUp('Set `logBroadcastEval` to `' + newValue + '`');
-			} else if (argument.startsWith('logWebRequests ')) {
-				let newValue = argument.split(' ')[1] === 'true' ? true : false;
-				config.logWebRequests = newValue;
-
-				// Save the new config to the config.json file
-				const fs = require('fs');
-				fs.writeFile('./config.json', JSON.stringify(config, null, 4), (err) => {
-					if (err) {
-						console.error(err);
-						return;
-					}
-				});
-
-				await interaction.followUp('Set `logWebRequests` to `' + newValue + '`');
 			}
 		}
 	},

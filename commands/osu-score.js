@@ -371,6 +371,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 							user: user,
 							server: server,
 							mapRank: mapRank,
+							client: interaction.client,
 						};
 
 						const scoreCard = await scoreCardAttachment(input);
@@ -467,6 +468,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 							user: user,
 							server: server,
 							mapRank: mapRank,
+							client: interaction.client,
 						};
 
 						const scoreCard = await scoreCardAttachment(input);
@@ -586,7 +588,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 		}
 
 		for (let i = 0; i < userScores.length; i++) {
-			userScores[i] = await multiToBanchoScore(userScores[i]);
+			userScores[i] = await multiToBanchoScore(userScores[i], interaction.client);
 			mapRank = `${userScores[i].mapRank}/${beatmapScores.length - userScoreAmount + 1}`;
 
 			updateOsuDetailsforUser(interaction.client, osuUser, mode);
@@ -598,6 +600,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				user: osuUser,
 				server: server,
 				mapRank: mapRank,
+				client: interaction.client,
 			};
 
 			const scoreCard = await scoreCardAttachment(input);
@@ -712,6 +715,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			user: user,
 			server: server,
 			mapRank: gatariScore.top,
+			client: interaction.client,
 		};
 
 		const scoreCard = await scoreCardAttachment(input);

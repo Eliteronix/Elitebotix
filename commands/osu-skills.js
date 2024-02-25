@@ -577,7 +577,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			ctx.clip();
 
 			//Draw a shape onto the main canvas
-			const avatar = await getAvatar(user.id);
+			const avatar = await getAvatar(user.id, interaction.client);
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 
 			//Create as an attachment

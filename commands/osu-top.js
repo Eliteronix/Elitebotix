@@ -823,7 +823,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			scores.push(score);
 		}
 	} else if (server === 'tournaments') {
-		let topPlayData = await getTournamentTopPlayData(user.id, mode);
+		let topPlayData = await getTournamentTopPlayData(user.id, mode, interaction.client);
 
 		totalRankedPP = topPlayData.totalRankedPP;
 		rankedBonusPP = topPlayData.rankedBonusPP;
@@ -833,7 +833,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	} else if (server === 'mixed') {
 		let banchoTopPlays = await osuApi.getUserBest({ u: user.name, m: mode, limit: 100 });
 
-		let topPlayData = await getTournamentTopPlayData(user.id, mode, true);
+		let topPlayData = await getTournamentTopPlayData(user.id, mode, interaction.client, true);
 
 		let tournamentTopPlays = topPlayData.scores;
 
@@ -1211,7 +1211,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	return output;
 }
 
-async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
+async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) {
 
 	let where = {
 		osuUserId: osuUserId,
@@ -1284,7 +1284,7 @@ async function getTournamentTopPlayData(osuUserId, mode, mixed = false) {
 		if (parseInt(multiScores[i].rawMods) % 2 === 1) {
 			multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 		}
-		multiScores[i] = await multiToBanchoScore(multiScores[i]);
+		multiScores[i] = await multiToBanchoScore(multiScores[i], client);
 
 		if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
 			multiScores.splice(i, 1);

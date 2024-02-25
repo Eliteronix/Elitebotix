@@ -251,11 +251,11 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	elements = await drawMode(elements);
 
-	elements = await drawStats(elements, accuracy);
+	elements = await drawStats(elements, accuracy, interaction.client);
 
 	elements = await drawFooter(elements);
 
-	await drawBackground(elements);
+	await drawBackground(elements, interaction.client);
 
 	//Create as an attachment
 	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
@@ -501,7 +501,7 @@ async function drawMode(input) {
 	return output;
 }
 
-async function drawStats(input, accuracy) {
+async function drawStats(input, accuracy, client) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let beatmap = input[2];
@@ -574,7 +574,7 @@ async function drawStats(input, accuracy) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText(`${accuracy}% Accuracy`, canvas.width / 1000 * 330, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, accuracy, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, accuracy, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -597,7 +597,7 @@ async function drawStats(input, accuracy) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('99% Accuracy', canvas.width / 1000 * 580, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
 
 	//Third column
 	if (beatmap.mode === 'Mania') {
@@ -627,7 +627,7 @@ async function drawStats(input, accuracy) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('100% Accuracy', canvas.width / 1000 * 750, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo))} pp`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
 
 	const output = [canvas, ctx, beatmap];
 	return output;
@@ -653,7 +653,7 @@ async function drawFooter(input) {
 	return output;
 }
 
-async function drawBackground(input) {
+async function drawBackground(input, client) {
 	let canvas = input[0];
 	let ctx = input[1];
 	let beatmap = input[2];
@@ -665,7 +665,7 @@ async function drawBackground(input) {
 	ctx.clip();
 
 	//Draw a shape onto the main canvas in the top left
-	const background = await getBeatmapCover(beatmap.beatmapsetId, beatmap.beatmapId);
+	const background = await getBeatmapCover(beatmap.beatmapsetId, beatmap.beatmapId, client);
 	ctx.drawImage(background, background.width / 2 - background.height / 2, 0, background.height, background.height, 0, 0, canvas.height / 3 * 2, canvas.height / 3 * 2);
 	const output = [canvas, ctx, beatmap];
 	return output;

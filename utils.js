@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
-const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, logWebRequests, traceOsuAPICalls, noWarmUpAcronyms } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -1234,7 +1234,7 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-		await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/`);
+		await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/`, client);
 		return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -4611,7 +4611,7 @@ module.exports = {
 		}
 		return true;
 	},
-	async getOsuPP(beatmapId, modBits, accuracy, misses, combo, depth) {
+	async getOsuPP(beatmapId, modBits, accuracy, misses, combo, client, depth) {
 		const fs = require('fs');
 
 		if (!depth) {
@@ -4647,7 +4647,7 @@ module.exports = {
 					return null;
 				}
 
-				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`);
+				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`, client);
 				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 
 				await new Promise((resolve, reject) => {
@@ -4695,7 +4695,7 @@ module.exports = {
 
 				depth++;
 
-				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, depth);
+				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, client, depth);
 			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin') {
 				console.error(`error with map ${beatmapId}`, e);
 				mapsRetriedTooOften.push(beatmapId);
@@ -4706,7 +4706,7 @@ module.exports = {
 			}
 		}
 	},
-	async multiToBanchoScore(inputScore) {
+	async multiToBanchoScore(inputScore, client) {
 		let date = new Date(inputScore.gameStartDate);
 		let outputScore = {
 			score: inputScore.score,
@@ -4741,7 +4741,7 @@ module.exports = {
 			if (!outputScore.pp && outputScore.maxCombo) {
 				const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: outputScore.beatmapId, modBits: 0 });
 				if (dbBeatmap) {
-					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo));
+					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo), client);
 
 					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores pp update');
 					try {
@@ -6719,7 +6719,7 @@ module.exports = {
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {
-		await module.exports.awaitWebRequestPermission('https://osu.ppy.sh/community/forums/55');
+		await module.exports.awaitWebRequestPermission('https://osu.ppy.sh/community/forums/55', client);
 		await fetch('https://osu.ppy.sh/community/forums/55')
 			.then(async (res) => {
 				let htmlCode = await res.text();
@@ -7891,7 +7891,7 @@ module.exports = {
 									if (parseInt(multiScores[j].rawMods) % 2 === 1) {
 										multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
 									}
-									multiScores[j] = await multiToBanchoScore(multiScores[j]);
+									multiScores[j] = await multiToBanchoScore(multiScores[j], c);
 
 									if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
 										multiScores.splice(j, 1);
@@ -8324,7 +8324,7 @@ module.exports = {
 			}
 		});
 	},
-	async getMapListCover(beatmapsetId, beatmapId) {
+	async getMapListCover(beatmapsetId, beatmapId, client) {
 		const fs = require('fs');
 
 		//Check if the maps folder exists and create it if necessary
@@ -8344,7 +8344,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, client);
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
 
 				if (res.status === 404) {
@@ -8381,7 +8381,7 @@ module.exports = {
 			return null;
 		}
 	},
-	async getBeatmapCover(beatmapsetId, beatmapId) {
+	async getBeatmapCover(beatmapsetId, beatmapId, client) {
 		const fs = require('fs');
 
 		//Check if the maps folder exists and create it if necessary
@@ -8401,7 +8401,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, client);
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
 
 				if (res.status === 404) {
@@ -8434,7 +8434,7 @@ module.exports = {
 
 		return await Canvas.loadImage(path);
 	},
-	async getBeatmapSlimcover(beatmapsetId, beatmapId) {
+	async getBeatmapSlimcover(beatmapsetId, beatmapId, client) {
 		const fs = require('fs');
 
 		//Check if the maps folder exists and create it if necessary
@@ -8454,7 +8454,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, client);
 				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
 
 				if (res.status === 404) {
@@ -8487,7 +8487,7 @@ module.exports = {
 
 		return await Canvas.loadImage(path);
 	},
-	async getAvatar(osuUserId) {
+	async getAvatar(osuUserId, client) {
 		const fs = require('fs');
 
 		//Check if the maps folder exists and create it if necessary
@@ -8501,7 +8501,7 @@ module.exports = {
 		try {
 			// Doesn't exist or older than 48 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
-				await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`);
+				await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`, client);
 				const res = await fetch(`https://s.ppy.sh/a/${osuUserId}`);
 
 				if (res.status === 404) {
@@ -8543,7 +8543,7 @@ module.exports = {
 
 		return loadedImage;
 	},
-	async getBadgeImage(badgeName) {
+	async getBadgeImage(badgeName, client) {
 		const fs = require('fs');
 
 		//Check if the maps folder exists and create it if necessary
@@ -8556,7 +8556,7 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path)) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/profile-badges/${badgeName}`);
+				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/profile-badges/${badgeName}`, client);
 				const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
 
 				await new Promise((resolve, reject) => {
@@ -8630,7 +8630,7 @@ module.exports = {
 			}
 		}
 	},
-	async awaitWebRequestPermission(request) {
+	async awaitWebRequestPermission(request, client) {
 		let randomString = Math.random().toString(36).substring(2);
 
 		// eslint-disable-next-line no-undef
@@ -8649,9 +8649,23 @@ module.exports = {
 			iterator++;
 		}
 
-		if (logWebRequests) {
-			// eslint-disable-next-line no-console
-			console.log('Permission granted:', request.replace('https://', ''), randomString);
+		try {
+			client.shard.broadcastEval(async (c, { message }) => {
+				let channel;
+				// eslint-disable-next-line no-undef
+				if (process.env.SERVER === 'Live') {
+					channel = await c.channels.cache.get('1211359645638070333');
+					// eslint-disable-next-line no-undef
+				} else {
+					channel = await c.channels.cache.get('1211359790882885702');
+				}
+
+				if (channel) {
+					await channel.send(message);
+				}
+			}, { context: { message: `Requested <${request}> with string \`${randomString}\`` } });
+		} catch (err) {
+			console.error(err);
 		}
 
 		return;
@@ -8807,7 +8821,7 @@ module.exports = {
 		ctx.globalAlpha = 0.6;
 
 		//Draw a shape onto the main canvas in the top left
-		let background = await module.exports.getBeatmapCover(input.beatmap.beatmapsetId, input.beatmap.beatmapId);
+		let background = await module.exports.getBeatmapCover(input.beatmap.beatmapsetId, input.beatmap.beatmapId, input.client);
 		ctx.drawImage(background, 0, canvas.height / 6.25, canvas.width, background.height / background.width * canvas.width);
 
 		ctx.globalAlpha = 1;
@@ -9063,7 +9077,7 @@ module.exports = {
 		if (input.score.pp) {
 			pp = Math.round(input.score.pp);
 		} else {
-			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo));
+			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
 		}
 
 		ctx.font = '18px comfortaa, sans-serif';
@@ -9078,7 +9092,7 @@ module.exports = {
 			};
 
 			let fcScoreAccuracy = module.exports.getAccuracy(fcScore, 0) * 100;
-			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo));
+			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
 			if (pp !== fcpp) {
 				pp = `${pp} (${Math.round(fcpp)} FC)`;
 				ctx.font = '16px comfortaa, sans-serif';
@@ -9236,7 +9250,7 @@ module.exports = {
 		} else if (input.server === 'gatari') {
 			userAvatar = await Canvas.loadImage(`https://a.gatari.pw/${input.user.id}`);
 		} else {
-			userAvatar = await module.exports.getAvatar(input.user.id);
+			userAvatar = await module.exports.getAvatar(input.user.id, input.client);
 		}
 
 		module.exports.roundedRect(ctx, canvas.width / 900 * 50 + userBackground.height / 10 * 2, canvas.height / 500 * 375 + 5, userBackground.width / 10 * 2 - userBackground.height / 10 * 2 - 5, userBackground.height / 10 * 2 - 10, 5, '00', '00', '00', 0.5);

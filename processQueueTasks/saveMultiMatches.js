@@ -130,7 +130,7 @@ module.exports = {
 					try {
 						// Check using node fetch
 						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
+						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`, client);
 						let response = await fetch(`https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						let htmlCode = await response.text();
 						let isolatedContent = htmlCode.replace(/[\s\S]+<script id="json-events" type="application\/json">/gm, '').replace(/<\/script>[\s\S]+/gm, '');
@@ -272,7 +272,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			await osuApi.getMatch({ mp: incompleteMatch.matchId })
 				.then(async (match) => {
 					try {
-						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
+						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, client);
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 							.then(async (res) => {
 								let htmlCode = await res.text();
@@ -661,7 +661,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			} else {
 				const result = await verifyAnyMatch(osuApi, client, logVerificationProcess);
 
-				await addMissingRefereeInfo(osuApi);
+				await addMissingRefereeInfo(osuApi, client);
 
 				if (result === true) {
 					secondsToWait = secondsToWait + 60;
@@ -719,7 +719,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 			console.log('No match to verify');
 		}
 
-		return await addMissingRefereeInfo(osuApi);
+		return await addMissingRefereeInfo(osuApi, client);
 	}
 
 	if (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm')) {
@@ -745,7 +745,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 	return await osuApi.getMatch({ mp: matchToVerify.matchId })
 		.then(async (match) => {
 			try {
-				await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
+				await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, client);
 				return await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 					.then(async (res) => {
 						let htmlCode = await res.text();
@@ -770,7 +770,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 							while (json.first_event_id !== json.events[0].id) {
 								let firstIdInJSON = json.events[0].id;
 
-								await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
+								await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`, client);
 								let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 									.then(async (res) => {
 										let htmlCode = await res.text();
@@ -1512,7 +1512,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 		});
 }
 
-async function addMissingRefereeInfo(osuApi) {
+async function addMissingRefereeInfo(osuApi, client) {
 	logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches refereeInfoMissing');
 	let refereeInfoMissing = await DBOsuMultiMatches.findOne({
 		attributes: ['matchId'],
@@ -1544,7 +1544,7 @@ async function addMissingRefereeInfo(osuApi) {
 	return await osuApi.getMatch({ mp: refereeInfoMissing.matchId })
 		.then(async (match) => {
 			try {
-				await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`);
+				await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, client);
 				await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
 					.then(async (res) => {
 						let htmlCode = await res.text();
@@ -1567,7 +1567,7 @@ async function addMissingRefereeInfo(osuApi) {
 							let json = JSON.parse(regexMatch);
 
 							while (json.first_event_id !== json.events[0].id) {
-								await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`);
+								await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`, client);
 								let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
 									.then(async (res) => {
 										let htmlCode = await res.text();
