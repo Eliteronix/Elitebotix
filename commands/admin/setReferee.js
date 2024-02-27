@@ -19,6 +19,6 @@ module.exports = {
 			},
 		});
 
-		return await interaction.editReply(`Set ${count} scores to reffed by ${referee}.`);
+		return await interaction.editReply(`Set ${count} matches to reffed by ${referee}.`);
 	},
 };
