@@ -1585,6 +1585,8 @@ async function addMissingRefereeInfo(osuApi, client) {
 									});
 
 								json.events = earlierEvents.concat(json.events);
+
+								console.log(json.events);
 							}
 
 							if (json.events[0].detail.type === 'match-created') {
