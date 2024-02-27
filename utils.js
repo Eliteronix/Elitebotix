@@ -4845,10 +4845,14 @@ module.exports = {
 					[Op.in]: matchIds
 				},
 				matchName: {
-					[Op.or]: {
-						[Op.like]: 'ETX%:%',
-						[Op.like]: 'o!mm%:%',
-					}
+					[Op.or]: [
+						{
+							[Op.like]: 'ETX%:%',
+						},
+						{
+							[Op.like]: 'o!mm%:%',
+						}
+					]
 				},
 			},
 			group: ['matchId']

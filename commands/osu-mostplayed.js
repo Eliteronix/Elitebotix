@@ -446,10 +446,14 @@ module.exports = {
 					where: {
 						matchId: matchIds,
 						matchName: {
-							[Op.and]: {
-								[Op.like]: 'ETX%:%',
-								[Op.like]: 'o!mm%:%',
-							}
+							[Op.and]: [
+								{
+									[Op.like]: 'ETX%:%',
+								},
+								{
+									[Op.like]: 'o!mm%:%',
+								}
+							]
 						},
 					},
 				});
