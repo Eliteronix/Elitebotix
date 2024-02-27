@@ -429,7 +429,7 @@ module.exports = {
 												} else if (json.events[i].detail.type === 'other') {
 													if (lastMessageType !== 'playing') {
 														let modBits = getModBits(json.events[i].game.mods.join(''));
-														let attachment = await getPlayingImage(json.events[i], json.users, client);
+														let attachment = await getPlayingImage(json.events[i], client);
 														let currentScore = '';
 														if (redScore + blueScore > 0) {
 															currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
