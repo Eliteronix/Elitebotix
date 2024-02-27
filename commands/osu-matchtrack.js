@@ -512,7 +512,7 @@ module.exports = {
 						}
 						await pause(165000);
 					}
-					await pause(10000);
+					await pause(30000);
 				}
 			})
 			.catch(err => {
