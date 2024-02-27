@@ -8636,6 +8636,7 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		process.webRequestsWaiting.push(randomString);
 
+		let startTime = new Date();
 		let iterator = 0;
 		// eslint-disable-next-line no-undef
 		while (process.webRequestsWaiting.includes(randomString)) {
@@ -8648,6 +8649,8 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 100));
 			iterator++;
 		}
+
+		let endTime = new Date();
 
 		try {
 			client.shard.broadcastEval(async (c, { message }) => {
@@ -8663,7 +8666,7 @@ module.exports = {
 				if (channel) {
 					await channel.send(message);
 				}
-			}, { context: { message: `Requested <${request}> with string \`${randomString}\`` } });
+			}, { context: { message: `Requested <${request}> with string \`${randomString}\` after \`${endTime - startTime}ms\`` } });
 		} catch (err) {
 			console.error(err);
 		}
