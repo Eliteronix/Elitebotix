@@ -1581,6 +1581,10 @@ async function addMissingRefereeInfo(osuApi, client) {
 
 										let json = JSON.parse(regexMatch);
 
+										regexMatch = null;
+
+										console.log('json.events', json.events);
+
 										return json.events;
 									});
 
