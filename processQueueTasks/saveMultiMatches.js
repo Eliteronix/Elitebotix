@@ -775,8 +775,14 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 									.then(async (res) => {
 										let htmlCode = await res.text();
 										htmlCode = htmlCode.replace(/&quot;/gm, '"');
+										const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
 										const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+										const matchesRunning = matchRunningRegex.exec(htmlCode);
 										const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+										if (matchesRunning && matchesRunning[0]) {
+											regexMatch = matchesRunning[0];
+										}
 
 										if (matchesPaused && matchesPaused[0]) {
 											regexMatch = matchesPaused[0];
