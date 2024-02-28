@@ -772,6 +772,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 			let interaction = {
 				id: null,
 				channel: reaction.message.channel,
+				client: reaction.message.client,
 				guild: reaction.message.guild,
 				user: user,
 				options: {
