@@ -1572,8 +1572,15 @@ async function addMissingRefereeInfo(osuApi, client) {
 									.then(async (res) => {
 										let htmlCode = await res.text();
 										htmlCode = htmlCode.replace(/&quot;/gm, '"');
+
+										const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
 										const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+										const matchesRunning = matchRunningRegex.exec(htmlCode);
 										const matchesPaused = matchPausedRegex.exec(htmlCode);
+
+										if (matchesRunning && matchesRunning[0]) {
+											regexMatch = matchesRunning[0];
+										}
 
 										if (matchesPaused && matchesPaused[0]) {
 											regexMatch = matchesPaused[0];
@@ -1583,16 +1590,10 @@ async function addMissingRefereeInfo(osuApi, client) {
 
 										regexMatch = null;
 
-										console.log('json.events', json.events);
-
 										return json.events;
 									});
 
-								console.log('earlierEvents', earlierEvents);
-
 								json.events = earlierEvents.concat(json.events);
-
-								console.log('json.events', json.events);
 							}
 
 							if (json.events[0].detail.type === 'match-created') {
