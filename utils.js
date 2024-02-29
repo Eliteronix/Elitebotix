@@ -8672,7 +8672,7 @@ module.exports = {
 					continue;
 				}
 
-				stack[i] = stack[i].trim().replace('at ', '').replace('async ', '').replace(/\(\w:\\.+/gm, '').replace(/\w:\\.+\\/gm).trim();
+				stack[i] = stack[i].trim().replace('at ', '').replace('async ', '').replace(/\(\w:\\.+/gm, '').replace(/\w:\\.+\\/gm, '').trim();
 				stack[i] = '`' + stack[i] + '`';
 			}
 
