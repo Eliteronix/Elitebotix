@@ -8662,13 +8662,15 @@ module.exports = {
 			stack.shift();
 
 			for (let i = 0; i < stack.length; i++) {
-				if (stack[i].includes('awaitWebRequestPermission')) {
+				if (stack[i].includes('awaitWebRequestPermission')
+					|| stack[i].includes('processTimers')
+					|| stack[i].includes('runNextTicks')) {
 					stack.splice(i, 1);
 					i--;
 					continue;
 				}
 
-				stack[i] = stack[i].trim().replace('at ', '').replace('async ', '').replace(/\(\w:\\.+/gm, '').trim();
+				stack[i] = stack[i].trim().replace('at ', '').replace('async ', '').replace(/\(\w:\\.+/gm, '').replace(/\w:\\.+\\/gm).trim();
 				stack[i] = '`' + stack[i] + '`';
 			}
 
