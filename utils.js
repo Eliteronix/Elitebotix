@@ -8657,6 +8657,21 @@ module.exports = {
 		let endTime = new Date();
 
 		try {
+			let err = new Error();
+			let stack = err.stack.split('\n');
+			stack.shift();
+
+			for (let i = 0; i < stack.length; i++) {
+				if (stack[i].includes('awaitWebRequestPermission')) {
+					stack.splice(i, 1);
+					i--;
+					continue;
+				}
+
+				stack[i] = stack[i].trim().replace('at ', '').replace('async ', '').replace(/\(\w:\\.+/gm, '').trim();
+				stack[i] = '`' + stack[i] + '`';
+			}
+
 			client.shard.broadcastEval(async (c, { message }) => {
 				let channel;
 				// eslint-disable-next-line no-undef
@@ -8670,7 +8685,7 @@ module.exports = {
 				if (channel) {
 					await channel.send(message);
 				}
-			}, { context: { message: `Requested <${request}> with string \`${randomString}\` after \`${endTime - startTime}ms\`` } });
+			}, { context: { message: `After \`${endTime - startTime}ms\` - ${stack.reverse().join(' -> ')}: Requested <${request}> with string \`${randomString}\`` } });
 		} catch (err) {
 			console.error(err);
 		}
