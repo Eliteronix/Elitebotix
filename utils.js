@@ -8689,7 +8689,7 @@ module.exports = {
 				if (channel) {
 					await channel.send(message);
 				}
-			}, { context: { message: `After \`${endTime - startTime}ms\` - ${stack.reverse().join(' -> ')}: Requested <${request}> with string \`${randomString}\`` } });
+			}, { context: { message: `After \`${endTime - startTime}ms\` - Requested <${request}> with string \`${randomString}\`\n${stack.reverse().join(' -> ')}` } });
 		} catch (err) {
 			console.error(err);
 		}
