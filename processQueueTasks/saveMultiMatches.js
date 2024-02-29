@@ -1534,13 +1534,21 @@ async function addMissingRefereeInfo(osuApi, client) {
 		],
 	});
 
-	let logRefereeInfoMissing = true;
-
 	if (!refereeInfoMissing) {
-		if (logRefereeInfoMissing) {
-			// eslint-disable-next-line no-console
-			console.log('No match to get referee info for');
-		}
+		client.shard.broadcastEval(async (c, { message }) => {
+			let channel;
+			// eslint-disable-next-line no-undef
+			if (process.env.SERVER === 'Live') {
+				channel = await c.channels.cache.get('1212871483152400385');
+				// eslint-disable-next-line no-undef
+			} else {
+				channel = await c.channels.cache.get('1212871419998904420');
+			}
+
+			if (channel) {
+				await channel.send(message);
+			}
+		}, { context: { message: 'No match to get referee info for' } });
 
 		//Increase seconds to wait
 		return true;
@@ -1614,10 +1622,20 @@ async function addMissingRefereeInfo(osuApi, client) {
 										},
 									});
 
-									if (logRefereeInfoMissing) {
-										// eslint-disable-next-line no-console
-										console.log(`Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}`);
-									}
+									client.shard.broadcastEval(async (c, { message }) => {
+										let channel;
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Live') {
+											channel = await c.channels.cache.get('1212871483152400385');
+											// eslint-disable-next-line no-undef
+										} else {
+											channel = await c.channels.cache.get('1212871419998904420');
+										}
+
+										if (channel) {
+											await channel.send(message);
+										}
+									}, { context: { message: `Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}` } });
 								} else {
 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee is null');
 									await DBOsuMultiMatches.update({
@@ -1628,10 +1646,20 @@ async function addMissingRefereeInfo(osuApi, client) {
 										},
 									});
 
-									if (logRefereeInfoMissing) {
-										// eslint-disable-next-line no-console
-										console.log(`Referee is null ${refereeInfoMissing.matchId}`);
-									}
+									client.shard.broadcastEval(async (c, { message }) => {
+										let channel;
+										// eslint-disable-next-line no-undef
+										if (process.env.SERVER === 'Live') {
+											channel = await c.channels.cache.get('1212871483152400385');
+											// eslint-disable-next-line no-undef
+										} else {
+											channel = await c.channels.cache.get('1212871419998904420');
+										}
+
+										if (channel) {
+											await channel.send(message);
+										}
+									}, { context: { message: `Referee is null ${refereeInfoMissing.matchId}` } });
 								}
 							} else {
 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update unavailable match start referee 2');
@@ -1643,10 +1671,20 @@ async function addMissingRefereeInfo(osuApi, client) {
 									},
 								});
 
-								if (logRefereeInfoMissing) {
-									// eslint-disable-next-line no-console
-									console.log(`Match start ${refereeInfoMissing.matchId} unavailable`);
-								}
+								client.shard.broadcastEval(async (c, { message }) => {
+									let channel;
+									// eslint-disable-next-line no-undef
+									if (process.env.SERVER === 'Live') {
+										channel = await c.channels.cache.get('1212871483152400385');
+										// eslint-disable-next-line no-undef
+									} else {
+										channel = await c.channels.cache.get('1212871419998904420');
+									}
+
+									if (channel) {
+										await channel.send(message);
+									}
+								}, { context: { message: `Match start ${refereeInfoMissing.matchId} unavailable` } });
 							}
 						}
 					});
@@ -1671,10 +1709,20 @@ async function addMissingRefereeInfo(osuApi, client) {
 					},
 				});
 
-				if (logRefereeInfoMissing) {
-					// eslint-disable-next-line no-console
-					console.log(`Match ${refereeInfoMissing.matchId} unavailable`);
-				}
+				client.shard.broadcastEval(async (c, { message }) => {
+					let channel;
+					// eslint-disable-next-line no-undef
+					if (process.env.SERVER === 'Live') {
+						channel = await c.channels.cache.get('1212871483152400385');
+						// eslint-disable-next-line no-undef
+					} else {
+						channel = await c.channels.cache.get('1212871419998904420');
+					}
+
+					if (channel) {
+						await channel.send(message);
+					}
+				}, { context: { message: `Match ${refereeInfoMissing.matchId} unavailable` } });
 
 				return false;
 			} else {
