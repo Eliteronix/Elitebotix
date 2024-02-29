@@ -1635,7 +1635,7 @@ async function addMissingRefereeInfo(osuApi, client) {
 										if (channel) {
 											await channel.send(message);
 										}
-									}, { context: { message: `Match ${refereeInfoMissing.matchId} reffed by ${json.events[0].user_id}` } });
+									}, { context: { message: `Match ${refereeInfoMissing.matchId} reffed by https://osu.ppy.sh/users/${json.events[0].user_id}` } });
 								} else {
 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee is null');
 									await DBOsuMultiMatches.update({
