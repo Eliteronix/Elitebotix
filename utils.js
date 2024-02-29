@@ -8664,7 +8664,9 @@ module.exports = {
 			for (let i = 0; i < stack.length; i++) {
 				if (stack[i].includes('awaitWebRequestPermission')
 					|| stack[i].includes('processTimers')
-					|| stack[i].includes('runNextTicks')) {
+					|| stack[i].includes('runNextTicks')
+					|| stack[i].includes('ShardClientUtil')
+					|| stack[i].includes('_eval')) {
 					stack.splice(i, 1);
 					i--;
 					continue;
