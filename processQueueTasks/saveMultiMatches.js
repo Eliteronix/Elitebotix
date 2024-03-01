@@ -1635,7 +1635,7 @@ async function addMissingRefereeInfo(osuApi, client) {
 										if (channel) {
 											await channel.send(message);
 										}
-									}, { context: { message: `Match ${refereeInfoMissing.matchId} reffed by https://osu.ppy.sh/users/${json.events[0].user_id}` } });
+									}, { context: { message: `Match https://osu.ppy.sh/community/matches/${refereeInfoMissing.matchId} reffed by https://osu.ppy.sh/users/${json.events[0].user_id}` } });
 								} else {
 									logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update referee is null');
 									await DBOsuMultiMatches.update({
@@ -1659,7 +1659,7 @@ async function addMissingRefereeInfo(osuApi, client) {
 										if (channel) {
 											await channel.send(message);
 										}
-									}, { context: { message: `Referee is null ${refereeInfoMissing.matchId}` } });
+									}, { context: { message: `Referee is null https://osu.ppy.sh/community/matches/${refereeInfoMissing.matchId}` } });
 								}
 							} else {
 								logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update unavailable match start referee 2');
@@ -1684,7 +1684,7 @@ async function addMissingRefereeInfo(osuApi, client) {
 									if (channel) {
 										await channel.send(message);
 									}
-								}, { context: { message: `Match start ${refereeInfoMissing.matchId} unavailable` } });
+								}, { context: { message: `Match start https://osu.ppy.sh/community/matches/${refereeInfoMissing.matchId} unavailable` } });
 							}
 						}
 					});
@@ -1722,7 +1722,7 @@ async function addMissingRefereeInfo(osuApi, client) {
 					if (channel) {
 						await channel.send(message);
 					}
-				}, { context: { message: `Match ${refereeInfoMissing.matchId} unavailable` } });
+				}, { context: { message: `Match https://osu.ppy.sh/community/matches/${refereeInfoMissing.matchId} unavailable` } });
 
 				return false;
 			} else {
