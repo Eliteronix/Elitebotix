@@ -8666,7 +8666,8 @@ module.exports = {
 					|| stack[i].includes('processTimers')
 					|| stack[i].includes('runNextTicks')
 					|| stack[i].includes('ShardClientUtil')
-					|| stack[i].includes('_eval')) {
+					|| stack[i].includes('_eval')
+					|| stack[i].includes('listOnTimeout')) {
 					stack.splice(i, 1);
 					i--;
 					continue;
