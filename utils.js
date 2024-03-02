@@ -3376,6 +3376,15 @@ module.exports = {
 							}
 						]
 					},
+					{
+						[Op.not]: [
+							{
+								matchName: {
+									[Op.like]: 'NDC2:%' //Requires getting a specific score
+								}
+							}
+						]
+					},
 				]
 			}
 		});
