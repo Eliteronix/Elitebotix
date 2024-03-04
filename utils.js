@@ -8656,7 +8656,7 @@ module.exports = {
 			//Every 60 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
 			if (iterator % 600 === 0) {
 				// eslint-disable-next-line no-undef
-				process.send(`osu! website ${randomString}`);
+				process.send(`osu! website ${randomString} ${request}`);
 			}
 
 			await new Promise(resolve => setTimeout(resolve, 100));
