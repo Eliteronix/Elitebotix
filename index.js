@@ -285,7 +285,9 @@ manager.spawn()
 						amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
 					}, 86400000);
 				} else if (typeof message === 'string' && message.startsWith('osu! website')) {
-					osuWebRequestQueue.push(message.replace('osu! website ', ''));
+					let request = message.replace('osu! website ', '');
+
+					osuWebRequestQueue.push({ string: request.split(' ')[0], link: request.split(' ')[1] });
 				} else if (typeof message === 'string' && message.startsWith('saveMultiMatches')) {
 					const timeBehind = message.split(' ')[1];
 					timeBehindMatchCreation.set(parseInt(timeBehind));
@@ -445,7 +447,7 @@ setInterval(() => {
 processOsuWebRequests(client);
 
 async function processOsuWebRequests(client) {
-	osuWebRequestsQueueLength.set([...new Set(osuWebRequestQueue)].length);
+	osuWebRequestsQueueLength.set([...new Set(osuWebRequestQueue.map(item => item.string))].length);
 
 	if (osuWebRequestQueue.length) {
 		amountOfOsuWebRequestsInTheLast24Hours.inc();
@@ -459,10 +461,10 @@ async function processOsuWebRequests(client) {
 		}, 86400000);
 
 		manager.shards.forEach(shard => {
-			shard.send({ type: 'osuWebRequest', data: osuWebRequestQueue[0] });
+			shard.send({ type: 'osuWebRequest', data: osuWebRequestQueue[0].string });
 		});
 
-		osuWebRequestQueue = osuWebRequestQueue.filter(item => item !== osuWebRequestQueue[0]);
+		osuWebRequestQueue = osuWebRequestQueue.filter(item => item.string !== osuWebRequestQueue[0].string);
 
 		await new Promise(resolve => setTimeout(resolve, 5450));
 	}
