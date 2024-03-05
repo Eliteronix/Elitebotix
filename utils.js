@@ -3016,9 +3016,6 @@ module.exports = {
 			}
 		});
 
-		console.log('birthdayAnnouncements', birthdayAnnouncements);
-
-
 		// iterate through all users and check if the current date is the same as the birthday date 
 		for (let i = 0; i < birthdayAnnouncements.length; i++) {
 			//Check if the birthday announcement is enabled on the guild
@@ -3081,8 +3078,6 @@ module.exports = {
 
 				channelFound = channelFound.some(channel => channel);
 
-				console.log('channelFound', channelFound);
-
 				if (channelFound) {
 					let date = new Date(birthdayAnnouncements[i].birthdayTime);
 					date.setUTCFullYear(date.getUTCFullYear() + 1);
@@ -3090,8 +3085,6 @@ module.exports = {
 					date.setUTCMinutes(0);
 					date.setUTCSeconds(0);
 					birthdayAnnouncements[i].birthdayTime = date;
-
-					console.log('birthdayAnnouncements[i]', birthdayAnnouncements[i]);
 
 					await birthdayAnnouncements[i].save();
 					continue;
