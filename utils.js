@@ -3080,6 +3080,9 @@ module.exports = {
 				}, { context: { guildId: birthdayAnnouncements[i].guildId, channelId: dbGuild.birthdayMessageChannel, userId: birthdayAnnouncements[i].userId } });
 
 				channelFound = channelFound.some(channel => channel);
+
+				console.log('channelFound', channelFound);
+
 				if (channelFound) {
 					let date = new Date(birthdayAnnouncements[i].birthdayTime);
 					date.setUTCFullYear(date.getUTCFullYear() + 1);
@@ -3087,6 +3090,9 @@ module.exports = {
 					date.setUTCMinutes(0);
 					date.setUTCSeconds(0);
 					birthdayAnnouncements[i].birthdayTime = date;
+
+					console.log('birthdayAnnouncements[i]', birthdayAnnouncements[i]);
+
 					await birthdayAnnouncements[i].save();
 					continue;
 				}
