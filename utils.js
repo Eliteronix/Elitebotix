@@ -3016,6 +3016,8 @@ module.exports = {
 			}
 		});
 
+		console.log('birthdayAnnouncements', birthdayAnnouncements);
+
 
 		// iterate through all users and check if the current date is the same as the birthday date 
 		for (let i = 0; i < birthdayAnnouncements.length; i++) {
