@@ -4339,10 +4339,10 @@ module.exports = {
 				});
 
 				if (lastMultiMatch.matchEndDate) {
-					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiMatch.matchId}`);
+					return twitchClient.say(target.substring(1), `Last match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
 				}
 
-				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiMatch.matchId}`);
+				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
 			}
 
 			if (msg === '!whatishappiness') {
