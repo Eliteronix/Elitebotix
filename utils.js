@@ -4657,19 +4657,24 @@ module.exports = {
 					return null;
 				}
 
-				await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`, client);
-				const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+				let permission = await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`, client);
 
-				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
-					res.body.pipe(fileStream);
-					res.body.on('error', (err) => {
-						reject(err);
+				console.log(`permission for https://osu.ppy.sh/osu/${beatmapId}`, permission);
+
+				if (permission) {
+					const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
+
+					await new Promise((resolve, reject) => {
+						const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
+						res.body.pipe(fileStream);
+						res.body.on('error', (err) => {
+							reject(err);
+						});
+						fileStream.on('finish', function () {
+							resolve();
+						});
 					});
-					fileStream.on('finish', function () {
-						resolve();
-					});
-				});
+				}
 			}
 		} catch (err) {
 			if (!err.message.match(/request to https:\/\/osu.ppy.sh\/osu\/\d+ failed, reason: Parse Error: Invalid header value char/gm)) {
@@ -8358,31 +8363,36 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, client);
-				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
+				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, client);
 
-				if (res.status === 404) {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
-						fs.createReadStream('./other/defaultListCover.png').pipe(fileStream);
-						fileStream.on('finish', function () {
-							resolve();
+				console.log(`permission for https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, permission);
+
+				if (permission) {
+					const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
+
+					if (res.status === 404) {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
+							fs.createReadStream('./other/defaultListCover.png').pipe(fileStream);
+							fileStream.on('finish', function () {
+								resolve();
+							});
+							fileStream.on('error', (err) => {
+								reject(err);
+							});
 						});
-						fileStream.on('error', (err) => {
-							reject(err);
+					} else {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
+							res.body.pipe(fileStream);
+							res.body.on('error', (err) => {
+								reject(err);
+							});
+							fileStream.on('finish', function () {
+								resolve();
+							});
 						});
-					});
-				} else {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./listcovers/${beatmapsetId}.jpg`);
-						res.body.pipe(fileStream);
-						res.body.on('error', (err) => {
-							reject(err);
-						});
-						fileStream.on('finish', function () {
-							resolve();
-						});
-					});
+					}
 				}
 			}
 		} catch (err) {
@@ -8415,31 +8425,36 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, client);
-				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
+				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, client);
 
-				if (res.status === 404) {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
-						fs.createReadStream('./other/defaultMapCover.png').pipe(fileStream);
-						fileStream.on('finish', function () {
-							resolve();
+				console.log(`permission for https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, permission);
+
+				if (permission) {
+					const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
+
+					if (res.status === 404) {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
+							fs.createReadStream('./other/defaultMapCover.png').pipe(fileStream);
+							fileStream.on('finish', function () {
+								resolve();
+							});
+							fileStream.on('error', (err) => {
+								reject(err);
+							});
 						});
-						fileStream.on('error', (err) => {
-							reject(err);
+					} else {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
+							res.body.pipe(fileStream);
+							res.body.on('error', (err) => {
+								reject(err);
+							});
+							fileStream.on('finish', function () {
+								resolve();
+							});
 						});
-					});
-				} else {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./beatmapcovers/${beatmapsetId}.jpg`);
-						res.body.pipe(fileStream);
-						res.body.on('error', (err) => {
-							reject(err);
-						});
-						fileStream.on('finish', function () {
-							resolve();
-						});
-					});
+					}
 				}
 			}
 		} catch (err) {
@@ -8468,31 +8483,36 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, client);
-				const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
+				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, client);
 
-				if (res.status === 404) {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./slimcovers/${beatmapsetId}.jpg`);
-						fs.createReadStream('./other/defaultMapCover.png').pipe(fileStream);
-						fileStream.on('finish', function () {
-							resolve();
+				console.log(`permission for https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, permission);
+
+				if (permission) {
+					const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
+
+					if (res.status === 404) {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./slimcovers/${beatmapsetId}.jpg`);
+							fs.createReadStream('./other/defaultMapCover.png').pipe(fileStream);
+							fileStream.on('finish', function () {
+								resolve();
+							});
+							fileStream.on('error', (err) => {
+								reject(err);
+							});
 						});
-						fileStream.on('error', (err) => {
-							reject(err);
+					} else {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./slimcovers/${beatmapsetId}.jpg`);
+							res.body.pipe(fileStream);
+							res.body.on('error', (err) => {
+								reject(err);
+							});
+							fileStream.on('finish', function () {
+								resolve();
+							});
 						});
-					});
-				} else {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./slimcovers/${beatmapsetId}.jpg`);
-						res.body.pipe(fileStream);
-						res.body.on('error', (err) => {
-							reject(err);
-						});
-						fileStream.on('finish', function () {
-							resolve();
-						});
-					});
+					}
 				}
 			}
 		} catch (err) {
@@ -8515,31 +8535,36 @@ module.exports = {
 		try {
 			// Doesn't exist or older than 48 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
-				await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`, client);
-				const res = await fetch(`https://s.ppy.sh/a/${osuUserId}`);
+				let permission = await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`, client);
 
-				if (res.status === 404) {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./avatars/${osuUserId}.jpg`);
-						fs.createReadStream('./other/defaultAvatar.png').pipe(fileStream);
-						fileStream.on('finish', function () {
-							resolve();
+				console.log(`permission for https://s.ppy.sh/a/${osuUserId}`, permission);
+
+				if (permission) {
+					const res = await fetch(`https://s.ppy.sh/a/${osuUserId}`);
+
+					if (res.status === 404) {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./avatars/${osuUserId}.jpg`);
+							fs.createReadStream('./other/defaultAvatar.png').pipe(fileStream);
+							fileStream.on('finish', function () {
+								resolve();
+							});
+							fileStream.on('error', (err) => {
+								reject(err);
+							});
 						});
-						fileStream.on('error', (err) => {
-							reject(err);
+					} else {
+						await new Promise((resolve, reject) => {
+							const fileStream = fs.createWriteStream(`./avatars/${osuUserId}.png`);
+							res.body.pipe(fileStream);
+							res.body.on('error', (err) => {
+								reject(err);
+							});
+							fileStream.on('finish', function () {
+								resolve();
+							});
 						});
-					});
-				} else {
-					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./avatars/${osuUserId}.png`);
-						res.body.pipe(fileStream);
-						res.body.on('error', (err) => {
-							reject(err);
-						});
-						fileStream.on('finish', function () {
-							resolve();
-						});
-					});
+					}
 				}
 			}
 		} catch (err) {
@@ -8570,19 +8595,24 @@ module.exports = {
 
 		try {
 			if (!fs.existsSync(path)) {
-				await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/profile-badges/${badgeName}`, client);
-				const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
+				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/profile-badges/${badgeName}`, client);
 
-				await new Promise((resolve, reject) => {
-					const fileStream = fs.createWriteStream(`./badges/${badgeName.replaceAll('/', '_').replaceAll('?', '__')}`);
-					res.body.pipe(fileStream);
-					res.body.on('error', (err) => {
-						reject(err);
+				console.log(`permission for https://assets.ppy.sh/profile-badges/${badgeName}`, permission);
+
+				if (permission) {
+					const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
+
+					await new Promise((resolve, reject) => {
+						const fileStream = fs.createWriteStream(`./badges/${badgeName.replaceAll('/', '_').replaceAll('?', '__')}`);
+						res.body.pipe(fileStream);
+						res.body.on('error', (err) => {
+							reject(err);
+						});
+						fileStream.on('finish', function () {
+							resolve();
+						});
 					});
-					fileStream.on('finish', function () {
-						resolve();
-					});
-				});
+				}
 			}
 		} catch (err) {
 			console.error(err);
@@ -8648,19 +8678,39 @@ module.exports = {
 		let randomString = Math.random().toString(36).substring(2);
 
 		// eslint-disable-next-line no-undef
-		process.webRequestsWaiting.push(randomString);
+		process.webRequestsWaiting.push({ string: randomString, link: request });
 
 		let startTime = new Date();
 		let iterator = 0;
+
+		let webRequest = true;
+
 		// eslint-disable-next-line no-undef
-		while (process.webRequestsWaiting.includes(randomString)) {
-			//Every 60 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
-			if (iterator % 600 === 0) {
-				// eslint-disable-next-line no-undef
-				process.send(`osu! website ${randomString} ${request}`);
+		while (webRequest) {
+			await new Promise(resolve => setTimeout(resolve, 100));
+
+			// eslint-disable-next-line no-undef
+			webRequest = process.webRequestsWaiting.find(item => item.string === randomString);
+
+			if (webRequest) {
+				if (webRequest.coveredByOtherRequest) {
+					// eslint-disable-next-line no-undef
+					process.webRequestsWaiting = process.webRequestsWaiting.filter(item => item.string !== randomString);
+
+					await new Promise(resolve => setTimeout(resolve, 5000));
+
+					console.log('Covered by other request', request);
+
+					return false;
+				}
+
+				//Every 60 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
+				if (iterator % 600 === 0) {
+					// eslint-disable-next-line no-undef
+					process.send(`osu! website ${randomString} ${request}`);
+				}
 			}
 
-			await new Promise(resolve => setTimeout(resolve, 100));
 			iterator++;
 		}
 
@@ -8705,7 +8755,7 @@ module.exports = {
 			console.error(err);
 		}
 
-		return;
+		return true;
 	},
 	adjustStarRating(starRating, approachRate, circleSize, mods) {
 		// Adapt star rating from 0.0 to 1.5 depending on the CS

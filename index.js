@@ -460,11 +460,24 @@ async function processOsuWebRequests(client) {
 			amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
 		}, 86400000);
 
+		let osuWebRequest = osuWebRequestQueue[0];
+
 		manager.shards.forEach(shard => {
-			shard.send({ type: 'osuWebRequest', data: osuWebRequestQueue[0].string });
+			shard.send({ type: 'osuWebRequest', data: osuWebRequest.string });
 		});
 
-		osuWebRequestQueue = osuWebRequestQueue.filter(item => item.string !== osuWebRequestQueue[0].string);
+		manager.shards.forEach(shard => {
+			shard.send({ type: 'osuWebRequest', data: osuWebRequest.link });
+		});
+
+		osuWebRequestQueue = osuWebRequestQueue.filter(item => item.string !== osuWebRequest.string);
+
+		if (osuWebRequest.link.endsWith('.jpg') ||
+			osuWebRequest.link.startsWith('https://osu.ppy.sh/osu/') ||
+			osuWebRequest.link.startsWith('https://s.ppy.sh/a/') ||
+			osuWebRequest.link.startsWith('https://assets.ppy.sh/profile-badges/')) {
+			osuWebRequestQueue = osuWebRequestQueue.filter(item => item.link !== osuWebRequest.link);
+		}
 
 		await new Promise(resolve => setTimeout(resolve, 5450));
 	}

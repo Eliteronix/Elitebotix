@@ -169,11 +169,24 @@ process.on('message', message => {
 		client.totalShards = message.data.totalShards;
 	} else if (message.type == 'osuWebRequest') {
 		// eslint-disable-next-line no-undef
-		if (process.webRequestsWaiting.includes(message.data)) {
+		if (process.webRequestsWaiting.find(item => item.string === message.data)) {
 			// Remove all instances of the message
 
 			// eslint-disable-next-line no-undef
-			process.webRequestsWaiting = process.webRequestsWaiting.filter(item => item !== message.data);
+			process.webRequestsWaiting = process.webRequestsWaiting.filter(item => item.string !== message.data);
+		} else if (message.data.endsWith('.jpg') ||
+			message.data.startsWith('https://osu.ppy.sh/osu/') ||
+			message.data.startsWith('https://s.ppy.sh/a/') ||
+			message.data.startsWith('https://assets.ppy.sh/profile-badges/')) {
+
+			// eslint-disable-next-line no-undef
+			for (let i = 0; i < process.webRequestsWaiting.length; i++) {
+				// eslint-disable-next-line no-undef
+				if (process.webRequestsWaiting[i].link === message.data) {
+					// eslint-disable-next-line no-undef
+					process.webRequestsWaiting[i].coveredByOtherRequest = true;
+				}
+			}
 		}
 	}
 });
