@@ -4659,8 +4659,6 @@ module.exports = {
 
 				let permission = await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`, client);
 
-				console.log(`permission for https://osu.ppy.sh/osu/${beatmapId}`, permission);
-
 				if (permission) {
 					const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 
@@ -8365,8 +8363,6 @@ module.exports = {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, client);
 
-				console.log(`permission for https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, permission);
-
 				if (permission) {
 					const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`);
 
@@ -8427,8 +8423,6 @@ module.exports = {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, client);
 
-				console.log(`permission for https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, permission);
-
 				if (permission) {
 					const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`);
 
@@ -8485,8 +8479,6 @@ module.exports = {
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, client);
 
-				console.log(`permission for https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, permission);
-
 				if (permission) {
 					const res = await fetch(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`);
 
@@ -8536,8 +8528,6 @@ module.exports = {
 			// Doesn't exist or older than 48 hours
 			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 2)) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://s.ppy.sh/a/${osuUserId}`, client);
-
-				console.log(`permission for https://s.ppy.sh/a/${osuUserId}`, permission);
 
 				if (permission) {
 					const res = await fetch(`https://s.ppy.sh/a/${osuUserId}`);
@@ -8596,8 +8586,6 @@ module.exports = {
 		try {
 			if (!fs.existsSync(path)) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/profile-badges/${badgeName}`, client);
-
-				console.log(`permission for https://assets.ppy.sh/profile-badges/${badgeName}`, permission);
 
 				if (permission) {
 					const res = await fetch(`https://assets.ppy.sh/profile-badges/${badgeName}`);
