@@ -8687,8 +8687,6 @@ module.exports = {
 
 					await new Promise(resolve => setTimeout(resolve, 5000));
 
-					console.log('Covered by other request', request);
-
 					return false;
 				}
 
