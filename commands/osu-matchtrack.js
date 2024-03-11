@@ -231,6 +231,8 @@ module.exports = {
 					client = interaction.client;
 				}
 
+				let json = null;
+
 				while (!stop) {
 					try {
 						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, msg.client);
@@ -253,7 +255,28 @@ module.exports = {
 								}
 
 								if (regexMatch) {
-									let json = JSON.parse(regexMatch);
+									if (json) {
+										// Theoretically something could be missing in between this batch of 100 events and the last batch
+										// The chance for that happening is so low though that its not worth checking as it
+										// would require a major delay between the two requests
+										let oldJson = json;
+
+										json = JSON.parse(regexMatch);
+
+										let firstIdNewJson = json.events[0].id;
+
+										// Add all old events that are not in the new array to the new array
+										for (let i = 0; i < oldJson.events.length; i++) {
+											if (oldJson.events[i].id < firstIdNewJson) {
+												json.events.push(oldJson.events[i]);
+											}
+										}
+
+										// Sort the array by id
+										json.events.sort((a, b) => a.id - b.id);
+									} else {
+										json = JSON.parse(regexMatch);
+									}
 
 									if (!latestEventId) {
 										latestEventId = json.latest_event_id - 1;
