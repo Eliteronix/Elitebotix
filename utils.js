@@ -8668,6 +8668,9 @@ module.exports = {
 		// eslint-disable-next-line no-undef
 		process.webRequestsWaiting.push({ string: randomString, link: request });
 
+		// eslint-disable-next-line no-undef
+		process.send(`osu! website ${randomString} ${request}`);
+
 		let startTime = new Date();
 		let iterator = 0;
 
