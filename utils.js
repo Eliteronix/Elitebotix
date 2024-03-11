@@ -4251,7 +4251,7 @@ module.exports = {
 		async function onMessageHandler(target, context, msg, self) {
 			if (self) { return; } // Ignore messages from the bot
 
-			if (msg.startsWith('!verify') && context.username === target.substring(1)) {
+			if (msg.toLowerCase().startsWith('!verify') && context.username === target.substring(1)) {
 				let content = msg.substring(7).trim();
 
 				if (!content) {
@@ -4297,7 +4297,7 @@ module.exports = {
 				return;
 			}
 
-			if (msg === '!mp') {
+			if (msg.toLowerCase() === '!mp') {
 				module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers twitchConnect 2');
 				let discordUser = await DBDiscordUsers.findOne({
 					attributes: ['osuUserId', 'osuName'],
@@ -4345,13 +4345,13 @@ module.exports = {
 				return twitchClient.say(target.substring(1), `Current match with ${discordUser.osuName}: ${lastMultiMatch.matchName} | https://osu.ppy.sh/mp/${lastMultiScore.matchId}`);
 			}
 
-			if (msg === '!whatishappiness') {
+			if (msg.toLowerCase() === '!whatishappiness') {
 				return twitchClient.say(target.substring(1), 'Happiness is when Elitebotix rating up widepeepoHappy');
 			}
 
 			if (msg.startsWith('!')) { return; } // Ignore other messages starting with !
 
-			if (msg.includes('https://osu.ppy.sh/community/matches/') || msg.includes('https://osu.ppy.sh/mp/')) {
+			if (msg.toLowerCase().includes('https://osu.ppy.sh/community/matches/') || msg.toLowerCase().includes('https://osu.ppy.sh/mp/')) {
 				// Get the match ID
 				let matchIDRegex = /https:\/\/osu\.ppy\.sh\/community\/matches\/(\d+)/gm;
 				let matchID = matchIDRegex.exec(msg);
