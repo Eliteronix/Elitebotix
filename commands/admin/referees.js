@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../
 const { logDatabaseQueries, logOsuAPICalls, getOsuPlayerName, humanReadable } = require('../../utils');
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
+const osu = require('node-osu');
 
 module.exports = {
 	name: 'referees',
