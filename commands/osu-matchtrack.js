@@ -234,6 +234,8 @@ module.exports = {
 				let json = null;
 
 				while (!stop) {
+					let pauseTime = 30000;
+
 					try {
 						await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, msg.client);
 						await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
@@ -450,20 +452,21 @@ module.exports = {
 
 													await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
 												} else if (json.events[i].detail.type === 'other') {
+													let startDate = new Date(json.events[i].game.start_time);
+
+													let modBits = getModBits(json.events[i].game.mods.join(''));
+
+													let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
+
+													if (beatmap) {
+														startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 20);
+													}
+
 													if (lastMessageType !== 'playing') {
-														let modBits = getModBits(json.events[i].game.mods.join(''));
 														let attachment = await getPlayingImage(json.events[i], client);
 														let currentScore = '';
 														if (redScore + blueScore > 0) {
 															currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
-														}
-
-														let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
-
-														let startDate = new Date(json.events[i].game.start_time);
-
-														if (beatmap) {
-															startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 30);
 														}
 
 														let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
@@ -483,6 +486,8 @@ module.exports = {
 
 														await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
 													}
+
+													pauseTime = startDate - new Date();
 												} else if (json.events[i].detail.type !== 'other') {
 													let embed = new Discord.EmbedBuilder()
 														.setColor(0x0099FF)
@@ -535,7 +540,14 @@ module.exports = {
 						}
 						await pause(165000);
 					}
-					await pause(30000);
+
+
+					//Pause time is max 3 minutes, min 15 seconds
+					pauseTime = Math.max(pauseTime, 15000);
+
+					pauseTime = Math.min(pauseTime, 180000);
+
+					await pause(pauseTime);
 				}
 			})
 			.catch(err => {
