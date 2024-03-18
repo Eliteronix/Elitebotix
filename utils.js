@@ -8678,7 +8678,11 @@ module.exports = {
 
 		// eslint-disable-next-line no-undef
 		while (webRequest) {
-			await new Promise(resolve => setTimeout(resolve, 100));
+			if (iterator) {
+				await new Promise(resolve => setTimeout(resolve, 100));
+			} else {
+				await new Promise(resolve => setTimeout(resolve, 55));
+			}
 
 			// eslint-disable-next-line no-undef
 			webRequest = process.webRequestsWaiting.find(item => item.string === randomString);
