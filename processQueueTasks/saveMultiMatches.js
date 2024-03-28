@@ -661,7 +661,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			} else {
 				const result = await verifyAnyMatch(osuApi, client, logVerificationProcess);
 
-				await addMissingRefereeInfo(osuApi, client);
+				//await addMissingRefereeInfo(osuApi, client);
 
 				if (result === true) {
 					secondsToWait = secondsToWait + 60;
@@ -719,7 +719,8 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 			console.log('No match to verify');
 		}
 
-		return await addMissingRefereeInfo(osuApi, client);
+		return;
+		//return await addMissingRefereeInfo(osuApi, client);
 	}
 
 	if (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm')) {
