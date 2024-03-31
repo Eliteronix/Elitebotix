@@ -1234,189 +1234,213 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-		await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/users/${osuUserId}/`, client);
-		return await fetch(`https://osu.ppy.sh/users/${osuUserId}/`)
-			.then(async (res) => {
-				let htmlCode = await res.text();
-				htmlCode = htmlCode.replace(/&quot;/gm, '"');
 
-				const additionalInfo = {
-					tournamentBan: false,
-					badges: [],
-					tournamentBadges: [],
-				};
+		if (!client.osuv2_access_token) {
+			const url = new URL(
+				'https://osu.ppy.sh/oauth/token'
+			);
 
-				// console.log(htmlCode);
-				const accountHistoryRegex = /,"account_history".+,"active_tournament_banner":/gm;
-				const tournamentBanMatches = accountHistoryRegex.exec(htmlCode);
-				if (tournamentBanMatches && tournamentBanMatches[0]) {
-					const cleanedMatch = tournamentBanMatches[0].replace(',"account_history":', '').replace(',"active_tournament_banner":', '');
-					const rawAccountHistoryNotices = JSON.parse(cleanedMatch);
-					const tournamentBans = rawAccountHistoryNotices.filter((notice) => notice.type === 'tournament_ban');
+			const headers = {
+				'Accept': 'application/json',
+				'Content-Type': 'application/x-www-form-urlencoded',
+			};
 
-					if (tournamentBans.length) {
-						tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
+			// eslint-disable-next-line no-undef
+			let body = `client_id=4184&client_secret=${process.env.OSUTOKENV2}&grant_type=client_credentials&scope=public`;
 
-						if (tournamentBans[0].permanent) {
-							tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
-							tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
-							tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
-							tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
-							tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
-							tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
-							tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
-						} else {
-							tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
-						}
+			await fetch(url, {
+				method: 'POST',
+				headers,
+				body: body,
+			}).then(async (response) => {
+				let json = await response.json();
 
-						tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
+				client.osuv2_access_token = json.access_token;
 
-						additionalInfo.tournamentBan = tournamentBans[0];
-					}
-				}
-
-				const badgesRegex = /,"badges".+,"comments_count":/gm;
-				const badgeMatches = badgesRegex.exec(htmlCode);
-				if (badgeMatches && badgeMatches[0]) {
-					const cleanedMatch = badgeMatches[0].replace(',"badges":', '').replace(',"comments_count":', '');
-
-					additionalInfo.badges = JSON.parse(cleanedMatch);
-
-					for (let i = 0; i < additionalInfo.badges.length; i++) {
-						additionalInfo.badges[i].description = additionalInfo.badges[i].description.replace('&#039;', '\'');
-
-						const badge = additionalInfo.badges[i];
-						if (!badge.description.startsWith('Beatmap Spotlights: ')
-							&& !badge.description.includes(' contribution to the ')
-							&& !badge.description.includes(' contributor')
-							&& !badge.description.includes('Contributions')
-							&& !badge.description.includes('commitment')
-							&& !badge.description.includes('Mapper\'s Favourite ')
-							&& !badge.description.includes('Community Favourite ')
-							&& !badge.description.includes('Community Choice ')
-							&& !badge.description.includes('Mapping')
-							&& !badge.description.includes('Aspire')
-							&& !badge.description.includes('Beatmapping')
-							&& !badge.description.includes('osu!idol')
-							&& badge.description !== 'The official voice behind osu!'
-							&& !badge.description.includes('Newspaper ')
-							&& !badge.description.includes('Pending Cup ')
-							&& !badge.description.includes('Mapper\'s Choice ')
-							&& !badge.description.includes('Exemplary performance')
-							&& !badge.description.toLowerCase().includes('contribution')
-							&& !badge.description.toLowerCase().includes('elite mapper')
-							&& !badge.description.toLowerCase().includes('outstanding commitment')
-							&& !badge.description.toLowerCase().includes('featured artist playlist')) {
-							additionalInfo.tournamentBadges.push(badge);
-						}
-					}
-				}
-
-				module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
-				//get discordUser from db to update pp and rank
-				await DBDiscordUsers.findOne({
-					attributes: ['id', 'osuBadges', 'osuName', 'osuUserId', 'tournamentBannedReason', 'tournamentBannedUntil'],
-					where: {
-						osuUserId: osuUserId
-					},
-				})
-					.then(async (discordUser) => {
-						if (discordUser) {
-							if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
-
-								if (logBroadcastEval) {
-									// eslint-disable-next-line no-console
-									console.log('Broadcasting utils.js tournamentbadges to shards...');
-								}
-
-								client.shard.broadcastEval(async (c, { message }) => {
-									let guildId = '727407178499096597';
-
-									// eslint-disable-next-line no-undef
-									if (process.env.SERVER === 'Dev') {
-										guildId = '800641468321759242';
-									}
-
-									const guild = await c.guilds.cache.get(guildId);
-
-									if (!guild || guild.shardId !== c.shardId) {
-										return;
-									}
-
-									let channelId = '1078318397688926260';
-
-									// eslint-disable-next-line no-undef
-									if (process.env.SERVER === 'Dev') {
-										channelId = '1078318144914985050';
-									}
-
-									const channel = await guild.channels.cache.get(channelId);
-
-									if (channel) {
-										let sentMessage = await channel.send(message);
-										sentMessage.crosspost();
-									}
-								}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} tournament badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
-
-								discordUser.osuBadges = additionalInfo.tournamentBadges.length;
-							}
-
-							if (additionalInfo.tournamentBan) {
-								if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
-									let bannedUntilString = 'indefinite';
-
-									if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
-										bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
-									}
-
-									if (logBroadcastEval) {
-										// eslint-disable-next-line no-console
-										console.log('Broadcasting utils.js tournamentban to shards...');
-									}
-
-									client.shard.broadcastEval(async (c, { message }) => {
-										let guildId = '727407178499096597';
-
-										// eslint-disable-next-line no-undef
-										if (process.env.SERVER === 'Dev') {
-											guildId = '800641468321759242';
-										}
-
-										const guild = await c.guilds.cache.get(guildId);
-
-										if (!guild || guild.shardId !== c.shardId) {
-											return;
-										}
-
-										let channelId = '1078318437408968804';
-
-										// eslint-disable-next-line no-undef
-										if (process.env.SERVER === 'Dev') {
-											channelId = '1078318180302323842';
-										}
-
-										const channel = await guild.channels.cache.get(channelId);
-
-										if (channel) {
-											let sentMessage = await channel.send(message);
-											sentMessage.crosspost();
-										}
-									}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
-								}
-
-								discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
-								discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
-							}
-
-							await discordUser.save();
-						}
-					})
-					.catch(err => {
-						console.error(err);
-					});
-
-				return additionalInfo;
+				setTimeout(() => {
+					client.osuv2_access_token = null;
+				}, json.expires_in * 1000);
 			});
+		}
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu`
+		);
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`
+		};
+
+		const additionalInfo = {
+			tournamentBan: false,
+			badges: [],
+			tournamentBadges: [],
+		};
+
+		await fetch(url, {
+			method: 'GET',
+			headers,
+		}).then(async (response) => {
+			let json = await response.json();
+
+			let tournamentBans = json.account_history.filter((entry) => entry.type === 'tournament_ban');
+
+			if (tournamentBans.length) {
+				tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
+
+				if (tournamentBans[0].permanent) {
+					tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
+					tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
+					tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
+					tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
+					tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
+					tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
+					tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
+				} else {
+					tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
+				}
+
+				tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
+
+				additionalInfo.tournamentBan = tournamentBans[0];
+			}
+
+			additionalInfo.badges = json.badges;
+
+			for (let i = 0; i < json.badges.length; i++) {
+				const badge = json.badges[i];
+				if (!badge.description.startsWith('Beatmap Spotlights: ')
+					&& !badge.description.includes(' contribution to the ')
+					&& !badge.description.includes(' contributor')
+					&& !badge.description.includes('Contributions')
+					&& !badge.description.includes('commitment')
+					&& !badge.description.includes('Mapper\'s Favourite ')
+					&& !badge.description.includes('Community Favourite ')
+					&& !badge.description.includes('Community Choice ')
+					&& !badge.description.includes('Mapping')
+					&& !badge.description.includes('Aspire')
+					&& !badge.description.includes('Beatmapping')
+					&& !badge.description.includes('osu!idol')
+					&& badge.description !== 'The official voice behind osu!'
+					&& !badge.description.includes('Newspaper ')
+					&& !badge.description.includes('Pending Cup ')
+					&& !badge.description.includes('Mapper\'s Choice ')
+					&& !badge.description.includes('Exemplary performance')
+					&& !badge.description.toLowerCase().includes('contribution')
+					&& !badge.description.toLowerCase().includes('elite mapper')
+					&& !badge.description.toLowerCase().includes('outstanding commitment')
+					&& !badge.description.toLowerCase().includes('featured artist playlist')) {
+					additionalInfo.tournamentBadges.push(badge);
+				}
+			}
+		});
+
+		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
+		//get discordUser from db to update pp and rank
+		await DBDiscordUsers.findOne({
+			attributes: ['id', 'osuBadges', 'osuName', 'osuUserId', 'tournamentBannedReason', 'tournamentBannedUntil'],
+			where: {
+				osuUserId: osuUserId
+			},
+		})
+			.then(async (discordUser) => {
+				if (discordUser) {
+					if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
+
+						if (logBroadcastEval) {
+							// eslint-disable-next-line no-console
+							console.log('Broadcasting utils.js tournamentbadges to shards...');
+						}
+
+						client.shard.broadcastEval(async (c, { message }) => {
+							let guildId = '727407178499096597';
+
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Dev') {
+								guildId = '800641468321759242';
+							}
+
+							const guild = await c.guilds.cache.get(guildId);
+
+							if (!guild || guild.shardId !== c.shardId) {
+								return;
+							}
+
+							let channelId = '1078318397688926260';
+
+							// eslint-disable-next-line no-undef
+							if (process.env.SERVER === 'Dev') {
+								channelId = '1078318144914985050';
+							}
+
+							const channel = await guild.channels.cache.get(channelId);
+
+							if (channel) {
+								let sentMessage = await channel.send(message);
+								sentMessage.crosspost();
+							}
+						}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} tournament badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+
+						discordUser.osuBadges = additionalInfo.tournamentBadges.length;
+					}
+
+					if (additionalInfo.tournamentBan) {
+						if (discordUser.tournamentBannedReason !== additionalInfo.tournamentBan.description || new Date(discordUser.tournamentBannedUntil).getTime() !== additionalInfo.tournamentBan.tournamentBannedUntil.getTime()) {
+							let bannedUntilString = 'indefinite';
+
+							if (additionalInfo.tournamentBan.tournamentBannedUntil.getUTCFullYear() !== 9999) {
+								bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
+							}
+
+							if (logBroadcastEval) {
+								// eslint-disable-next-line no-console
+								console.log('Broadcasting utils.js tournamentban to shards...');
+							}
+
+							client.shard.broadcastEval(async (c, { message }) => {
+								let guildId = '727407178499096597';
+
+								// eslint-disable-next-line no-undef
+								if (process.env.SERVER === 'Dev') {
+									guildId = '800641468321759242';
+								}
+
+								const guild = await c.guilds.cache.get(guildId);
+
+								if (!guild || guild.shardId !== c.shardId) {
+									return;
+								}
+
+								let channelId = '1078318437408968804';
+
+								// eslint-disable-next-line no-undef
+								if (process.env.SERVER === 'Dev') {
+									channelId = '1078318180302323842';
+								}
+
+								const channel = await guild.channels.cache.get(channelId);
+
+								if (channel) {
+									let sentMessage = await channel.send(message);
+									sentMessage.crosspost();
+								}
+							}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+						}
+
+						discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
+						discordUser.tournamentBannedUntil = additionalInfo.tournamentBan.tournamentBannedUntil;
+					}
+
+					await discordUser.save();
+				}
+			})
+			.catch(err => {
+				console.error(err);
+			});
+
+		return additionalInfo;
 	},
 	async restartProcessQueueTask() {
 		module.exports.logDatabaseQueries(5, 'utils.js DBProcessQueue restartProcessQueueTask');
