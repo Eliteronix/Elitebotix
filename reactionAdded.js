@@ -618,7 +618,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for schedule information
 	if (reaction._emoji.name === '📊') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
+		if (reaction.message.attachments.first() && (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings'))) {
 			//get the osuUserId used
 			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 
