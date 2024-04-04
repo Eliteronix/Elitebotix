@@ -191,6 +191,19 @@ process.on('message', message => {
 	}
 });
 
+// eslint-disable-next-line no-undef
+process.on('uncaughtException', (error, origin) => {
+	if (error?.code === 'ECONNRESET') {
+		console.log('ECONNRESET error caught');
+		return;
+	}
+	console.error('UNCAUGHT EXCEPTION');
+	console.error(error);
+	console.error(origin);
+	// eslint-disable-next-line no-undef
+	process.exit(1);
+});
+
 //declare what the discord client should do when it's ready
 client.on('ready', readyDiscord);
 
