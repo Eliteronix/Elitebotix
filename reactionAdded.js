@@ -478,7 +478,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 	//Check if reacted for skills information
 	if (reaction._emoji.name === '📈') {
 		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-mostplayed')) {
+		if (reaction.message.attachments.first() && (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-mostplayed'))) {
 			//get the osuUserId used
 			let osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
 			if (reaction.message.attachments.first().name.startsWith('osu-top')) {
