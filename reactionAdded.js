@@ -172,960 +172,964 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
-	if (reaction.message.attachments.first() && reaction.message.attachments.first().name.match(/.+leaderboard.+page.+/g)) {
-		let commandName = reaction.message.attachments.first().name.match(/.+leaderboard/g);
-		let page = reaction.message.attachments.first().name.replace(/.+page/g, '').replace('.png', '');
-		let mode = reaction.message.attachments.first().name.replace(/.+mode-/gm, '').replace(/-.+/gm, '');
+	let firstAttachment = reaction.message.attachments.first();
 
-		if (reaction.message.attachments.first().name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
-			return;
+	if (firstAttachment) {
+		if (firstAttachment.name.match(/.+leaderboard.+page.+/g)) {
+			let commandName = firstAttachment.name.match(/.+leaderboard/g);
+			let page = firstAttachment.name.replace(/.+page/g, '').replace('.png', '');
+			let mode = firstAttachment.name.replace(/.+mode-/gm, '').replace(/-.+/gm, '');
+
+			if (firstAttachment.name.replace(/.+leaderboard-/g, '').replace(/-.+/g, '') !== user.id) {
+				return;
+			}
+			if (reaction._emoji.name === '◀️') {
+				page--;
+			} else if (reaction._emoji.name === '▶️') {
+				page++;
+			} else {
+				return;
+			}
+			let message;
+			if (commandName[0] !== 'osu-duelrating-leaderboard') {
+				const command = require(`./commands/${commandName[0]}.js`);
+				if (commandName[0] == 'osu-leaderboard') {
+					message = {
+						client: reaction.message.client,
+						guild: reaction.message.guild,
+						guildId: reaction.message.guild.id,
+						content: `e!${commandName[0]} --${mode} ${page}`,
+						author: user,
+						channel: reaction.message.channel,
+					};
+
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
+
+					command.execute(message, [page, `--${mode}`], null, additionalObjects);
+				} else {
+					message = {
+						client: reaction.message.client,
+						guild: reaction.message.guild,
+						guildId: reaction.message.guild.id,
+						content: `e!${commandName[0]} ${page}`,
+						author: user,
+						channel: reaction.message.channel,
+					};
+
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
+
+					command.execute(message, [page], null, additionalObjects);
+				}
+			} else {
+				let guild = null;
+				let guildId = null;
+				if (reaction.message.guild) {
+					guild = reaction.message.guild;
+					guildId = reaction.message.guild.id;
+				}
+				let interaction = {
+					guild: guild,
+					guildId: guildId,
+					options: {
+						_subcommand: 'rating-leaderboard',
+						_hoistedOptions: [{ name: 'page', value: page }]
+					},
+					user: user,
+					channel: reaction.message.channel,
+				};
+
+				const command = require('./commands/osu-duel.js');
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
+				command.execute(null, [page], interaction, additionalObjects);
+			}
+
+			return reaction.message.delete();
 		}
-		if (reaction._emoji.name === '◀️') {
-			page--;
-		} else if (reaction._emoji.name === '▶️') {
-			page++;
-		} else {
-			return;
-		}
-		let message;
-		if (commandName[0] !== 'osu-duelrating-leaderboard') {
-			const command = require(`./commands/${commandName[0]}.js`);
-			if (commandName[0] == 'osu-leaderboard') {
-				message = {
+
+		//For the compare emoji
+		if (reaction._emoji.id === '827974793365159997') {
+			if (firstAttachment.name.startsWith('osu-recent') || firstAttachment.name.startsWith('osu-score')) {
+				const beatmapId = firstAttachment.name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
+
+				const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
+
+				let args = [beatmapId, `--${beatmap.mode}`];
+
+				const command = require('./commands/osu-score.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-score',
+					channel: reaction.message.channel,
 					client: reaction.message.client,
 					guild: reaction.message.guild,
-					guildId: reaction.message.guild.id,
-					content: `e!${commandName[0]} --${mode} ${page}`,
-					author: user,
-					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'beatmap') {
+								return beatmapId;
+							}
+						},
+						getNumber: (string) => {
+							if (string === 'gamemode') {
+								return getBeatmapModeId(beatmap);
+							}
+						},
+						getInteger: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
 				};
 
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
-				command.execute(message, [page, `--${mode}`], null, additionalObjects);
-			} else {
-				message = {
+				command.execute(null, null, interaction, additionalObjects);
+			} else if (firstAttachment.name.startsWith('osu-beatmap')) {
+				const beatmapId = firstAttachment.name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+				const command = require('./commands/osu-score.js');
+
+				if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-score',
+					channel: reaction.message.channel,
 					client: reaction.message.client,
 					guild: reaction.message.guild,
-					guildId: reaction.message.guild.id,
-					content: `e!${commandName[0]} ${page}`,
-					author: user,
-					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'beatmap') {
+								return beatmapId;
+							}
+						},
+						getNumber: () => { },
+						getInteger: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
 				};
 
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
-				command.execute(message, [page], null, additionalObjects);
-			}
-		} else {
-			let guild = null;
-			let guildId = null;
-			if (reaction.message.guild) {
-				guild = reaction.message.guild;
-				guildId = reaction.message.guild.id;
-			}
-			let interaction = {
-				guild: guild,
-				guildId: guildId,
-				options: {
-					_subcommand: 'rating-leaderboard',
-					_hoistedOptions: [{ name: 'page', value: page }]
-				},
-				user: user,
-				channel: reaction.message.channel,
-			};
+				command.execute(null, null, interaction, additionalObjects);
+			} else if (firstAttachment.name.startsWith('osu-game-')) {
+				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
-			const command = require('./commands/osu-duel.js');
+				const command = require('./commands/osu-score.js');
 
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
+				if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
+					return;
+				}
 
-			command.execute(null, [page], interaction, additionalObjects);
-		}
-
-		return reaction.message.delete();
-	}
-
-	//For the compare emoji
-	if (reaction._emoji.id === '827974793365159997') {
-		if (reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-score')) {
-			const beatmapId = reaction.message.attachments.first().name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
-
-			const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
-
-			let args = [beatmapId, `--${beatmap.mode}`];
-
-			const command = require('./commands/osu-score.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-score',
-				channel: reaction.message.channel,
-				client: reaction.message.client,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'beatmap') {
-							return beatmapId;
-						}
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-score',
+					channel: reaction.message.channel,
+					client: reaction.message.client,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'beatmap') {
+								return beatmapId;
+							} else if (string === 'server') {
+								return 'tournaments';
+							}
+						},
+						getNumber: () => { },
+						getInteger: () => { },
 					},
-					getNumber: (string) => {
-						if (string === 'gamemode') {
-							return getBeatmapModeId(beatmap);
-						}
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
 					},
-					getInteger: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
+				};
 
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		} else if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
-			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
-
-			const command = require('./commands/osu-score.js');
-
-			if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-score',
-				channel: reaction.message.channel,
-				client: reaction.message.client,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'beatmap') {
-							return beatmapId;
-						}
-					},
-					getNumber: () => { },
-					getInteger: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
-			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
-
-			const command = require('./commands/osu-score.js');
-
-			if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-score',
-				channel: reaction.message.channel,
-				client: reaction.message.client,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'beatmap') {
-							return beatmapId;
-						} else if (string === 'server') {
-							return 'tournaments';
-						}
-					},
-					getNumber: () => { },
-					getInteger: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		}
-	}
-
-	//Check if reacted for map information
-	if (reaction._emoji.name === '🗺️') {
-		//Check if it is actually a scorepost
-		if (reaction.message.attachments.first().name.startsWith('osu-recent-') || reaction.message.attachments.first().name.startsWith('osu-score')) {
-			//Regex the beatmapId out of there
-			const beatmapId = reaction.message.attachments.first().name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
-
-			//get the mods used
-			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-
-			let mods = getMods(modBits);
-
-			if (!mods[0]) {
-				mods = ['NM'];
-			}
-
-			//Setup artificial arguments
-			let args = [beatmapId, `--${mods.join('')}`];
-
-			const command = require('./commands/osu-beatmap.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-beatmap',
-				channel: reaction.message.channel,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'id') {
-							return beatmapId;
-						} else if (string === 'mods') {
-							return getMods(modBits).join('');
-						}
-					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
-			const beatmapId = reaction.message.attachments.first().name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
-
-			//get the mods used
-			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-
-			let mods = getMods(modBits);
-
-			if (!mods[0]) {
-				mods = ['NM'];
-			}
-
-			let args = [beatmapId, `--${mods.join('')}`];
-
-			const command = require('./commands/osu-beatmap.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-beatmap',
-				channel: reaction.message.channel,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'id') {
-							return beatmapId;
-						} else if (string === 'mods') {
-							return getMods(modBits).join('');
-						}
-					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		}
-	}
-
-	//Check if reacted for skills information
-	if (reaction._emoji.name === '📈') {
-		//Check if it is a profile
-		if (reaction.message.attachments.first() && (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-top') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-mostplayed'))) {
-			//get the osuUserId used
-			let osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-			if (reaction.message.attachments.first().name.startsWith('osu-top')) {
-				osuUserId = reaction.message.attachments.first().name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
-			}
-
-			//Setup artificial arguments
-			let args = [osuUserId];
-
-			const command = require('./commands/osu-skills.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				client: reaction.message.client,
-				channel: reaction.message.channel,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'username') {
-							return osuUserId.toString();
-						}
-					},
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			try {
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
 		}
-	}
 
-	//Check if reacted for profile information
-	if (reaction._emoji.name === '👤') {
-		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-score') || reaction.message.attachments.first().name.startsWith('osu-recent') || reaction.message.attachments.first().name.startsWith('osu-league-ratings') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-mostplayed')) {
-			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+		//Check if reacted for map information
+		if (reaction._emoji.name === '🗺️') {
+			//Check if it is actually a scorepost
+			if (firstAttachment.name.startsWith('osu-recent-') || firstAttachment.name.startsWith('osu-score')) {
+				//Regex the beatmapId out of there
+				const beatmapId = firstAttachment.name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
 
-			//Setup artificial arguments
-			let args = [osuUserId];
+				//get the mods used
+				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
-			const command = require('./commands/osu-profile.js');
+				let mods = getMods(modBits);
 
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
+				if (!mods[0]) {
+					mods = ['NM'];
+				}
 
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				client: reaction.message.client,
-				channel: reaction.message.channel,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'username') {
-							return osuUserId.toString();
-						}
+				//Setup artificial arguments
+				let args = [beatmapId, `--${mods.join('')}`];
+
+				const command = require('./commands/osu-beatmap.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-beatmap',
+					channel: reaction.message.channel,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'id') {
+								return beatmapId;
+							} else if (string === 'mods') {
+								return getMods(modBits).join('');
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
 					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		} else if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-top')) {
-			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
-			let mode = reaction.message.attachments.first().name.replace(/.+.mode/gm, '').replace('.png', '');
-
-			//Setup artificial arguments
-			let args = [osuUserId, mode];
-
-			const command = require('./commands/osu-profile.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				client: reaction.message.client,
-				channel: reaction.message.channel,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'username') {
-							return osuUserId.toString();
-						}
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
 					},
-					getNumber: (string) => {
-						if (string === 'gamemode') {
-							return mode;
-						}
-					},
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
+				};
 
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		}
-	}
-
-	//Check if reacted for schedule information
-	if (reaction._emoji.name === '📊') {
-		//Check if it is a profile
-		if (reaction.message.attachments.first() && (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings'))) {
-			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-
-			//Setup artificial arguments
-			let args = [osuUserId];
-
-			const command = require('./commands/osu-schedule.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
-
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let tempMessage = {
-				guild: reaction.message.guild,
-				guildId: guildId,
-				content: `e!osu-schedule ${osuUserId}`,
-				author: user,
-				channel: reaction.message.channel,
-			};
-
-			try {
-				// eslint-disable-next-line no-undef
-				process.send(`command ${command.name}`);
-
-				command.execute(tempMessage, args, null, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
-		}
-	}
-
-	//Check if reacted for schedule information
-	if (reaction._emoji.name === '🥇') {
-		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
-			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-
-			//Setup artificial arguments
-			let args = [osuUserId];
-
-			const command = require('./commands/osu-top.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				client: reaction.message.client,
-				channel: reaction.message.channel,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'username') {
-							return osuUserId.toString();
-						}
-					},
-					getNumber: () => { },
-					getInteger: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
-		} else if (reaction.message.attachments.first().name.startsWith('osu-game-')) {
-			//get the osuUserId used
-			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-
-			const beatmapId = reaction.message.attachments.first().name.replace(`-${modBits}.png`, '').replace(/.+-/gm, '');
-
-			const command = require('./commands/osu-mapleaderboard.js');
-
-			let args = [beatmapId, modBits];
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				client: reaction.message.client,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'id') {
-							return beatmapId;
-						} else if (string === 'server') {
-							return 'tournaments';
-						} else if (string === 'mods') {
-							return getMods(modBits).join('');
-						}
-					},
-					getInteger: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			try {
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-			}
-		}
-	}
+			} else if (firstAttachment.name.startsWith('osu-game-')) {
+				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
-	//Check if reacted for matchup information
-	if (reaction._emoji.name === '🆚' && reaction.message.attachments.first()) {
-		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-topPlayStats') || reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-league-ratings')) {
-			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+				//get the mods used
+				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
-			//Setup artificial arguments
-			let args = [osuUserId];
+				let mods = getMods(modBits);
 
-			const command = require('./commands/osu-matchup.js');
+				if (!mods[0]) {
+					mods = ['NM'];
+				}
 
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
+				let args = [beatmapId, `--${mods.join('')}`];
 
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				channel: reaction.message.channel,
-				client: reaction.message.client,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'username') {
-							return osuUserId;
-						}
+				const command = require('./commands/osu-beatmap.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-beatmap',
+					channel: reaction.message.channel,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'id') {
+								return beatmapId;
+							} else if (string === 'mods') {
+								return getMods(modBits).join('');
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
 					},
-					getInteger: () => { },
-					getBoolean: () => { },
-					getSubcommand: () => {
-						return '1v1';
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
 					},
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-				editReply: async (input) => {
-					if (typeof input === 'string' && input.includes('Processing')) {
-						return;
-					}
-					return await reaction.message.channel.send(input);
-				},
-			};
+				};
 
-			try {
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 			}
 		}
-	}
 
-	if (reaction._emoji.name === '🔵' || reaction._emoji.name === '🔴') {
-		//Check if it is a matchup
-		if (reaction.message.attachments.first().name.startsWith('osu-matchup')) {
-			//get the osuUserId used
-			let osuUserId;
-			if (reaction._emoji.name === '🔴') {
-				osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
-			} else {
-				osuUserId = reaction.message.attachments.first().name.replace('osu-matchup-', '').replace(/-.+/, '');
-			}
-			//Setup artificial arguments
-			let args = [osuUserId];
+		//Check if reacted for skills information
+		if (reaction._emoji.name === '📈') {
+			//Check if it is a profile
+			if (firstAttachment.name.startsWith('osu-profile') || firstAttachment.name.startsWith('osu-top') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
+				//get the osuUserId used
+				let osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+				if (firstAttachment.name.startsWith('osu-top')) {
+					osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
+				}
 
-			const command = require('./commands/osu-profile.js');
+				//Setup artificial arguments
+				let args = [osuUserId];
 
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
+				const command = require('./commands/osu-skills.js');
 
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				client: reaction.message.client,
-				channel: reaction.message.channel,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'username') {
-							return osuUserId.toString();
-						}
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					client: reaction.message.client,
+					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'username') {
+								return osuUserId.toString();
+							}
+						},
+						getBoolean: () => { },
 					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
 
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
+				try {
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
 
-			command.execute(null, null, interaction, additionalObjects);
+					command.execute(null, null, interaction, additionalObjects);
+				} catch (error) {
+					console.error(error);
+					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+				}
+			}
 		}
-	}
 
-	//Check if reacted for osu-duel-rating information
-	if (reaction._emoji.id === '951396806653255700') {
-		//Check if it is a profile
-		if (reaction.message.attachments.first().name.startsWith('osu-profile') || reaction.message.attachments.first().name.startsWith('osu-topPlayStats')) {
-			//get the osuUserId used
-			const osuUserId = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+		//Check if reacted for profile information
+		if (reaction._emoji.name === '👤') {
+			//Check if it is a profile
+			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-recent') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-mostplayed')) {
+				//get the osuUserId used
+				const osuUserId = firstAttachment.name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
-			//Setup artificial arguments
-			let args = [osuUserId];
+				//Setup artificial arguments
+				let args = [osuUserId];
 
-			const command = require('./commands/osu-duel.js');
+				const command = require('./commands/osu-profile.js');
 
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
 
-			//Set author of a temporary message copy to the reacting user to not break the commands
-			let guildId = null;
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					client: reaction.message.client,
+					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'username') {
+								return osuUserId.toString();
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
 
-			if (reaction.message.guild) {
-				guildId = reaction.message.guild.id;
-			}
-
-			let interaction = {
-				client: reaction.client,
-				guild: reaction.message.guild,
-				guildId: guildId,
-				options: {
-					_subcommand: 'rating',
-					_hoistedOptions: [{ name: 'username', value: args[0] }]
-				},
-				user: user,
-				channel: reaction.message.channel,
-			};
-
-			try {
 				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
-				command.execute(null, args, interaction, additionalObjects);
-			} catch (error) {
-				console.error(error);
-				const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-				reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-				eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+				command.execute(null, null, interaction, additionalObjects);
+			} else if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-top')) {
+				//get the osuUserId used
+				const osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
+				let mode = firstAttachment.name.replace(/.+.mode/gm, '').replace('.png', '');
+
+				//Setup artificial arguments
+				let args = [osuUserId, mode];
+
+				const command = require('./commands/osu-profile.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					client: reaction.message.client,
+					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'username') {
+								return osuUserId.toString();
+							}
+						},
+						getNumber: (string) => {
+							if (string === 'gamemode') {
+								return mode;
+							}
+						},
+						getBoolean: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
+				command.execute(null, null, interaction, additionalObjects);
 			}
 		}
-	}
 
-	//For the compare emoji | EZ | HT | HD | DT | HR | FL | FI
-	if (reaction._emoji.id === '918920760586805259'
-		|| reaction._emoji.id === '918921193426411544'
-		|| reaction._emoji.id === '918922015182827531'
-		|| reaction._emoji.id === '918920670023397396'
-		|| reaction._emoji.id === '918938816377671740'
-		|| reaction._emoji.id === '918920836755382343'
-		|| reaction._emoji.id === '918922047994880010') {
-		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
-			const beatmapId = reaction.message.attachments.first().name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+		//Check if reacted for schedule information
+		if (reaction._emoji.name === '📊') {
+			//Check if it is a profile
+			if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-profile') || firstAttachment.name.startsWith('osu-league-ratings')) {
+				//get the osuUserId used
+				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
-			const dbBeatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+				//Setup artificial arguments
+				let args = [osuUserId];
 
-			//get the mods used
-			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+				const command = require('./commands/osu-schedule.js');
 
-			let mods = getMods(modBits);
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
 
-			if (reaction._emoji.name === 'EZ' && mods.includes('HR')) {
-				mods.splice(mods.indexOf('HR'), 1);
-			} else if (reaction._emoji.name === 'HR' && mods.includes('EZ')) {
-				mods.splice(mods.indexOf('EZ'), 1);
-			} else if (reaction._emoji.name === 'HT' && mods.includes('DT')) {
-				mods.splice(mods.indexOf('DT'), 1);
-			} else if (reaction._emoji.name === 'DT' && mods.includes('HT')) {
-				mods.splice(mods.indexOf('HT'), 1);
-			} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
-				mods.splice(mods.indexOf('FL'), 1);
-			} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
-				mods.splice(mods.indexOf('FI'), 1);
-			} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
-				mods.splice(mods.indexOf('FI'), 1);
-			} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
-				mods.splice(mods.indexOf('HD'), 1);
-			} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
-				mods.splice(mods.indexOf('HD'), 1);
-			} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
-				mods.splice(mods.indexOf('FL'), 1);
+				//Set author of a temporary message copy to the reacting user to not break the commands
+				let guildId = null;
+
+				if (reaction.message.guild) {
+					guildId = reaction.message.guild.id;
+				}
+
+				let tempMessage = {
+					guild: reaction.message.guild,
+					guildId: guildId,
+					content: `e!osu-schedule ${osuUserId}`,
+					author: user,
+					channel: reaction.message.channel,
+				};
+
+				try {
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
+
+					command.execute(tempMessage, args, null, additionalObjects);
+				} catch (error) {
+					console.error(error);
+					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+				}
 			}
-
-			if (!mods.includes(reaction._emoji.name)) {
-				mods.push(reaction._emoji.name);
-			} else {
-				mods.splice(mods.indexOf(reaction._emoji.name), 1);
-			}
-
-			if (!mods[0]) {
-				mods = ['NM'];
-			}
-
-			let args = [beatmapId, `--${mods.join('')}`];
-
-			const command = require('./commands/osu-beatmap.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-beatmap',
-				channel: reaction.message.channel,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'id') {
-							return beatmapId;
-						} else if (string === 'mods') {
-							return mods.join('');
-						}
-					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
-
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
-
-			command.execute(null, null, interaction, additionalObjects);
 		}
-	}
 
-	//For the compare emoji
-	if (reaction._emoji.id === '918935327215861760') {
-		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
-			const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+		//Check if reacted for schedule information
+		if (reaction._emoji.name === '🥇') {
+			//Check if it is a profile
+			if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-profile') || firstAttachment.name.startsWith('osu-league-ratings')) {
+				//get the osuUserId used
+				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
-			//get the mods used
-			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+				//Setup artificial arguments
+				let args = [osuUserId];
 
-			let mods = getMods(modBits);
+				const command = require('./commands/osu-top.js');
 
-			if (!mods.includes('HD') && !mods.includes('HR')) {
-				mods.push('HD');
-				mods.push('HR');
-			} else if (mods.includes('HD') && !mods.includes('HR')) {
-				mods.push('HR');
-			} else if (!mods.includes('HD') && mods.includes('HR')) {
-				mods.push('HD');
-			} else {
-				mods.splice(mods.indexOf('HD'), 1);
-				mods.splice(mods.indexOf('HR'), 1);
-			}
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
 
-			if (!mods[0]) {
-				mods = ['NM'];
-			}
-
-			let args = [beatmapId, `--${mods.join('')}`];
-
-			const command = require('./commands/osu-beatmap.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-beatmap',
-				channel: reaction.message.channel,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'id') {
-							return beatmapId;
-						} else if (string === 'mods') {
-							return getMods(modBits).join('');
-						}
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					client: reaction.message.client,
+					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'username') {
+								return osuUserId.toString();
+							}
+						},
+						getNumber: () => { },
+						getInteger: () => { },
+						getBoolean: () => { },
 					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
 
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
 
-			command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction, additionalObjects);
+			} else if (firstAttachment.name.startsWith('osu-game-')) {
+				//get the osuUserId used
+				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+
+				const beatmapId = firstAttachment.name.replace(`-${modBits}.png`, '').replace(/.+-/gm, '');
+
+				const command = require('./commands/osu-mapleaderboard.js');
+
+				let args = [beatmapId, modBits];
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					client: reaction.message.client,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'id') {
+								return beatmapId;
+							} else if (string === 'server') {
+								return 'tournaments';
+							} else if (string === 'mods') {
+								return getMods(modBits).join('');
+							}
+						},
+						getInteger: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
+
+				try {
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
+
+					command.execute(null, null, interaction, additionalObjects);
+				} catch (error) {
+					console.error(error);
+					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+				}
+			}
 		}
-	}
 
-	//For the compare emoji
-	if (reaction._emoji.id === '918935350125142036') {
-		if (reaction.message.attachments.first().name.startsWith('osu-beatmap')) {
-			const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+		//Check if reacted for matchup information
+		if (reaction._emoji.name === '🆚') {
+			//Check if it is a profile
+			if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-profile') || firstAttachment.name.startsWith('osu-league-ratings')) {
+				//get the osuUserId used
+				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
-			//get the mods used
-			const modBits = reaction.message.attachments.first().name.replace(/.+-/gm, '').replace('.png', '');
+				//Setup artificial arguments
+				let args = [osuUserId];
 
-			let mods = getMods(modBits);
+				const command = require('./commands/osu-matchup.js');
 
-			if (!mods.includes('HD') && !mods.includes('DT')) {
-				mods.push('HD');
-				mods.push('DT');
-			} else if (mods.includes('HD') && !mods.includes('DT')) {
-				mods.push('DT');
-			} else if (!mods.includes('HD') && mods.includes('DT')) {
-				mods.push('HD');
-			} else {
-				mods.splice(mods.indexOf('HD'), 1);
-				mods.splice(mods.indexOf('DT'), 1);
-			}
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
 
-			if (!mods[0]) {
-				mods = ['NM'];
-			}
-
-			let args = [beatmapId, `--${mods.join('')}`];
-
-			const command = require('./commands/osu-beatmap.js');
-
-			if (checkCooldown(reaction, command, user, args) !== undefined) {
-				return;
-			}
-
-			//Setup artificial interaction
-			let interaction = {
-				id: null,
-				commandName: 'osu-beatmap',
-				channel: reaction.message.channel,
-				guild: reaction.message.guild,
-				user: user,
-				options: {
-					getString: (string) => {
-						if (string === 'id') {
-							return beatmapId;
-						} else if (string === 'mods') {
-							return getMods(modBits).join('');
-						}
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					channel: reaction.message.channel,
+					client: reaction.message.client,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'username') {
+								return osuUserId;
+							}
+						},
+						getInteger: () => { },
+						getBoolean: () => { },
+						getSubcommand: () => {
+							return '1v1';
+						},
 					},
-					getNumber: () => { },
-					getBoolean: () => { },
-				},
-				deferReply: () => { },
-				followUp: async (input) => {
-					return await reaction.message.channel.send(input);
-				},
-			};
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+					editReply: async (input) => {
+						if (typeof input === 'string' && input.includes('Processing')) {
+							return;
+						}
+						return await reaction.message.channel.send(input);
+					},
+				};
 
-			// eslint-disable-next-line no-undef
-			process.send(`command ${command.name}`);
+				try {
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
 
-			command.execute(null, null, interaction, additionalObjects);
+					command.execute(null, null, interaction, additionalObjects);
+				} catch (error) {
+					console.error(error);
+					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+				}
+			}
+		}
+
+		if (reaction._emoji.name === '🔵' || reaction._emoji.name === '🔴') {
+			//Check if it is a matchup
+			if (firstAttachment.name.startsWith('osu-matchup')) {
+				//get the osuUserId used
+				let osuUserId;
+				if (reaction._emoji.name === '🔴') {
+					osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+				} else {
+					osuUserId = firstAttachment.name.replace('osu-matchup-', '').replace(/-.+/, '');
+				}
+				//Setup artificial arguments
+				let args = [osuUserId];
+
+				const command = require('./commands/osu-profile.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					client: reaction.message.client,
+					channel: reaction.message.channel,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'username') {
+								return osuUserId.toString();
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
+				command.execute(null, null, interaction, additionalObjects);
+			}
+		}
+
+		//Check if reacted for osu-duel-rating information
+		if (reaction._emoji.id === '951396806653255700') {
+			//Check if it is a profile
+			if (firstAttachment.name.startsWith('osu-profile') || firstAttachment.name.startsWith('osu-topPlayStats')) {
+				//get the osuUserId used
+				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+
+				//Setup artificial arguments
+				let args = [osuUserId];
+
+				const command = require('./commands/osu-duel.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Set author of a temporary message copy to the reacting user to not break the commands
+				let guildId = null;
+
+				if (reaction.message.guild) {
+					guildId = reaction.message.guild.id;
+				}
+
+				let interaction = {
+					client: reaction.client,
+					guild: reaction.message.guild,
+					guildId: guildId,
+					options: {
+						_subcommand: 'rating',
+						_hoistedOptions: [{ name: 'username', value: args[0] }]
+					},
+					user: user,
+					channel: reaction.message.channel,
+				};
+
+				try {
+					// eslint-disable-next-line no-undef
+					process.send(`command ${command.name}`);
+
+					command.execute(null, args, interaction, additionalObjects);
+				} catch (error) {
+					console.error(error);
+					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
+					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
+					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+				}
+			}
+		}
+
+		//For the compare emoji | EZ | HT | HD | DT | HR | FL | FI
+		if (reaction._emoji.id === '918920760586805259'
+			|| reaction._emoji.id === '918921193426411544'
+			|| reaction._emoji.id === '918922015182827531'
+			|| reaction._emoji.id === '918920670023397396'
+			|| reaction._emoji.id === '918938816377671740'
+			|| reaction._emoji.id === '918920836755382343'
+			|| reaction._emoji.id === '918922047994880010') {
+			if (firstAttachment.name.startsWith('osu-beatmap')) {
+				const beatmapId = firstAttachment.name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+				const dbBeatmap = await getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+
+				//get the mods used
+				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+
+				let mods = getMods(modBits);
+
+				if (reaction._emoji.name === 'EZ' && mods.includes('HR')) {
+					mods.splice(mods.indexOf('HR'), 1);
+				} else if (reaction._emoji.name === 'HR' && mods.includes('EZ')) {
+					mods.splice(mods.indexOf('EZ'), 1);
+				} else if (reaction._emoji.name === 'HT' && mods.includes('DT')) {
+					mods.splice(mods.indexOf('DT'), 1);
+				} else if (reaction._emoji.name === 'DT' && mods.includes('HT')) {
+					mods.splice(mods.indexOf('HT'), 1);
+				} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
+					mods.splice(mods.indexOf('FL'), 1);
+				} else if (reaction._emoji.name === 'HD' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
+					mods.splice(mods.indexOf('FI'), 1);
+				} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('FI')) {
+					mods.splice(mods.indexOf('FI'), 1);
+				} else if (reaction._emoji.name === 'FL' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
+					mods.splice(mods.indexOf('HD'), 1);
+				} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('HD')) {
+					mods.splice(mods.indexOf('HD'), 1);
+				} else if (reaction._emoji.name === 'FI' && dbBeatmap.mode === 'Mania' && mods.includes('FL')) {
+					mods.splice(mods.indexOf('FL'), 1);
+				}
+
+				if (!mods.includes(reaction._emoji.name)) {
+					mods.push(reaction._emoji.name);
+				} else {
+					mods.splice(mods.indexOf(reaction._emoji.name), 1);
+				}
+
+				if (!mods[0]) {
+					mods = ['NM'];
+				}
+
+				let args = [beatmapId, `--${mods.join('')}`];
+
+				const command = require('./commands/osu-beatmap.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-beatmap',
+					channel: reaction.message.channel,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'id') {
+								return beatmapId;
+							} else if (string === 'mods') {
+								return mods.join('');
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
+				command.execute(null, null, interaction, additionalObjects);
+			}
+		}
+
+		//For the compare emoji
+		if (reaction._emoji.id === '918935327215861760') {
+			if (firstAttachment.name.startsWith('osu-beatmap')) {
+				const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+				//get the mods used
+				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+
+				let mods = getMods(modBits);
+
+				if (!mods.includes('HD') && !mods.includes('HR')) {
+					mods.push('HD');
+					mods.push('HR');
+				} else if (mods.includes('HD') && !mods.includes('HR')) {
+					mods.push('HR');
+				} else if (!mods.includes('HD') && mods.includes('HR')) {
+					mods.push('HD');
+				} else {
+					mods.splice(mods.indexOf('HD'), 1);
+					mods.splice(mods.indexOf('HR'), 1);
+				}
+
+				if (!mods[0]) {
+					mods = ['NM'];
+				}
+
+				let args = [beatmapId, `--${mods.join('')}`];
+
+				const command = require('./commands/osu-beatmap.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-beatmap',
+					channel: reaction.message.channel,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'id') {
+								return beatmapId;
+							} else if (string === 'mods') {
+								return getMods(modBits).join('');
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
+				command.execute(null, null, interaction, additionalObjects);
+			}
+		}
+
+		//For the compare emoji
+		if (reaction._emoji.id === '918935350125142036') {
+			if (firstAttachment.name.startsWith('osu-beatmap')) {
+				const beatmapId = reaction.message.content.replace('osu-beatmap-', '').replace(/-.+/gm, '');
+
+				//get the mods used
+				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
+
+				let mods = getMods(modBits);
+
+				if (!mods.includes('HD') && !mods.includes('DT')) {
+					mods.push('HD');
+					mods.push('DT');
+				} else if (mods.includes('HD') && !mods.includes('DT')) {
+					mods.push('DT');
+				} else if (!mods.includes('HD') && mods.includes('DT')) {
+					mods.push('HD');
+				} else {
+					mods.splice(mods.indexOf('HD'), 1);
+					mods.splice(mods.indexOf('DT'), 1);
+				}
+
+				if (!mods[0]) {
+					mods = ['NM'];
+				}
+
+				let args = [beatmapId, `--${mods.join('')}`];
+
+				const command = require('./commands/osu-beatmap.js');
+
+				if (checkCooldown(reaction, command, user, args) !== undefined) {
+					return;
+				}
+
+				//Setup artificial interaction
+				let interaction = {
+					id: null,
+					commandName: 'osu-beatmap',
+					channel: reaction.message.channel,
+					guild: reaction.message.guild,
+					user: user,
+					options: {
+						getString: (string) => {
+							if (string === 'id') {
+								return beatmapId;
+							} else if (string === 'mods') {
+								return getMods(modBits).join('');
+							}
+						},
+						getNumber: () => { },
+						getBoolean: () => { },
+					},
+					deferReply: () => { },
+					followUp: async (input) => {
+						return await reaction.message.channel.send(input);
+					},
+				};
+
+				// eslint-disable-next-line no-undef
+				process.send(`command ${command.name}`);
+
+				command.execute(null, null, interaction, additionalObjects);
+			}
 		}
 	}
 
