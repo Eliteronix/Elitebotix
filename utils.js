@@ -1234,7 +1234,7 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-		module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
 
 		const url = new URL(
 			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu`
