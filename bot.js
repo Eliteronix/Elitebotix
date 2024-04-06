@@ -439,8 +439,7 @@ async function checkOsuTracks(client) {
 	try {
 		await processOsuTrack(client);
 	} catch (e) {
-		if (e.message !== 'Timeout in osu! track - reject') {
-			console.log(e.message);
+		if (e !== 'Timeout in osu! track - reject') {
 			console.error('bot.js | processOsuTrack ' + e);
 		}
 	}
