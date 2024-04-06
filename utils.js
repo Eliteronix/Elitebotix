@@ -1234,34 +1234,7 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-
-		if (!client.osuv2_access_token) {
-			const url = new URL(
-				'https://osu.ppy.sh/oauth/token'
-			);
-
-			const headers = {
-				'Accept': 'application/json',
-				'Content-Type': 'application/x-www-form-urlencoded',
-			};
-
-			// eslint-disable-next-line no-undef
-			let body = `client_id=4184&client_secret=${process.env.OSUTOKENV2}&grant_type=client_credentials&scope=public`;
-
-			await fetch(url, {
-				method: 'POST',
-				headers,
-				body: body,
-			}).then(async (response) => {
-				let json = await response.json();
-
-				client.osuv2_access_token = json.access_token;
-
-				setTimeout(() => {
-					client.osuv2_access_token = null;
-				}, json.expires_in * 1000);
-			});
-		}
+		module.exports.getNewOsuAPIv2TokenIfNecessary(client);
 
 		const url = new URL(
 			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu`
@@ -1441,6 +1414,37 @@ module.exports = {
 			});
 
 		return additionalInfo;
+	},
+	async getNewOsuAPIv2TokenIfNecessary(client) {
+		if (client.osuv2_access_token) {
+			return;
+		}
+
+		const url = new URL(
+			'https://osu.ppy.sh/oauth/token'
+		);
+
+		const headers = {
+			'Accept': 'application/json',
+			'Content-Type': 'application/x-www-form-urlencoded',
+		};
+
+		// eslint-disable-next-line no-undef
+		let body = `client_id=4184&client_secret=${process.env.OSUTOKENV2}&grant_type=client_credentials&scope=public`;
+
+		await fetch(url, {
+			method: 'POST',
+			headers,
+			body: body,
+		}).then(async (response) => {
+			let json = await response.json();
+
+			client.osuv2_access_token = json.access_token;
+
+			setTimeout(() => {
+				client.osuv2_access_token = null;
+			}, json.expires_in * 1000);
+		});
 	},
 	async restartProcessQueueTask() {
 		module.exports.logDatabaseQueries(5, 'utils.js DBProcessQueue restartProcessQueueTask');
