@@ -337,7 +337,7 @@ module.exports = {
 			});
 
 			if (forumPosts.length === 0) {
-				return interaction.editReply('No tournament posts open to ping.');
+				return await interaction.editReply('No tournament posts open to ping.');
 			}
 
 			await interaction.editReply(`${forumPosts.length} tournament posts open to ping.`);
@@ -418,7 +418,7 @@ module.exports = {
 			});
 
 			if (!forumPost) {
-				return interaction.editReply('Could not find forum post.');
+				return await interaction.editReply('Could not find forum post.');
 			}
 
 			//Create embed
@@ -630,7 +630,7 @@ module.exports = {
 			forumPost.pinged = true;
 			await forumPost.save();
 
-			interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
+			await interaction.editReply(`Ping sent. (Pinged ${pingedUsers} users)`);
 
 		} else if (interaction.options.getSubcommand() === 'update') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
@@ -653,7 +653,7 @@ module.exports = {
 			});
 
 			if (!forumPost) {
-				return interaction.editReply('Could not find forum post.');
+				return await interaction.editReply('Could not find forum post.');
 			}
 
 			if (format) {
@@ -753,7 +753,7 @@ module.exports = {
 				embed.setFooter({ text: `Posted: ${posted.getUTCDate()}.${posted.getUTCMonth() + 1}.${posted.getUTCFullYear()} by ${forumPost.host}` });
 			}
 
-			interaction.editReply({ embeds: [embed] });
+			await interaction.editReply({ embeds: [embed] });
 		} else if (interaction.options.getSubcommand() === 'delete') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
@@ -766,11 +766,11 @@ module.exports = {
 			});
 
 			if (!forumPost) {
-				return interaction.editReply('Could not find forum post.');
+				return await interaction.editReply('Could not find forum post.');
 			}
 
 			await forumPost.destroy();
-			return interaction.editReply('Deleted forum post.');
+			return await interaction.editReply('Deleted forum post.');
 		}
 	}
 };

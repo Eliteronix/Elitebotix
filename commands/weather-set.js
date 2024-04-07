@@ -141,7 +141,7 @@ module.exports = {
 							});
 						}
 
-						return interaction.editReply('Set weather degree type to `Fahrenheit`');
+						return await interaction.editReply('Set weather degree type to `Fahrenheit`');
 						// set default degree type to celcius
 
 					} else if (args[0] == 'c') {
@@ -155,7 +155,7 @@ module.exports = {
 							});
 						}
 
-						return interaction.editReply('Set weather degree type to `Celsius`');
+						return await interaction.editReply('Set weather degree type to `Celsius`');
 					}
 				}
 
@@ -174,7 +174,7 @@ module.exports = {
 								if (!result[0]) {
 									triesBeforeError = Infinity;
 
-									return interaction.editReply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+									return await interaction.editReply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 								}
 
 								let weatherLocation = result[0].location.name;
@@ -190,7 +190,7 @@ module.exports = {
 									});
 								}
 
-								interaction.editReply(`Set weather location to \`${weatherLocation}\``);
+								await interaction.editReply(`Set weather location to \`${weatherLocation}\``);
 							}).catch(err => {
 								throw err;
 							});

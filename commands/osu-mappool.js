@@ -635,7 +635,7 @@ module.exports = {
 			let uniqueModPools = [...new Set(modPools.map(modPool => modPool.mod))];
 
 			if (uniqueModPools.length !== modPools.length) {
-				return interaction.editReply({ content: 'You can\'t have the same modpool twice!' });
+				return await interaction.editReply({ content: 'You can\'t have the same modpool twice!' });
 			}
 
 			let maps = [];

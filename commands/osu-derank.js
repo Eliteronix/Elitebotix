@@ -104,11 +104,11 @@ module.exports = {
 				.then(osuUser => {
 					return osuUser;
 				})
-				.catch(err => {
+				.catch(async (err) => {
 					if (err.message === 'Not found') {
-						interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+						await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 					} else {
-						interaction.editReply('The API ran into an error. Please try again later.');
+						await interaction.editReply('The API ran into an error. Please try again later.');
 						console.error(err);
 					}
 					return null;
@@ -145,7 +145,7 @@ module.exports = {
 				discordUser.osuDuelStarRating = duelRating.total;
 			} catch (e) {
 				if (e.message === 'No standard plays') {
-					return interaction.editReply(`\`${username.replace(/`/g, '')}\` has no standard plays.`);
+					return await interaction.editReply(`\`${username.replace(/`/g, '')}\` has no standard plays.`);
 				} else {
 					console.error(e);
 				}
@@ -163,6 +163,6 @@ module.exports = {
 		message.push('The expected osu! rank change for that duel rating would be:');
 		message.push(`#${discordUser.osuRank} (${derankStats.expectedCurrentDuelRating.substring(0, 5)}*) -> ~#${derankStats.expectedPpRankOsu} (${derankStats.expectedDuelRating.substring(0, 5)}*) (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks / ${(derankStats.expectedDuelRating - derankStats.expectedCurrentDuelRating).toFixed(3)}*)\`\`\``);
 
-		interaction.editReply(message.join('\n'));
+		await interaction.editReply(message.join('\n'));
 	},
 };

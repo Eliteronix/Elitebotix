@@ -49,19 +49,19 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
 			}
-			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
+			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
 		} else if (!elitiriSignUp && args[2].toLowerCase() !== 'top' && args[2].toLowerCase() !== 'middle' && args[2].toLowerCase() !== 'lower' && args[2].toLowerCase() !== 'beginner') {
 			if (msg.id) {
 				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
 			}
-			return interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
+			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
 			if (msg.id) {
 				return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
 			}
-			return interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
+			return await interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
 		}
 
 		let bracket = '';
@@ -256,14 +256,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply({ embeds: [viabilityEmbed] });
 				}
-				return interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
+				return await interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
+						return await msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 					}
-					return interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
+					return await interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
 				} else {
 					console.error(err);
 				}

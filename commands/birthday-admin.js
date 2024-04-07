@@ -128,12 +128,12 @@ module.exports = {
 			}
 
 			if (guild.birthdayEnabled) {
-				return interaction.editReply({ content: 'Birthday announcements are already enabled.', ephemeral: true });
+				return await interaction.editReply({ content: 'Birthday announcements are already enabled.', ephemeral: true });
 			}
 
 			guild.birthdayEnabled = true;
 			guild.save();
-			return interaction.editReply({ content: 'Birthday announcements have been enabled.', ephemeral: true });
+			return await interaction.editReply({ content: 'Birthday announcements have been enabled.', ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
 				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds disable create');
@@ -144,12 +144,12 @@ module.exports = {
 			}
 
 			if (!guild.birthdayEnabled) {
-				return interaction.editReply({ content: 'Birthday announcements are already disabled.', ephemeral: true });
+				return await interaction.editReply({ content: 'Birthday announcements are already disabled.', ephemeral: true });
 			}
 
 			guild.birthdayEnabled = false;
 			guild.save();
-			return interaction.editReply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
+			return await interaction.editReply({ content: 'Birthday announcements have been disabled.', ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(2, 'birthday-admin.js DBBirthdayGuilds list');
 			let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
@@ -161,20 +161,20 @@ module.exports = {
 			});
 
 			if (birthdayAnnouncements.length === 0) {
-				return interaction.editReply({ content: 'There are no birthdays shared for this server.', ephemeral: true });
+				return await interaction.editReply({ content: 'There are no birthdays shared for this server.', ephemeral: true });
 			}
 
 			let birthdays = birthdayAnnouncements.map(birthday => {
 				return `<@${birthday.userId}>: <t:${Math.round(birthday.birthdayTime.getTime() / 1000)}:f>`;
 			});
 
-			return interaction.editReply({ content: `Shared birthdays for this server:\n${birthdays.join('\n')}`, ephemeral: true });
+			return await interaction.editReply({ content: `Shared birthdays for this server:\n${birthdays.join('\n')}`, ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'channel') {
 			//There is only one argument so we can set the channelId to the first argument
 			let channel = interaction.options.getChannel('set', true);
 
 			if (channel.type !== 0) {
-				return interaction.editReply({ content: 'The channel has to be a text channel.', ephemeral: true });
+				return await interaction.editReply({ content: 'The channel has to be a text channel.', ephemeral: true });
 			}
 
 			if (!guild) {
@@ -187,7 +187,7 @@ module.exports = {
 
 			guild.birthdayMessageChannel = channel.id;
 			guild.save();
-			return interaction.editReply({ content: `Birthday announcements channel has been set to ${channel}`, ephemeral: true });
+			return await interaction.editReply({ content: `Birthday announcements channel has been set to ${channel}`, ephemeral: true });
 		}
 	}
 };

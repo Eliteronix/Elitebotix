@@ -183,7 +183,7 @@ module.exports = {
 		});
 
 		if (multiMatchesPlayed.length === 0) {
-			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
+			return await interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
 		}
 
 		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores all scores');
@@ -317,7 +317,7 @@ module.exports = {
 			// }
 
 			if (new Date() - lastUpdate > 15000) {
-				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				lastUpdate = new Date();
 			}
 
@@ -720,6 +720,6 @@ module.exports = {
 		//Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];
 
-		return interaction.editReply({ content: ' ', files: files });
+		return await interaction.editReply({ content: ' ', files: files });
 	},
 };

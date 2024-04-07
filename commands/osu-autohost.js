@@ -1,6 +1,6 @@
 const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBDiscordUsers, DBProcessQueue, DBOsuMultiGames, DBOsuMultiGameScores, } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBOsuMultiGameScores, } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -219,7 +219,7 @@ module.exports = {
 			commandUser = commandConfig[0];
 
 			if (!commandUser || commandUser && !commandUser.osuUserId || commandUser && commandUser.osuVerified !== true) {
-				return interaction.editReply(`Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> [https://discord.gg/Asz5Gfe Discord]`);
+				return await interaction.editReply(`Please connect and verify your account with the bot on discord as a backup by using: </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> [https://discord.gg/Asz5Gfe Discord]`);
 			}
 		} else {
 			await msg.user.fetchFromAPI();

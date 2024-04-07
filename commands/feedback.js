@@ -79,19 +79,19 @@ module.exports = {
 		if (type === 'bug') {
 			createJiraIssue('10006', `[BUG] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
-			return interaction.editReply('Your bug report was sent to the developers.');
+			return await interaction.editReply('Your bug report was sent to the developers.');
 		} else if (type === 'feature') {
 			createJiraIssue('10007', `[FEATURE] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
-			return interaction.editReply('Your feature-request was sent to the developers.');
+			return await interaction.editReply('Your feature-request was sent to the developers.');
 		} else if (type === 'feedback') {
 			createJiraIssue('10005', `[FEEDBACK] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
-			return interaction.editReply('Your feedback has been sent to the developers.');
+			return await interaction.editReply('Your feedback has been sent to the developers.');
 		} else if (type === 'question') {
 			createJiraIssue('10008', `[QUESTION] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
-			return interaction.editReply('Your question has been sent to the developers. They will respond to you as soon as possible.');
+			return await interaction.editReply('Your question has been sent to the developers. They will respond to you as soon as possible.');
 		}
 	},
 };

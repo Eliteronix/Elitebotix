@@ -182,7 +182,7 @@ module.exports = {
 
 		//reminders check
 		if (reminders.length === 0) {
-			return interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
 
 		let userReminderId;
@@ -219,7 +219,7 @@ module.exports = {
 		try {
 			reminderDate = reminders[Number(userReminderId) - 1].date;
 		} catch (error) {
-			return interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
 		}
 
 		if (years || months || weeks || days || hours || minutes) {
@@ -239,7 +239,7 @@ module.exports = {
 			try {
 				reminderId = reminders[Number(userReminderId) - 1].id;
 			} catch (error) {
-				return interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
+				return await interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
 			}
 			//If no reminder with the given Id
 			//destroy previous reminder
@@ -254,7 +254,7 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/reminders-edit.js DBProcessQueue create');
 			DBProcessQueue.create({ id: reminderId, guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${userReminderMessage}`, date: userReminderDate });
 
-			return interaction.editReply({
+			return await interaction.editReply({
 				content: `Your reminder has been successfully edited.\nNew message: \`${userReminderMessage}\`\nNew date: \`${userReminderDate.toLocaleTimeString('en-UK', {
 					day: 'numeric', // numeric, 2-digit
 					year: 'numeric', // numeric, 2-digit

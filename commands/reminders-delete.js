@@ -80,7 +80,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
-			return interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
 
 		try {
@@ -94,12 +94,12 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('Reminder has been successfully deleted');
 			}
-			return interaction.editReply({ content: 'Reminder has been successfully deleted', ephemeral: true });
+			return await interaction.editReply({ content: 'Reminder has been successfully deleted', ephemeral: true });
 		} catch (error) {
 			if (msg.id) {
 				return msg.reply('There are no reminders with the given ID');
 			}
-			return interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
 		}
 
 	}

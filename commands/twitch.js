@@ -205,7 +205,7 @@ module.exports = {
 			});
 
 			if (!discordUser || !discordUser.twitchName) {
-				return interaction.editReply('You don\'t have a twitch account linked to your discord account.');
+				return await interaction.editReply('You don\'t have a twitch account linked to your discord account.');
 			}
 
 			discordUser.twitchName = null;
@@ -240,7 +240,7 @@ module.exports = {
 				await interaction.editReply('!mp is now disabled.');
 			} else {
 				discordUser.twitchOsuMatchCommand = true;
-				interaction.editReply('!mp is now enabled. Be sure to mod or vip `Elitebotix` in your twitch channel.');
+				await interaction.editReply('!mp is now enabled. Be sure to mod or vip `Elitebotix` in your twitch channel.');
 
 				if (logBroadcastEval) {
 					// eslint-disable-next-line no-console

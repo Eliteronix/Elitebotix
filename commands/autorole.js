@@ -124,13 +124,13 @@ module.exports = {
 			});
 
 			if (autoRole) {
-				return interaction.editReply(`${role.name} is already an autorole.`);
+				return await interaction.editReply(`${role.name} is already an autorole.`);
 			}
 
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add create');
 			await DBAutoRoles.create({ guildId: interaction.guildId, roleId: role.id });
 
-			interaction.editReply(`${role.name} has been added as an autorole.`);
+			await interaction.editReply(`${role.name} has been added as an autorole.`);
 
 			let guildMembers = null;
 
@@ -157,9 +157,9 @@ module.exports = {
 			const rowCount = await DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
 
 			if (rowCount > 0) {
-				return interaction.editReply(`${role.name} has been removed from autoroles.`);
+				return await interaction.editReply(`${role.name} has been removed from autoroles.`);
 			} else {
-				return interaction.editReply(`${role.name} was no autorole.`);
+				return await interaction.editReply(`${role.name} was no autorole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list');
@@ -186,7 +186,7 @@ module.exports = {
 
 			const autoRolesString = autoRolesList.join(', ') || 'No autoroles found.';
 
-			return interaction.editReply(`List of autoroles: ${autoRolesString}`);
+			return await interaction.editReply(`List of autoroles: ${autoRolesString}`);
 		}
 
 	},

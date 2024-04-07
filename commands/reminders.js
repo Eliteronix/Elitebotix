@@ -62,7 +62,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
-			return interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
 		}
 
 		let setReminders = [];
@@ -91,6 +91,6 @@ module.exports = {
 					return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 				});
 		}
-		return interaction.editReply({ content: message, ephemeral: true });
+		return await interaction.editReply({ content: message, ephemeral: true });
 	}
 };

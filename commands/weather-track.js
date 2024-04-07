@@ -237,7 +237,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(trackingListString || 'No weather tracking tasks found in this channel.');
 			}
-			return interaction.editReply(trackingListString || 'No weather tracking tasks found in this channel.');
+			return await interaction.editReply(trackingListString || 'No weather tracking tasks found in this channel.');
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
 			//TODO: add attributes and logdatabasequeries
@@ -263,13 +263,13 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('The specified tracker has been removed.');
 					}
-					return interaction.editReply('The specified tracker has been removed.');
+					return await interaction.editReply('The specified tracker has been removed.');
 				}
 			}
 			if (msg.id) {
 				return msg.reply('Couldn\'t find a weather tracker to remove.');
 			}
-			return interaction.editReply('Couldn\'t find a weather tracker to remove.');
+			return await interaction.editReply('Couldn\'t find a weather tracker to remove.');
 		} else if (args[0].toLowerCase() === 'hourly') {
 			timePeriod = 'hourly';
 			args.shift();
@@ -295,7 +295,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 				}
-				return interaction.editReply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+				return await interaction.editReply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
 			}
 
 			let date = new Date();
@@ -320,7 +320,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
 				}
-				return interaction.editReply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
+				return await interaction.editReply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
 			}
 
 			if (timePeriod === 'hourly') {
@@ -337,7 +337,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 					}
-					return interaction.editReply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
+					return await interaction.editReply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 				}
 			} else {
 				//TODO: add attributes and logdatabasequeries
@@ -353,7 +353,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
 					}
-					return interaction.editReply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
+					return await interaction.editReply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
 				}
 			}
 
@@ -363,7 +363,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
 			}
-			return interaction.editReply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
+			return await interaction.editReply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
 		});
 	},
 };

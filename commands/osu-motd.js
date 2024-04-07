@@ -558,7 +558,7 @@ module.exports = {
 				}
 
 				if (mappool.length !== 10) {
-					return interaction.editReply('You need to provide exactly 10 maps if you want to use a custom mappool!');
+					return await interaction.editReply('You need to provide exactly 10 maps if you want to use a custom mappool!');
 				}
 			}
 		}
@@ -594,7 +594,7 @@ module.exports = {
 
 			//Return if at least one player wasn't found
 			if (playersNotFound.length > 0) {
-				return interaction.editReply(`The following players were not found: ${playersNotFound.join(', ')}\nThe custom MOTD has been aborted.`);
+				return await interaction.editReply(`The following players were not found: ${playersNotFound.join(', ')}\nThe custom MOTD has been aborted.`);
 			}
 
 			//Check if there are any duplicate players
@@ -609,7 +609,7 @@ module.exports = {
 
 			//Return if there are any duplicate players
 			if (duplicatePlayers.length > 0) {
-				return interaction.editReply(`The following players have been mentioned multiple times: ${duplicatePlayers.join(', ')}\nThe custom MOTD has been aborted.`);
+				return await interaction.editReply(`The following players have been mentioned multiple times: ${duplicatePlayers.join(', ')}\nThe custom MOTD has been aborted.`);
 			}
 
 			//Get the related discordUser from the db for each player
@@ -637,7 +637,7 @@ module.exports = {
 
 			//Return if at least one player isn't connected to the bot
 			if (playersNotConnected.length > 0) {
-				return interaction.editReply(`The following players are not connected to the bot: ${playersNotConnected.join(', ')}\nThe custom MOTD has been aborted.`);
+				return await interaction.editReply(`The following players are not connected to the bot: ${playersNotConnected.join(', ')}\nThe custom MOTD has been aborted.`);
 			}
 
 			//Get the related user on discord for each discorduser
@@ -674,7 +674,7 @@ module.exports = {
 
 			//Return if at least one user isn't reachable
 			if (unreachableUsers.length > 0) {
-				return interaction.editReply(`The following users are not reachable: ${unreachableUsers.join(', ')}\nThe custom MOTD has been aborted.`);
+				return await interaction.editReply(`The following users are not reachable: ${unreachableUsers.join(', ')}\nThe custom MOTD has been aborted.`);
 			}
 
 			//Push the chosen maps in correct order
@@ -975,7 +975,7 @@ module.exports = {
 				mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 			}
 
-			interaction.editReply({ embeds: [mappoolEmbed] });
+			await interaction.editReply({ embeds: [mappoolEmbed] });
 
 			//Start the knockout lobby
 			const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
@@ -1339,7 +1339,7 @@ module.exports = {
 						mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 					}
 
-					interaction.editReply({ embeds: [mappoolEmbed] });
+					await interaction.editReply({ embeds: [mappoolEmbed] });
 				} else {
 					reaction.users.remove(user.id);
 					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using </osu-link connect:${embedMessage.client.slashCommandData.find(command => command.name === 'osu-link').id}> and try again.`);
@@ -1348,10 +1348,10 @@ module.exports = {
 				}
 			});
 
-			collector.on('end', () => {
+			collector.on('end', async () => {
 				embedMessage.reactions.removeAll();
 				if (discordUsers.length < 2) {
-					return interaction.editReply({ content: 'Less than 2 players signed up. The custom MOTD has been aborted.', embeds: [] });
+					return await interaction.editReply({ content: 'Less than 2 players signed up. The custom MOTD has been aborted.', embeds: [] });
 				}
 
 				//Edit embed
@@ -1376,7 +1376,7 @@ module.exports = {
 					mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 				}
 
-				interaction.editReply({ embeds: [mappoolEmbed] });
+				await interaction.editReply({ embeds: [mappoolEmbed] });
 
 				//Start the knockout lobby
 				const { knockoutLobby } = require('../MOTD/knockoutLobby.js');

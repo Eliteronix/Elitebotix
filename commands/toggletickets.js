@@ -56,15 +56,15 @@ module.exports = {
 
 			//output change
 			if (guild.ticketsEnabled) {
-				interaction.editReply('Tickets have been enabled');
+				await interaction.editReply('Tickets have been enabled');
 			} else {
-				interaction.editReply('Tickets have been disabled');
+				await interaction.editReply('Tickets have been disabled');
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
 			logDatabaseQueries(4, 'commands/toggletickets.js DBGuilds create');
 			DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, ticketsEnabled: true });
-			interaction.editReply('Tickets have been enabled');
+			await interaction.editReply('Tickets have been enabled');
 		}
 	},
 };

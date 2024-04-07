@@ -131,7 +131,7 @@ module.exports = {
 					});
 				}
 
-				return interaction.editReply('Standard has been set as your main mode.');
+				return await interaction.editReply('Standard has been set as your main mode.');
 			} else if (mode === 'taiko') {
 				if (discordUser) {
 					discordUser.osuMainMode = 1;
@@ -144,7 +144,7 @@ module.exports = {
 					});
 				}
 
-				return interaction.editReply('Taiko has been set as your main mode.');
+				return await interaction.editReply('Taiko has been set as your main mode.');
 			} else if (mode === 'catch') {
 				if (discordUser) {
 					discordUser.osuMainMode = 2;
@@ -157,7 +157,7 @@ module.exports = {
 					});
 				}
 
-				return interaction.editReply('Catch has been set as your main mode.');
+				return await interaction.editReply('Catch has been set as your main mode.');
 			} else if (mode === 'mania') {
 				if (discordUser) {
 					discordUser.osuMainMode = 3;
@@ -170,7 +170,7 @@ module.exports = {
 					});
 				}
 
-				return interaction.editReply('Mania has been set as your main mode.');
+				return await interaction.editReply('Mania has been set as your main mode.');
 			}
 		} else if (interaction.options.getSubcommand() === 'server') {
 			let server = interaction.options.getString('server');
@@ -187,7 +187,7 @@ module.exports = {
 					});
 				}
 
-				return interaction.editReply('Bancho has been set as your main server.');
+				return await interaction.editReply('Bancho has been set as your main server.');
 			} else if (server === 'ripple') {
 				if (discordUser) {
 					discordUser.osuMainServer = 'ripple';
@@ -200,7 +200,7 @@ module.exports = {
 					});
 				}
 
-				return interaction.editReply('Ripple has been set as your main server.');
+				return await interaction.editReply('Ripple has been set as your main server.');
 			}
 		}
 	},

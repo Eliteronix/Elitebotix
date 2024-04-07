@@ -148,7 +148,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`The starboard is already enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 					}
-					return interaction.editReply(`The starboard is already enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
+					return await interaction.editReply(`The starboard is already enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 				} else {
 					if (!guild.starBoardMinimum) {
 						guild.starBoardMinimum = 3;
@@ -161,7 +161,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 					}
-					return interaction.editReply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
+					return await interaction.editReply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 				}
 			} else {
 				logDatabaseQueries(4, 'commands/starboard.js DBGuilds create 1');
@@ -169,7 +169,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of 3 stars.`);
 				}
-				return interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of 3 stars.`);
+				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of 3 stars.`);
 			}
 		} else if (args[0].toLowerCase() === 'disable') {
 			if (guild) {
@@ -179,25 +179,25 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('The starboard is has been disabled on this server.');
 					}
-					return interaction.editReply('The starboard is has been disabled on this server.');
+					return await interaction.editReply('The starboard is has been disabled on this server.');
 				} else {
 					if (msg.id) {
 						return msg.reply('The starboard is not enabled on this server.');
 					}
-					return interaction.editReply('The starboard is not enabled on this server.');
+					return await interaction.editReply('The starboard is not enabled on this server.');
 				}
 			} else {
 				if (msg.id) {
 					return msg.reply('The starboard is not enabled on this server.');
 				}
-				return interaction.editReply('The starboard is not enabled on this server.');
+				return await interaction.editReply('The starboard is not enabled on this server.');
 			}
 		} else if (args[0].toLowerCase() === 'channel') {
 			if (!msg.mentions.channels.first()) {
 				if (msg.id) {
 					return msg.reply('Please mention a channel where the highlighted messages should be sent into.');
 				}
-				return interaction.editReply('Please mention a channel where the highlighted messages should be sent into.');
+				return await interaction.editReply('Please mention a channel where the highlighted messages should be sent into.');
 			}
 			if (guild) {
 				guild.starBoardEnabled = true;
@@ -209,21 +209,21 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 				}
-				return interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
+				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 			} else {
 				logDatabaseQueries(4, 'commands/starboard.js DBGuilds create 2');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.mentions.channels.first().id });
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of 3 stars.`);
 				}
-				return interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of 3 stars.`);
+				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of 3 stars.`);
 			}
 		} else if (args[0].toLowerCase() === 'minimum') {
 			if (!args[1] || isNaN(args[1]) || parseInt(args[1]) < 1) {
 				if (msg.id) {
 					return msg.reply('Please provide a valid number (at least 1) that should be the minimum requirement for highlighting the message.');
 				}
-				return interaction.editReply('Please provide a valid number (at least 1) that should be the minimum requirement for highlighting the message.');
+				return await interaction.editReply('Please provide a valid number (at least 1) that should be the minimum requirement for highlighting the message.');
 			}
 			if (guild) {
 				guild.starBoardEnabled = true;
@@ -235,14 +235,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 				}
-				return interaction.editReply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${parseInt(args[1])} stars.`);
+				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 			} else {
 				logDatabaseQueries(4, 'commands/starboard.js DBGuilds create 3');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: parseInt(args[1]), starBoardChannel: msg.channel.id });
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 				}
-				return interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of ${parseInt(args[1])} stars.`);
+				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 			}
 		} else {
 			msg.reply(`Please specify what setting about the starboard you would like to change.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);

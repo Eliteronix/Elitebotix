@@ -134,12 +134,12 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 					}
-					return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
+					return await interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 				} else {
 					if (msg.id) {
 						return msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will NOT be created alongside for all the members in the voices.\n To enable this type \`${guildPrefix}tempvoice text enable\``);
 					}
-					return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will NOT be created alongside for all the members in the voices.\n To enable this type \`${guildPrefix}tempvoice text enable\``);
+					return await interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will NOT be created alongside for all the members in the voices.\n To enable this type \`${guildPrefix}tempvoice text enable\``);
 				}
 			} else if (args[0] === 'disable') {
 				guild.temporaryVoices = false;
@@ -147,7 +147,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Temporary channels have been disabled.');
 				}
-				return interaction.editReply('Temporary channels have been disabled.');
+				return await interaction.editReply('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
@@ -177,19 +177,19 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('Text channels will now be created alongside temporary voice channels.');
 					}
-					return interaction.editReply('Text channels will now be created alongside temporary voice channels.');
+					return await interaction.editReply('Text channels will now be created alongside temporary voice channels.');
 				} else if (args[1] === 'disable') {
 					guild.addTemporaryText = false;
 					guild.save();
 					if (msg.id) {
 						return msg.reply('Text channels will NOT be created alongside temporary voice channels.');
 					}
-					return interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
+					return await interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
 				} else {
 					if (msg.id) {
 						return msg.reply('Please specify if you want to enable or disable the textchannel creation.');
 					}
-					return interaction.editReply('Please specify if you want to enable or disable the textchannel creation.');
+					return await interaction.editReply('Please specify if you want to enable or disable the textchannel creation.');
 				}
 			}
 		} else {
@@ -204,7 +204,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 				}
-				return interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
+				return await interaction.editReply(`Temporary channels have been enabled.\nAdd an \`➕\` to the start of your voicechannel to make it an creating channel.\nExample name: \`➕ Click to create\`\nText channels will be created alongside for all the members in the voices.\nTo disable this type \`${guildPrefix}tempvoice text disable\``);
 			} else if (args[0] === 'disable') {
 				//Create guild in db if it wasn't there yet
 				logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 2');
@@ -212,7 +212,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Temporary channels have been disabled.');
 				}
-				return interaction.editReply('Temporary channels have been disabled.');
+				return await interaction.editReply('Temporary channels have been disabled.');
 			} else if (args[0] === 'text') {
 				if (args[1] === 'enable') {
 					//Check permissions of the bot
@@ -237,7 +237,7 @@ module.exports = {
 						if (msg.id) {
 							return msg.reply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
 						}
-						return interaction.editReply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
+						return await interaction.editReply('I need Administrator permissions to ensure the proper visibility of temporary text channels for only the relevant users!');
 					}
 
 					//Create guild in db if it wasn't there yet
@@ -246,7 +246,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('Text channels will now be created alongside temporary voice channels.');
 					}
-					return interaction.editReply('Text channels will now be created alongside temporary voice channels.');
+					return await interaction.editReply('Text channels will now be created alongside temporary voice channels.');
 				} else if (args[1] === 'disable') {
 					//Create guild in db if it wasn't there yet
 					logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 4');
@@ -254,7 +254,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('Text channels will NOT be created alongside temporary voice channels.');
 					}
-					return interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
+					return await interaction.editReply('Text channels will NOT be created alongside temporary voice channels.');
 				} else {
 					//Create guild in db if it wasn't there yet
 					logDatabaseQueries(4, 'commands/tempvoice.js DBGuilds create 5');
@@ -262,7 +262,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('Please specify if you want to enable or disable the textchannel creation.');
 					}
-					return interaction.editReply('Please specify if you want to enable or disable the textchannel creation.');
+					return await interaction.editReply('Please specify if you want to enable or disable the textchannel creation.');
 				}
 			}
 		}

@@ -127,6 +127,6 @@ module.exports = {
 			)
 			.setTimestamp();
 
-		return interaction.editReply({ embeds: [guildBotInfoEmbed] });
+		return await interaction.editReply({ embeds: [guildBotInfoEmbed] });
 	},
 };

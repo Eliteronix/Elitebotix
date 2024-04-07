@@ -61,7 +61,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`Seems like you're not registered for the ${currentElitiriCup}`);
 				} else {
-					return interaction.editReply({ content: `Seems like you're not registered for the ${currentElitiriCup}` });
+					return await interaction.editReply({ content: `Seems like you're not registered for the ${currentElitiriCup}` });
 				}
 			}
 
@@ -90,7 +90,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Please make sure your lobby ID is correct');
 				} else {
-					return interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
+					return await interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
 				}
 			}
 
@@ -99,7 +99,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Your qualifier round is over');
 				} else {
-					return interaction.editReply({ content: 'Your qualifier round is over' });
+					return await interaction.editReply({ content: 'Your qualifier round is over' });
 				}
 			} else {
 				date = new Date(roundOverCheck(elitiriSignUp.bracketName, lobbyId.replace(/\D+/, ''))).toUTCString();
@@ -135,7 +135,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('This lobby is full. Please, choose another one');
 				} else {
-					return interaction.editReply({ content: 'This lobby is full. Please, choose another one' });
+					return await interaction.editReply({ content: 'This lobby is full. Please, choose another one' });
 				}
 			}
 
@@ -154,7 +154,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`You are already in lobby ${lobbyId}`);
 				} else {
-					return interaction.editReply({ content: `You are already in lobby ${lobbyId}` });
+					return await interaction.editReply({ content: `You are already in lobby ${lobbyId}` });
 				}
 			}
 
@@ -238,14 +238,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Something went wrong... Please, try again');
 				} else {
-					return interaction.editReply({ content: 'Something went wrong... Please, try again' });
+					return await interaction.editReply({ content: 'Something went wrong... Please, try again' });
 				}
 			}
 
 			if (msg.id) {
 				return msg.reply(`You have successfully claimed lobby \`${lobbyId}\``);
 			} else {
-				return interaction.editReply({ content: `You have successfully claimed lobby \`${lobbyId}\`` });
+				return await interaction.editReply({ content: `You have successfully claimed lobby \`${lobbyId}\`` });
 			}
 
 
@@ -255,7 +255,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Please provide a valid lobby ID');
 				} else {
-					return interaction.editReply({ content: 'Please provide a valid lobby ID' });
+					return await interaction.editReply({ content: 'Please provide a valid lobby ID' });
 				}
 			}
 			let lobbyId = args[0].toUpperCase();
@@ -267,7 +267,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Please make sure your lobby ID is correct');
 				} else {
-					return interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
+					return await interaction.editReply({ content: 'Please make sure your lobby ID is correct' });
 				}
 			}
 			if (args[0].replace(/\d+/, '') == 'DQ-') {
@@ -329,7 +329,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('This qualifier round is over');
 				} else {
-					return interaction.editReply({ content: 'This qualifier round is over' });
+					return await interaction.editReply({ content: 'This qualifier round is over' });
 				}
 			} else {
 				let date = new Date(roundOverCheck(bracketName, lobbyId.replace(/\D+/, ''))).toUTCString();
@@ -351,7 +351,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('You are not allowed to ref your own bracket unless you have lost');
 					} else {
-						return interaction.editReply({ content: 'You are not allowed to ref your own bracket unless you have lost' });
+						return await interaction.editReply({ content: 'You are not allowed to ref your own bracket unless you have lost' });
 					}
 				}
 			}
@@ -360,7 +360,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`You're not a referee for the ${currentElitiriCup}. If you think this is a mistake, please contact head staff of the tournament`);
 				} else {
-					return interaction.editReply({ content: `You're not a referee for the ${currentElitiriCup}. If you think this is a mistake, please contact head staff of the tournament` });
+					return await interaction.editReply({ content: `You're not a referee for the ${currentElitiriCup}. If you think this is a mistake, please contact head staff of the tournament` });
 				}
 			}
 			//TODO: Attributes
@@ -374,13 +374,13 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`This lobby is already been taken by \`${potentialLobby.refOsuName}\`. If you want to take this lobby, please contact them`);
 				} else {
-					return interaction.editReply({ content: `This lobby is already been taken by \`${potentialLobby.refOsuName}\`. If you want to take this lobby, please contact them` });
+					return await interaction.editReply({ content: `This lobby is already been taken by \`${potentialLobby.refOsuName}\`. If you want to take this lobby, please contact them` });
 				}
 			} else if (potentialLobby.refOsuName == discordUser.osuName) {
 				if (msg.id) {
 					return msg.reply(`You have already claimed \`${lobbyId}\` lobby as referee`);
 				} else {
-					return interaction.editReply({ content: `You have already claimed \`${lobbyId}\` lobby as referee` });
+					return await interaction.editReply({ content: `You have already claimed \`${lobbyId}\` lobby as referee` });
 				}
 			}
 
@@ -428,14 +428,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`You successfully claimed \`${lobbyId}\` as referee`);
 				} else {
-					return interaction.editReply({ content: `You successfully claimed \`${lobbyId}\` as referee` });
+					return await interaction.editReply({ content: `You successfully claimed \`${lobbyId}\` as referee` });
 				}
 			} catch (error) {
 				console.error(error);
 				if (msg.id) {
 					return msg.reply('Something went wrong. Please, try again');
 				} else {
-					interaction.editReply({ content: 'Something went wrong. Please, try again' });
+					await interaction.editReply({ content: 'Something went wrong. Please, try again' });
 				}
 
 			}
@@ -446,7 +446,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('Please provide a valid lobby ID');
 				} else {
-					return interaction.editReply({ content: 'Please provide a valid lobby ID' });
+					return await interaction.editReply({ content: 'Please provide a valid lobby ID' });
 				}
 			}
 			//TODO: Attributes
@@ -460,7 +460,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`Lobby \`${lobbyId}\` not found`);
 				} else {
-					return interaction.editReply({ content: `Lobby \`${lobbyId}\` not found` });
+					return await interaction.editReply({ content: `Lobby \`${lobbyId}\` not found` });
 				}
 			}
 
@@ -475,7 +475,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`You are not a referee for \`${lobbyId}\``);
 				} else {
-					return interaction.editReply({ content: `You are not a referee for \`${lobbyId}\`` });
+					return await interaction.editReply({ content: `You are not a referee for \`${lobbyId}\`` });
 				}
 			}
 			potentialLobby.refOsuName = null;
@@ -522,14 +522,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply(`Successfully unassigned you from \`${lobbyId}\``);
 				} else {
-					interaction.editReply({ content: `Successfully unassigned you from \`${lobbyId}\`` });
+					await interaction.editReply({ content: `Successfully unassigned you from \`${lobbyId}\`` });
 				}
 			} catch (error) {
 				console.error(error);
 				if (msg.id) {
 					return msg.reply('Something went wrong. Please, try again');
 				} else {
-					interaction.editReply({ content: 'Something went wrong. Please, try again' });
+					await interaction.editReply({ content: 'Something went wrong. Please, try again' });
 				}
 			}
 		}

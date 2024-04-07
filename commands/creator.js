@@ -77,6 +77,6 @@ module.exports = {
 				{ name: '\u200B', value: '\u200B', inline: true })
 			.setTimestamp();
 
-		return interaction.editReply({ embeds: [creatorInfoEmbed], files: [file] });
+		return await interaction.editReply({ embeds: [creatorInfoEmbed], files: [file] });
 	},
 };

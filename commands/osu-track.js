@@ -800,7 +800,7 @@ module.exports = {
 				await interaction.followUp({ content: `Not tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, ephemeral: true });
 			}
 
-			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
+			return await interaction.editReply({ content: 'Finished processing.', ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			try {
 				await interaction.reply({ content: 'Processing...', ephemeral: true });
@@ -1012,7 +1012,7 @@ module.exports = {
 				await interaction.followUp({ content: `Removed tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, ephemeral: true });
 			}
 
-			return interaction.editReply({ content: 'Finished processing.', ephemeral: true });
+			return await interaction.editReply({ content: 'Finished processing.', ephemeral: true });
 		} else if (interaction.options.getSubcommand() === 'list') {
 			try {
 				await interaction.deferReply({ ephemeral: true });

@@ -110,29 +110,29 @@ module.exports = {
 			if (!guild) {
 				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds current create');
 				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendGoodbyeMessage: false });
-				return interaction.editReply('There is currently no goodbye message set.');
+				return await interaction.editReply('There is currently no goodbye message set.');
 			}
 
 			if (!guild.sendGoodbyeMessage) {
-				return interaction.editReply('There is currently no goodbye message set.');
+				return await interaction.editReply('There is currently no goodbye message set.');
 			}
 
-			return interaction.editReply(`The current goodbye message is set to channel <#${guild.goodbyeMessageChannel}>: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
+			return await interaction.editReply(`The current goodbye message is set to channel <#${guild.goodbyeMessageChannel}>: \`${guild.goodbyeMessageText.replace(/`/g, '')}\``);
 
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
 				logDatabaseQueries(4, 'commands/goodbye-message.js DBGuilds disable create');
 				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendGoodbyeMessage: false });
-				return interaction.editReply('There is currently no goodbye message set.');
+				return await interaction.editReply('There is currently no goodbye message set.');
 			}
 
 			if (!guild.sendGoodbyeMessage) {
-				return interaction.editReply('There is currently no goodbye message set.');
+				return await interaction.editReply('There is currently no goodbye message set.');
 			}
 
 			guild.sendGoodbyeMessage = false;
 			await guild.save();
-			return interaction.editReply('Goodbye messages have been disabled for this server.');
+			return await interaction.editReply('Goodbye messages have been disabled for this server.');
 		} else if (interaction.options.getSubcommand() === 'set') {
 			let message = interaction.options.getString('message');
 
@@ -152,7 +152,7 @@ module.exports = {
 				});
 			}
 
-			return interaction.editReply(`The new message \`${message.replace(/`/g, '')}\` has been set for leaving members in the channel \`${interaction.channel.name}\`.`);
+			return await interaction.editReply(`The new message \`${message.replace(/`/g, '')}\` has been set for leaving members in the channel \`${interaction.channel.name}\`.`);
 		}
 	},
 };

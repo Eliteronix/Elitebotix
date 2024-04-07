@@ -155,7 +155,7 @@ module.exports = {
 				osuUser.osuUserId = parseInt(user.id);
 				osuUser.osuName = user.name;
 			} catch (error) {
-				return interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				return await interaction.editReply(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			}
 		}
 
@@ -179,7 +179,7 @@ module.exports = {
 		multiMatchIds = multiMatchIds.map(match => match.matchId);
 
 		if (multiMatchIds.length === 0) {
-			return interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
+			return await interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 2');
@@ -305,7 +305,7 @@ module.exports = {
 			}
 
 			if (new Date() - lastUpdate > 15000) {
-				interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				lastUpdate = new Date();
 			}
 
@@ -625,7 +625,7 @@ module.exports = {
 
 				for (let i = 0; i < tourneysPlayed.length; i++) {
 					if (new Date() - lastUpdate > 15000) {
-						interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
+						await interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
 						lastUpdate = new Date();
 					}
 
@@ -793,7 +793,7 @@ module.exports = {
 			while (date > oldestScore.gameEndDate) {
 				iterator++;
 				if (new Date() - lastUpdate > 15000) {
-					interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+					await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
 					lastUpdate = new Date();
 				}
 
@@ -1208,6 +1208,6 @@ module.exports = {
 			content = 'Tournament details are currently still in development. This is an early but public release.';
 		}
 
-		return interaction.editReply({ content: content, files: files });
+		return await interaction.editReply({ content: content, files: files });
 	},
 };

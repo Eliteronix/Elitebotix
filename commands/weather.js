@@ -120,7 +120,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply('You must specify a location or set your location');
 					}
-					return interaction.editReply('You must specify a location or set your location');
+					return await interaction.editReply('You must specify a location or set your location');
 				}
 			}
 		}
@@ -136,7 +136,7 @@ module.exports = {
 							if (msg.id) {
 								return msg.reply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
 							}
-							return interaction.editReply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
+							return await interaction.editReply(`Could not find location \`${weatherLocation.replace(/`/g, '')}\``);
 						}
 
 						const weather = result[0];
@@ -217,7 +217,7 @@ module.exports = {
 						if (msg.id) {
 							msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						} else {
-							interaction.editReply({ content: `Weather for ${weather.location.name}`, files: [attachment] });
+							await interaction.editReply({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						}
 
 						return triesBeforeError = Infinity;

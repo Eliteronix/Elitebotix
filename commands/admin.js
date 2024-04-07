@@ -105,7 +105,7 @@ module.exports = {
 
 			return await command.execute(interaction);
 		} catch (error) {
-			interaction.editReply('There was an error trying to execute that command!');
+			await interaction.editReply('There was an error trying to execute that command!');
 			return console.error(error);
 		}
 	},

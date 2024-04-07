@@ -176,11 +176,11 @@ module.exports = {
 			});
 
 			if (activityRole) {
-				return interaction.editReply(`${role.name} is already an activityrole.`);
+				return await interaction.editReply(`${role.name} is already an activityrole.`);
 			}
 
 			if (!rank && !percentage && !points) {
-				return interaction.editReply('Please declare conditions using the at least one of the optional arguments.');
+				return await interaction.editReply('Please declare conditions using the at least one of the optional arguments.');
 			}
 
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add create');
@@ -193,7 +193,7 @@ module.exports = {
 				await DBProcessQueue.create({ guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 });
 			}
 
-			return interaction.editReply(`${role.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
+			return await interaction.editReply(`${role.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles remove');
 			const rowCount = await DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
@@ -205,9 +205,9 @@ module.exports = {
 						member.roles.remove(role.id);
 					}
 				});
-				return interaction.editReply(`${role.name} has been removed from activityroles.`);
+				return await interaction.editReply(`${role.name} has been removed from activityroles.`);
 			} else {
-				return interaction.editReply(`${role.name} was no activityrole.`);
+				return await interaction.editReply(`${role.name} was no activityrole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
 			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list');
@@ -262,7 +262,7 @@ module.exports = {
 			}
 
 			//Output activityrole list
-			return interaction.editReply(`List of activityroles: ${activityRolesString}`);
+			return await interaction.editReply(`List of activityroles: ${activityRolesString}`);
 		}
 	},
 };

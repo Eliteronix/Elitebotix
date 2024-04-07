@@ -1006,13 +1006,13 @@ module.exports = {
 						if (i === 4) {
 							if (e === 'No standard plays') {
 								if (interaction.id) {
-									return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+									return await interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
 								} else {
 									return processingMessage.edit(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
 								}
 							} else {
 								if (interaction.id) {
-									return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+									return await interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
 								} else {
 									return processingMessage.edit('The API seems to be running into errors right now.\nPlease try again later.');
 								}
@@ -1722,9 +1722,9 @@ module.exports = {
 					} catch (e) {
 						if (i === 4) {
 							if (e === 'No standard plays') {
-								return interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
+								return await interaction.editReply(`Could not find any standard plays for user \`${osuUser.name.replace(/`/g, '')}\`.\nPlease try again later.`);
 							} else {
-								return interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+								return await interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
 							}
 						} else {
 							await pause(15000);
@@ -2186,7 +2186,7 @@ module.exports = {
 					guildName = `${interaction.guild.name}'s`;
 				}
 
-				interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
+				await interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
 			} else if (interaction.options._subcommand === 'rating-updates') {
 				try {
 					await interaction.deferReply({ ephemeral: true });
@@ -2214,28 +2214,28 @@ module.exports = {
 				});
 
 				if (!discordUser || !discordUser.osuUserId) {
-					return interaction.editReply('You must link your osu! account before using this command.');
+					return await interaction.editReply('You must link your osu! account before using this command.');
 				}
 
 				if (enable) {
 					if (discordUser.osuDuelRatingUpdates) {
-						return interaction.editReply('You are already receiving osu! Duel rating updates.');
+						return await interaction.editReply('You are already receiving osu! Duel rating updates.');
 					}
 
 					discordUser.osuDuelRatingUpdates = true;
 					await discordUser.save();
 
-					return interaction.editReply('You will now receive osu! Duel rating updates.');
+					return await interaction.editReply('You will now receive osu! Duel rating updates.');
 				}
 
 				if (!discordUser.osuDuelRatingUpdates) {
-					return interaction.editReply('You are not receiving osu! Duel rating updates.');
+					return await interaction.editReply('You are not receiving osu! Duel rating updates.');
 				}
 
 				discordUser.osuDuelRatingUpdates = false;
 				await discordUser.save();
 
-				return interaction.editReply('You will no longer receive osu! Duel rating updates.');
+				return await interaction.editReply('You will no longer receive osu! Duel rating updates.');
 			} else if (interaction.options._subcommand === 'queue1v1') {
 				try {
 					await interaction.deferReply({ ephemeral: true });

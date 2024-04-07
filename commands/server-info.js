@@ -50,6 +50,6 @@ module.exports = {
 			guildInfoEmbed.setThumbnail(`${interaction.guild.iconURL()}`);
 		}
 
-		return interaction.editReply({ embeds: [guildInfoEmbed] });
+		return await interaction.editReply({ embeds: [guildInfoEmbed] });
 	},
 };

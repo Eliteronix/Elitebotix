@@ -213,7 +213,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 			}
-			return interaction.editReply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, ephemeral: true });
+			return await interaction.editReply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, ephemeral: true });
 		}
 
 		if (now.getTime() === date.getTime()) {
@@ -221,7 +221,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 			}
-			return interaction.editReply({ content: 'You didn\'t specify when I should remind you.', ephemeral: true });
+			return await interaction.editReply({ content: 'You didn\'t specify when I should remind you.', ephemeral: true });
 		}
 
 		logDatabaseQueries(4, 'commands/remindme.js DBProcessQueue create');
@@ -231,6 +231,6 @@ module.exports = {
 			return msg.reply('Reminder has been set. Be sure to have DMs enabled for the bot.');
 		}
 
-		return interaction.editReply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });
+		return await interaction.editReply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });
 	},
 };

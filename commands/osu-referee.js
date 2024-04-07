@@ -815,7 +815,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue create');
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
-			return interaction.editReply(`The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:${interaction.client.slashCommandData.find(command => command.name === 'osu-referee').id}>`);
+			return await interaction.editReply(`The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:${interaction.client.slashCommandData.find(command => command.name === 'osu-referee').id}>`);
 		} else if (interaction.options.getSubcommand() === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
