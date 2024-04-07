@@ -7,7 +7,7 @@ module.exports = {
 	usage: '<incomplete/all/osuUserId>',
 	async execute(interaction) {
 		if (!interaction.options.getString('argument')) {
-			return interaction.reply('Please provide an argument.');
+			return await interaction.reply('Please provide an argument.');
 		}
 
 		const argument = interaction.options.getString('argument');

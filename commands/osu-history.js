@@ -77,10 +77,6 @@ module.exports = {
 		),
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
-		// if (interaction.options.getBoolean('showtournamentdetails')) {
-		// 	return interaction.reply('`showtournamentdetails` is currently causing issues and is disabled until it is fixed.');
-		// }
-
 		try {
 			await interaction.deferReply();
 		} catch (error) {

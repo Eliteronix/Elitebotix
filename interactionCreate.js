@@ -51,13 +51,13 @@ module.exports = async function (client, bancho, interaction) {
 			const botPermissions = interaction.channel.permissionsFor(member);
 			if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.ViewChannel)) {
 				//The bot can't possibly answer the message
-				return interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });
+				return await interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });
 			}
 
 			//Check the command permissions
 			if (command.botPermissions) {
 				if (!botPermissions.has(command.botPermissions)) {
-					return interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
+					return await interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
 				}
 			}
 		}
@@ -83,7 +83,7 @@ module.exports = async function (client, bancho, interaction) {
 				return;
 			} else if (now < expirationTime) {
 				const timeLeft = (expirationTime - now) / 1000;
-				return interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, ephemeral: true });
+				return await interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, ephemeral: true });
 			}
 		}
 
