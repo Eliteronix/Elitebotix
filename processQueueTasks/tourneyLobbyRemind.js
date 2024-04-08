@@ -16,7 +16,7 @@ module.exports = {
 		let date = new Date(args[3]);
 
 		if (user) {
-			user.send(`The lobby \`${args[1]}\` in ${args[2]} is going to happen <t:${date}:R>\nThe players are: ${playerNames}`);
+			await user.send(`The lobby \`${args[1]}\` in ${args[2]} is going to happen <t:${date}:R>\nThe players are: ${playerNames}`);
 		}
 		processQueueEntry.destroy();
 	},

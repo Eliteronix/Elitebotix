@@ -67,7 +67,7 @@ module.exports = {
 
 				console.log(`[${c.shardId}] Sending match notification to ${dbPlayers.join(', ')} for match ${args[5]} at ${matchTime} (invite send time: ${inviteSendTime})`);
 				// eslint-disable-next-line no-undef
-				channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts <t:${Date.parse(matchTime) / 1000}:R>. Invites will be sent <t:${inviteSendTime}:R>.\nIngame invites will be sent out by \`${process.env.OSUNAME}\` - be sure to allow DMs on discord as a backup.`);
+				await channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts <t:${Date.parse(matchTime) / 1000}:R>. Invites will be sent <t:${inviteSendTime}:R>.\nIngame invites will be sent out by \`${process.env.OSUNAME}\` - be sure to allow DMs on discord as a backup.`);
 				logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue create');
 				DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: 'tourneyMatchReferee', priority: 10, additions: processQueueEntry.additions, date: inviteTime });
 			}
@@ -89,7 +89,7 @@ module.exports = {
 				dbPlayers.push(dbDiscordUser.osuName);
 			}
 			let user = await client.users.fetch(args[0]);
-			user.send(`The defined discord channel for a scheduled match could not be found anymore and therefore the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[2]}`);
+			await user.send(`The defined discord channel for a scheduled match could not be found anymore and therefore the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${dbPlayers.join(', ')}\nMappool: ${args[2]}`);
 		}
 
 		processQueueEntry.destroy();

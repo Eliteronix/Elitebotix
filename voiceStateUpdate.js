@@ -26,7 +26,7 @@ module.exports = async function (oldMember, newMember) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error(error);
 			}
@@ -60,7 +60,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: servermute' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -82,7 +82,7 @@ module.exports = async function (oldMember, newMember) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error(error);
 			}
@@ -116,7 +116,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: serverdeaf' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -138,7 +138,7 @@ module.exports = async function (oldMember, newMember) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error(error);
 			}
@@ -172,7 +172,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: joinvoice' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 
 		if (guild && oldMember.channelId && guild.loggingChannel && guild.loggingLeaveVoice) {
@@ -184,7 +184,7 @@ module.exports = async function (oldMember, newMember) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newMember.client.users.fetch(newMember.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error(error);
 			}
@@ -218,7 +218,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: leavevoice' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -258,7 +258,7 @@ module.exports = async function (oldMember, newMember) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-						return owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
+						return await owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
 					} else {
 						return console.error(e);
 					}
@@ -278,7 +278,7 @@ module.exports = async function (oldMember, newMember) {
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-							return owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
+							return await owner.send(`I could not create a new temporary voicechannel because I am missing the \`Manage Channels\` permission on \`${member.guild.name}\`.`);
 						} else {
 							return console.error(e);
 						}
@@ -344,7 +344,7 @@ module.exports = async function (oldMember, newMember) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-						return owner.send(`I could not move a user to their temporary voicechannel because I am missing the \`Move Members\` permission on \`${member.guild.name}\`.`);
+						return await owner.send(`I could not move a user to their temporary voicechannel because I am missing the \`Move Members\` permission on \`${member.guild.name}\`.`);
 					} else if (e.message === 'Target user is not connected to voice.') {
 						if (createdText) {
 							try {
@@ -352,7 +352,7 @@ module.exports = async function (oldMember, newMember) {
 							} catch (e) {
 								if (e.message === 'Missing Access') {
 									const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
-									return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
+									return await owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
 								} else {
 									return console.error(e);
 								}
@@ -363,7 +363,7 @@ module.exports = async function (oldMember, newMember) {
 						} catch (e) {
 							if (e.message === 'Missing Access') {
 								const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
-								return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
+								return await owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${newMember.guild.name}\`.`);
 							} else {
 								return console.error(e);
 							}
@@ -379,7 +379,7 @@ module.exports = async function (oldMember, newMember) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-						return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+						return await owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 					} else {
 						return console.error(e);
 					}
@@ -417,12 +417,12 @@ module.exports = async function (oldMember, newMember) {
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-							return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+							return await owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${member.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 						} else if (e.message !== 'Unknown Channel') { //Channel might be deleted already
 							return console.error(e);
 						}
 					}
-					createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side.`);
+					await createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side.`);
 				}
 			}
 		}
@@ -440,13 +440,13 @@ module.exports = async function (oldMember, newMember) {
 		} catch (e) {
 			if (e.message === 'Missing Access') {
 				const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
-				return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+				return await owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 			} else {
 				return console.error(e);
 			}
 		}
 		if (textChannel) {
-			textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
+			await textChannel.send(`<@${newMember.id}>, you now have access to this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel. You will also lose access to this channel if you leave the voice channel.`);
 		}
 	}
 
@@ -486,7 +486,7 @@ module.exports = async function (oldMember, newMember) {
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerId);
-							return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
+							return await owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
 						} else {
 							return console.error(e);
 						}
@@ -498,7 +498,7 @@ module.exports = async function (oldMember, newMember) {
 					if (e.message === 'Missing Access') {
 						await dbTemporaryVoices.destroy();
 						const owner = await oldMember.client.users.cache.find(user => user.id === oldMember.guild.ownerId);
-						return owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
+						return await owner.send(`I could not delete a temporary textchannel because I am missing the \`Manage Channels\` permission on \`${oldMember.guild.name}\`.`);
 					} else if (e.message === 'Unknown Channel') {
 						await dbTemporaryVoices.destroy();
 					} else {
@@ -516,7 +516,7 @@ module.exports = async function (oldMember, newMember) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await newMember.client.users.cache.find(user => user.id === newMember.guild.ownerId);
-						return owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
+						return await owner.send(`I could not setup the rights in a new temporary textchannel because I am missing the \`Administrator\` permission on \`${newMember.guild.name}\`. I need the admin permissions because no other permissions are sufficient for setting up the textchannel properly.`);
 					} else {
 						return console.error(e);
 					}

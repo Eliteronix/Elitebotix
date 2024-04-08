@@ -65,7 +65,7 @@ module.exports = async function (oldUser, newUser) {
 						.setTimestamp()
 						.setFooter({ text: 'Eventname: usernames' });
 
-					channel.send({ embeds: [changeEmbed] });
+					await channel.send({ embeds: [changeEmbed] });
 					return 'channel';
 				}, { context: { guildId: guild.guildId, newUser: newUser, oldUser: oldUser } });
 
@@ -78,7 +78,7 @@ module.exports = async function (oldUser, newUser) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newUser.client.users.cache.get(found.split(';')[1]);
-					return owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 			}
 		});
@@ -146,7 +146,7 @@ module.exports = async function (oldUser, newUser) {
 						.setTimestamp()
 						.setFooter({ text: 'Eventname: userdiscriminators' });
 
-					channel.send({ embeds: [changeEmbed] });
+					await channel.send({ embeds: [changeEmbed] });
 					return 'channel';
 				}, { context: { guildId: guild.guildId, newUser: newUser, oldUser: oldUser } });
 
@@ -159,7 +159,7 @@ module.exports = async function (oldUser, newUser) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newUser.client.users.cache.get(found.split(';')[1]);
-					return owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 			}
 		});
@@ -227,7 +227,7 @@ module.exports = async function (oldUser, newUser) {
 						.setTimestamp()
 						.setFooter({ text: 'Eventname: useravatars' });
 
-					channel.send({ embeds: [changeEmbed] });
+					await channel.send({ embeds: [changeEmbed] });
 					return 'channel';
 				}, { context: { guildId: guild.guildId, newUser: newUser, oldUser: oldUser } });
 
@@ -240,7 +240,7 @@ module.exports = async function (oldUser, newUser) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newUser.client.users.cache.get(found.split(';')[1]);
-					return owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${found.split(';')[2]}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 			}
 		});

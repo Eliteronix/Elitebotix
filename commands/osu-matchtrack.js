@@ -88,7 +88,7 @@ module.exports = {
 			} else {
 				const guildPrefix = await getGuildPrefix(msg);
 				if (msg.id) {
-					return msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
+					return await msg.channel.send(`You didn't provide a valid match ID or URL.\nUsage: \`${guildPrefix}${this.name} ${this.usage}\``);
 				} else {
 					return await interaction.editReply(`You didn't provide a valid match ID or URL.\nUsage: \`/${this.name} ${this.usage}\``);
 				}
@@ -102,7 +102,7 @@ module.exports = {
 			.then(async (match) => {
 				if (match.raw_end && !showStart) {
 					if (msg.id) {
-						return msg.channel.send(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
+						return await msg.channel.send(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
 					} else {
 						return await interaction.editReply(`Match \`${match.name.replace(/`/g, '')}\` has already ended.`);
 					}
@@ -131,7 +131,7 @@ module.exports = {
 				reactionCollector.on('end', async () => {
 					stop = true;
 					initialMessage.reactions.removeAll().catch(() => { });
-					msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
+					await msg.channel.send(`Stopped tracking match \`${match.name.replace(/`/g, '')}\``);
 					if (msg.id) {
 						if (msg.client.matchTracks.includes(matchID)) {
 							msg.client.matchTracks.splice(msg.client.matchTracks.indexOf(matchID), 1);
@@ -552,7 +552,7 @@ module.exports = {
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
-						return msg.channel.send(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
+						return await msg.channel.send(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
 					} else {
 						return await interaction.editReply(`Could not find match \`${matchID.replace(/`/g, '')}\`.`);
 					}

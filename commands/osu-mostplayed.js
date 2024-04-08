@@ -358,7 +358,7 @@ module.exports = {
 						if (discordUser && discordUser.osuUserId) {
 							getMostPlayed(msg, discordUser.osuUserId, server, mode, false, limit);
 						} else {
-							msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
+							await msg.channel.send(`\`${args[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 							getMostPlayed(msg, args[i], server, mode, false, limit);
 						}
 					} else {
@@ -712,9 +712,9 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				processingMessage.delete();
 
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					await msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
@@ -725,7 +725,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 			.then(async (response) => {
 				const responseJson = await response.json();
 				if (!responseJson[0]) {
-					return msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					return await msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				}
 
 				let user = rippleToBanchoUser(responseJson[0]);
@@ -758,9 +758,9 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
 				processingMessage.delete();
 			})
-			.catch(err => {
+			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					await msg.channel.send(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}

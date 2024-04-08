@@ -30,7 +30,7 @@ module.exports = async function (oldMsg, newMsg) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await newMsg.client.users.fetch(newMsg.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${newMsg.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${newMsg.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error('messageUpdate.js | logging' + error);
 		}
@@ -50,7 +50,7 @@ module.exports = async function (oldMsg, newMsg) {
 		if (oldMsg.content !== newMsg.content) {
 			changeEmbed.addFields([{ name: 'Content', value: `\`${oldMsg.content}\` -> \`${newMsg.content}\`` }]);
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 };

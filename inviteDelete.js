@@ -26,7 +26,7 @@ module.exports = async function (invite) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await invite.client.users.fetch(invite.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${invite.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${invite.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error('inviteDelete.js | logging' + error);
 		}
@@ -43,6 +43,6 @@ module.exports = async function (invite) {
 			.setTimestamp()
 			.setFooter({ text: 'Eventname: invitedelete' });
 
-		channel.send({ embeds: [changeEmbed] });
+		await channel.send({ embeds: [changeEmbed] });
 	}
 };

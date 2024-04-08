@@ -444,7 +444,7 @@ module.exports = {
 
 					await setPermissions(msg.channel, ticket);
 
-					msg.channel.send('The Ticket has been closed.');
+					await msg.channel.send('The Ticket has been closed.');
 					if (interaction) {
 						await interaction.editReply('The ticket state has been updated.');
 					} else {
@@ -513,7 +513,7 @@ module.exports = {
 
 			await ticketChannel.send({ embeds: [messageEmbed] });
 
-			ticketChannel.send('Staff will take over shortly.\nPlease make sure to describe your issue as well as possible in the meantime.');
+			await ticketChannel.send('Staff will take over shortly.\nPlease make sure to describe your issue as well as possible in the meantime.');
 
 			if (msg.id) {
 				return msg.delete();

@@ -121,7 +121,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						guild.starBoardEnabled = false;
 						guild.save();
 						const owner = await reaction.message.client.users.fetch(reaction.message.guild.ownerId);
-						return owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
+						return await owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
 					}
 					console.error(error);
 				}
@@ -154,7 +154,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 						guild.starBoardEnabled = false;
 						guild.save();
 						const owner = await reaction.message.client.users.fetch(reaction.message.guild.ownerId);
-						return owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
+						return await owner.send(`It seems like the starboard channel on the guild \`${reaction.message.guild.name}\` has been deleted.\nThe starboard has been deactivated.`);
 					}
 					console.error(error);
 				}
@@ -262,7 +262,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-score.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -302,7 +302,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-score.js');
 
-				if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
+				if (await checkCooldown(reaction, command, user, beatmapId) !== undefined) {
 					return;
 				}
 
@@ -338,7 +338,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-score.js');
 
-				if (checkCooldown(reaction, command, user, beatmapId) !== undefined) {
+				if (await checkCooldown(reaction, command, user, beatmapId) !== undefined) {
 					return;
 				}
 
@@ -395,7 +395,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-beatmap.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -443,7 +443,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-beatmap.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -493,7 +493,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-skills.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -526,7 +526,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
 					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+					await eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 				}
 			}
 		}
@@ -543,7 +543,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-profile.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -582,7 +582,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-profile.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -630,7 +630,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-schedule.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -658,7 +658,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
 					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+					await eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 				}
 			}
 		}
@@ -675,7 +675,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-top.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -715,7 +715,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				let args = [beatmapId, modBits];
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -751,7 +751,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
 					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+					await eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 				}
 			}
 		}
@@ -768,7 +768,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-matchup.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -812,7 +812,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
 					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+					await eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 				}
 			}
 		}
@@ -832,7 +832,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-profile.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -876,7 +876,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-duel.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -908,7 +908,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
 					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-					eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
+					await eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
 				}
 			}
 		}
@@ -967,7 +967,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-beatmap.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -1032,7 +1032,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-beatmap.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -1097,7 +1097,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-beatmap.js');
 
-				if (checkCooldown(reaction, command, user, args) !== undefined) {
+				if (await checkCooldown(reaction, command, user, args) !== undefined) {
 					return;
 				}
 
@@ -1189,7 +1189,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-						return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+						return await owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 					} else {
 						return console.error(e);
 					}
@@ -1246,7 +1246,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-							return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+							return await owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 						} else {
 							return console.error(e);
 						}
@@ -1302,7 +1302,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	try {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
-		msg.channel.send('Couldn\'t find an embed with this EmbedId');
+		await msg.channel.send('Couldn\'t find an embed with this EmbedId');
 		logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader destroy');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
@@ -1325,7 +1325,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		} catch (e) {
 			if (e.message === 'Missing Access') {
 				const owner = await msg.client.users.cache.find(user => user.id === msg.guild.ownerId);
-				return owner.send(`I could not add reactions to a reactionrole-embed because I'm missing the \`Add Reactions\` permission on \`${msg.guild.name}\`.`);
+				return await owner.send(`I could not add reactions to a reactionrole-embed because I'm missing the \`Add Reactions\` permission on \`${msg.guild.name}\`.`);
 			} else {
 				return console.error(e);
 			}
@@ -1334,7 +1334,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 }
 
 
-function checkCooldown(reaction, command, user, args) {
+async function checkCooldown(reaction, command, user, args) {
 	if (!cooldowns.has(command.name + args)) {
 		cooldowns.set(command.name + args, new Discord.Collection());
 	}
@@ -1355,7 +1355,7 @@ function checkCooldown(reaction, command, user, args) {
 			return;
 		} else if (now < expirationTime) {
 			const timeLeft = (expirationTime - now) / 1000;
-			return reaction.message.channel.send(`<@${user.id}>, you need to wait ${timeLeft.toFixed(1)} seconds before you can use this command again.`)
+			return await reaction.message.channel.send(`<@${user.id}>, you need to wait ${timeLeft.toFixed(1)} seconds before you can use this command again.`)
 				.then(async (msg) => {
 					await pause(5000);
 					msg.delete();

@@ -215,7 +215,7 @@ module.exports = {
 						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `elitebotix-weather-${weather.location.name}.png` });
 
 						if (msg.id) {
-							msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });
+							await msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						} else {
 							await interaction.editReply({ content: `Weather for ${weather.location.name}`, files: [attachment] });
 						}

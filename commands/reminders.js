@@ -82,7 +82,7 @@ module.exports = {
 		}
 		if (msg.id) {
 			//Try DM'ing the user
-			return msg.author.send(message, { split: true })
+			return await msg.author.send(message, { split: true })
 				.then(async () => {
 					if (msg.channel.type === Discord.ChannelType.DM) return;
 					msg.reply('You have received a DM with your pending reminders.');

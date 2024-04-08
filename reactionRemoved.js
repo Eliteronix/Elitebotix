@@ -78,7 +78,7 @@ module.exports = async function (reaction, user) {
 				} catch (e) {
 					if (e.message === 'Missing Access') {
 						const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-						return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+						return await owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 					} else {
 						return console.error(e);
 					}
@@ -138,7 +138,7 @@ module.exports = async function (reaction, user) {
 					} catch (e) {
 						if (e.message === 'Missing Access') {
 							const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-							return owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+							return await owner.send(`I could not assign a reactionrole to an user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 						} else {
 							return console.error(e);
 						}
@@ -259,7 +259,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 	try {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
-		msg.channel.send('Couldn\'t find an embed with this EmbedId');
+		await msg.channel.send('Couldn\'t find an embed with this EmbedId');
 		logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader destroy');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
@@ -282,7 +282,7 @@ async function editEmbed(msg, reactionRolesHeader) {
 		} catch (e) {
 			if (e.message === 'Missing Access') {
 				const owner = await msg.client.users.cache.find(user => user.id === msg.guild.ownerId);
-				return owner.send(`I could not add reactions to a reactionrole-embed because I'm missing the \`Add Reactions\` permission on \`${msg.guild.name}\`.`);
+				return await owner.send(`I could not add reactions to a reactionrole-embed because I'm missing the \`Add Reactions\` permission on \`${msg.guild.name}\`.`);
 			} else {
 				return console.error(e);
 			}

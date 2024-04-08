@@ -59,7 +59,7 @@ module.exports = {
 						players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
 					}
 					let user = await client.users.fetch(args[0]);
-					user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
+					await user.send(`I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 
 					if (logBroadcastEval) {
 						// eslint-disable-next-line no-console
@@ -69,7 +69,7 @@ module.exports = {
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
 						let channel = await c.channels.cache.get(channelId);
 						if (channel) {
-							channel.send(message);
+							await channel.send(message);
 						}
 					}, { context: { channelId: args[1], message: `I am having issues creating the lobby and the match has been aborted.\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}` } });
 					return;
@@ -166,7 +166,7 @@ module.exports = {
 			}
 
 			let user = await client.users.fetch(args[0]);
-			user.send(`The scheduled Qualifier match has started. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
+			await user.send(`The scheduled Qualifier match has started. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 		} catch (e) {
 			//Nothing
 		}
@@ -187,7 +187,7 @@ module.exports = {
 			let channel = await c.channels.cache.get(channelId);
 			if (channel) {
 				console.log(`[Shard ${c.shard.ids[0]}] Sending message to ${channelId} [${message}]`);
-				channel.send(message);
+				await channel.send(message);
 			}
 			// eslint-disable-next-line no-undef
 		}, { context: { channelId: args[1], message: `<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.` } });
@@ -285,7 +285,7 @@ module.exports = {
 					}
 
 					let user = await client.users.fetch(args[0]);
-					user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
+					await user.send(`The scheduled Qualifier has been aborted because no one showed up. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`);
 					return await channel.leave();
 				}
 
@@ -555,7 +555,7 @@ module.exports = {
 				let attachment = new Discord.AttachmentBuilder(`./matchLogs/${channel.lobby.id}.txt`, { name: `${channel.lobby.id}.txt` });
 
 				let user = await client.users.fetch(args[0]);
-				user.send({ content: `The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`, files: [attachment] });
+				await user.send({ content: `The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`, files: [attachment] });
 
 				return await channel.leave();
 
@@ -585,7 +585,7 @@ async function messageUserWithRetries(client, user, channelId, content) {
 					client.shard.broadcastEval(async (c, { channelId, message }) => {
 						const channel = await c.channels.cache.get(channelId);
 						if (channel) {
-							channel.send(message);
+							await channel.send(message);
 						}
 					}, { context: { channelId: channelId, message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 				} else {

@@ -26,7 +26,7 @@ module.exports = async function (role) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await role.client.users.fetch(role.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${role.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${role.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error(error);
 		}
@@ -52,6 +52,6 @@ module.exports = async function (role) {
 			.setTimestamp()
 			.setFooter({ text: 'Eventname: rolecreate' });
 
-		channel.send({ embeds: [changeEmbed] });
+		await channel.send({ embeds: [changeEmbed] });
 	}
 };

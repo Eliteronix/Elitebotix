@@ -8,7 +8,7 @@ module.exports = {
 		});
 
 		if (user) {
-			user.send(`Reminder: ${args[1]}`);
+			await user.send(`Reminder: ${args[1]}`);
 		}
 		processQueueEntry.destroy();
 	},

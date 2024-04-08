@@ -26,7 +26,7 @@ module.exports = async function (oldRole, newRole) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await newRole.client.users.fetch(newRole.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${newRole.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${newRole.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error(error);
 		}
@@ -76,6 +76,6 @@ module.exports = async function (oldRole, newRole) {
 			changeEmbed.addFields([{ name: 'Permissions', value: `\`${oldPermissionsReadable}\` -> \`${newPermissionsReadable}\`` }]);
 		}
 
-		channel.send({ embeds: [changeEmbed] });
+		await channel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -30,7 +30,7 @@ module.exports = async function (oldChannel, newChannel) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await newChannel.client.users.fetch(newChannel.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${newChannel.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${newChannel.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error('channelUpdate.js | logging' + error);
 		}
@@ -146,6 +146,6 @@ module.exports = async function (oldChannel, newChannel) {
 			changeEmbed.addFields([{ name: 'Deny', value: permissionsDenyReadable }]);
 		});
 
-		loggingChannel.send({ embeds: [changeEmbed] });
+		await loggingChannel.send({ embeds: [changeEmbed] });
 	}
 };

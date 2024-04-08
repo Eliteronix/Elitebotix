@@ -230,7 +230,7 @@ module.exports = {
 
 async function sendMessage(msg, interaction, content) {
 	if (msg.id) {
-		return msg.author.send(content)
+		return await msg.author.send(content)
 			.then(() => {
 				if (msg.channel.type === Discord.ChannelType.DM) return;
 				msg.reply('I\'ve sent you a DM with some info!');

@@ -27,7 +27,7 @@ module.exports = async function (guildBan) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await guildBan.guild.client.users.fetch(guildBan.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${guildBan.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${guildBan.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error('guildBanAdd.js | logging' + error);
 		}
@@ -43,6 +43,6 @@ module.exports = async function (guildBan) {
 			.setTimestamp()
 			.setFooter({ text: 'Eventname: banadd' });
 
-		channel.send({ embeds: [changeEmbed] });
+		await channel.send({ embeds: [changeEmbed] });
 	}
 };

@@ -28,11 +28,11 @@ module.exports = async function (member) {
 			const guildWelcomeMessageText = guild.welcomeMessageText.replace('@member', '<@' + member.user.id + '>');
 			try {
 				//send the welcome message text into the channel
-				guildWelcomeMessageChannel.send(guildWelcomeMessageText);
+				await guildWelcomeMessageChannel.send(guildWelcomeMessageText);
 			} catch (e) {
 				if (e.message === 'Missing Access') {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-					return owner.send(`I could not send a welcome message for a new user into the channel \`${guildWelcomeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
+					return await owner.send(`I could not send a welcome message for a new user into the channel \`${guildWelcomeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
 					return console.error('guildMemberAdd.js | welcome message' + e);
 				}
@@ -48,7 +48,7 @@ module.exports = async function (member) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await member.message.client.users.fetch(member.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error('guildMemberAdd.js | logging' + error);
 			}
@@ -64,7 +64,7 @@ module.exports = async function (member) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: userjoining' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -89,7 +89,7 @@ module.exports = async function (member) {
 			} catch (e) {
 				if (e.message === 'Missing Access' || e.message === 'Missing Permissions') {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-					return owner.send(`I could not assign an autorole to a new user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
+					return await owner.send(`I could not assign an autorole to a new user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 				} else {
 					return console.error('guildMemberAdd.js | autoroles' + e);
 				}

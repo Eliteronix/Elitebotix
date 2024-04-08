@@ -134,7 +134,7 @@ module.exports = {
 				client.shard.broadcastEval(async (c, { message }) => {
 					const announceChannel = await c.channels.cache.get('893215604503351386');
 					if (announceChannel) {
-						announceChannel.send(message);
+						await announceChannel.send(message);
 					}
 				}, { context: { message: `Lobby #${lobbyNumber}: <https://osu.ppy.sh/mp/${lobby.id}>` } });
 			} catch (error) {
@@ -785,7 +785,7 @@ async function messageUserWithRetries(client, user, content, attachment) {
 					client.shard.broadcastEval(async (c, { message }) => {
 						const channel = await c.channels.cache.get('833803740162949191');
 						if (channel) {
-							channel.send(message);
+							await channel.send(message);
 						}
 					}, { context: { message: `<@${user.id}>, it seems like I can't DM you. Please enable DMs so that I can keep you up to date with the match procedure!` } });
 				} else {

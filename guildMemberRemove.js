@@ -32,11 +32,11 @@ module.exports = async function (member) {
 			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member', member.user.username + '#' + member.user.discriminator);
 			try {
 				//send the goodbye message text into the channel
-				guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
+				await guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);
 			} catch (e) {
 				if (e.message === 'Missing Access') {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
-					return owner.send(`I could not send a goodbye message for a new user into the channel \`${guildGoodbyeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
+					return await owner.send(`I could not send a goodbye message for a new user into the channel \`${guildGoodbyeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
 					return console.error('guildMemberRemove.js | goodbye message' + e);
 				}
@@ -52,7 +52,7 @@ module.exports = async function (member) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await member.message.client.users.fetch(member.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error('guildMemberRemove.js | logging' + error);
 			}
@@ -68,7 +68,7 @@ module.exports = async function (member) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: userleaving' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 		logDatabaseQueries(2, 'guildMemberAdd.js DBBirthdayGuilds destroy');
 		// destroy the guild dataset in the db

@@ -3098,7 +3098,7 @@ module.exports = {
 							});
 
 						// send the birthday message
-						birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
+						await birthdayMessageChannel.send(`<@${userId}> is celebrating their birthday today! :partying_face: :tada:\n${birthdayGif}`);
 						return true;
 					}
 					return false;
@@ -4013,13 +4013,13 @@ module.exports = {
 
 								if (!channel) return;
 
-								channel.send(message);
+								await channel.send(message);
 							}, { context: { message: `\`\`\`${message.join('\n')}\`\`\`` } });
 
 							if (discordUser.osuDuelRatingUpdates) {
 								const user = await input.client.users.cache.get(discordUser.userId);
 								if (user) {
-									user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
+									await user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
 								}
 							}
 
@@ -5833,7 +5833,7 @@ module.exports = {
 							});
 						});
 
-					channel.send({ content: issues[i].key, embeds: [issueEmbed] });
+					await channel.send({ content: issues[i].key, embeds: [issueEmbed] });
 				}
 			}
 		}, { context: { issues: issues } });
@@ -6660,7 +6660,7 @@ module.exports = {
 
 					players = players.map(player => player.text);
 
-					textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\nRead <#1042938217684541551> for more information.\n\n${players.join('\n')}`);
+					await textChannel.send(`There ${verb} currently ${existingQueueTasks.length} user${multipleString} in the 1v1 queue!\nRead <#1042938217684541551> for more information.\n\n${players.join('\n')}`);
 				}
 			} catch (error) {
 				console.error('Error in updateQueueChannels utils.js', error);
@@ -6923,7 +6923,7 @@ module.exports = {
 								const channel = await guild.channels.cache.get(channelId);
 
 								if (channel) {
-									channel.send(message);
+									await channel.send(message);
 								}
 							}, { context: { message: `There is a new tournament post: ${uniqueTopics[i]}` } });
 						});

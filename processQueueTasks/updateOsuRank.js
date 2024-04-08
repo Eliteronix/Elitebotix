@@ -652,7 +652,7 @@ module.exports = {
 					}
 
 					const channel = await guild.channels.cache.get('830534251757174824');
-					channel.send(message);
+					await channel.send(message);
 				}, { context: { message: `<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.` } });
 
 			}
@@ -680,7 +680,7 @@ module.exports = {
 					await elitiriSignUp.destroy();
 					const user = await client.users.fetch(discordUser.userId);
 					try {
-						user.send(`Your BWS Rank has dropped below 1000 (${BWSRank}) and you have therefore been removed from the signups for the \`${currentElitiriCup}\`.\nYou can re-register if you drop above 1000 again.`);
+						await user.send(`Your BWS Rank has dropped below 1000 (${BWSRank}) and you have therefore been removed from the signups for the \`${currentElitiriCup}\`.\nYou can re-register if you drop above 1000 again.`);
 					} catch {
 						//Nothing
 					}
@@ -701,7 +701,7 @@ module.exports = {
 					}
 
 					try {
-						user.send(`Your bracket for the \`${currentElitiriCup}\` has been automatically changed to ${bracketName}. (Used to be ${elitiriSignUp.bracketName})`);
+						await user.send(`Your bracket for the \`${currentElitiriCup}\` has been automatically changed to ${bracketName}. (Used to be ${elitiriSignUp.bracketName})`);
 					} catch {
 						//Nothing
 					}

@@ -25,7 +25,7 @@ module.exports = async function (oldMember, newMember) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error('guildMemberUpdate.js | logging nickname' + error);
 			}
@@ -53,7 +53,7 @@ module.exports = async function (oldMember, newMember) {
 				.setTimestamp()
 				.setFooter({ text: 'Eventname: nicknames' });
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 
@@ -79,7 +79,7 @@ module.exports = async function (oldMember, newMember) {
 					guild.loggingChannel = null;
 					guild.save();
 					const owner = await newMember.message.client.users.fetch(newMember.guild.ownerId);
-					return owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+					return await owner.send(`It seems like the logging channel on the guild \`${newMember.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 				}
 				console.error('guildMemberUpdate.js | logging roles' + error);
 			}
@@ -128,7 +128,7 @@ module.exports = async function (oldMember, newMember) {
 				);
 			}
 
-			channel.send({ embeds: [changeEmbed] });
+			await channel.send({ embeds: [changeEmbed] });
 		}
 	}
 };

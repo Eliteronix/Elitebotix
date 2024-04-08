@@ -134,7 +134,7 @@ module.exports = {
 
 
 			const eliteronixUser = await msg.client.users.fetch('138273136285057025');
-			eliteronixUser.send(`Top Bracket: \`${Math.round(topLowerDiff * 100) / 100} - ${Math.round(topUpperDiff * 100) / 100}\`\nMiddle Bracket: \`${Math.round(middleLowerDiff * 100) / 100} - ${Math.round(middleUpperDiff * 100) / 100}\`\nLower Bracket: \`${Math.round(lowerLowerDiff * 100) / 100} - ${Math.round(lowerUpperDiff * 100) / 100}\`\nBeginner Bracket: \`${Math.round(beginnerLowerDiff * 100) / 100} - ${Math.round(beginnerUpperDiff * 100) / 100}\``);
+			await eliteronixUser.send(`Top Bracket: \`${Math.round(topLowerDiff * 100) / 100} - ${Math.round(topUpperDiff * 100) / 100}\`\nMiddle Bracket: \`${Math.round(middleLowerDiff * 100) / 100} - ${Math.round(middleUpperDiff * 100) / 100}\`\nLower Bracket: \`${Math.round(lowerLowerDiff * 100) / 100} - ${Math.round(lowerUpperDiff * 100) / 100}\`\nBeginner Bracket: \`${Math.round(beginnerLowerDiff * 100) / 100} - ${Math.round(beginnerUpperDiff * 100) / 100}\``);
 		} else if (args[0] === 'message') {
 			args.shift();
 			let targetGroup = '';
@@ -363,7 +363,7 @@ module.exports = {
 			});
 
 			if (!elitiriSignUp.tournamentLobbyId) {
-				return msg.channel.send(`${args[1]} does not have a lobby set`);
+				return await msg.channel.send(`${args[1]} does not have a lobby set`);
 			}
 
 			let k = Number(elitiriSignUp.tournamentLobbyId.replace(/\D+/, ''));
@@ -452,7 +452,7 @@ module.exports = {
 			});
 
 			if (!elitirisignup) {
-				return msg.channel.send(`${args[0]} is not registered for ${currentElitiriCup}`);
+				return await msg.channel.send(`${args[0]} is not registered for ${currentElitiriCup}`);
 			}
 
 			if (!lobby) {

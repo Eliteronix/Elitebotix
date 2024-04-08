@@ -58,7 +58,7 @@ module.exports = {
 
 			try {
 				const user = await client.users.fetch(player.userId);
-				user.send(`You got a total of **${qualifierDataset.totalPoints} points** today! (${qualifierDataset.qualifierPoints} from Qualifiers | ${qualifierDataset.knockoutPoints} from Knockouts)`);
+				await user.send(`You got a total of **${qualifierDataset.totalPoints} points** today! (${qualifierDataset.qualifierPoints} from Qualifiers | ${qualifierDataset.knockoutPoints} from Knockouts)`);
 			} catch {
 				//Nothing
 			}
@@ -84,7 +84,7 @@ module.exports = {
 
 			try {
 				const user = await client.users.fetch(player.userId);
-				user.send(`You got a total of **${motdPoints.totalPoints} points** today! (${motdPoints.qualifierPoints} from Qualifiers | ${motdPoints.knockoutPoints} from Knockouts)`);
+				await user.send(`You got a total of **${motdPoints.totalPoints} points** today! (${motdPoints.qualifierPoints} from Qualifiers | ${motdPoints.knockoutPoints} from Knockouts)`);
 			} catch {
 				//Nothing
 			}

@@ -286,7 +286,7 @@ async function rollRound(msg, sentMessage, players, rounds) {
 			if (players[0][0] == msg.client.user.id || players[1][0] == msg.client.user.id) {
 
 				sentMessage = await updateEmbed(sentMessage, players, rounds, `<@${players[(rounds.length - 1) % players.length][0]}> won the roll game!`);
-				return msg.channel.send('gg');
+				return await msg.channel.send('gg');
 			} else {
 				return sentMessage = await updateEmbed(sentMessage, players, rounds, `<@${players[(rounds.length - 1) % players.length][0]}> won the roll game!`);
 			}

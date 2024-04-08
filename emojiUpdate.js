@@ -26,7 +26,7 @@ module.exports = async function (oldEmoji, newEmoji) {
 				guild.loggingChannel = null;
 				guild.save();
 				const owner = await newEmoji.client.users.fetch(newEmoji.guild.ownerId);
-				return owner.send(`It seems like the logging channel on the guild \`${newEmoji.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
+				return await owner.send(`It seems like the logging channel on the guild \`${newEmoji.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
 			}
 			console.error('emojiUpdate.js | logging' + error);
 		}
@@ -41,6 +41,6 @@ module.exports = async function (oldEmoji, newEmoji) {
 			.setTimestamp()
 			.setFooter({ text: 'Eventname: emojiupdate' });
 
-		channel.send({ embeds: [changeEmbed] });
+		await channel.send({ embeds: [changeEmbed] });
 	}
 };
