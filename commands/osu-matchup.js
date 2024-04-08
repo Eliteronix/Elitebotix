@@ -1774,8 +1774,8 @@ module.exports = {
 		let sentMessage = await interaction.editReply({ content: content, files: files });
 
 		if (team1.length === 1 && team2.length === 1) {
-			sentMessage.react('🔵');
-			sentMessage.react('🔴');
+			await sentMessage.react('🔵');
+			await sentMessage.react('🔴');
 		}
 	},
 };

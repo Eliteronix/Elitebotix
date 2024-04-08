@@ -212,7 +212,7 @@ module.exports = {
 					console.error(error);
 				});
 
-				initialMessage.react('🛑');
+				await initialMessage.react('🛑');
 
 				let latestEventId = null;
 

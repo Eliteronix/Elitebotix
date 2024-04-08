@@ -1294,7 +1294,7 @@ module.exports = {
 
 			let embedMessage = await interaction.editReply({ embeds: [mappoolEmbed] });
 			//Handle reactions
-			embedMessage.react('✅');
+			await embedMessage.react('✅');
 			let discordUsers = [];
 			let users = [];
 			let discordUserIds = [];

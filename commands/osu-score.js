@@ -477,7 +477,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 						let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`, files: [scoreCard] });
 
 						if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-							sentMessage.react('<:COMPARE:827974793365159997>');
+							await sentMessage.react('<:COMPARE:827974793365159997>');
 						}
 						await sentMessage.react('🗺️');
 						await sentMessage.react('👤');
@@ -724,7 +724,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`, files: [scoreCard] });
 
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-			sentMessage.react('<:COMPARE:827974793365159997>');
+			await sentMessage.react('<:COMPARE:827974793365159997>');
 		}
 		await sentMessage.react('🗺️');
 		await sentMessage.react('👤');
