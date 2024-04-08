@@ -1330,6 +1330,12 @@ module.exports = {
 					now.setUTCMinutes(now.getUTCMinutes() - 15);
 
 					if (interaction.id && interaction.createdAt > now) {
+
+						while (!interaction.client.slashCommandData) {
+							console.log('Waiting for slashCommandData osu-duel:1335');
+							await pause(1000);
+						}
+
 						sentMessage = await interaction.editReply({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings] });
 					} else {
 						if (processingMessage) {
