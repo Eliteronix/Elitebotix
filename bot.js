@@ -139,6 +139,8 @@ process.on('message', message => {
 		// eslint-disable-next-line no-console
 		console.log(`The shard id is: ${message.data.shardId}`);
 		client.shardId = message.data.shardId;
+		// eslint-disable-next-line no-undef
+		process.shardId = message.data.shardId;
 
 		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
