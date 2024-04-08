@@ -1332,7 +1332,6 @@ module.exports = {
 					if (interaction.id && interaction.createdAt > now) {
 
 						while (!interaction.client.slashCommandData) {
-							console.log('Waiting for slashCommandData osu-duel:1335');
 							await pause(1000);
 						}
 
