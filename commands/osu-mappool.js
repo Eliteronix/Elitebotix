@@ -892,7 +892,17 @@ module.exports = {
 				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
 			});
 
-			await doc.loadInfo(); // loads document properties and worksheet
+			try {
+				await doc.loadInfo(); // loads document properties and worksheet
+			} catch (error) {
+				if (error.message === 'Google API error - [403] The caller does not have permission') {
+					// eslint-disable-next-line no-undef
+					return await interaction.editReply(`Error trying to load the document. Make sure the document is shared with the service account email (\`${process.env.GOOGLESHEETSSERVICEACCOUNTMAIL}\`).`);
+				} else {
+					console.error(error);
+					return await interaction.editReply('Error trying to load the document.');
+				}
+			}
 
 			const sheet = doc.sheetsByTitle[interaction.options.getString('sheetname')];
 
@@ -907,9 +917,9 @@ module.exports = {
 
 			let dataRows = [];
 
-			const modPoolHeaders = ['pick', 'mod', 'identifier'];
+			const modPoolHeaders = ['pick', 'mod', 'identifier', 'slot'];
 
-			const beatmapHeaders = ['map id'];
+			const beatmapHeaders = ['map id', 'id'];
 
 			for (let i = 0; i < sheet.rowCount; i++) {
 				let currentRow = [];
@@ -966,7 +976,7 @@ module.exports = {
 				for (let j = 0; j < dataRows[i].length; j++) {
 					let data = dataRows[i][j];
 
-					if (data === null || data === undefined) {
+					if (data === null || data === undefined || headerRow[j] === null || headerRow[j] === undefined) {
 						continue;
 					}
 
@@ -1034,6 +1044,20 @@ module.exports = {
 
 			if (currentMappool.name !== null) {
 				mappools.push(currentMappool);
+			}
+
+			let columnIdentifiers = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+			for (let i = 0; i < 26; i++) {
+				for (let j = 0; j < 26; j++) {
+					columnIdentifiers.push(`${columnIdentifiers[i]}${columnIdentifiers[j]}`);
+				}
+			}
+
+			await interaction.followUp({ content: `Detected column \`${columnIdentifiers[modPoolIndex]}\` as the mod column and \`${columnIdentifiers[beatmapIndex]}\` as the beatmap id column.` });
+
+			if (mappools.length === 0) {
+				return await interaction.followUp({ content: 'No mappools were found. Be sure that the detected mod and beatmap id columns are filled.' });
 			}
 
 			await interaction.followUp({ content: `${invalidModpools.length} invalid modpool(s) have been replaced with FM ${invalidModpools.join(', ')}` });
