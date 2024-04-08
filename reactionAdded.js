@@ -18,7 +18,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		try {
 			await reaction.fetch();
 		} catch (error) {
-			if (error.message !== 'Unknown Message') {
+			if (error.message !== 'Unknown Message' && error.message !== 'Missing Access') {
 				console.error('Something went wrong when fetching the message: ', error);
 				// Return as `reaction.message.author` may be undefined/null
 				return;
