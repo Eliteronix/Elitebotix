@@ -1430,7 +1430,7 @@ module.exports = {
 		};
 
 		// eslint-disable-next-line no-undef
-		let body = `client_id=4184&client_secret=${process.env.OSUTOKENV2}&grant_type=client_credentials&scope=public`;
+		let body = `client_id=${process.env.OSUCLIENTID}&client_secret=${process.env.OSUTOKENV2}&grant_type=client_credentials&scope=public`;
 
 		await fetch(url, {
 			method: 'POST',
