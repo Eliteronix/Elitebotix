@@ -83,7 +83,14 @@ module.exports = async function (client, bancho, interaction) {
 				return;
 			} else if (now < expirationTime) {
 				const timeLeft = (expirationTime - now) / 1000;
-				return await interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, ephemeral: true });
+				try {
+					await interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, ephemeral: true });
+				} catch (error) {
+					if (error.message !== 'Unknown interaction') {
+						console.error('interactionCreate.js | Cooldown message', error);
+					}
+				}
+				return;
 			}
 		}
 
