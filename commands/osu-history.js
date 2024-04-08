@@ -586,6 +586,7 @@ module.exports = {
 			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym.replaceAll('\'', '\\\'')))].filter(acronym => acronym.length > 0);
 
 			try {
+				console.log(osuUser.osuUserId, acronyms.length, acronyms);
 				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 3');
 				let tourneyMatches = await DBOsuMultiMatches.findAll({
 					attributes: ['matchId', 'matchName', 'matchStartDate'],
@@ -599,6 +600,7 @@ module.exports = {
 					order: [['matchStartDate', 'DESC']],
 				});
 
+				console.log(osuUser.osuUserId, tourneyMatches.length, tourneyMatches.map(match => match.Id));
 				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGames 3');
 				let tourneyScores = await DBOsuMultiGames.findAll({
 					attributes: ['matchId', 'teamType', 'beatmapId'],
