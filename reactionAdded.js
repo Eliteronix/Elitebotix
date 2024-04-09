@@ -168,7 +168,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
-	if (reaction.message.author.id !== reaction.client.user.id && reaction.message.author.id !== '784836063058329680') {
+	if (reaction.message.author?.id !== reaction.client.user.id && reaction.message.author.id !== '784836063058329680') {
 		return;
 	}
 
