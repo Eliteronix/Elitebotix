@@ -196,7 +196,6 @@ process.on('message', message => {
 // eslint-disable-next-line no-undef
 process.on('uncaughtException', (error, origin) => {
 	if (error?.code === 'ECONNRESET') {
-		console.log('ECONNRESET error caught');
 		return;
 	}
 	console.error('UNCAUGHT EXCEPTION');
