@@ -5007,7 +5007,8 @@ module.exports = {
 		console.log(`Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
-			return;
+			// eslint-disable-next-line no-console
+			return console.log('Finished cleanup');
 		}
 
 		// Remove duplicate discorduser entries
@@ -5567,6 +5568,9 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log(`Reset ${updated[0]} scores without matchEndDates warmup flag`);
+
+		// eslint-disable-next-line no-console
+		return console.log('Finished cleanup');
 	},
 	wrongCluster(client, id) {
 		let clusterAmount = client.totalShards;
