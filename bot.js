@@ -368,26 +368,26 @@ setTimeout(() => {
 	client.update = 1;
 }, 82800000);
 
-let nextMBThreshold = 3000;
+// let nextMBThreshold = 3000;
 
-setInterval(function () {
-	// eslint-disable-next-line no-undef
-	let memMB = process.memoryUsage().rss / 1048576;
-	if (memMB > nextMBThreshold) {
-		// eslint-disable-next-line no-console
-		console.log(`[${client.shardId}] ${new Date()} Heap snapshot taken at ${memMB}MB`);
+// setInterval(function () {
+// 	// eslint-disable-next-line no-undef
+// 	let memMB = process.memoryUsage().rss / 1048576;
+// 	if (memMB > nextMBThreshold) {
+// 		// eslint-disable-next-line no-console
+// 		console.log(`[${client.shardId}] ${new Date()} Heap snapshot taken at ${memMB}MB`);
 
-		const fs = require('fs');
+// 		const fs = require('fs');
 
-		//Check if the maps folder exists and create it if necessary
-		if (!fs.existsSync('./heapSnapshots')) {
-			fs.mkdirSync('./heapSnapshots');
-		}
+// 		//Check if the maps folder exists and create it if necessary
+// 		if (!fs.existsSync('./heapSnapshots')) {
+// 			fs.mkdirSync('./heapSnapshots');
+// 		}
 
-		require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${client.shardId}-${nextMBThreshold}.heapsnapshot`);
-		nextMBThreshold += 500;
-	}
-}, 6000 * 2);
+// 		require('v8').writeHeapSnapshot(`./heapSnapshots/heapSnapshot${client.shardId}-${nextMBThreshold}.heapsnapshot`);
+// 		nextMBThreshold += 500;
+// 	}
+// }, 6000 * 2);
 
 async function executeProcessQueue(client, bancho) {
 	try {
