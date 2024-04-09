@@ -5323,7 +5323,7 @@ module.exports = {
 			},
 		});
 
-		while (duplicates && iterations < 10) {
+		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates');
 			let result = await multiGameScores.query(
 				'SELECT id, matchId, gameId, osuUserId, updatedAt FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
