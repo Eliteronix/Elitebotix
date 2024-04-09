@@ -5135,7 +5135,7 @@ module.exports = {
 		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates');
 			let result = await beatmaps.query(
-				'SELECT * FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
+				'SELECT id, beatmapId, mods, updatedAt FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
 
 			iterations++;
@@ -5146,32 +5146,37 @@ module.exports = {
 				// eslint-disable-next-line no-console
 				console.log(`Found ${result[0].length} duplicate beatmaps`);
 				let beatmapIds = [];
+				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (beatmapIds.indexOf(`${result[0][i].beatmapId}-${result[0][i].mods}`) === -1) {
 						beatmapIds.push(`${result[0][i].beatmapId}-${result[0][i].mods}`);
 
-						await new Promise(resolve => setTimeout(resolve, 500));
-
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuBeatmaps.findOne({
-							attributes: ['id', 'beatmapId', 'mods', 'updatedAt'],
-							where: {
-								id: result[0][i].id
-							}
-						});
+						deleteIds.push(result[0][i].id);
 
 						deleted++;
 
 						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'beatmapId', duplicate.beatmapId, 'mods', duplicate.mods, 'updatedAt', duplicate.updatedAt);
-
-						await new Promise(resolve => setTimeout(resolve, 500));
-						try {
-							await duplicate.destroy();
-						} catch (e) {
-							console.error(e);
-						}
+						console.log('#', deleted, 'iteration', iterations, 'beatmapId', result[0][i].beatmapId, 'mods', result[0][i].mods, 'updatedAt', result[0][i].updatedAt);
 					}
+				}
+
+				try {
+					// eslint-disable-next-line no-console
+					console.log(`Deleting ${deleteIds.length} duplicate beatmaps`);
+
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates delete');
+					await DBOsuBeatmaps.destroy({
+						where: {
+							id: {
+								[Op.in]: deleteIds
+							}
+						}
+					});
+
+					// eslint-disable-next-line no-console
+					console.log(`Deleted ${deleteIds.length} duplicate beatmaps`);
+				} catch (e) {
+					console.error(e);
 				}
 			}
 			await new Promise(resolve => setTimeout(resolve, 10000));
@@ -5199,7 +5204,7 @@ module.exports = {
 		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
 			let result = await multiMatches.query(
-				'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
+				'SELECT id, matchId, updatedAt FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
 			);
 
 			iterations++;
@@ -5210,34 +5215,40 @@ module.exports = {
 				// eslint-disable-next-line no-console
 				console.log(`Found ${result[0].length} duplicate matches`);
 				let matchIds = [];
+				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (matchIds.indexOf(result[0][i].matchId) === -1) {
 						matchIds.push(result[0][i].matchId);
 
-						await new Promise(resolve => setTimeout(resolve, 100));
-
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuMultiMatches.findOne({
-							attributes: ['id', 'matchId', 'updatedAt'],
-							where: {
-								id: result[0][i].id
-							}
-						});
+						deleteIds.push(result[0][i].id);
 
 						deleted++;
 
 						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'updatedAt', duplicate.updatedAt);
-
-						await new Promise(resolve => setTimeout(resolve, 100));
-						try {
-							await duplicate.destroy();
-						} catch (e) {
-							console.error(e);
-						}
+						console.log('#', deleted, 'iteration', iterations, 'matchId', result[0][i].matchId, 'updatedAt', result[0][i].updatedAt);
 					}
 				}
+
+				try {
+					// eslint-disable-next-line no-console
+					console.log(`Deleting ${deleteIds.length} duplicate matches`);
+
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
+					await DBOsuMultiMatches.destroy({
+						where: {
+							id: {
+								[Op.in]: deleteIds
+							}
+						}
+					});
+
+					// eslint-disable-next-line no-console
+					console.log(`Deleted ${deleteIds.length} duplicate matches`);
+				} catch (e) {
+					console.error(e);
+				}
 			}
+
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
@@ -5263,7 +5274,7 @@ module.exports = {
 		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates');
 			let result = await multiGames.query(
-				'SELECT * FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
+				'SELECT id, matchId, gameId, updatedAt FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
 			);
 
 			iterations++;
@@ -5274,32 +5285,37 @@ module.exports = {
 				// eslint-disable-next-line no-console
 				console.log(`Found ${result[0].length} duplicate games`);
 				let gameIds = [];
+				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
 					if (gameIds.indexOf(result[0][i].gameId) === -1) {
 						gameIds.push(result[0][i].gameId);
 
-						await new Promise(resolve => setTimeout(resolve, 500));
-
-						module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates delete');
-						let duplicate = await DBOsuMultiGames.findOne({
-							attributes: ['id', 'matchId', 'gameId', 'updatedAt'],
-							where: {
-								id: result[0][i].id
-							}
-						});
+						deleteIds.push(result[0][i].id);
 
 						deleted++;
 
 						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', duplicate.matchId, 'gameId', duplicate.gameId, 'updatedAt', duplicate.updatedAt);
-
-						await new Promise(resolve => setTimeout(resolve, 500));
-						try {
-							await duplicate.destroy();
-						} catch (e) {
-							console.error(e);
-						}
+						console.log('#', deleted, 'iteration', iterations, 'matchId', result[0][i].matchId, 'gameId', result[0][i].gameId, 'updatedAt', result[0][i].updatedAt);
 					}
+				}
+
+				try {
+					// eslint-disable-next-line no-console
+					console.log(`Deleting ${deleteIds.length} duplicate games`);
+
+					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates delete');
+					await DBOsuMultiGames.destroy({
+						where: {
+							id: {
+								[Op.in]: deleteIds
+							}
+						}
+					});
+
+					// eslint-disable-next-line no-console
+					console.log(`Deleted ${deleteIds.length} duplicate games`);
+				} catch (e) {
+					console.error(e);
 				}
 			}
 			await new Promise(resolve => setTimeout(resolve, 10000));
