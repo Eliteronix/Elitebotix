@@ -5131,7 +5131,7 @@ module.exports = {
 			},
 		});
 
-		while (duplicates && iterations < 10) {
+		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates');
 			let result = await beatmaps.query(
 				'SELECT * FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
@@ -5195,7 +5195,7 @@ module.exports = {
 			},
 		});
 
-		while (duplicates && iterations < 10) {
+		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
 			let result = await multiMatches.query(
 				'SELECT * FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
@@ -5259,7 +5259,7 @@ module.exports = {
 			},
 		});
 
-		while (duplicates && iterations < 10) {
+		while (duplicates && iterations < 100) {
 			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates');
 			let result = await multiGames.query(
 				'SELECT * FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
