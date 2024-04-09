@@ -7395,6 +7395,10 @@ module.exports = {
 
 							//Fetch the channel
 							guildTrackers[i].channel = await guildTrackers[i].guild.channels.cache.get(guildTrackers[i].channelId);
+
+							if (!guildTrackers[i].channel) {
+								console.log('processOsuTrack - Didnt find channel but also not error', guildTrackers[i].channel);
+							}
 						} catch (err) {
 							if (err.message === 'Missing Access' || err.message === 'Unknown Channel') {
 								await guildTrackers[i].destroy();
