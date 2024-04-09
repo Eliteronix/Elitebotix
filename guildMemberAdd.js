@@ -88,7 +88,12 @@ module.exports = async function (member) {
 				await member.roles.add(autoRole);
 			} catch (e) {
 				if (e.message === 'Missing Access' || e.message === 'Missing Permissions') {
-					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
+					let owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
+
+					if (!owner) {
+						owner = await member.client.users.fetch(member.guild.ownerId);
+					}
+
 					return await owner.send(`I could not assign an autorole to a new user because I'm missing the \`Manage Roles\` permission on \`${member.guild.name}\`.`);
 				} else {
 					return console.error('guildMemberAdd.js | autoroles' + e);
