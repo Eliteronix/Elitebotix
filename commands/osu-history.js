@@ -586,33 +586,36 @@ module.exports = {
 			let acronyms = [...new Set(tourneysPlayed.map(tourney => tourney.acronym.replaceAll('\'', '\\\'')))].filter(acronym => acronym.length > 0);
 
 			try {
-				console.log(osuUser.osuUserId, acronyms.length, acronyms);
-				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 3');
-				let tourneyMatches = await DBOsuMultiMatches.findAll({
-					attributes: ['matchId', 'matchName', 'matchStartDate'],
-					where: {
-						tourneyMatch: true,
-						matchName: {
-							[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
-						},
-					},
-					group: ['matchId', 'matchName', 'matchStartDate'],
-					order: [['matchStartDate', 'DESC']],
-				});
+				let tourneyMatches = [];
+				let tourneyScores = [];
 
-				console.log(osuUser.osuUserId, tourneyMatches.length, tourneyMatches.map(match => match.Id));
-				logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGames 3');
-				let tourneyScores = await DBOsuMultiGames.findAll({
-					attributes: ['matchId', 'teamType', 'beatmapId'],
-					where: {
-						tourneyMatch: true,
-						matchId: {
-							[Op.in]: tourneyMatches.map(match => match.matchId),
-						}
-					},
-					group: ['matchId', 'teamType', 'beatmapId'],
-					order: [['matchId', 'DESC']],
-				});
+				if (acronyms.length > 0) {
+					logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 3');
+					tourneyMatches = await DBOsuMultiMatches.findAll({
+						attributes: ['matchId', 'matchName', 'matchStartDate'],
+						where: {
+							tourneyMatch: true,
+							matchName: {
+								[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
+							},
+						},
+						group: ['matchId', 'matchName', 'matchStartDate'],
+						order: [['matchStartDate', 'DESC']],
+					});
+
+					logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGames 3');
+					tourneyScores = await DBOsuMultiGames.findAll({
+						attributes: ['matchId', 'teamType', 'beatmapId'],
+						where: {
+							tourneyMatch: true,
+							matchId: {
+								[Op.in]: tourneyMatches.map(match => match.matchId),
+							}
+						},
+						group: ['matchId', 'teamType', 'beatmapId'],
+						order: [['matchId', 'DESC']],
+					});
+				}
 
 				for (let i = 0; i < tourneyScores.length; i++) {
 					let match = tourneyMatches.find(match => match.matchId === tourneyScores[i].matchId);
