@@ -976,6 +976,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				//Setup artificial interaction
 				let interaction = {
 					id: null,
+					client: reaction.message.client,
 					commandName: 'osu-beatmap',
 					channel: reaction.message.channel,
 					guild: reaction.message.guild,
@@ -1041,6 +1042,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				//Setup artificial interaction
 				let interaction = {
 					id: null,
+					client: reaction.message.client,
 					commandName: 'osu-beatmap',
 					channel: reaction.message.channel,
 					guild: reaction.message.guild,
@@ -1106,6 +1108,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				//Setup artificial interaction
 				let interaction = {
 					id: null,
+					client: reaction.message.client,
 					commandName: 'osu-beatmap',
 					channel: reaction.message.channel,
 					guild: reaction.message.guild,
