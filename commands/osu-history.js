@@ -531,7 +531,11 @@ module.exports = {
 			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
 
 			if (!tourneyEntry) {
-				tourneysPlayed.push({ acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''), matches: [{ matchId: multiScores[i].matchId, matchName: multiScores[i].matchName, beatmapIds: [multiScores[i].beatmapId] }], teammates: [], date: multiScores[i].matchStartDate });
+				tourneysPlayed.push({
+					acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''),
+					matches: [{ matchId: multiScores[i].matchId, matchName: multiScores[i].matchName, beatmapIds: [multiScores[i].beatmapId] }],
+					teammates: [], date: multiScores[i].matchStartDate
+				});
 			} else if (!tourneyEntry.matches.includes(multiScores[i].matchId)) {
 				let matchEntry = tourneyEntry.matches.find(match => match.matchId === multiScores[i].matchId);
 
@@ -754,21 +758,6 @@ module.exports = {
 
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
-			// Create rank history graph
-			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores duelRatingDevelopment');
-			let oldestScore = await DBOsuMultiGameScores.findOne({
-				attributes: ['gameEndDate'],
-				where: {
-					osuUserId: osuUser.osuUserId,
-					tourneyMatch: true,
-					scoringType: 3,
-					mode: 0,
-				},
-				order: [
-					['gameId', 'ASC']
-				]
-			});
-
 			// Get the user's duel ratings
 			let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client });
 
@@ -788,26 +777,47 @@ module.exports = {
 				},
 			});
 
-			let iterator = 0;
-			let startTime = date - oldestScore.gameEndDate;
+			// Create rank history graph
+			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores duelRatingDevelopment');
+			let oldestScore = await DBOsuMultiGameScores.findOne({
+				attributes: ['gameEndDate'],
+				where: {
+					osuUserId: osuUser.osuUserId,
+					tourneyMatch: true,
+					scoringType: 3,
+					mode: 0,
+				},
+				order: [
+					['gameId', 'ASC']
+				]
+			});
 
-			while (date > oldestScore.gameEndDate) {
-				iterator++;
-				if (new Date() - lastUpdate > 15000) {
-					await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
-					lastUpdate = new Date();
+			if (oldestScore) {
+				let iterator = 0;
+				let startTime = date - oldestScore.gameEndDate;
+
+				while (date > oldestScore.gameEndDate) {
+					iterator++;
+					if (new Date() - lastUpdate > 15000) {
+						await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+						lastUpdate = new Date();
+					}
+
+					let existingRating = existingDuelRatings.find(rating => rating.year === date.getUTCFullYear() && rating.month === date.getUTCMonth() + 1 && rating.date === date.getUTCDate());
+
+					if (existingRating) {
+						duelRatings.push({ rating: parseFloat(existingRating.osuDuelStarRating), date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+					} else {
+						let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
+						duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+					}
+					date.setUTCDate(1);
+					date.setUTCDate(date.getUTCDate() - 1);
 				}
-
-				let existingRating = existingDuelRatings.find(rating => rating.year === date.getUTCFullYear() && rating.month === date.getUTCMonth() + 1 && rating.date === date.getUTCDate());
-
-				if (existingRating) {
-					duelRatings.push({ rating: parseFloat(existingRating.osuDuelStarRating), date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
-				} else {
-					let duelRating = await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client, date: date });
-					duelRatings.push({ rating: duelRating.total, date: `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}.${date.getUTCFullYear()}` });
+			} else {
+				if (duelRating.total) {
+					duelRatings.push({ rating: duelRating.total, date: 'Today' });
 				}
-				date.setUTCDate(1);
-				date.setUTCDate(date.getUTCDate() - 1);
 			}
 
 			let labels = [];
