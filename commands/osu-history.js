@@ -755,7 +755,7 @@ module.exports = {
 			tourneyPPPlays.sort((a, b) => parseFloat(b.pp) - parseFloat(a.pp));
 
 			// Create rank history graph
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
+			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores duelRatingDevelopment');
 			let oldestScore = await DBOsuMultiGameScores.findOne({
 				attributes: ['gameEndDate'],
 				where: {
