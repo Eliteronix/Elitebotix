@@ -957,9 +957,9 @@ module.exports = {
 			// Save the zip file to the mappacks folder
 			const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
 
-			fs.writeFileSync(`./mappacks/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_')}.zip`, content);
+			fs.writeFileSync(`./mappacks/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_').replace(/\/+/gm, '_')}.zip`, content);
 
-			await interaction.editReply({ content: `Mappack for \`${mappoolName.replace(/`/g, '')}\` available [here](http://www.eliteronix.de/mappack/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_')}).` });
+			await interaction.editReply({ content: `Mappack for \`${mappoolName.replace(/`/g, '')}\` available [here](http://www.eliteronix.de/mappack/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_').replace(/\/+/gm, '_')}).` });
 		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
 			logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
