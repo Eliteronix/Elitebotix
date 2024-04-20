@@ -1,10 +1,12 @@
 const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools, DBOsuPoolAccess } = require('../dbObjects');
-const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, logDatabaseQueries } = require('../utils.js');
+const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, logDatabaseQueries, getMapOsrFile } = require('../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
+const JSZip = require('jszip');
+const fs = require('fs');
 
 const discordUsers = {};
 const userMappools = [];
@@ -42,6 +44,36 @@ module.exports = {
 					'de': 'Zeigt einen Mappool an',
 					'en-GB': 'Shows a mappool',
 					'en-US': 'Shows a mappool',
+				})
+				.addStringOption(option =>
+					option.setName('name')
+						.setNameLocalizations({
+							'de': 'name',
+							'en-GB': 'name',
+							'en-US': 'name',
+						})
+						.setDescription('The name of the mappool')
+						.setDescriptionLocalizations({
+							'de': 'Der Name des Mappools',
+							'en-GB': 'The name of the mappool',
+							'en-US': 'The name of the mappool',
+						})
+						.setRequired(true)
+						.setAutocomplete(true)
+				)
+		)
+		.addSubcommand(subcommand =>
+			subcommand.setName('mappack')
+				.setNameLocalizations({
+					'de': 'mappack',
+					'en-GB': 'mappack',
+					'en-US': 'mappack',
+				})
+				.setDescription('Creates a mappack for a mappool')
+				.setDescriptionLocalizations({
+					'de': 'Erstellt ein Mappack für einen mappool',
+					'en-GB': 'Creates a mappack for a mappool',
+					'en-US': 'Creates a mappack for a mappool',
 				})
 				.addStringOption(option =>
 					option.setName('name')
@@ -862,6 +894,72 @@ module.exports = {
 			}
 
 			await interaction.editReply({ content: `Mappool \`${mappoolName.replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
+		} else if (interaction.options.getSubcommand() === 'mappack') {
+			logDatabaseQueries(1, 'commands/osu-mappool.js (mappack) DBDiscordUsers');
+			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
+				where: {
+					userId: interaction.user.id,
+					osuUserId: {
+						[Op.not]: null,
+					},
+					osuVerified: true,
+				}
+			});
+
+			if (!discordUser) {
+				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
+			}
+
+			let mappoolName = interaction.options.getString('name');
+
+			logDatabaseQueries(4, 'commands/osu-mappool.js (view) DBOsuMappools');
+			let mappool = await DBOsuMappools.findAll({
+				attributes: ['number', 'modPool', 'freeMod', 'tieBreaker', 'modPoolNumber', 'beatmapId'],
+				where: {
+					creatorId: discordUser.osuUserId,
+					name: mappoolName,
+				},
+				order: [
+					['number', 'ASC']
+				]
+			});
+
+			if (mappool.length === 0) {
+				return await interaction.editReply(`Could not find mappool \`${mappoolName.replace(/`/g, '')}\`.`);
+			}
+
+			let beatmapIds = [...new Set(mappool.map(map => map.beatmapId))];
+
+			const zip = new JSZip();
+
+			let lastUpdate = new Date();
+			lastUpdate.setFullYear(2000); // Triggers update on first iteration
+
+			for (let i = 0; i < beatmapIds.length; i++) {
+				if (new Date() - lastUpdate > 15000) {
+					await interaction.editReply(`Processing... (${i}/${beatmapIds.length})`);
+					lastUpdate = new Date();
+				}
+				let path = `./mapsets/${await getMapOsrFile(beatmapIds[i])}.osr`;
+
+				const fs = require('fs');
+				const mapData = fs.readFileSync(path);
+
+				zip.file(`${beatmapIds[i]}.osr`, mapData);
+			}
+
+			//Check if the mappacks folder exists and create it if necessary
+			if (!fs.existsSync('./mappacks')) {
+				fs.mkdirSync('./mappacks');
+			}
+
+			// Save the zip file to the mappacks folder
+			const content = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+
+			fs.writeFileSync(`./mappacks/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_')}.zip`, content);
+
+			await interaction.editReply({ content: `Mappack for \`${mappoolName.replace(/`/g, '')}\` available [here](http://www.eliteronix.de/mappack/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_')}).` });
 		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
 			logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({

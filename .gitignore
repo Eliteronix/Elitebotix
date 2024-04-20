@@ -1,6 +1,8 @@
 databases
 .env
 maps
+mapsets
+mappacks
 matchLogs
 listcovers
 beatmapcovers

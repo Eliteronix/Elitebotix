@@ -91,8 +91,30 @@ const browserSourceServer = http.createServer(async (req, res) => {
 		// Send the image from the duelratingcards folder
 		res.setHeader('Content-Type', 'image/png');
 		res.end(fs.readFileSync(`./wrappedcards/${year}/${osuUserId}.png`));
+	} else if (route.startsWith('/mappack/')) {
+		const mappackId = route.replace('/mappack/', '');
+
+		if (!mappackId) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Invalid mappack id');
+			return;
+		}
+
+		// Check if the zip exists
+		if (!fs.existsSync(`./mappacks/${mappackId}.zip`)) {
+			res.setHeader('Content-Type', 'text/plain');
+			res.end('Please create the mappack using /osu-mappool mappack');
+			return;
+		}
+
+		// Provide the zip file
+		res.setHeader('Content-Type', 'application/zip');
+		res.end(fs.readFileSync(`./mappacks/${mappackId}.zip`));
 	}
 });
 
 // Start the HTTP server which exposes the browsersources on http://localhost:80/duelRating/1234
 browserSourceServer.listen(80);
+
+// Start the HTTPS server which exposes the browsersources on https://localhost:443/duelRating/1234
+// browserSourceServer.listen(443);

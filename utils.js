@@ -7,6 +7,7 @@ const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { Beatmap, Calculator } = require('rosu-pp');
 const mapsRetriedTooOften = [];
+const fs = require('fs');
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -4747,6 +4748,50 @@ module.exports = {
 			}
 		}
 	},
+	async getMapOsrFile(beatmapId) {
+		const fs = require('fs');
+
+		//Check if the maps folder exists and create it if necessary
+		if (!fs.existsSync('./mapsets')) {
+			fs.mkdirSync('./mapsets');
+		}
+
+		//Force download if the map is recently updated in the database and therefore probably updated
+		const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+
+		//Check if the map is already downloaded and download if necessary
+		const path = `./mapsets/${dbBeatmap.beatmapsetId}.osr`;
+
+		const recent = new Date();
+		recent.setUTCMinutes(recent.getUTCMinutes() - 3);
+
+		let forceDownload = false;
+		if (recent < dbBeatmap.updatedAt) {
+			forceDownload = true;
+		}
+
+		try {
+			if (forceDownload || !fs.existsSync(path)) {
+				const res = await fetch(`https://beatconnect.io/b/${dbBeatmap.beatmapsetId}`);
+
+				await new Promise((resolve, reject) => {
+					const fileStream = fs.createWriteStream(`./mapsets/${dbBeatmap.beatmapsetId}.osr`);
+					res.body.pipe(fileStream);
+					res.body.on('error', (err) => {
+						reject(err);
+					});
+					fileStream.on('finish', function () {
+						resolve();
+					});
+				});
+			}
+		} catch (err) {
+			console.error(err);
+			return;
+		}
+
+		return dbBeatmap.beatmapsetId;
+	},
 	async multiToBanchoScore(inputScore, client) {
 		let date = new Date(inputScore.gameStartDate);
 		let outputScore = {
@@ -5584,6 +5629,26 @@ module.exports = {
 
 		// eslint-disable-next-line no-console
 		console.log(`Reset ${updated[0]} scores without matchEndDates warmup flag`);
+
+		// Delete mappacks that are older than 4 weeks
+		let weeksAgo4 = new Date();
+		weeksAgo4.setDate(weeksAgo4.getDate() - 28);
+
+		deleted = 0;
+
+		fs.readdirSync('mappacks').forEach(file => {
+			let stats = fs.statSync(`mappacks/${file}`);
+			if (stats.mtime < weeksAgo4) {
+				fs.unlinkSync(`mappacks/${file}`);
+				deleted++;
+
+				// eslint-disable-next-line no-console
+				console.log(`Deleted mappack ${file}`);
+			}
+		});
+
+		// eslint-disable-next-line no-console
+		console.log(`Deleted ${deleted} mappacks older than 4 weeks`);
 
 		// eslint-disable-next-line no-console
 		return console.log('Finished cleanup');
