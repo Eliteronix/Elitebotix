@@ -456,10 +456,12 @@ module.exports = {
 
 											let modBits = getModBits(json.events[i].game.mods.join(''));
 
-											let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
+											if (json.events[i].game.beatmap) {
+												let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
 
-											if (beatmap) {
-												startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 20);
+												if (beatmap) {
+													startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 20);
+												}
 											}
 
 											if (lastMessageType !== 'playing') {
