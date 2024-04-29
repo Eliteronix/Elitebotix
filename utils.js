@@ -6190,6 +6190,7 @@ module.exports = {
 				break;
 			} catch (error) {
 				if (i === 4) {
+					console.error(error);
 					if (interaction) {
 						return await interaction.editReply('I am having issues creating the lobby and the match has been aborted.\nPlease try again later.');
 					} else {
