@@ -6181,7 +6181,9 @@ module.exports = {
 				}
 				// console.log('Duel Match: Creating match');
 				if (users.length === 2) {
-					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
+					// TODO: Temporary Fix for ROBLOX
+					// Bancho js has to fix this issue
+					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`.replace('ROBLOX', 'lego'));
 				} else {
 					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
 				}
