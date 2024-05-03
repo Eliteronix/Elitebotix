@@ -1208,14 +1208,17 @@ module.exports = {
 			}
 
 			let currentOutput = [];
+			let currentOutputLength = 0;
 
 			while (output.length) {
-				while (currentOutput.length < 10 && output.length) {
+				while (output.length && currentOutputLength + output[0].length + 4 < 2000) {
+					currentOutputLength += output[0].length + 4;
 					currentOutput.push(output.shift());
 				}
 
 				await interaction.followUp({ content: currentOutput.join('\n\n'), ephemeral: true });
 				currentOutput = [];
+				currentOutputLength = 0;
 			}
 		} else if (interaction.options.getSubcommand() === 'tourneyenable') {
 			try {
