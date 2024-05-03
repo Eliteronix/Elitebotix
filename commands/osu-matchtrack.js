@@ -503,7 +503,12 @@ module.exports = {
 												embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 											}
 
-											await lastMessage.edit({ embeds: [embed] });
+											try {
+												await lastMessage.edit({ embeds: [embed] });
+											} catch (e) {
+												console.error(e);
+												console.error(lastMessage);
+											}
 										}
 
 
