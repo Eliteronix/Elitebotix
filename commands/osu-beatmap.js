@@ -261,7 +261,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
 
 	if (!interaction) {
-		processingMessage.delete();
+		await processingMessage.delete();
 	}
 
 	let files = [attachment];

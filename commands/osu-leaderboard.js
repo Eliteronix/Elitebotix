@@ -250,7 +250,7 @@ module.exports = {
 		}
 
 		if (processingMessage) {
-			processingMessage.delete();
+			await processingMessage.delete();
 		}
 	},
 };

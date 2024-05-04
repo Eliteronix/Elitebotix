@@ -174,19 +174,19 @@ async function handleTicketStatus(msg) {
 
 		let openCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Open');
 		if (openCategory && !openCategory.children.first()) {
-			openCategory.delete();
+			await openCategory.delete();
 		}
 		let respondedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Responded');
 		if (respondedCategory && !respondedCategory.children.first()) {
-			respondedCategory.delete();
+			await respondedCategory.delete();
 		}
 		let inActionCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - In Action');
 		if (inActionCategory && !inActionCategory.children.first()) {
-			inActionCategory.delete();
+			await inActionCategory.delete();
 		}
 		let closedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Closed');
 		if (closedCategory && !closedCategory.children.first()) {
-			closedCategory.delete();
+			await closedCategory.delete();
 		}
 	}
 }

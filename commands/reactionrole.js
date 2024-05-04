@@ -477,7 +477,7 @@ module.exports = {
 							await interaction.editReply({ content: 'Embed will be deleted', ephemeral: true });
 						}
 						//Delete the embed
-						embedMessage.delete();
+						await embedMessage.delete();
 						//Delete the record from the db
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed remove destroy 2');
 						DBReactionRolesHeader.destroy({

@@ -35,23 +35,23 @@ module.exports = {
 
 					let openCategory = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Open');
 					if (openCategory && !openCategory.children.first()) {
-						openCategory.delete();
+						await openCategory.delete();
 					}
 					let respondedCategory = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Responded');
 					if (respondedCategory && !respondedCategory.children.first()) {
-						respondedCategory.delete();
+						await respondedCategory.delete();
 					}
 					let inActionCategory = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - In Action');
 					if (inActionCategory && !inActionCategory.children.first()) {
-						inActionCategory.delete();
+						await inActionCategory.delete();
 					}
 					let awaitingResponseCategory = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Awaiting Response');
 					if (awaitingResponseCategory && !awaitingResponseCategory.children.first()) {
-						awaitingResponseCategory.delete();
+						await awaitingResponseCategory.delete();
 					}
 					let closedCategory = guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Closed');
 					if (closedCategory && !closedCategory.children.first()) {
-						closedCategory.delete();
+						await closedCategory.delete();
 					}
 				}
 			}, { context: { channelId: processQueueEntry.additions } });

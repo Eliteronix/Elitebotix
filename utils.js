@@ -6284,7 +6284,7 @@ module.exports = {
 			// eslint-disable-next-line no-undef
 			await interaction.editReply(`<@${users.map(user => user.userId).join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup. <https://osu.ppy.sh/mp/${lobby.id}>`);
 			pingMessage = await interaction.channel.send(`<@${users.map(user => user.userId).join('>, <@')}>`);
-			pingMessage.delete();
+			await pingMessage.delete();
 		}
 		//Start the timer to close the lobby if not everyone joined by then
 		await channel.sendMessage('!mp timer 300');

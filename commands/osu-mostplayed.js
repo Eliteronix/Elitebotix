@@ -709,7 +709,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await sentMessage.react('👤');
 				await sentMessage.react('📈');
 
-				processingMessage.delete();
+				await processingMessage.delete();
 
 			})
 			.catch(async (err) => {
@@ -756,7 +756,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 
 				//Send attachment
 				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
-				processingMessage.delete();
+				await processingMessage.delete();
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {

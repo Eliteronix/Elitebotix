@@ -229,7 +229,7 @@ async function updateEmbed(embedMessage, players, rounds, instructions, edit) {
 	if (edit) {
 		return await embedMessage.edit({ embeds: [rollgameEmbed] });
 	} else {
-		setTimeout(() => embedMessage.delete(), 80);
+		setTimeout(async () => await embedMessage.delete(), 80);
 		return await embedMessage.channel.send({ embeds: [rollgameEmbed] });
 	}
 }

@@ -1344,7 +1344,7 @@ module.exports = {
 					reaction.users.remove(user.id);
 					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using </osu-link connect:${embedMessage.client.slashCommandData.find(command => command.name === 'osu-link').id}> and try again.`);
 					await pause(10000);
-					hintMessage.delete();
+					await hintMessage.delete();
 				}
 			});
 

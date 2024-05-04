@@ -520,7 +520,7 @@ module.exports = {
 		let pingMessage = await interaction.channel.send(`<@${uniqueUsers.join('>, <@')}>`);
 		await sentMessage.react('✅');
 		await sentMessage.react('❌');
-		pingMessage.delete();
+		await pingMessage.delete();
 
 		let responded = false;
 		let accepted = [];

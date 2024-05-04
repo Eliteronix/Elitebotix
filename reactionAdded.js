@@ -248,7 +248,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				command.execute(null, [page], interaction, additionalObjects);
 			}
 
-			return reaction.message.delete();
+			return await reaction.message.delete();
 		}
 
 		//For the compare emoji
@@ -1363,7 +1363,7 @@ async function checkCooldown(reaction, command, user, args) {
 			return await reaction.message.channel.send(`<@${user.id}>, you need to wait ${timeLeft.toFixed(1)} seconds before you can use this command again.`)
 				.then(async (msg) => {
 					await pause(5000);
-					msg.delete();
+					await msg.delete();
 				});
 		}
 	}

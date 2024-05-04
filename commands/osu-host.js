@@ -464,7 +464,7 @@ module.exports = {
 				}
 			}
 
-			processingMessage.delete();
+			await processingMessage.delete();
 
 			let data = [];
 			for (let i = 0; i < exportScores.length; i++) {
@@ -539,7 +539,7 @@ module.exports = {
 				}
 			}
 
-			processingMessage.delete();
+			await processingMessage.delete();
 
 			let data = [];
 			for (let i = 0; i < csvData.length; i++) {
@@ -718,7 +718,7 @@ module.exports = {
 				});
 			}
 
-			processingMessage.delete();
+			await processingMessage.delete();
 
 			let data = [];
 			for (let i = 0; i < csvData.length; i++) {
@@ -782,7 +782,7 @@ module.exports = {
 				}
 			}
 
-			processingMessage.delete();
+			await processingMessage.delete();
 
 			if (csvData.length === 0) {
 				if (interaction.client.hostCommands.includes(randomString)) {

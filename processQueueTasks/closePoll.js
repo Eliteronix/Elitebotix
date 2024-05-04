@@ -23,7 +23,7 @@ module.exports = {
 					//Nothing
 				});
 
-				msg.delete();
+				await msg.delete();
 
 				let reactions = [];
 				msg.reactions.cache.each(reaction => reactions.push(reaction));

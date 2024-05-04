@@ -758,7 +758,7 @@ module.exports = {
 				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`.replace('<@>, ', ''));
 				await sentMessage.react('✅');
 				await sentMessage.react('❌');
-				pingMessage.delete();
+				await pingMessage.delete();
 
 				let responded = false;
 				let accepted = [];
@@ -1338,7 +1338,7 @@ module.exports = {
 						sentMessage = await interaction.editReply({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings] });
 					} else {
 						if (processingMessage) {
-							processingMessage.delete();
+							await processingMessage.delete();
 						}
 						sentMessage = await interaction.channel.send({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings] });
 					}

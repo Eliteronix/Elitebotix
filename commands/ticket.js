@@ -315,7 +315,7 @@ module.exports = {
 					if (interaction) {
 						await interaction.editReply('The ticket state has been updated.');
 					} else {
-						msg.delete();
+						await msg.delete();
 					}
 					removeEmptyCategories(msg);
 				} else {
@@ -377,7 +377,7 @@ module.exports = {
 					if (interaction) {
 						await interaction.editReply('The ticket state has been updated.');
 					} else {
-						msg.delete();
+						await msg.delete();
 					}
 					removeEmptyCategories(msg);
 				} else {
@@ -448,7 +448,7 @@ module.exports = {
 					if (interaction) {
 						await interaction.editReply('The ticket state has been updated.');
 					} else {
-						msg.delete();
+						await msg.delete();
 					}
 					removeEmptyCategories(msg);
 
@@ -516,7 +516,7 @@ module.exports = {
 			await ticketChannel.send('Staff will take over shortly.\nPlease make sure to describe your issue as well as possible in the meantime.');
 
 			if (msg.id) {
-				return msg.delete();
+				return await msg.delete();
 			}
 			return await interaction.editReply('The Ticket has been created.');
 		} else {
@@ -532,23 +532,23 @@ module.exports = {
 async function removeEmptyCategories(msg) {
 	let openCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Open');
 	if (openCategory && !openCategory.children.first()) {
-		openCategory.delete();
+		await openCategory.delete();
 	}
 	let respondedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Responded');
 	if (respondedCategory && !respondedCategory.children.first()) {
-		respondedCategory.delete();
+		await respondedCategory.delete();
 	}
 	let inActionCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - In Action');
 	if (inActionCategory && !inActionCategory.children.first()) {
-		inActionCategory.delete();
+		await inActionCategory.delete();
 	}
 	let awaitingResponseCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Awaiting Response');
 	if (awaitingResponseCategory && !awaitingResponseCategory.children.first()) {
-		awaitingResponseCategory.delete();
+		await awaitingResponseCategory.delete();
 	}
 	let closedCategory = msg.guild.channels.cache.find(c => c.type === Discord.ChannelType.GuildCategory && c.name === 'Tickets - Closed');
 	if (closedCategory && !closedCategory.children.first()) {
-		closedCategory.delete();
+		await closedCategory.delete();
 	}
 }
 

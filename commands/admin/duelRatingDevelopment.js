@@ -322,7 +322,7 @@ module.exports = {
 
 			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
 			if (i === 0) {
-				processingMessage.delete();
+				await processingMessage.delete();
 			}
 			await interaction.followUp({ content: `${type} Duel Rating History for ${osuUser.osuName}`, files: [new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` })] });
 		}
