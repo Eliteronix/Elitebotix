@@ -893,7 +893,20 @@ module.exports = {
 				}
 			}
 
-			await interaction.editReply({ content: `Mappool \`${mappoolName.replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
+			content = `Mappool \`${mappoolName.replace(/`/g, '')}\`\n${content}`.split('\n');
+
+			let finalContent = [];
+
+			while (content.length) {
+				if (finalContent.join('\n').length + 2 + content[0].length < 2000) {
+					finalContent.push(content.shift());
+				} else {
+					await interaction.followUp({ content: finalContent.join('\n'), files: [mappoolImage] });
+					finalContent = [];
+				}
+			}
+
+			await interaction.followUp({ content: finalContent.join('\n'), files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'mappack') {
 			logDatabaseQueries(1, 'commands/osu-mappool.js (mappack) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
