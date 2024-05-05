@@ -14,8 +14,8 @@ const userMappools = [];
 module.exports = {
 	name: 'osu-mappool',
 	description: 'Allows you to manage and view mappools',
-	botPermissions: PermissionsBitField.Flags.SendMessages,
-	botPermissionsTranslated: 'Send Messages',
+	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
+	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
 	tags: 'osu',
 	data: new SlashCommandBuilder()
