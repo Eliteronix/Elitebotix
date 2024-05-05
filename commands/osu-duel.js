@@ -14,8 +14,8 @@ const fs = require('fs');
 module.exports = {
 	name: 'osu-duel',
 	description: 'Lets you play a match which is being reffed by the bot',
-	botPermissions: PermissionsBitField.Flags.SendMessages,
-	botPermissionsTranslated: 'Send Messages',
+	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AddReactions, PermissionsBitField.Flags.UseExternalEmojis],
+	botPermissionsTranslated: 'Send Messages, Attach Files and Add Reactions (including external emojis)',
 	cooldown: 15,
 	tags: 'osu',
 	data: new SlashCommandBuilder()
