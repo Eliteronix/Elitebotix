@@ -4851,7 +4851,7 @@ module.exports = {
 
 		return outputScore;
 	},
-	async cleanUpDuplicateEntries(manually) {
+	async cleanUpDuplicateEntries(client, manually) {
 		const Sequelize = require('sequelize');
 		// Automatically add missing players to the database
 		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries existingUsers');
@@ -4878,8 +4878,7 @@ module.exports = {
 		missingUsers = missingUsers.map(user => user.osuUserId);
 
 		if (missingUsers.length) {
-			// eslint-disable-next-line no-console
-			console.log(`${missingUsers.length} missing users found`);
+			await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `${missingUsers.length} missing users found`);
 		}
 
 		let iterator = 0;
@@ -9468,6 +9467,30 @@ module.exports = {
 
 		//Create as an attachment
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${input.user.id}-${input.beatmap.beatmapId}-${input.score.raw_mods}.png` });
+	},
+	async sendMessageToLogChannel(client, channelId, message) {
+		client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+			let guild = await c.guilds.cache.get(guildId);
+
+			if (!guild || guild.shardId !== c.shardId) {
+				return;
+			}
+
+			let channel = await guild.channels.cache.get(channelId);
+
+			if (!channel) {
+				return;
+			}
+
+			await channel.send(message);
+		}, {
+			context: {
+				// eslint-disable-next-line no-undef
+				guildId: process.env.LOGSERVER,
+				channelId: channelId,
+				message: message
+			}
+		});
 	}
 };
 
