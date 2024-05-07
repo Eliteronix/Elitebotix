@@ -2947,7 +2947,7 @@ module.exports = {
 		//Level 2: Log constant periodic queries
 		//Level 1: Log all queries
 		if (traceDatabaseQueries <= level) {
-			// eslint-disable-next-line no-undef, no-console
+			// eslint-disable-next-line no-console
 			console.log(`[${process.shardId}] traceDatabaseQueries: `, new Date(), output);
 		}
 
