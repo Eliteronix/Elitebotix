@@ -31,7 +31,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
-	// eslint-disable-next-line no-undef
 	process.send(`discorduser ${user.id}}`);
 
 	if (reaction._emoji.name === '⭐') {
@@ -203,7 +202,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 						channel: reaction.message.channel,
 					};
 
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(message, [page, `--${mode}`], null, additionalObjects);
@@ -217,7 +215,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 						channel: reaction.message.channel,
 					};
 
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(message, [page], null, additionalObjects);
@@ -242,7 +239,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				const command = require('./commands/osu-duel.js');
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, [page], interaction, additionalObjects);
@@ -293,7 +289,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -329,7 +324,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -367,7 +361,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -424,7 +417,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -473,7 +465,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -520,7 +511,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 				};
 
 				try {
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(null, null, interaction, additionalObjects);
@@ -570,7 +560,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -613,7 +602,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -652,7 +640,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 				};
 
 				try {
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(tempMessage, args, null, additionalObjects);
@@ -703,7 +690,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -745,7 +731,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 				};
 
 				try {
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(null, null, interaction, additionalObjects);
@@ -806,7 +791,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 				};
 
 				try {
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(null, null, interaction, additionalObjects);
@@ -859,7 +843,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -902,7 +885,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 				};
 
 				try {
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(null, args, interaction, additionalObjects);
@@ -998,7 +980,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -1064,7 +1045,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);
@@ -1130,7 +1110,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 					},
 				};
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(null, null, interaction, additionalObjects);

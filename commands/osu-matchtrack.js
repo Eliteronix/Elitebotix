@@ -66,7 +66,6 @@ module.exports = {
 			args.push(interaction.options._hoistedOptions[0].value);
 		}
 
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -167,7 +166,6 @@ module.exports = {
 
 					let matchScoreCommand = require('./osu-matchscore.js');
 
-					// eslint-disable-next-line no-undef
 					process.send(`command ${matchScoreCommand.name}`);
 
 					await matchScoreCommand.execute(null, null, {
@@ -196,13 +194,11 @@ module.exports = {
 					if (msg.id) {
 						if (msg.client.update === 1 && msg.client.duels.length === 0 && msg.client.otherMatches.length === 0 && msg.client.matchTracks.length === 0 && msg.client.bingoMatches.length === 0 && msg.client.hostCommands.length === 0) {
 
-							// eslint-disable-next-line no-undef
 							process.exit();
 						}
 					} else {
 						if (interaction.client.update === 1 && interaction.client.duels.length === 0 && interaction.client.otherMatches.length === 0 && interaction.client.matchTracks.length === 0 && interaction.client.bingoMatches.length === 0 && interaction.client.hostCommands.length === 0) {
 
-							// eslint-disable-next-line no-undef
 							process.exit();
 						}
 					}

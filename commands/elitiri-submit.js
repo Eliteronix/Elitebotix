@@ -188,7 +188,6 @@ module.exports = {
 		let bracketNameParts = elitiriSignUp.bracketName.split(' ');
 		let bracket = bracketNameParts[0].toLowerCase();
 
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -462,7 +461,6 @@ module.exports = {
 async function getBeatmap(interaction) {
 	let command = require('./osu-beatmap.js');
 
-	// eslint-disable-next-line no-undef
 	process.send(`command ${command.name}`);
 
 	command.execute(null, null, interaction);

@@ -104,7 +104,6 @@ module.exports = {
 		}
 
 		channel.on('message', async (msg) => {
-			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${msg.user.id}}`);
 
 			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
@@ -189,7 +188,6 @@ module.exports = {
 				console.log(`[Shard ${c.shard.ids[0]}] Sending message to ${channelId} [${message}]`);
 				await channel.send(message);
 			}
-			// eslint-disable-next-line no-undef
 		}, { context: { channelId: args[1], message: `<@${discordIds.join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup.` } });
 
 		//Add timers to 10 minutes after the match and also during the scheduled time send another message
@@ -362,7 +360,6 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
-			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${obj.player.user.id}}`);
 
 			if (!playerIds.includes(obj.player.user.id.toString())) {
@@ -465,7 +462,6 @@ module.exports = {
 		// eslint-disable-next-line no-unused-vars
 		lobby.on('matchFinished', async (results) => {
 			for (let i = 0; i < results.length; i++) {
-				// eslint-disable-next-line no-undef
 				process.send(`osuuser ${results[i].player.user.id}}`);
 			}
 
@@ -513,7 +509,6 @@ module.exports = {
 				await channel.sendMessage('Thank you everyone for playing! The lobby will automatically close in one minute.');
 				await pause(60000);
 				await channel.sendMessage('!mp close');
-				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)

@@ -59,12 +59,9 @@ module.exports = {
 			const developerUser = await interaction.client.users.cache.find(user => user.id === interaction.user.id);
 			let csv = new ObjectsToCsv(dbList.map(entry => entry.dataValues));
 			csv = await csv.toString();
-			// eslint-disable-next-line no-undef
 			const buffer = Buffer.from(csv);
 			//Create as an attachment
-			// eslint-disable-next-line no-undef
 			const attachment = new Discord.AttachmentBuilder(buffer, { name: `${dbTableName}-${process.env.SERVER}-${process.env.PROVIDER}.csv` });
-			// eslint-disable-next-line no-undef
 			await developerUser.send({ content: `${dbTableName} - ${process.env.SERVER} Environment on ${process.env.PROVIDER}`, files: [attachment] });
 
 			newIdLimit = dbList[dbList.length - 1].id;

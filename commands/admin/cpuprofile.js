@@ -19,7 +19,6 @@ module.exports = {
 		await interaction.client.shard.broadcastEval(async (c, { seconds }) => {
 			const inspector = require('inspector');
 			const fs = require('fs');
-			// eslint-disable-next-line no-undef
 			const { pause } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			const session = new inspector.Session();

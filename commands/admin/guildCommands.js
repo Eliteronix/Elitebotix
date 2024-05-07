@@ -23,7 +23,6 @@ module.exports = {
 		}
 
 		// Construct and prepare an instance of the REST module
-		// eslint-disable-next-line no-undef
 		const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
 
 		// and deploy your commands!

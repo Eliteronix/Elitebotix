@@ -11,9 +11,7 @@ module.exports = {
 
 		client.shard.broadcastEval(async (c, { guildId, processQueueEntryId, setting }) => {
 			try {
-				// eslint-disable-next-line no-undef
 				const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				// eslint-disable-next-line no-undef
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				const { Op } = require('sequelize');
 

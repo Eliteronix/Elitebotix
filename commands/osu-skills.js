@@ -273,7 +273,6 @@ module.exports = {
 };
 
 async function getOsuSkills(interaction, username, scaled, scoringType, tourneyMatch, runningAverage) {
-	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -1022,7 +1021,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 						runningAverageText = ` (Running Average of at least ${runningAverageAmount / 5} maps per mod per month)`;
 					}
 
-					// eslint-disable-next-line no-undef
 					matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${user.id}.txt` });
 					files.push(matchesPlayed);
 

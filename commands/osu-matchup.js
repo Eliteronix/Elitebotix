@@ -661,7 +661,6 @@ module.exports = {
 			return await interaction.editReply('You did not specify enough players for team 2.');
 		}
 
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -1760,13 +1759,11 @@ module.exports = {
 			mapsPlayedReadable[0] = `----------${team1Names.join(' ')}----------\n${mapsPlayedReadable[0]}`;
 			mapsPlayedReadable[1] = `----------${team2Names.join(' ')}----------\n${mapsPlayedReadable[1]}`;
 
-			// eslint-disable-next-line no-undef
 			mapsPlayedReadable = new Discord.AttachmentBuilder(Buffer.from(mapsPlayedReadable.join('\n\n\n\n'), 'utf-8'), { name: `indirect-matchups-${team1.join('-')}-vs-${team2.join('-')}.txt` });
 			files.push(mapsPlayedReadable);
 		}
 
 		if (matchesPlayed.length) {
-			// eslint-disable-next-line no-undef
 			matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${team1.join('-')}-vs-${team2.join('-')}.txt` });
 			files.push(matchesPlayed);
 		}

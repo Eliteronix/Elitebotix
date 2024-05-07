@@ -126,7 +126,6 @@ module.exports = {
 
 				const command = require('./osu-score.js');
 
-				// eslint-disable-next-line no-undef
 				process.send(`command ${command.name}`);
 
 				command.execute(msg, newArgs, null, additionalObjects);

@@ -477,7 +477,6 @@ module.exports = {
 				embed.setFooter({ text: `Posted: ${forumPost.posted.getUTCDate()}.${forumPost.posted.getUTCMonth() + 1}.${forumPost.posted.getUTCFullYear()} by ${forumPost.host}` });
 			}
 
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				let channel = await interaction.client.channels.fetch('1010602094694244362');
 				let sentMessage = await channel.send({ embeds: [embed] });

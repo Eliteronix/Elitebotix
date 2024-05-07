@@ -5,7 +5,6 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('elitiriRoleAssignment');
-		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Live') {
 			return processQueueEntry.destroy();
 		}
@@ -25,11 +24,8 @@ module.exports = {
 					return;
 				}
 
-				// eslint-disable-next-line no-undef
 				const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				// eslint-disable-next-line no-undef
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
-				// eslint-disable-next-line no-undef
 				const { currentElitiriCup } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\config.json`);
 
 				//Fetch all members

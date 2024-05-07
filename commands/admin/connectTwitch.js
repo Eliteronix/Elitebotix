@@ -28,7 +28,6 @@ module.exports = {
 
 		let twitchName = args[1];
 
-		// eslint-disable-next-line no-undef
 		let response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`, {
 			method: 'POST',
 		});
@@ -40,9 +39,7 @@ module.exports = {
 		// Do a GET https://api.twitch.tv/helix/users?login=USERNAME
 		response = await fetch(`https://api.twitch.tv/helix/users?login=${twitchName}`, {
 			headers: {
-				// eslint-disable-next-line no-undef
 				'Client-ID': process.env.TWITCH_CLIENT_ID,
-				// eslint-disable-next-line no-undef
 				'Authorization': `Bearer ${accessToken}`
 			}
 		});

@@ -134,7 +134,6 @@ module.exports = {
 		}
 
 		users.forEach(async (user) => {
-			// eslint-disable-next-line no-undef
 			let url = `https://g.tenor.com/v1/search?q=pat%20anime&key=${process.env.TENORTOKEN}&contentfilter=high`;
 			let response = await fetch(url);
 			let json = await response.json();

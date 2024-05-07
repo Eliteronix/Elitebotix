@@ -354,7 +354,6 @@ module.exports = {
 
 async function getTopPlays(interaction, username, server, mode, noLinkedAccount, sorting, limit, tracking, order, csv) {
 	if (server === 'bancho') {
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -400,7 +399,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
@@ -486,7 +484,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
@@ -557,7 +554,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		if (csv) {
 			let csv = new ObjectsToCsv(scores);
 			csv = await csv.toString();
-			// eslint-disable-next-line no-undef
 			const buffer = Buffer.from(csv);
 			//Create as an attachment
 			files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
@@ -566,7 +562,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		//Send attachment
 		await interaction.followUp({ content: `\`${user.name}\`: <https://osu.gatari.pw/u/${user.id}?mode=${mode}>`, files: files });
 	} else if (server === 'tournaments' || server === 'mixed') {
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -612,7 +607,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
@@ -754,7 +748,6 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	let ctx = input[1];
 	let user = input[2];
 
-	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)

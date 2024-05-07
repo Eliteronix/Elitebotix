@@ -13,10 +13,8 @@ module.exports = {
 
 		let matchID = args[0];
 
-		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length];
 
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(APItoken, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -24,7 +22,6 @@ module.exports = {
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 
-		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
 			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 0);
 		}
@@ -32,7 +29,6 @@ module.exports = {
 		logOsuAPICalls('processQueueTasks/saveMultiMatches.js main');
 		await osuApi.getMatch({ mp: matchID })
 			.then(async (match) => {
-				// eslint-disable-next-line no-undef
 				process.send('saveMultiMatches ' + Math.floor((Date.now() - Date.parse(match.raw_start)) / 1000));
 				let sixHoursAgo = new Date();
 				sixHoursAgo.setUTCHours(sixHoursAgo.getUTCHours() - 6);
@@ -67,10 +63,8 @@ module.exports = {
 							}
 
 							let channel;
-							// eslint-disable-next-line no-undef
 							if (process.env.SERVER === 'Live') {
 								channel = await c.channels.cache.get('891314445559676928');
-								// eslint-disable-next-line no-undef
 							} else if (process.env.SERVER === 'QA') {
 								channel = await c.channels.cache.get('892873577479692358');
 							} else {
@@ -83,7 +77,6 @@ module.exports = {
 
 							if (c.update === 1 && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
-								// eslint-disable-next-line no-undef
 								process.exit();
 							}
 						}, { context: { message: `<https://osu.ppy.sh/mp/${matchID}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`, matchID: parseInt(matchID) } });
@@ -104,7 +97,6 @@ module.exports = {
 						await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matchID};1;${Date.parse(match.raw_start)};${match.name.toLowerCase()}`, priority: 1, date: date });
 						updateCurrentMatchesChannel(client);
 
-						// eslint-disable-next-line no-undef
 						process.send('importMatch');
 					}
 
@@ -151,7 +143,6 @@ module.exports = {
 							return await processQueueEntry.save();
 						}
 					} catch (error) {
-						// eslint-disable-next-line no-undef
 						console.error(error, `API Key Index ${parseInt(matchID) % process.env.OSUTOKENSV1.split('-').length} going same saveMultiMatches.js https://osu.ppy.sh/community/matches/${parseInt(matchID)}`);
 						//Go same if error
 						let date = new Date();
@@ -335,7 +326,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -407,7 +397,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -508,7 +497,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						let guildId = '727407178499096597';
 						let channelId = '1068905937219362826';
 
-						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Dev') {
 							guildId = '800641468321759242';
 							channelId = '1070013925334204516';
@@ -625,7 +613,6 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					let guildId = '727407178499096597';
 					let channelId = '1068905937219362826';
 
-					// eslint-disable-next-line no-undef
 					if (process.env.SERVER === 'Dev') {
 						guildId = '800641468321759242';
 						channelId = '1070013925334204516';
@@ -741,7 +728,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 		return;
 	}
 
-	// eslint-disable-next-line no-undef
 	process.send('osu! API');
 	return await osuApi.getMatch({ mp: matchToVerify.matchId })
 		.then(async (match) => {
@@ -988,7 +974,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -1078,7 +1063,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -1182,7 +1166,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -1254,7 +1237,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -1326,7 +1308,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -1398,7 +1379,6 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 											let guildId = '727407178499096597';
 											let channelId = '1068905937219362826';
 
-											// eslint-disable-next-line no-undef
 											if (process.env.SERVER === 'Dev') {
 												guildId = '800641468321759242';
 												channelId = '1070013925334204516';
@@ -1538,10 +1518,8 @@ async function addMissingRefereeInfo(osuApi, client) {
 	if (!refereeInfoMissing) {
 		client.shard.broadcastEval(async (c, { message }) => {
 			let channel;
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				channel = await c.channels.cache.get('1212871483152400385');
-				// eslint-disable-next-line no-undef
 			} else {
 				channel = await c.channels.cache.get('1212871419998904420');
 			}
@@ -1625,10 +1603,8 @@ async function addMissingRefereeInfo(osuApi, client) {
 
 									client.shard.broadcastEval(async (c, { message }) => {
 										let channel;
-										// eslint-disable-next-line no-undef
 										if (process.env.SERVER === 'Live') {
 											channel = await c.channels.cache.get('1212871483152400385');
-											// eslint-disable-next-line no-undef
 										} else {
 											channel = await c.channels.cache.get('1212871419998904420');
 										}
@@ -1649,10 +1625,8 @@ async function addMissingRefereeInfo(osuApi, client) {
 
 									client.shard.broadcastEval(async (c, { message }) => {
 										let channel;
-										// eslint-disable-next-line no-undef
 										if (process.env.SERVER === 'Live') {
 											channel = await c.channels.cache.get('1212871483152400385');
-											// eslint-disable-next-line no-undef
 										} else {
 											channel = await c.channels.cache.get('1212871419998904420');
 										}
@@ -1674,10 +1648,8 @@ async function addMissingRefereeInfo(osuApi, client) {
 
 								client.shard.broadcastEval(async (c, { message }) => {
 									let channel;
-									// eslint-disable-next-line no-undef
 									if (process.env.SERVER === 'Live') {
 										channel = await c.channels.cache.get('1212871483152400385');
-										// eslint-disable-next-line no-undef
 									} else {
 										channel = await c.channels.cache.get('1212871419998904420');
 									}
@@ -1712,10 +1684,8 @@ async function addMissingRefereeInfo(osuApi, client) {
 
 				client.shard.broadcastEval(async (c, { message }) => {
 					let channel;
-					// eslint-disable-next-line no-undef
 					if (process.env.SERVER === 'Live') {
 						channel = await c.channels.cache.get('1212871483152400385');
-						// eslint-disable-next-line no-undef
 					} else {
 						channel = await c.channels.cache.get('1212871419998904420');
 					}

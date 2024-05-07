@@ -26,14 +26,11 @@ module.exports = {
 		if (importMatchTasks > 0) {
 			await processQueueEntry.destroy();
 			updateCurrentMatchesChannel(client);
-			// eslint-disable-next-line no-undef
 			return process.send('importMatch');
 		}
 
-		// eslint-disable-next-line no-undef
 		let APItoken = process.env.OSUTOKENSV1.split('-')[parseInt(matchId) % process.env.OSUTOKENSV1.split('-').length];
 
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(APItoken, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -74,10 +71,8 @@ module.exports = {
 						}
 
 						let channel;
-						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Live') {
 							channel = await c.channels.cache.get('891314445559676928');
-							// eslint-disable-next-line no-undef
 						} else if (process.env.SERVER === 'QA') {
 							channel = await c.channels.cache.get('892873577479692358');
 						} else {
@@ -90,7 +85,6 @@ module.exports = {
 
 						if (c.update === 1 && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
-							// eslint-disable-next-line no-undef
 							process.exit();
 						}
 					}, { context: { message: `<https://osu.ppy.sh/mp/${matchId}> ${daysBehindToday}d ${hoursBehindToday}h ${minutesBehindToday}m \`${match.name}\` done`, matchID: parseInt(matchId) } });
@@ -98,7 +92,6 @@ module.exports = {
 					await processQueueEntry.destroy();
 					updateCurrentMatchesChannel(client);
 
-					// eslint-disable-next-line no-undef
 					return process.send('importMatch');
 				}
 
@@ -154,7 +147,6 @@ module.exports = {
 				return await processQueueEntry.save();
 			})
 			.catch(async (error) => {
-				// eslint-disable-next-line no-undef
 				console.error(error, `[${client.shardId}] API Key Index ${parseInt(matchId) % process.env.OSUTOKENSV1.split('-').length} going same importMatch.js https://osu.ppy.sh/community/matches/${parseInt(matchId)}`);
 				//Go same if error
 				let date = new Date();

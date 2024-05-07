@@ -146,7 +146,6 @@ module.exports = {
 		}
 
 		// Return the file as a follow up message
-		// eslint-disable-next-line no-undef
 		await interaction.followUp({ content: 'The new collection.db file is attached below.\nSave this file in your osu! directory. You will have an existing file that you will need to overwrite.\nBe sure to restart osu! before doing any changes on your collections after overwriting the file. If you don\'t have some maps, download them before doing any changes to the collections otherwise the collection will be saved only with the maps that you have.', files: [{ attachment: Buffer.from(file, 'hex'), name: 'collection.db' }] });
 	},
 };
@@ -158,7 +157,6 @@ function buf2hex(buffer) { // buffer is an ArrayBuffer
 }
 
 function addStringToFile(file, string) {
-	// eslint-disable-next-line no-undef
 	const bufferText = Buffer.from(string, 'utf8');
 	const text = bufferText.toString('hex');
 

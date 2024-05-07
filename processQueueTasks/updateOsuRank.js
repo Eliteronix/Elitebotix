@@ -7,7 +7,6 @@ const { Op } = require('sequelize');
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
 		// console.log('updateOsuRank', processQueueEntry.additions);
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -414,7 +413,6 @@ module.exports = {
 					client.shard.broadcastEval(async (c, { message }) => {
 						let guildId = '727407178499096597';
 
-						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Dev') {
 							guildId = '800641468321759242';
 						}
@@ -427,7 +425,6 @@ module.exports = {
 
 						let channelId = '1061942415864385536';
 
-						// eslint-disable-next-line no-undef
 						if (process.env.SERVER === 'Dev') {
 							channelId = '1061942304979566614';
 						}
@@ -456,7 +453,6 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-undef
 		if (ecs2021SignUp && process.env.SERVER === 'Live') {
 			if (logBroadcastEval) {
 				// eslint-disable-next-line no-console
@@ -539,7 +535,6 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-undef
 		if (ecw2022SignUp && process.env.SERVER === 'Live') {
 			if (logBroadcastEval) {
 				// eslint-disable-next-line no-console
@@ -637,7 +632,6 @@ module.exports = {
 
 			const user = await client.users.fetch(discordUser.userId);
 
-			// eslint-disable-next-line no-undef
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
 				if (logBroadcastEval) {
 					// eslint-disable-next-line no-console

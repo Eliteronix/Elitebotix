@@ -56,10 +56,8 @@ module.exports = {
 			//Create as an attachment
 			const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'elitebotix-changelog.png' });
 
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Dev' || process.env.SERVER === 'QA') {
 				msg.reply({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${msg.client.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
-				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'Live') {
 				if (logBroadcastEval) {
 					// eslint-disable-next-line no-console

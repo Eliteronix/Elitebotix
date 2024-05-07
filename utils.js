@@ -940,7 +940,6 @@ module.exports = {
 			},
 		});
 
-		// eslint-disable-next-line no-undef
 		process.send(`osuUpdateQueue ${osuUpdateQueueLength}`);
 
 		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers');
@@ -1331,7 +1330,6 @@ module.exports = {
 						client.shard.broadcastEval(async (c, { message }) => {
 							let guildId = '727407178499096597';
 
-							// eslint-disable-next-line no-undef
 							if (process.env.SERVER === 'Dev') {
 								guildId = '800641468321759242';
 							}
@@ -1344,7 +1342,6 @@ module.exports = {
 
 							let channelId = '1078318397688926260';
 
-							// eslint-disable-next-line no-undef
 							if (process.env.SERVER === 'Dev') {
 								channelId = '1078318144914985050';
 							}
@@ -1376,7 +1373,6 @@ module.exports = {
 							client.shard.broadcastEval(async (c, { message }) => {
 								let guildId = '727407178499096597';
 
-								// eslint-disable-next-line no-undef
 								if (process.env.SERVER === 'Dev') {
 									guildId = '800641468321759242';
 								}
@@ -1389,7 +1385,6 @@ module.exports = {
 
 								let channelId = '1078318437408968804';
 
-								// eslint-disable-next-line no-undef
 								if (process.env.SERVER === 'Dev') {
 									channelId = '1078318180302323842';
 								}
@@ -1430,7 +1425,6 @@ module.exports = {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		};
 
-		// eslint-disable-next-line no-undef
 		let body = `client_id=${process.env.OSUCLIENTID}&client_secret=${process.env.OSUTOKENV2}&grant_type=client_credentials&scope=public`;
 
 		await fetch(url, {
@@ -2538,21 +2532,18 @@ module.exports = {
 		}
 		//For the development version
 		//if the message is not in the Dev-Servers then return
-		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
 			if (guildId != '800641468321759242' && guildId != '800641735658176553') {
 				return true;
 			}
 			//For the QA version
 			//if the message is in the QA-Servers then return
-			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'QA') {
 			if (guildId != '800641367083974667' && guildId != '800641819086946344') {
 				return true;
 			}
 			//For the Live version
 			//if the message is in the Dev/QA-Servers then return
-			// eslint-disable-next-line no-undef
 		} else if (process.env.SERVER === 'Live') {
 			if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
 				return true;
@@ -2670,7 +2661,6 @@ module.exports = {
 						//console.error(err);
 					}
 
-					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -2950,7 +2940,6 @@ module.exports = {
 		return dbBeatmap;
 	},
 	async logDatabaseQueries(level, output) {
-		// eslint-disable-next-line no-undef
 		process.send('traceDatabaseQueries: ' + output);
 		//Level 5: Log rarely used queries
 		//Level 4: Log queries used in commands
@@ -2978,7 +2967,6 @@ module.exports = {
 		// }
 	},
 	logOsuAPICalls(output) {
-		// eslint-disable-next-line no-undef
 		process.send('osu!API');
 
 		if (traceOsuAPICalls) {
@@ -3068,9 +3056,7 @@ module.exports = {
 
 					if (birthdayMessageChannel) {
 						if (birthdayMessageChannel.type !== 0) {
-							// eslint-disable-next-line no-undef
 							const { DBGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-							// eslint-disable-next-line no-undef
 							const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 							logDatabaseQueries(4, 'utils.js DBGuilds checkForBirthdays broadcastEval');
@@ -3090,7 +3076,6 @@ module.exports = {
 						// send a birthday gif from tenor 
 						let index;
 						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-						// eslint-disable-next-line no-undef
 						const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
 							.then(async (res) => {
 								let gifs = await res.json();
@@ -3324,7 +3309,6 @@ module.exports = {
 		let suspiciousActivityLogGuildId = '727407178499096597';
 		let suspiciousActivityLogChannelId = '1142772110540931154';
 
-		// eslint-disable-next-line no-undef
 		if (process.env.SERVER === 'Dev') {
 			suspiciousActivityLogGuildId = '800641468321759242';
 			suspiciousActivityLogChannelId = '1142772857877823488';
@@ -3994,11 +3978,9 @@ module.exports = {
 							input.client.shard.broadcastEval(async (c, { message }) => {
 								let guildId = '727407178499096597';
 								let channelId = '946150632128135239';
-								// eslint-disable-next-line no-undef
 								if (process.env.SERVER === 'Dev') {
 									guildId = '800641468321759242';
 									channelId = '946190123677126666';
-									// eslint-disable-next-line no-undef
 								} else if (process.env.SERVER === 'QA') {
 									guildId = '800641367083974667';
 									channelId = '946190678189293569';
@@ -4093,7 +4075,6 @@ module.exports = {
 		duelRatings.provisional = true;
 
 		//Get it from the top plays if no tournament data is available
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -4258,9 +4239,7 @@ module.exports = {
 		// Define configuration options
 		const opts = {
 			identity: {
-				// eslint-disable-next-line no-undef
 				username: process.env.TWITCH_USERNAME,
-				// eslint-disable-next-line no-undef
 				password: process.env.TWITCH_OAUTH_TOKEN
 			},
 			channels: twitchChannels
@@ -4396,7 +4375,6 @@ module.exports = {
 
 				matchID = matchID[0].replace(/.*\//gm, '');
 
-				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -5783,11 +5761,9 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { message }) => {
 			let guildId = null;
 			let channelId = null;
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Dev') {
 				guildId = '800641468321759242';
 				channelId = '980119563381383228';
-				// eslint-disable-next-line no-undef
 			} else if (process.env.SERVER === 'QA') {
 				guildId = '800641367083974667';
 				channelId = '980119465998037084';
@@ -5810,7 +5786,6 @@ module.exports = {
 		}, { context: { message: `https://osu.ppy.sh/mp/${matchId}` } });
 	},
 	async syncJiraCards(client) {
-		// eslint-disable-next-line no-undef
 		if (module.exports.wrongCluster(client) || process.env.SERVER !== 'Live') {
 			return;
 		}
@@ -5818,9 +5793,7 @@ module.exports = {
 		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-20m&maxResults=100', {
 			method: 'GET',
 			headers: {
-				// eslint-disable-next-line no-undef
 				'Authorization': `Basic ${Buffer.from(
-					// eslint-disable-next-line no-undef
 					`zimmermann.mariomarvin@gmail.com:${process.env.ATLASSIANTOKEN}`
 				).toString('base64')}`,
 				'Accept': 'application/json',
@@ -5937,7 +5910,6 @@ module.exports = {
 		if (discordUser) {
 			playerName = discordUser.osuName;
 		} else {
-			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -6211,7 +6183,6 @@ module.exports = {
 		let usersOnline = [];
 
 		channel.on('message', async (msg) => {
-			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${msg.user.id}}`);
 
 			module.exports.addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
@@ -6281,7 +6252,6 @@ module.exports = {
 
 		let pingMessage = null;
 		if (interaction) {
-			// eslint-disable-next-line no-undef
 			await interaction.editReply(`<@${users.map(user => user.userId).join('>, <@')}> your match has been created. You have been invited ingame by \`${process.env.OSUNAME}\` and also got a DM as a backup. <https://osu.ppy.sh/mp/${lobby.id}>`);
 			pingMessage = await interaction.channel.send(`<@${users.map(user => user.userId).join('>, <@')}>`);
 			await pingMessage.delete();
@@ -6356,7 +6326,6 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
-			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${obj.player.user.id}}`);
 
 			orderMatchPlayers(lobby, channel, [...users]);
@@ -6502,7 +6471,6 @@ module.exports = {
 			let firstTeam = team1.map(user => user.osuUserId);
 
 			for (let i = 0; i < results.length; i++) {
-				// eslint-disable-next-line no-undef
 				process.send(`osuuser ${results[i].player.user.id}}`);
 
 				if (firstTeam.includes(results[i].player.user.id.toString())) {
@@ -6525,7 +6493,6 @@ module.exports = {
 				await channel.sendMessage(`Bo${bestOf} | ${teamname1}: ${module.exports.humanReadable(scoreTeam1)} | ${teamname2}: ${module.exports.humanReadable(scoreTeam2)} | Difference: ${module.exports.humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
 				await lobby.closeLobby();
-				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -6622,7 +6589,6 @@ module.exports = {
 				await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
 				await new Promise(resolve => setTimeout(resolve, 5000));
 
-				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -6684,7 +6650,6 @@ module.exports = {
 			try {
 				let voiceChannelId = '1010093794714189865';
 				let textChannelId = '1045505232576184470';
-				// eslint-disable-next-line no-undef
 				if (process.env.SERVER === 'Dev') {
 					voiceChannelId = '1010092736155762818';
 					textChannelId = '1045483219555983381';
@@ -6692,9 +6657,7 @@ module.exports = {
 
 				let textChannel = await c.channels.cache.get(textChannelId);
 				if (textChannel && textChannel.guildId) {
-					// eslint-disable-next-line no-undef
 					const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-					// eslint-disable-next-line no-undef
 					const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
@@ -6764,7 +6727,6 @@ module.exports = {
 		// eslint-disable-next-line no-empty-pattern
 		client.shard.broadcastEval(async (c, { }) => {
 			let textChannelId = '1089269685259866242';
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Dev') {
 				textChannelId = '1089272362869985390';
 			}
@@ -6774,9 +6736,7 @@ module.exports = {
 				return;
 			}
 
-			// eslint-disable-next-line no-undef
 			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-			// eslint-disable-next-line no-undef
 			const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			logDatabaseQueries(4, 'utils.js DBProcessQueue updateCurrentMatchesChannel existingQueueTasks');
@@ -6990,7 +6950,6 @@ module.exports = {
 							client.shard.broadcastEval(async (c, { message }) => {
 								let guildId = '727407178499096597';
 
-								// eslint-disable-next-line no-undef
 								if (process.env.SERVER === 'Dev') {
 									guildId = '800641468321759242';
 								}
@@ -7003,7 +6962,6 @@ module.exports = {
 
 								let channelId = '1062637410594340874';
 
-								// eslint-disable-next-line no-undef
 								if (process.env.SERVER === 'Dev') {
 									channelId = '1062644551271075930';
 								}
@@ -7391,7 +7349,6 @@ module.exports = {
 			},
 		});
 
-		// eslint-disable-next-line no-undef
 		process.send(`osuTrackQueue ${osuTrackQueueLength}`);
 
 		if (osuTracker) {
@@ -7409,12 +7366,9 @@ module.exports = {
 					const osu = require('node-osu');
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-					// eslint-disable-next-line no-undef
 					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-					// eslint-disable-next-line no-undef
 					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -7625,10 +7579,8 @@ module.exports = {
 												},
 											};
 
-											// eslint-disable-next-line no-undef
 											let scoreCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-score.js`);
 
-											// eslint-disable-next-line no-undef
 											process.send(`command ${scoreCommand.name}`);
 
 											scoreCommand.execute(null, null, interaction);
@@ -7670,7 +7622,6 @@ module.exports = {
 
 								recentActivity = true;
 
-								// eslint-disable-next-line no-undef
 								let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 
 								//Setup artificial interaction
@@ -7711,7 +7662,6 @@ module.exports = {
 									},
 								};
 
-								// eslint-disable-next-line no-undef
 								process.send(`command ${topCommand.name}`);
 
 								topCommand.execute(null, null, interaction);
@@ -7750,7 +7700,6 @@ module.exports = {
 
 								recentActivity = true;
 
-								// eslint-disable-next-line no-undef
 								let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 
 								//Setup artificial interaction
@@ -7791,7 +7740,6 @@ module.exports = {
 									},
 								};
 
-								// eslint-disable-next-line no-undef
 								process.send(`command ${topCommand.name}`);
 
 								topCommand.execute(null, null, interaction);
@@ -7831,7 +7779,6 @@ module.exports = {
 
 								recentActivity = true;
 
-								// eslint-disable-next-line no-undef
 								let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 
 								//Setup artificial interaction
@@ -7872,7 +7819,6 @@ module.exports = {
 									},
 								};
 
-								// eslint-disable-next-line no-undef
 								process.send(`command ${topCommand.name}`);
 
 								topCommand.execute(null, null, interaction);
@@ -7912,7 +7858,6 @@ module.exports = {
 
 								recentActivity = true;
 
-								// eslint-disable-next-line no-undef
 								let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 
 								//Setup artificial interaction
@@ -7953,7 +7898,6 @@ module.exports = {
 									},
 								};
 
-								// eslint-disable-next-line no-undef
 								process.send(`command ${topCommand.name}`);
 
 								topCommand.execute(null, null, interaction);
@@ -8077,7 +8021,6 @@ module.exports = {
 
 								recentActivity = true;
 
-								// eslint-disable-next-line no-undef
 								let topCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-top.js`);
 
 								//Setup artificial interaction
@@ -8120,7 +8063,6 @@ module.exports = {
 									},
 								};
 
-								// eslint-disable-next-line no-undef
 								process.send(`command ${topCommand.name}`);
 
 								topCommand.execute(null, null, interaction);
@@ -8740,7 +8682,6 @@ module.exports = {
 			},
 		});
 
-		// eslint-disable-next-line no-undef
 		let response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`, {
 			method: 'POST',
 		});
@@ -8753,9 +8694,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 5000));
 			response = await fetch(`https://api.twitch.tv/helix/users?id=${twitchUsers[i].twitchId}`, {
 				headers: {
-					// eslint-disable-next-line no-undef
 					'Client-ID': process.env.TWITCH_CLIENT_ID,
-					// eslint-disable-next-line no-undef
 					'Authorization': `Bearer ${accessToken}`
 				}
 			});
@@ -8786,10 +8725,8 @@ module.exports = {
 	async awaitWebRequestPermission(request, client) {
 		let randomString = Math.random().toString(36).substring(2);
 
-		// eslint-disable-next-line no-undef
 		process.webRequestsWaiting.push({ string: randomString, link: request });
 
-		// eslint-disable-next-line no-undef
 		process.send(`osu! website ${randomString} ${request}`);
 
 		let startTime = new Date();
@@ -8797,7 +8734,6 @@ module.exports = {
 
 		let webRequest = true;
 
-		// eslint-disable-next-line no-undef
 		while (webRequest) {
 			if (iterator) {
 				await new Promise(resolve => setTimeout(resolve, 100));
@@ -8805,12 +8741,10 @@ module.exports = {
 				await new Promise(resolve => setTimeout(resolve, 55));
 			}
 
-			// eslint-disable-next-line no-undef
 			webRequest = process.webRequestsWaiting.find(item => item.string === randomString);
 
 			if (webRequest) {
 				if (webRequest.coveredByOtherRequest) {
-					// eslint-disable-next-line no-undef
 					process.webRequestsWaiting = process.webRequestsWaiting.filter(item => item.string !== randomString);
 
 					await new Promise(resolve => setTimeout(resolve, 5000));
@@ -8820,7 +8754,6 @@ module.exports = {
 
 				//Every 60 seconds send a message to the parent process to let it know that the bot is still waiting for a web request permission
 				if (iterator % 600 === 0) {
-					// eslint-disable-next-line no-undef
 					process.send(`osu! website ${randomString} ${request}`);
 				}
 			}
@@ -8853,10 +8786,8 @@ module.exports = {
 
 			client.shard.broadcastEval(async (c, { message }) => {
 				let channel;
-				// eslint-disable-next-line no-undef
 				if (process.env.SERVER === 'Live') {
 					channel = await c.channels.cache.get('1211359645638070333');
-					// eslint-disable-next-line no-undef
 				} else {
 					channel = await c.channels.cache.get('1211359790882885702');
 				}
@@ -9485,7 +9416,6 @@ module.exports = {
 			await channel.send(message);
 		}, {
 			context: {
-				// eslint-disable-next-line no-undef
 				guildId: process.env.LOGSERVER,
 				channelId: channelId,
 				message: message

@@ -86,7 +86,6 @@ module.exports = {
 		}
 
 		channel.on('message', async (msg) => {
-			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${msg.user.id}}`);
 
 			addMatchMessage(lobby.id, matchMessages, msg.user.ircUsername, msg.message);
@@ -123,7 +122,6 @@ module.exports = {
 			}
 		}
 
-		// eslint-disable-next-line no-undef
 		if (process.env.SERVER !== 'Dev' && lobbyNumber !== 'custom') {
 			try {
 				if (logBroadcastEval) {
@@ -215,7 +213,6 @@ module.exports = {
 		});
 
 		lobby.on('playerJoined', async (obj) => {
-			// eslint-disable-next-line no-undef
 			process.send(`osuuser ${obj.player.user.id}}`);
 
 			if (!playerIds.includes(obj.player.user.id.toString())) {
@@ -254,7 +251,6 @@ module.exports = {
 		});
 		lobby.on('matchFinished', async (results) => {
 			for (let i = 0; i < results.length; i++) {
-				// eslint-disable-next-line no-undef
 				process.send(`osuuser ${results[i].player.user.id}}`);
 			}
 
@@ -342,7 +338,6 @@ module.exports = {
 				await pause(15000);
 				await channel.sendMessage('!mp close');
 
-				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -364,7 +359,6 @@ module.exports = {
 				lobbyStatus = 'Lobby finished';
 				await channel.sendMessage('!mp close');
 
-				// eslint-disable-next-line no-undef
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -611,7 +605,6 @@ async function sendMapMessages(client, map, mapIndex, knockoutNumber, users, dou
 }
 
 async function getKnockoutScores(map, players, doubleTime) {
-	// eslint-disable-next-line no-undef
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)

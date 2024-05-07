@@ -384,9 +384,7 @@ module.exports = {
 
 			const doc = new GoogleSpreadsheet(currentElitiriCupRefSheetId);
 			await doc.useServiceAccountAuth({
-				// eslint-disable-next-line no-undef
 				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
-				// eslint-disable-next-line no-undef
 				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
 			});
 			await doc.loadInfo(); // loads document properties and worksheet
@@ -502,9 +500,7 @@ module.exports = {
 
 			const doc = new GoogleSpreadsheet(currentElitiriCupRefSheetId);
 			await doc.useServiceAccountAuth({
-				// eslint-disable-next-line no-undef
 				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
-				// eslint-disable-next-line no-undef
 				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
 			});
 			await doc.loadInfo(); // loads document properties and worksheet
@@ -1218,7 +1214,6 @@ module.exports = {
 				GrandfinalPool = addRandomMapAndRemoveDuplicatesToFrom(GrandfinalPool, potentialFMGrandfinalMaps);
 			}
 
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER !== 'Live') {
 				return;
 			}
@@ -1229,9 +1224,7 @@ module.exports = {
 
 			// Initialize Auth - see more available options at https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication
 			await doc.useServiceAccountAuth({
-				// eslint-disable-next-line no-undef
 				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
-				// eslint-disable-next-line no-undef
 				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
 			});
 

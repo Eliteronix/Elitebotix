@@ -5,7 +5,6 @@ const { PermissionsBitField } = require('discord.js');
 const { developers, salesmen } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
-	// eslint-disable-next-line no-undef
 	process.send(`discorduser ${interaction.user.id}}`);
 
 	//Create a collection for the commands
@@ -103,7 +102,6 @@ module.exports = async function (client, bancho, interaction) {
 
 		interaction.client.cooldowns = cooldowns;
 
-		// eslint-disable-next-line no-undef
 		process.send(`command ${command.name}`);
 		// console.log(`${client.shardId} command ${command.name} ${interaction.options._subcommand}`);
 

@@ -2,7 +2,6 @@ const { getOsuPP, getOsuBeatmap, getMods, logDatabaseQueries, getUserDuelStarRat
 const { DBDiscordUsers, DBProcessQueue } = require('./dbObjects');
 
 module.exports = async function (client, bancho, message) {
-	// eslint-disable-next-line no-undef
 	process.send(`osuuser ${message.user.id}}`);
 
 	if (message.message === '!help') {
@@ -307,7 +306,6 @@ module.exports = async function (client, bancho, message) {
 
 		const command = require('./commands/osu-autohost.js');
 
-		// eslint-disable-next-line no-undef
 		process.send(`command ${command.name}`);
 
 		command.execute(message, args, null, [client, bancho]);

@@ -274,7 +274,6 @@ module.exports = {
 
 async function getProfile(interaction, username, server, mode, showGraph, noLinkedAccount) {
 	if (server === 'bancho') {
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)

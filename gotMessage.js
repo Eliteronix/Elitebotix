@@ -95,7 +95,6 @@ module.exports = async function (msg, bancho) {
 		}
 	}
 
-	// eslint-disable-next-line no-undef
 	process.send(`command ${command.name}`);
 
 	command.execute(msg, args, null, [msg.client, bancho]);

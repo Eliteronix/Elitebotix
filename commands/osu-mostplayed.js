@@ -631,7 +631,6 @@ module.exports = {
 					if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
 						let csv = new ObjectsToCsv(data);
 						csv = await csv.toString();
-						// eslint-disable-next-line no-undef
 						const buffer = Buffer.from(csv);
 						//Create as an attachment
 						files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-mostplayed-maps-${amount * page}.csv` }));
@@ -648,7 +647,6 @@ module.exports = {
 
 async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit) {
 	if (server === 'bancho' || server === 'tournaments') {
-		// eslint-disable-next-line no-undef
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			notFoundAsError: true,
 			completeScores: false,

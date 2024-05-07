@@ -8,7 +8,6 @@ module.exports = {
 
 		const command = require('../osu-matchtrack.js');
 
-		// eslint-disable-next-line no-undef
 		process.send(`command ${command.name}`);
 
 		command.execute({ id: 1, channel: interaction.channel, author: { id: 1 }, client: interaction.client }, [matchId, '--tracking']);

@@ -22,7 +22,6 @@ module.exports = {
 			}
 		}
 
-		// eslint-disable-next-line no-undef
 		const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
 
 		(async () => {

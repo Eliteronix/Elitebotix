@@ -137,7 +137,6 @@ module.exports = {
 
 		//Get the user from the API if needed
 		if (!osuUser.osuUserId) {
-			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -1177,7 +1176,6 @@ module.exports = {
 			files.push(new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` }));
 		}
 
-		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${osuUser.osuUserId}.txt` });
 		files.push(matchesPlayed);
 
@@ -1208,7 +1206,6 @@ module.exports = {
 
 			let mostPlayedWonLost = mostPlayedWith.concat(mostWonAgainst, mostLostAgainst);
 
-			// eslint-disable-next-line no-undef
 			mostPlayedWonLost = new Discord.AttachmentBuilder(Buffer.from(mostPlayedWonLost.join('\n'), 'utf-8'), { name: `most-played-won-and-lost-${osuUser.osuUserId}.txt` });
 			files.push(mostPlayedWonLost);
 		}

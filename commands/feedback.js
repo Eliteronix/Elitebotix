@@ -114,9 +114,7 @@ async function createJiraIssue(issuetypeId, text) {
 	fetch('https://eliteronix.atlassian.net/rest/api/2/issue/', {
 		method: 'POST',
 		headers: {
-			// eslint-disable-next-line no-undef
 			'Authorization': `Basic ${Buffer.from(
-				// eslint-disable-next-line no-undef
 				`zimmermann.mariomarvin@gmail.com:${process.env.ATLASSIANTOKEN}`
 			).toString('base64')}`,
 			'Accept': 'application/json',

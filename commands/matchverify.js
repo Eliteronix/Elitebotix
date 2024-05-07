@@ -442,7 +442,6 @@ module.exports = {
 
 			unverifiedScores = unverifiedScores.map(score => `https://osu.ppy.sh/mp/${score.matchId}`);
 
-			// eslint-disable-next-line no-undef
 			await interaction.followUp({ files: [new AttachmentBuilder(Buffer.from(unverifiedScores.join('\n'), 'utf-8'), { name: 'unverified-scores.txt' })] });
 		} else if (interaction.options.getSubcommand() === 'update') {
 			let matchIds = interaction.options.getString('id').split(/ +/);
@@ -615,7 +614,6 @@ module.exports = {
 
 					let channelId = '1068905937219362826';
 
-					// eslint-disable-next-line no-undef
 					if (process.env.SERVER === 'Dev') {
 						channelId = '1070013925334204516';
 					}
@@ -889,14 +887,12 @@ module.exports = {
 
 			let matchesPlayed = userScores.map((score) => `${(new Date(score.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(score.matchStartDate).getUTCFullYear()} - ${score.matchName} - ${score.verificationComment} ----- https://osu.ppy.sh/community/matches/${score.matchId}`);
 
-			// eslint-disable-next-line no-undef
 			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
 
 			await interaction.editReply({ content: `All matches found for the acronym \`${acronym.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });
 		} else if (interaction.options.getSubcommand() === 'player') {
 			let player = getIDFromPotentialOsuLink(interaction.options.getString('player', true));
 
-			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -955,7 +951,6 @@ module.exports = {
 
 			let matchesPlayed = matches.map((match) => `${(new Date(match.matchStartDate).getUTCMonth() + 1).toString().padStart(2, '0')}-${new Date(match.matchStartDate).getUTCFullYear()} - ${match.matchName} - ${match.verificationComment} ----- https://osu.ppy.sh/community/matches/${match.matchId}`);
 
-			// eslint-disable-next-line no-undef
 			matchesPlayed = new AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${user.id}.txt` });
 
 			await interaction.editReply({ content: `All matches found for the player \`${player.replace(/`/g, '')}\` are attached.`, files: [matchesPlayed] });

@@ -14,11 +14,8 @@ module.exports = {
 			const channel = await c.channels.cache.get(channelId);
 
 			if (channel) {
-				// eslint-disable-next-line no-undef
 				const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				// eslint-disable-next-line no-undef
 				const { getGuildPrefix, pause, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
-				// eslint-disable-next-line no-undef
 				let command = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\weather.js`);
 
 				logDatabaseQueries(2, 'processQueueTasks/periodic-weather.js DBProcessQueue');
@@ -55,7 +52,6 @@ module.exports = {
 						newArgs.push(locationArguments[i]);
 					}
 
-					// eslint-disable-next-line no-undef
 					process.send(`command ${command.name}`);
 
 					command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [c, null]);

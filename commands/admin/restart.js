@@ -121,7 +121,6 @@ module.exports = {
 				!isNaN(condition) && c.shardId === parseInt(condition) ||
 				condition === 'update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
-				// eslint-disable-next-line no-undef
 				process.exit();
 			} else if (condition === 'update') {
 				c.update = 1;

@@ -108,7 +108,6 @@ module.exports = {
 			}
 		}
 
-		// eslint-disable-next-line no-undef
 		matchesPlayed = new Discord.AttachmentBuilder(Buffer.from(matchesPlayed.join('\n'), 'utf-8'), { name: `multi-matches-${acronym}.txt` });
 
 		try {

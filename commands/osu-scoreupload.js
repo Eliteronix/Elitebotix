@@ -399,7 +399,6 @@ function getNextString(file) {
 
 	let outputString = file.slice(0, stringLength * 2);
 
-	// eslint-disable-next-line no-undef
 	outputString = Buffer.from(outputString, 'hex').toString('utf8');
 
 	file = file.slice(stringLength * 2);
@@ -489,10 +488,8 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 			} catch (e) {
 				//Nothing
 			}
-			// eslint-disable-next-line no-undef
 			const { DBOsuTeamSheets, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
-			// eslint-disable-next-line no-undef
 			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			DBOsuTeamSheets.destroy({
@@ -502,7 +499,6 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 			});
 
 			// Create the new message
-			// eslint-disable-next-line no-undef
 			const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
 
 			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBDiscordUsers 2');

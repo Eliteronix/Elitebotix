@@ -901,7 +901,6 @@ module.exports = {
 				}
 
 				if (!osuUser.id) {
-					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -1606,10 +1605,8 @@ module.exports = {
 						if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
 							let csv = new ObjectsToCsv(data);
 							csv = await csv.toString();
-							// eslint-disable-next-line no-undef
 							const buffer = Buffer.from(csv);
 							//Create as an attachment
-							// eslint-disable-next-line no-undef
 							csvFiles.push(new Discord.AttachmentBuilder(buffer, { name: `duelRatings${csvFiles.length.toString().padStart(2, '0')}.csv` }));
 
 							data = [];
@@ -1696,7 +1693,6 @@ module.exports = {
 				}
 
 				if (!osuUser.name) {
-					// eslint-disable-next-line no-undef
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 						notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -1961,15 +1957,12 @@ module.exports = {
 					}
 				}
 
-				// eslint-disable-next-line no-undef
 				scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUser.id}.txt` });
 				files.push(scores);
 
-				// eslint-disable-next-line no-undef
 				stepData = new Discord.AttachmentBuilder(Buffer.from(stepData.join('\n\n'), 'utf-8'), { name: `osu-duel-star-rating-group-weights-${osuUser.id}.txt` });
 				files.push(stepData);
 
-				// eslint-disable-next-line no-undef
 				multiMatches = new Discord.AttachmentBuilder(Buffer.from(multiMatches.join('\n'), 'utf-8'), { name: `osu-duel-multimatches-${osuUser.id}.txt` });
 				files.push(multiMatches);
 

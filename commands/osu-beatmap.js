@@ -399,7 +399,6 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	}
 
 	if (tournament) {
-		// eslint-disable-next-line no-undef
 		matches = new Discord.AttachmentBuilder(Buffer.from(matches.join('\n'), 'utf-8'), { name: `tourney-scores-${beatmap.beatmapId}.txt` });
 		files.push(matches);
 	}

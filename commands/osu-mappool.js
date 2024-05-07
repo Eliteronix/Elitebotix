@@ -997,9 +997,7 @@ module.exports = {
 
 			// Initialize Auth - see more available options at https://theoephraim.github.io/node-google-spreadsheet/#/getting-started/authentication
 			await doc.useServiceAccountAuth({
-				// eslint-disable-next-line no-undef
 				client_email: process.env.GOOGLESHEETSSERVICEACCOUNTMAIL,
-				// eslint-disable-next-line no-undef
 				private_key: process.env.GOOGLESHEETSSERVICEACCOUNTPRIVATEKEY.replace(/\\n/g, '\n'),
 			});
 
@@ -1007,7 +1005,6 @@ module.exports = {
 				await doc.loadInfo(); // loads document properties and worksheet
 			} catch (error) {
 				if (error.message === 'Google API error - [403] The caller does not have permission') {
-					// eslint-disable-next-line no-undef
 					return await interaction.editReply(`Error trying to load the document. Make sure the document is shared with the service account email (\`${process.env.GOOGLESHEETSSERVICEACCOUNTMAIL}\`).`);
 				} else {
 					console.error(error);

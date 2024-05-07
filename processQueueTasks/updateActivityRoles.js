@@ -26,7 +26,6 @@ module.exports = {
 
 		client.shard.broadcastEval(async (c, { guildId, activityRoles }) => {
 			try {
-				// eslint-disable-next-line no-undef
 				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 				let guild;
@@ -72,7 +71,6 @@ module.exports = {
 
 				let discordUsers = [];
 				for (let i = 0; i < members.length; i++) {
-					// eslint-disable-next-line no-undef
 					const { DBServerUserActivity } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
 					logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBServerUserActivity');

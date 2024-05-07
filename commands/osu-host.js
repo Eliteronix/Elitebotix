@@ -473,7 +473,6 @@ module.exports = {
 				if (i % 10000 === 0 && i > 0 || exportScores.length - 1 === i) {
 					let csv = new ObjectsToCsv(data);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournament-topplays.csv' });
@@ -548,7 +547,6 @@ module.exports = {
 				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
 					let csv = new ObjectsToCsv(data);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'duelratings.csv' });
@@ -610,7 +608,6 @@ module.exports = {
 						}
 					}
 
-					// eslint-disable-next-line no-undef
 					scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUserId}.txt` });
 
 					await interaction.user.send({ content: `Duel Scores and Weights for ${osuName} (\`${osuUserId}\`)`, files: [scores] });
@@ -629,7 +626,6 @@ module.exports = {
 
 			let lastUpdate = new Date();
 
-			// eslint-disable-next-line no-undef
 			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -727,7 +723,6 @@ module.exports = {
 				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
 					let csv = new ObjectsToCsv(data);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentpp.csv' });
@@ -799,7 +794,6 @@ module.exports = {
 				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
 					let csv = new ObjectsToCsv(data);
 					csv = await csv.toString();
-					// eslint-disable-next-line no-undef
 					const buffer = Buffer.from(csv);
 					//Create as an attachment
 					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentbans.csv' });
