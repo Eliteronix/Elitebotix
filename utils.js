@@ -4872,8 +4872,7 @@ module.exports = {
 		}
 
 		if (iterator) {
-			// eslint-disable-next-line no-console
-			console.log(`Created ${iterator} missing users`);
+			await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Created ${iterator} missing users`);
 		}
 
 		//Only clean up during the night
@@ -4882,8 +4881,7 @@ module.exports = {
 			return;
 		}
 
-		// eslint-disable-next-line no-console
-		console.log('Getting most played maps and matches');
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, 'Getting most played maps and matches');
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
 		let mostplayed = await DBOsuMultiGames.findAll({
 			attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
@@ -4900,8 +4898,7 @@ module.exports = {
 
 		let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
 
-		// eslint-disable-next-line no-console
-		console.log(`Getting most played matchIds for matchMaking for ${matchIds.length} matches`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Getting most played matchIds for matchMaking for ${matchIds.length} matches`);
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
 		let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
@@ -4925,8 +4922,7 @@ module.exports = {
 
 		let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
 
-		// eslint-disable-next-line no-console
-		console.log(`Matchmaking matches: ${matchMakingMatchIds.length}`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Matchmaking matches: ${matchMakingMatchIds.length}`);
 
 		// Get playcount for all matches that are not in matchMakingMatchIds
 		mostplayed = await DBOsuMultiGames.findAll({
@@ -4965,8 +4961,7 @@ module.exports = {
 			silent: true
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} beatmaps as not popular again`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Marked ${update[0]} beatmaps as not popular again`);
 
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
@@ -4984,8 +4979,7 @@ module.exports = {
 			silent: true
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} new beatmaps as popular`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Marked ${update[0]} new beatmaps as popular`);
 
 		// Filter out maps that have less than 100 plays
 		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
@@ -5007,8 +5001,7 @@ module.exports = {
 			silent: true
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} beatmaps as not used often again`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Marked ${update[0]} beatmaps as not used often again`);
 
 		// Update beatmap data
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
@@ -5026,12 +5019,10 @@ module.exports = {
 			silent: true
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Marked ${update[0]} new beatmaps as used often`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Marked ${update[0]} new beatmaps as used often`);
 
 		if (date.getUTCHours() > 0 && !manually) {
-			// eslint-disable-next-line no-console
-			return console.log('Finished cleanup');
+			return await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, 'Finished cleanup');
 		}
 
 		// Remove duplicate discorduser entries
@@ -5068,16 +5059,14 @@ module.exports = {
 				await new Promise(resolve => setTimeout(resolve, 2000));
 				await results[0].destroy();
 
-				// eslint-disable-next-line no-console
-				console.log(results[0].userId, results[0].osuUserId, results[0].osuName, results[0].updatedAt);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`${results[0].userId}, ${results[0].osuUserId}, ${results[0].osuName}, ${results[0].updatedAt}\``);
 
 				deleted++;
 				i--;
 			}
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate users (by osuUserId)`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate users (by osuUserId)`);
 
 		deleted = 0;
 
@@ -5109,16 +5098,14 @@ module.exports = {
 				await new Promise(resolve => setTimeout(resolve, 2000));
 				await results[0].destroy();
 
-				// eslint-disable-next-line no-console
-				console.log(results[0].userId, results[0].osuUserId, results[0].osuName, results[0].updatedAt);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`${results[0].userId}, ${results[0].osuUserId}, ${results[0].osuName}, ${results[0].updatedAt}\``);
 
 				deleted++;
 				i--;
 			}
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate users (by userId)`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate users (by userId)`);
 
 		// Remove entries over half a year old
 		duplicates = true;
@@ -5136,8 +5123,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} old duel rating histories`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} old duel rating histories`);
 
 		duplicates = true;
 		deleted = 0;
@@ -5166,8 +5152,7 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
-				// eslint-disable-next-line no-console
-				console.log(`Found ${result[0].length} duplicate beatmaps`);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Found ${result[0].length} duplicate beatmaps`);
 				let beatmapIds = [];
 				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
@@ -5178,14 +5163,12 @@ module.exports = {
 
 						deleted++;
 
-						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'beatmapId', result[0][i].beatmapId, 'mods', result[0][i].mods, 'updatedAt', result[0][i].updatedAt);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} beatmapId ${result[0][i].beatmapId} mods ${result[0][i].mods} updatedAt ${result[0][i].updatedAt}\``);
 					}
 				}
 
 				try {
-					// eslint-disable-next-line no-console
-					console.log(`Deleting ${deleteIds.length} duplicate beatmaps`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate beatmaps`);
 
 					module.exports.logDatabaseQueries(4, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates delete');
 					await DBOsuBeatmaps.destroy({
@@ -5196,8 +5179,7 @@ module.exports = {
 						}
 					});
 
-					// eslint-disable-next-line no-console
-					console.log(`Deleted ${deleteIds.length} duplicate beatmaps`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleteIds.length} duplicate beatmaps`);
 				} catch (e) {
 					console.error(e);
 				}
@@ -5205,8 +5187,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate beatmaps`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate beatmaps`);
 
 		duplicates = true;
 		deleted = 0;
@@ -5235,8 +5216,7 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
-				// eslint-disable-next-line no-console
-				console.log(`Found ${result[0].length} duplicate matches`);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Found ${result[0].length} duplicate matches`);
 				let matchIds = [];
 				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
@@ -5247,14 +5227,12 @@ module.exports = {
 
 						deleted++;
 
-						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', result[0][i].matchId, 'updatedAt', result[0][i].updatedAt);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} updatedAt ${result[0][i].updatedAt}\``);
 					}
 				}
 
 				try {
-					// eslint-disable-next-line no-console
-					console.log(`Deleting ${deleteIds.length} duplicate matches`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate matches`);
 
 					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
 					await DBOsuMultiMatches.destroy({
@@ -5265,8 +5243,7 @@ module.exports = {
 						}
 					});
 
-					// eslint-disable-next-line no-console
-					console.log(`Deleted ${deleteIds.length} duplicate matches`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleteIds.length} duplicate matches`);
 				} catch (e) {
 					console.error(e);
 				}
@@ -5275,8 +5252,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate matches`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate matches`);
 
 		duplicates = true;
 		deleted = 0;
@@ -5305,8 +5281,7 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
-				// eslint-disable-next-line no-console
-				console.log(`Found ${result[0].length} duplicate games`);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Found ${result[0].length} duplicate games`);
 				let gameIds = [];
 				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
@@ -5317,14 +5292,12 @@ module.exports = {
 
 						deleted++;
 
-						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', result[0][i].matchId, 'gameId', result[0][i].gameId, 'updatedAt', result[0][i].updatedAt);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} updatedAt ${result[0][i].updatedAt}\``);
 					}
 				}
 
 				try {
-					// eslint-disable-next-line no-console
-					console.log(`Deleting ${deleteIds.length} duplicate games`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate games`);
 
 					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates delete');
 					await DBOsuMultiGames.destroy({
@@ -5335,8 +5308,7 @@ module.exports = {
 						}
 					});
 
-					// eslint-disable-next-line no-console
-					console.log(`Deleted ${deleteIds.length} duplicate games`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleteIds.length} duplicate games`);
 				} catch (e) {
 					console.error(e);
 				}
@@ -5344,8 +5316,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate games`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate games`);
 
 		duplicates = true;
 		deleted = 0;
@@ -5374,8 +5345,7 @@ module.exports = {
 			duplicates = result[0].length;
 
 			if (result[0].length) {
-				// eslint-disable-next-line no-console
-				console.log(`Found ${result[0].length} duplicate scores`);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Found ${result[0].length} duplicate scores`);
 				let gameIds = [];
 				let deleteIds = [];
 				for (let i = 0; i < result[0].length; i++) {
@@ -5386,14 +5356,12 @@ module.exports = {
 
 						deleted++;
 
-						// eslint-disable-next-line no-console
-						console.log('#', deleted, 'iteration', iterations, 'matchId', result[0][i].matchId, 'gameId', result[0][i].gameId, 'osuUserId', result[0][i].osuUserId, 'updatedAt', result[0][i].updatedAt);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} osuUserId ${result[0][i].osuUserId} updatedAt ${result[0][i].updatedAt}\``);
 					}
 				}
 
 				try {
-					// eslint-disable-next-line no-console
-					console.log(`Deleting ${deleteIds.length} duplicate scores`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate scores`);
 
 					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates delete');
 					await DBOsuMultiGameScores.destroy({
@@ -5404,8 +5372,7 @@ module.exports = {
 						}
 					});
 
-					// eslint-disable-next-line no-console
-					console.log(`Deleted ${deleteIds.length} duplicate scores`);
+					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleteIds.length} duplicate scores`);
 				} catch (e) {
 					console.error(e);
 				}
@@ -5414,8 +5381,7 @@ module.exports = {
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
 
-		// eslint-disable-next-line no-console
-		console.log(`Cleaned up ${deleted} duplicate scores`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate scores`);
 
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries wrong mode scores');
 		let beatmapsOtherModes = await DBOsuBeatmaps.findAll({
@@ -5446,8 +5412,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Updated ${updated[0]} Taiko games that were in the wrong mode`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Taiko games that were in the wrong mode`);
 
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update taiko');
 		updated = await DBOsuMultiGameScores.update({
@@ -5464,8 +5429,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Updated ${updated[0]} Taiko scores that were in the wrong mode`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Taiko scores that were in the wrong mode`);
 
 		let catchMaps = beatmapsOtherModes.filter(beatmap => beatmap.mode === 'Catch the Beat');
 
@@ -5485,8 +5449,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Updated ${updated[0]} Catch the Beat games that were in the wrong mode`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Catch the Beat games that were in the wrong mode`);
 
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update catcch');
 		updated = await DBOsuMultiGameScores.update({
@@ -5503,8 +5466,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Updated ${updated[0]} Catch the Beat scores that were in the wrong mode`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Catch the Beat scores that were in the wrong mode`);
 
 		let maniaMaps = beatmapsOtherModes.filter(beatmap => beatmap.mode === 'Mania');
 
@@ -5524,8 +5486,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Updated ${updated[0]} Mania games that were in the wrong mode`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Mania games that were in the wrong mode`);
 
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update mania');
 		updated = await DBOsuMultiGameScores.update({
@@ -5542,8 +5503,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Updated ${updated[0]} Mania scores that were in the wrong mode`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Mania scores that were in the wrong mode`);
 
 		// Reset unverified scores that were checked by Elitebotix
 		let weeksAgo = new Date();
@@ -5562,8 +5522,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
 
 		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		let matchesWithoutEndDate = await DBOsuMultiMatches.findAll({
@@ -5588,8 +5547,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Reset ${updated[0]} games without matchEndDates warmup flag`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Reset ${updated[0]} games without matchEndDates warmup flag`);
 
 		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		updated = await DBOsuMultiGameScores.update({
@@ -5605,8 +5563,7 @@ module.exports = {
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Reset ${updated[0]} scores without matchEndDates warmup flag`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Reset ${updated[0]} scores without matchEndDates warmup flag`);
 
 		// Delete mappacks that are older than 4 weeks
 		let weeksAgo4 = new Date();
@@ -5614,22 +5571,19 @@ module.exports = {
 
 		deleted = 0;
 
-		fs.readdirSync('mappacks').forEach(file => {
+		fs.readdirSync('mappacks').forEach(async (file) => {
 			let stats = fs.statSync(`mappacks/${file}`);
 			if (stats.mtime < weeksAgo4) {
 				fs.unlinkSync(`mappacks/${file}`);
 				deleted++;
 
-				// eslint-disable-next-line no-console
-				console.log(`Deleted mappack ${file}`);
+				await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted mappack ${file}`);
 			}
 		});
 
-		// eslint-disable-next-line no-console
-		console.log(`Deleted ${deleted} mappacks older than 4 weeks`);
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleted} mappacks older than 4 weeks`);
 
-		// eslint-disable-next-line no-console
-		return console.log('Finished cleanup');
+		return await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, 'Finished cleanup');
 	},
 	wrongCluster(client, id) {
 		let clusterAmount = client.totalShards;

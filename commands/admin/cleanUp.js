@@ -4,7 +4,7 @@ module.exports = {
 	name: 'cleanUp',
 	usage: 'None',
 	async execute(interaction) {
-		cleanUpDuplicateEntries(true);
+		cleanUpDuplicateEntries(interaction.client, true);
 
 		await interaction.editReply('Started cleanup process');
 	},

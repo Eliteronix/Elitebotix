@@ -336,7 +336,7 @@ setTimeout(() => {
 	// eslint-disable-next-line no-console
 	console.log('Starting regular tasks...');
 
-	cleanUpDuplicates();
+	cleanUpDuplicates(client);
 	getForumPosts(client);
 	checkOsuTracks(client);
 	updateTwitchNames(client);
@@ -384,15 +384,15 @@ async function executeProcessQueue(client, bancho) {
 	}, 650);
 }
 
-async function cleanUpDuplicates() {
+async function cleanUpDuplicates(client) {
 	try {
-		await cleanUpDuplicateEntries();
+		await cleanUpDuplicateEntries(client);
 	} catch (e) {
 		console.error('bot.js | cleanUpDuplicates' + e);
 	}
 
 	setTimeout(() => {
-		cleanUpDuplicates();
+		cleanUpDuplicates(client);
 	}, 3600000);
 }
 
