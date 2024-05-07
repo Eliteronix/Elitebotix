@@ -118,20 +118,16 @@ const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
 const { Op } = require('sequelize');
 
-// eslint-disable-next-line no-undef
 const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
 
 client.bancho = bancho;
 
 //login with the Discord client using the Token from the .env file
-// eslint-disable-next-line no-undef
 client.login(process.env.BOTTOKEN);
 client.twitchClient = null;
 
 //Get manager messages
-// eslint-disable-next-line no-undef
 process.webRequestsWaiting = [];
-// eslint-disable-next-line no-undef
 process.on('message', message => {
 	if (!message.type) return false;
 
@@ -139,7 +135,6 @@ process.on('message', message => {
 		// eslint-disable-next-line no-console
 		console.log(`The shard id is: ${message.data.shardId}`);
 		client.shardId = message.data.shardId;
-		// eslint-disable-next-line no-undef
 		process.shardId = message.data.shardId;
 
 		if (!wrongCluster(client)) {
@@ -151,9 +146,7 @@ process.on('message', message => {
 		});
 
 		//Connect for the first shard
-		// eslint-disable-next-line no-undef
 		if (!wrongCluster(client)) {
-			// eslint-disable-next-line no-undef
 			if (process.env.SERVER === 'Live') {
 				bancho.connect();
 			}
@@ -170,22 +163,17 @@ process.on('message', message => {
 		// console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
 		client.totalShards = message.data.totalShards;
 	} else if (message.type == 'osuWebRequest') {
-		// eslint-disable-next-line no-undef
 		if (process.webRequestsWaiting.find(item => item.string === message.data)) {
 			// Remove all instances of the message
 
-			// eslint-disable-next-line no-undef
 			process.webRequestsWaiting = process.webRequestsWaiting.filter(item => item.string !== message.data);
 		} else if (message.data.endsWith('.jpg') ||
 			message.data.startsWith('https://osu.ppy.sh/osu/') ||
 			message.data.startsWith('https://s.ppy.sh/a/') ||
 			message.data.startsWith('https://assets.ppy.sh/profile-badges/')) {
 
-			// eslint-disable-next-line no-undef
 			for (let i = 0; i < process.webRequestsWaiting.length; i++) {
-				// eslint-disable-next-line no-undef
 				if (process.webRequestsWaiting[i].link === message.data) {
-					// eslint-disable-next-line no-undef
 					process.webRequestsWaiting[i].coveredByOtherRequest = true;
 				}
 			}
@@ -193,7 +181,6 @@ process.on('message', message => {
 	}
 });
 
-// eslint-disable-next-line no-undef
 process.on('uncaughtException', (error, origin) => {
 	if (error?.code === 'ECONNRESET') {
 		return;
@@ -201,7 +188,6 @@ process.on('uncaughtException', (error, origin) => {
 	console.error('UNCAUGHT EXCEPTION');
 	console.error(error);
 	console.error(origin);
-	// eslint-disable-next-line no-undef
 	process.exit(1);
 });
 
@@ -251,7 +237,6 @@ function readyDiscord() {
 		}
 	}
 
-	// eslint-disable-next-line no-undef
 	const rest = new REST({ version: '10' }).setToken(process.env.BOTTOKEN);
 
 	(async () => {
@@ -370,7 +355,6 @@ setTimeout(() => {
 // let nextMBThreshold = 3000;
 
 // setInterval(function () {
-// 	// eslint-disable-next-line no-undef
 // 	let memMB = process.memoryUsage().rss / 1048576;
 // 	if (memMB > nextMBThreshold) {
 // 		// eslint-disable-next-line no-console
