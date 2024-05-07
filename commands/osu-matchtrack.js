@@ -441,7 +441,12 @@ module.exports = {
 											}
 
 											if (lastMessageType === 'playing') {
-												lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
+												try {
+													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
+												} catch (e) {
+													console.error(e);
+													console.error(lastMessage);
+												}
 											} else {
 												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
 											}
