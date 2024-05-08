@@ -603,22 +603,7 @@ module.exports = {
 			const user = await client.users.fetch(discordUser.userId);
 
 			if (elitiriSignUp.osuName !== discordUser.osuName && !elitiriSignUp.rankAchieved && process.env.SERVER === 'Live') {
-				if (logBroadcastEval) {
-					// eslint-disable-next-line no-console
-					console.log('Broadcasting processQueueTasks/updateOsuRank.js elitiri host name change message log to shards...');
-				}
-
-				client.shard.broadcastEval(async (c, { message }) => {
-					const guild = await c.guilds.cache.get('727407178499096597');
-
-					if (!guild || guild.shardId !== c.shardId) {
-						return;
-					}
-
-					const channel = await guild.channels.cache.get('830534251757174824');
-					await channel.send(message);
-				}, { context: { message: `<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.` } });
-
+				await sendMessageToLogChannel(client, '830534251757174824', `<@&851356668415311963> The player \`${elitiriSignUp.osuName}\` from \`${elitiriSignUp.bracketName}\` changed their osu! name to \`${discordUser.osuName}\`.`);
 			}
 
 			elitiriSignUp.osuName = discordUser.osuName;
