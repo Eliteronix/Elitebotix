@@ -6896,36 +6896,7 @@ module.exports = {
 								notes: notes,
 							});
 
-							if (logBroadcastEval) {
-								// eslint-disable-next-line no-console
-								console.log('Broadcasting utils.js new tourney posts to shards...');
-							}
-
-							client.shard.broadcastEval(async (c, { message }) => {
-								let guildId = '727407178499096597';
-
-								if (process.env.SERVER === 'Dev') {
-									guildId = '800641468321759242';
-								}
-
-								const guild = await c.guilds.cache.get(guildId);
-
-								if (!guild || guild.shardId !== c.shardId) {
-									return;
-								}
-
-								let channelId = '1062637410594340874';
-
-								if (process.env.SERVER === 'Dev') {
-									channelId = '1062644551271075930';
-								}
-
-								const channel = await guild.channels.cache.get(channelId);
-
-								if (channel) {
-									await channel.send(message);
-								}
-							}, { context: { message: `There is a new tournament post: ${uniqueTopics[i]}` } });
+							await module.exports.sendMessageToLogChannel(client, process.env.TOURNAMENTPOSTSLOG, `There is a new tournament post: ${uniqueTopics[i]}`);
 						});
 				}
 			});
