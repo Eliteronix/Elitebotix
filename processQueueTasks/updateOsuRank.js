@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects');
-const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils.js');
+const { logDatabaseQueries, getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo, logOsuAPICalls, sendMessageToLogChannel } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs, logBroadcastEval } = require('../config.json');
 const { Op } = require('sequelize');
@@ -405,37 +405,7 @@ module.exports = {
 				}
 
 				if (sendLogMessage) {
-					if (logBroadcastEval) {
-						// eslint-disable-next-line no-console
-						console.log('Broadcasting processQueueTasks/updateOsuRank.js banned-users log to shards...');
-					}
-
-					client.shard.broadcastEval(async (c, { message }) => {
-						let guildId = '727407178499096597';
-
-						if (process.env.SERVER === 'Dev') {
-							guildId = '800641468321759242';
-						}
-
-						const guild = await c.guilds.cache.get(guildId);
-
-						if (!guild || guild.shardId !== c.shardId) {
-							return;
-						}
-
-						let channelId = '1061942415864385536';
-
-						if (process.env.SERVER === 'Dev') {
-							channelId = '1061942304979566614';
-						}
-
-						const channel = await guild.channels.cache.get(channelId);
-
-						if (channel) {
-							let sentMessage = await channel.send(message);
-							sentMessage.crosspost();
-						}
-					}, { context: { message: message } });
+					await sendMessageToLogChannel(client, process.env.BANNEDUSERSLOG, message, true);
 				}
 
 				await discordUser.save();

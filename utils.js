@@ -9353,7 +9353,12 @@ module.exports = {
 		//Create as an attachment
 		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${input.user.id}-${input.beatmap.beatmapId}-${input.score.raw_mods}.png` });
 	},
-	async sendMessageToLogChannel(client, channelId, message) {
+	async sendMessageToLogChannel(client, channelId, message, crosspost) {
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting utils.js sendMessageToLogChannel to shards...');
+		}
+
 		client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
 			let guild = await c.guilds.cache.get(guildId);
 
@@ -9367,7 +9372,15 @@ module.exports = {
 				return;
 			}
 
-			await channel.send(message);
+			let sentMessage = await channel.send(message);
+
+			if (crosspost) {
+				try {
+					await sentMessage.crosspost();
+				} catch (e) {
+					console.error('utils.js sendMessageToLogChannel | ', e);
+				}
+			}
 		}, {
 			context: {
 				guildId: process.env.LOGSERVER,
