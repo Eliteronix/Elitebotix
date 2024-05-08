@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { DBProcessQueue, DBOsuMultiMatches, DBOsuMultiGames, DBOsuMultiGameScores } = require('../dbObjects');
-const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
+const { saveOsuMultiScores, logDatabaseQueries, awaitWebRequestPermission, updateCurrentMatchesChannel, logOsuAPICalls, sendMessageToLogChannel } = require('../utils');
 const { Op } = require('sequelize');
 const { logBroadcastEval } = require('../config.json');
 
@@ -323,40 +323,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												console.log(`Match ${match.id} verified - Match created by MaidBot`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match created by MaidBot to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match created by MaidBot\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match created by MaidBot\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update maidbot match');
 											await DBOsuMultiMatches.update({
@@ -394,40 +361,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 												console.log(`Match ${match.id} verified as fake - Match not created by MaidBot`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js ini\n[Changed] diff\n- Valid: False\nComment: Match not created by MaidBot to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`ini\n[Changed]\`\`\`\`\`\`diff\n- Valid: False\nComment: Match not created by MaidBot\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`ini\n[Changed]\`\`\`\`\`\`diff\n- Valid: False\nComment: Match not created by MaidBot\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										}
 									} else {
 										logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update not determinable maidbot match');
@@ -494,40 +428,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 							console.log(`Match ${incompleteMatch.matchId} verified as fake - o!mm not found - Fake because MaidBot uses !mp make to create matches`);
 						}
 
-						let guildId = '727407178499096597';
-						let channelId = '1068905937219362826';
-
-						if (process.env.SERVER === 'Dev') {
-							guildId = '800641468321759242';
-							channelId = '1070013925334204516';
-						}
-
-						if (logBroadcastEval) {
-							// eslint-disable-next-line no-console
-							console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n- Valid: False\nComment: o!mm not found - Fake because MaidBot uses !mp make to create matches to shards...');
-						}
-
-						client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-							let guild = await c.guilds.cache.get(guildId);
-
-							if (!guild || guild.shardId !== c.shardId) {
-								return;
-							}
-
-							let channel = await guild.channels.cache.get(channelId);
-
-							if (!channel) {
-								return;
-							}
-
-							await channel.send(message);
-						}, {
-							context: {
-								guildId: guildId,
-								channelId: channelId,
-								message: `\`\`\`ini\n[Changed]\`\`\`\`\`\`diff\n- Valid: False\nComment: o!mm not found - Fake because MaidBot uses !mp make to create matches\`\`\`https://osu.ppy.sh/mp/${incompleteMatch.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-							}
-						});
+						await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`ini\n[Changed]\`\`\`\`\`\`diff\n- Valid: False\nComment: o!mm not found - Fake because MaidBot uses !mp make to create matches\`\`\`https://osu.ppy.sh/mp/${incompleteMatch.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 					} else {
 						// Go same if error
 						secondsToWait = secondsToWait + 60;
@@ -610,40 +511,7 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 						console.log(`Match ${matchesToVerify[i]} verified - Elitebotix Duel Match`);
 					}
 
-					let guildId = '727407178499096597';
-					let channelId = '1068905937219362826';
-
-					if (process.env.SERVER === 'Dev') {
-						guildId = '800641468321759242';
-						channelId = '1070013925334204516';
-					}
-
-					if (logBroadcastEval) {
-						// eslint-disable-next-line no-console
-						console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Elitebotix Duel Match to shards...');
-					}
-
-					client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-						let guild = await c.guilds.cache.get(guildId);
-
-						if (!guild || guild.shardId !== c.shardId) {
-							return;
-						}
-
-						let channel = await guild.channels.cache.get(channelId);
-
-						if (!channel) {
-							return;
-						}
-
-						await channel.send(message);
-					}, {
-						context: {
-							guildId: guildId,
-							channelId: channelId,
-							message: `\`\`\`diff\n+ Valid: True\nComment: Elitebotix Duel Match\`\`\`https://osu.ppy.sh/mp/${matchesToVerify[i]} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-						}
-					});
+					await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Elitebotix Duel Match\`\`\`https://osu.ppy.sh/mp/${matchesToVerify[i]} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 				}
 			} else {
 				const result = await verifyAnyMatch(osuApi, client, logVerificationProcess);
@@ -971,40 +839,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Qualifiers - All maps played more than 20 times outside of the lobby\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Qualifiers not all maps played more than 20 times');
 											await DBOsuMultiMatches.update({
@@ -1060,40 +895,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that was verified\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else if (qualsMatchOfTheSamePlayers && qualsMatchOfTheSamePlayers.verifiedBy) {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - The same players played in a Qualifiers match that could not be verified');
 											await DBOsuMultiMatches.update({
@@ -1163,40 +965,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 2 matches by the same players - some maps played more than 20 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else if (otherMatchesWithTheSamePlayers.length > 4 && mapsPlayed.some(map => map.amount > 15)) {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym');
 											await DBOsuMultiMatches.update({
@@ -1234,40 +1003,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 4 matches by the same players - some maps played more than 15 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else if (otherMatchesWithTheSamePlayers.length > 6 && mapsPlayed.some(map => map.amount > 10)) {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym');
 											await DBOsuMultiMatches.update({
@@ -1305,40 +1041,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 6 matches by the same players - some maps played more than 10 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else if (otherMatchesWithTheSamePlayers.length > 8 && mapsPlayed.some(map => map.amount > 5)) {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym');
 											await DBOsuMultiMatches.update({
@@ -1376,40 +1079,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 												console.log(`Match ${match.id} verified - Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym`);
 											}
 
-											let guildId = '727407178499096597';
-											let channelId = '1068905937219362826';
-
-											if (process.env.SERVER === 'Dev') {
-												guildId = '800641468321759242';
-												channelId = '1070013925334204516';
-											}
-
-											if (logBroadcastEval) {
-												// eslint-disable-next-line no-console
-												console.log('Broadcasting processQueueTasks/saveMultiMatches.js diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym to shards...');
-											}
-
-											client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
-												let guild = await c.guilds.cache.get(guildId);
-
-												if (!guild || guild.shardId !== c.shardId) {
-													return;
-												}
-
-												let channel = await guild.channels.cache.get(channelId);
-
-												if (!channel) {
-													return;
-												}
-
-												await channel.send(message);
-											}, {
-												context: {
-													guildId: guildId,
-													channelId: channelId,
-													message: `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`
-												}
-											});
+											await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match reffed by someone else - Not Qualifiers - No quals match of the same players - more than 8 matches by the same players - some maps played more than 5 times in other matches of the same acronym\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
 										} else {
 											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update No quals match of the same players - not verifyable');
 											await DBOsuMultiMatches.update({
