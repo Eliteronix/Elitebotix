@@ -1321,38 +1321,7 @@ module.exports = {
 			.then(async (discordUser) => {
 				if (discordUser) {
 					if (discordUser.osuBadges !== additionalInfo.tournamentBadges.length) {
-
-						if (logBroadcastEval) {
-							// eslint-disable-next-line no-console
-							console.log('Broadcasting utils.js tournamentbadges to shards...');
-						}
-
-						client.shard.broadcastEval(async (c, { message }) => {
-							let guildId = '727407178499096597';
-
-							if (process.env.SERVER === 'Dev') {
-								guildId = '800641468321759242';
-							}
-
-							const guild = await c.guilds.cache.get(guildId);
-
-							if (!guild || guild.shardId !== c.shardId) {
-								return;
-							}
-
-							let channelId = '1078318397688926260';
-
-							if (process.env.SERVER === 'Dev') {
-								channelId = '1078318144914985050';
-							}
-
-							const channel = await guild.channels.cache.get(channelId);
-
-							if (channel) {
-								let sentMessage = await channel.send(message);
-								sentMessage.crosspost();
-							}
-						}, { context: { message: `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} tournament badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+						await module.exports.sendMessageToLogChannel(client, process.env.BADGELOG, `\`${discordUser.osuName}\` gained ${additionalInfo.tournamentBadges.length - discordUser.osuBadges} tournament badge(s). (${discordUser.osuBadges} -> ${additionalInfo.tournamentBadges.length}) | https://osu.ppy.sh/users/${discordUser.osuUserId}`, true);
 
 						discordUser.osuBadges = additionalInfo.tournamentBadges.length;
 					}
@@ -1365,37 +1334,7 @@ module.exports = {
 								bannedUntilString = `over <t:${Math.floor(additionalInfo.tournamentBan.tournamentBannedUntil.getTime() / 1000)}:R>`;
 							}
 
-							if (logBroadcastEval) {
-								// eslint-disable-next-line no-console
-								console.log('Broadcasting utils.js tournamentban to shards...');
-							}
-
-							client.shard.broadcastEval(async (c, { message }) => {
-								let guildId = '727407178499096597';
-
-								if (process.env.SERVER === 'Dev') {
-									guildId = '800641468321759242';
-								}
-
-								const guild = await c.guilds.cache.get(guildId);
-
-								if (!guild || guild.shardId !== c.shardId) {
-									return;
-								}
-
-								let channelId = '1078318437408968804';
-
-								if (process.env.SERVER === 'Dev') {
-									channelId = '1078318180302323842';
-								}
-
-								const channel = await guild.channels.cache.get(channelId);
-
-								if (channel) {
-									let sentMessage = await channel.send(message);
-									sentMessage.crosspost();
-								}
-							}, { context: { message: `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}` } });
+							await module.exports.sendMessageToLogChannel(client, process.env.TOURNAMENTBANLOG, `\`${discordUser.osuName}\` has received a tournament ban at <t:${Math.floor(new Date(additionalInfo.tournamentBan.timestamp).getTime() / 1000)}:f> for \`${additionalInfo.tournamentBan.description}\`. (${bannedUntilString}) | https://osu.ppy.sh/users/${discordUser.osuUserId}`, true);
 						}
 
 						discordUser.tournamentBannedReason = additionalInfo.tournamentBan.description;
@@ -3306,14 +3245,6 @@ module.exports = {
 
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
-		let suspiciousActivityLogGuildId = '727407178499096597';
-		let suspiciousActivityLogChannelId = '1142772110540931154';
-
-		if (process.env.SERVER === 'Dev') {
-			suspiciousActivityLogGuildId = '800641468321759242';
-			suspiciousActivityLogChannelId = '1142772857877823488';
-		}
-
 		//Get the tournament data either limited by the date
 		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores getUserDuelStarRating');
 		let userScores = await DBOsuMultiGameScores.findAll({
@@ -3447,34 +3378,7 @@ module.exports = {
 					if (input.client.knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
 						input.client.knownSuspiciousMatches.push(userScores[i].matchId);
 
-						if (logBroadcastEval) {
-							// eslint-disable-next-line no-console
-							console.log('Broadcasting utils.js Found suspicious unverified match');
-						}
-
-						input.client.shard.broadcastEval(async (c, { guildId, channelId, matchId }) => {
-							c.knownSuspiciousMatches.push(matchId);
-
-							let guild = await c.guilds.cache.get(guildId);
-
-							if (!guild || guild.shardId !== c.shardId) {
-								return;
-							}
-
-							let channel = await guild.channels.cache.get(channelId);
-
-							if (!channel) {
-								return;
-							}
-
-							await channel.send(`Found suspicious unverified match: https://osu.ppy.sh/community/matches/${matchId}\nReason: More than 15% misses on a map`);
-						}, {
-							context: {
-								guildId: suspiciousActivityLogGuildId,
-								channelId: suspiciousActivityLogChannelId,
-								matchId: userScores[i].matchId
-							}
-						});
+						await module.exports.sendMessageToLogChannel(input.client, process.env.SUSPICIOUSACTIVITYLOG, `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`);
 					}
 
 					continue;
@@ -3970,34 +3874,7 @@ module.exports = {
 						}
 
 						if (message.length > 1) {
-							if (logBroadcastEval) {
-								// eslint-disable-next-line no-console
-								console.log('Broadcasting utils.js duel Rating change for official server to shards...');
-							}
-
-							input.client.shard.broadcastEval(async (c, { message }) => {
-								let guildId = '727407178499096597';
-								let channelId = '946150632128135239';
-								if (process.env.SERVER === 'Dev') {
-									guildId = '800641468321759242';
-									channelId = '946190123677126666';
-								} else if (process.env.SERVER === 'QA') {
-									guildId = '800641367083974667';
-									channelId = '946190678189293569';
-								}
-
-								const guild = await c.guilds.cache.get(guildId);
-
-								if (!guild || guild.shardId !== c.shardId) {
-									return;
-								}
-
-								const channel = await guild.channels.cache.get(channelId);
-
-								if (!channel) return;
-
-								await channel.send(message);
-							}, { context: { message: `\`\`\`${message.join('\n')}\`\`\`` } });
+							await module.exports.sendMessageToLogChannel(input.client, process.env.DUELRATINGLOG, `\`\`\`${message.join('\n')}\`\`\``);
 
 							if (discordUser.osuDuelRatingUpdates) {
 								const user = await input.client.users.cache.get(discordUser.userId);
