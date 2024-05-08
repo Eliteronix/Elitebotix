@@ -9206,7 +9206,7 @@ module.exports = {
 			console.log('Broadcasting utils.js sendMessageToLogChannel to shards...');
 		}
 
-		client.shard.broadcastEval(async (c, { guildId, channelId, message }) => {
+		client.shard.broadcastEval(async (c, { guildId, channelId, message, crosspost }) => {
 			let guild = await c.guilds.cache.get(guildId);
 
 			if (!guild || guild.shardId !== c.shardId) {
@@ -9232,7 +9232,8 @@ module.exports = {
 			context: {
 				guildId: process.env.LOGSERVER,
 				channelId: channelId,
-				message: message
+				message: message,
+				crosspost: crosspost
 			}
 		});
 	}
