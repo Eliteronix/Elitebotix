@@ -9225,7 +9225,9 @@ module.exports = {
 				try {
 					await sentMessage.crosspost();
 				} catch (e) {
-					console.error('utils.js sendMessageToLogChannel | ', e);
+					if (e.message !== 'This message has already been crossposted.') {
+						console.error('utils.js sendMessageToLogChannel | ', e);
+					}
 				}
 			}
 		}, {
