@@ -423,6 +423,8 @@ module.exports = {
 					group: ['beatmapId'],
 					order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
 				});
+
+				mostplayed = mostplayed.map(item => item.dataValues);
 			} else {
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 2');
 				let mostplayedGrouped = await DBOsuMultiGames.findAll({
@@ -444,9 +446,11 @@ module.exports = {
 				let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 					attributes: ['matchId'],
 					where: {
-						matchId: matchIds,
+						matchId: {
+							[Op.in]: matchIds
+						},
 						matchName: {
-							[Op.and]: [
+							[Op.or]: [
 								{
 									[Op.like]: 'ETX%:%',
 								},
@@ -456,34 +460,29 @@ module.exports = {
 							]
 						},
 					},
+					group: ['matchId']
 				});
 
 				let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
 
-				// Filter out matches that are not in the match making queue
-				mostplayedGrouped = mostplayedGrouped.filter(item => !matchMakingMatchIds.includes(item.matchId));
+				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 3');
+				mostplayed = await DBOsuMultiGames.findAll({
+					attributes: ['beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
+					where: {
+						warmup: false,
+						beatmapId: {
+							[Op.gt]: 0,
+						},
+						tourneyMatch: true,
+						matchId: {
+							[Op.notIn]: matchMakingMatchIds,
+						},
+					},
+					group: ['beatmapId'],
+					order: [[Sequelize.fn('SUM', Sequelize.col('scores')), 'DESC']],
+				});
 
-				// Sum up the playcount of the same beatmap in different matches
-				mostplayed = [];
-				let mostplayedBeatmapIds = [];
-
-				for (let i = 0; i < mostplayedGrouped.length; i++) {
-					let index = mostplayedBeatmapIds.indexOf(mostplayedGrouped[i].beatmapId);
-
-					if (index !== -1) {
-						mostplayed[index].playcount = mostplayedGrouped[i].dataValues.playcount + mostplayed[index].playcount;
-					} else {
-						mostplayed.push({
-							beatmapId: mostplayedGrouped[i].beatmapId,
-							playcount: mostplayedGrouped[i].dataValues.playcount,
-						});
-
-						mostplayedBeatmapIds.push(mostplayedGrouped[i].beatmapId);
-					}
-				}
-
-				// Sort by playcount
-				mostplayed.sort((a, b) => b.playcount - a.playcount);
+				mostplayed = mostplayed.map(item => item.dataValues);
 			}
 
 			let data = [];
