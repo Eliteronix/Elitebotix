@@ -6,6 +6,7 @@ const { DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const osu = require('node-osu');
+const fs = require('fs');
 
 module.exports = {
 	name: 'osu-bingo',
@@ -467,13 +468,13 @@ module.exports = {
 		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
 		const uniqueUsers = [...new Set(allUsers)];
 
-		if (allUsers.length !== uniqueUsers.length) {
-			return await interaction.editReply('You can\'t play a bingo match with the same user twice');
-		}
+		// if (allUsers.length !== uniqueUsers.length) {
+		// 	return await interaction.editReply('You can\'t play a bingo match with the same user twice');
+		// }
 
-		if (allUsers.length < 2) {
-			return await interaction.editReply('You can\'t play a bingo match alone');
-		}
+		// if (allUsers.length < 2) {
+		// 	return await interaction.editReply('You can\'t play a bingo match alone');
+		// }
 
 		let everyUser = [];
 		for (let i = 0; i < allUsers.length; i++) {
@@ -487,6 +488,19 @@ module.exports = {
 			});
 
 			if (discordUser && discordUser.osuUserId) {
+				// Get the players team
+				if (team1.includes(discordUser.userId)) {
+					discordUser.team = 'Team Red';
+				} else if (team2.includes(discordUser.userId)) {
+					discordUser.team = 'Team Blue';
+				} else if (team3.includes(discordUser.userId)) {
+					discordUser.team = 'Team Green';
+				} else if (team4.includes(discordUser.userId)) {
+					discordUser.team = 'Team Yellow';
+				} else if (team5.includes(discordUser.userId)) {
+					discordUser.team = 'Team Pink';
+				}
+
 				everyUser.push(discordUser);
 			} else {
 				return await interaction.editReply(`<@${allUsers[i]}> doesn't have their osu! account connected and verified.\nPlease have them connect their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
@@ -654,6 +668,21 @@ module.exports = {
 		interaction.client.bingoMatches.push(randomString);
 
 		let message = await interaction.channel.send('Creating the bingo card...');
+
+		// Create references for each user to the current bingo game
+		//Check if the folder exists and create it if necessary
+		if (!fs.existsSync('./currentbingo')) {
+			fs.mkdirSync('./currentbingo');
+		}
+
+		for (let i = 0; i < everyUser.length; i++) {
+			let buffer = JSON.stringify({
+				team: everyUser[i].team,
+				message: message.id
+			});
+
+			fs.writeFileSync(`./currentbingo/${everyUser[i].osuUserId}.json`, buffer);
+		}
 
 		await refreshMessage(message, mappool, lastRefresh);
 
@@ -852,7 +881,18 @@ async function refreshMessage(message, mappool, lastRefresh) {
 		}
 	}
 
+	// Save the image locally
+	const buffer = canvas.toBuffer('image/png');
+
+	//Check if the folder exists and create it if necessary
+	if (!fs.existsSync('./bingocards')) {
+		fs.mkdirSync('./bingocards');
+	}
+
+	fs.writeFileSync(`./bingocards/${message.id}.png`, buffer);
+
 	const bingoCard = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bingo.png' });
+
 	try {
 		await message.fetch();
 		await message.edit({ content: reply, files: [bingoCard] });
@@ -902,17 +942,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 												}
 
 												// Get the players team
-												if (team1.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team Red';
-												} else if (team2.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team Blue';
-												} else if (team3.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team Green';
-												} else if (team4.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team Yellow';
-												} else if (team5.includes(everyUser[i].userId)) {
-													mappool[k].team = 'Team Pink';
-												}
+												mappool[k].team = everyUser[i].team;
 
 												await mappool[k].message.fetch();
 												await mappool[k].message.delete();
@@ -944,17 +974,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 											}
 
 											// Get the players team
-											if (team1.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team Red';
-											} else if (team2.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team Blue';
-											} else if (team3.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team Green';
-											} else if (team4.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team Yellow';
-											} else if (team5.includes(everyUser[i].userId)) {
-												mappool[k].team = 'Team Pink';
-											}
+											mappool[k].team = everyUser[i].team;
 
 											// Translate K into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
 											let code = '';
