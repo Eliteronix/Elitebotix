@@ -230,13 +230,8 @@ module.exports = {
 
 		let attachedFile = interaction.options.getAttachment('file');
 
-		try {
-			if (!attachedFile.contentType.startsWith('text/plain')) {
-				return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
-			}
-		} catch (error) {
-			console.error(attachedFile);
-			console.error(error);
+		if (!attachedFile.contentType?.startsWith('text/plain')) {
+			return await interaction.editReply({ content: 'The attached file is not a .txt file.' });
 		}
 
 		// fetch the file
