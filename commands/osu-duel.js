@@ -1628,6 +1628,10 @@ module.exports = {
 					serverHint = ' from the server';
 				}
 
+				while (!interaction.client.slashCommandData) {
+					await pause(1000);
+				}
+
 				//Send attachment
 				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players${serverHint} that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> is being used.`, files: files });
 
