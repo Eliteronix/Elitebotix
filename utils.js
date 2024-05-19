@@ -5531,6 +5531,8 @@ module.exports = {
 			]
 		});
 
+		duelDiscordUsers.sort((a, b) => parseFloat(b.osuDuelStarRating) - parseFloat(a.osuDuelStarRating));
+
 		//Get the user's position in the list
 		let ppRank = null;
 
@@ -5576,7 +5578,7 @@ module.exports = {
 				expectedPpRankPercentageDifference: expectedPpRankPercentageDifference,
 				expectedPpRankOsu: expectedPpRankOsu,
 				expectedDuelRating: duelDiscordUsers[duelRank].osuDuelStarRating,
-				expectedCurrentDuelRating: duelDiscordUsers[ppRank].osuDuelStarRating
+				expectedCurrentDuelRating: duelDiscordUsers[Math.min(ppRank, duelDiscordUsers.length - 1)].osuDuelStarRating
 			};
 		} catch (error) {
 			console.error(duelDiscordUsers.length, ppRank, discordUser.osuUserId, discordUser.osuName);
