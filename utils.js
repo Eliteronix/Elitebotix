@@ -4119,7 +4119,18 @@ module.exports = {
 				username: process.env.TWITCH_USERNAME,
 				password: process.env.TWITCH_OAUTH_TOKEN
 			},
-			channels: twitchChannels
+			channels: twitchChannels,
+			logger: {
+				info: function () {
+					return;
+				},
+				warn: function () {
+					return;
+				},
+				error: function (message) {
+					console.error(message);
+				}
+			}
 		};
 
 		// Create a client with our options
@@ -4594,8 +4605,8 @@ module.exports = {
 
 				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, client, depth);
 			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
-				e.message !== 'Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') {
-				console.error(`Test | error with map ${beatmapId}`, e, `message '${e.message}'`);
+				!e.message.includes.includes('Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)')) {
+				console.error(`error with map ${beatmapId}`, e);
 				mapsRetriedTooOften.push(beatmapId);
 				return null;
 			} else {
