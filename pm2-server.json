@@ -1,5 +1,0 @@
-{
-	"script": "server.js",
-	"name": "Server",
-	"nodeArgs": "--use_strict"
-}
