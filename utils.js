@@ -4128,7 +4128,12 @@ module.exports = {
 					return;
 				},
 				error: function (message) {
-					console.error(message);
+					if (message !== 'No response from Twitch.'
+						&& message !== 'msg_channel_suspended'
+						&& message !== 'Ping timeout.'
+						&& message !== 'Could not connect to server. Reconnecting in 1 seconds..') {
+						console.error('twitchClient error', message);
+					}
 				}
 			}
 		};
