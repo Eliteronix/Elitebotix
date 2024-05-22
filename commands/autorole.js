@@ -149,8 +149,8 @@ module.exports = {
 			}
 
 			//Assign the role to every member
-			guildMembers.forEach(autoRole => {
-				autoRole.roles.add(role);
+			guildMembers.forEach(async (autoRole) => {
+				await autoRole.roles.add(role);
 			});
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles remove');
