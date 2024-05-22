@@ -650,7 +650,7 @@ module.exports = {
 
 		let lastRefresh = { date: new Date(), lastScore: new Date() };
 
-		let reply = `The bingo match has started!\n\nPlay the maps without \`NF\`, \`HT\`, \`Score v2\`, \`Relax\` and \`Autopilot\` to claim a map.\nThe minimum requirement to claim a map is: \`${requirement}\`\nYou can claim a map for your own team by beating the achieved score on the map!`;
+		let reply = `The bingo match has started! - Are you streaming? [You can set up your browsersource here](<http://eliteronix.de/bingo>).\n\nPlay the maps without \`NF\`, \`HT\`, \`Score v2\`, \`Relax\` and \`Autopilot\` to claim a map.\nThe minimum requirement to claim a map is: \`${requirement}\`\nYou can claim a map for your own team by beating the achieved score on the map!`;
 
 		reply = reply + teamsString;
 
