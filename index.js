@@ -460,11 +460,21 @@ async function processOsuWebRequests(client) {
 		let osuWebRequest = osuWebRequestQueue[0];
 
 		manager.shards.forEach(shard => {
-			shard.send({ type: 'osuWebRequest', data: osuWebRequest.string });
+			shard.send({ type: 'osuWebRequest', data: osuWebRequest.string })
+				.catch(error => {
+					if (error.message !== 'Channel closed') {
+						console.error('index.js | processOsuWebRequests osuWebRequest string' + error);
+					}
+				});
 		});
 
 		manager.shards.forEach(shard => {
-			shard.send({ type: 'osuWebRequest', data: osuWebRequest.link });
+			shard.send({ type: 'osuWebRequest', data: osuWebRequest.link })
+				.catch(error => {
+					if (error.message !== 'Channel closed') {
+						console.error('index.js | processOsuWebRequests osuWebRequest link' + error);
+					}
+				});
 		});
 
 		osuWebRequestQueue = osuWebRequestQueue.filter(item => item.string !== osuWebRequest.string);
