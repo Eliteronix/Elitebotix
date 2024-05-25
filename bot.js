@@ -456,7 +456,7 @@ async function resetSaveMultiMatches() {
 			task.beingExecuted = false;
 			await task.save();
 			// eslint-disable-next-line no-console
-			console.log(`Reset ${task.task} task`);
+			// console.log(`Reset ${task.task} task`);
 		}
 	} catch (e) {
 		console.error('bot.js | resetSaveMultiMatches' + e);
