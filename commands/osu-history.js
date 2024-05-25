@@ -798,8 +798,14 @@ module.exports = {
 				while (date > oldestScore.gameEndDate) {
 					iterator++;
 					if (new Date() - lastUpdate > 15000) {
-						await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
-						lastUpdate = new Date();
+						try {
+							await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+							lastUpdate = new Date();
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token') {
+								return console.error(error);
+							}
+						}
 					}
 
 					let existingRating = existingDuelRatings.find(rating => rating.year === date.getUTCFullYear() && rating.month === date.getUTCMonth() + 1 && rating.date === date.getUTCDate());
@@ -1216,6 +1222,14 @@ module.exports = {
 			content = 'Tournament details are currently still in development. This is an early but public release.';
 		}
 
-		return await interaction.editReply({ content: content, files: files });
+		try {
+			return await interaction.editReply({ content: content, files: files });
+		} catch (error) {
+			if (error.message === 'Invalid Webhook Token') {
+				return await interaction.channel.send({ content: content, files: files });
+			} else {
+				return console.error(error);
+			}
+		}
 	},
 };
