@@ -530,7 +530,7 @@ module.exports = {
 						member = member.first();
 					} catch (e) {
 						if (e.message !== 'Members didn\'t arrive in time.') {
-							console.error('processQueueTasks/updateOsuRank.js | get ecw2022 member', e);
+							console.error('processQueueTasks/updateOsuRank.js | get ecw2022 member', e, 'message', e.message);
 							return;
 						}
 					}
