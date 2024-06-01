@@ -639,7 +639,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 					} catch (err) {
 						if (err.message === 'Invalid Webhook Token') {
 							sentMessage = await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
-						} else {
+						} else if (err.message !== 'Unknown Message') {
 							console.error(err);
 						}
 					}
