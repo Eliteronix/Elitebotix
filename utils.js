@@ -4610,7 +4610,7 @@ module.exports = {
 
 				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, client, depth);
 			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
-				!e.message.includes.includes('Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)')) {
+				!e.message.includes('Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)')) {
 				console.error(`error with map ${beatmapId}`, e);
 				mapsRetriedTooOften.push(beatmapId);
 				return null;
