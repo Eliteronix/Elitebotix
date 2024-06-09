@@ -1,13 +1,9 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem, pause, logDatabaseQueries } = require('./utils');
+const { pause, logDatabaseQueries } = require('./utils');
 
 module.exports = async function (channel) {
 	if (channel.type === Discord.ChannelType.DM) {
-		return;
-	}
-
-	if (isWrongSystem(channel.guild.id, channel.type === Discord.ChannelType.DM)) {
 		return;
 	}
 

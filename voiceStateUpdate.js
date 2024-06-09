@@ -1,13 +1,9 @@
 const Discord = require('discord.js');
 const { PermissionFlagsBits } = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries } = require('./utils');
+const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
-	if (isWrongSystem(newMember.guild.id, false)) {
-		return;
-	}
-
 	if (oldMember.serverMute !== null && oldMember.serverMute !== newMember.serverMute) {
 		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 1');
 		const guild = await DBGuilds.findOne({

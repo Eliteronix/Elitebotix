@@ -3,14 +3,10 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, logDatabaseQueries } = require('./utils');
+const { logDatabaseQueries } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
-	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === Discord.ChannelType.DM)) {
-		return;
-	}
-
 	//Check if the reaction is partial or not
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which needs to be handled

@@ -1,11 +1,6 @@
-const { isWrongSystem } = require('./utils');
 const Discord = require('discord.js');
 
 module.exports = async function (guild) {
-	if (isWrongSystem(guild.id, false)) {
-		return;
-	}
-
 	let message = `Thanks for adding me to the server!\nUse </help:${guild.client.slashCommandData.find(command => command.name === 'help').id}> to get a list of commands!\nTo provide feedback please use </feedback:${guild.client.slashCommandData.find(command => command.name === 'feedback').id}>`;
 
 	try {

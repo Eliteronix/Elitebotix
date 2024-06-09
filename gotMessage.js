@@ -1,4 +1,4 @@
-const { getGuildPrefix, updateServerUserActivity, isWrongSystem, logDatabaseQueries } = require('./utils');
+const { getGuildPrefix, updateServerUserActivity, logDatabaseQueries } = require('./utils');
 const fs = require('fs');
 const Discord = require('discord.js');
 const { PermissionsBitField } = require('discord.js');
@@ -34,10 +34,6 @@ module.exports = async function (msg, bancho) {
 		// set a new item in the Collection
 		// with the key as the command name and the value as the exported module
 		msg.client.commands.set(command.name, command);
-	}
-
-	if (isWrongSystem(msg.guildId, msg.channel.type === Discord.ChannelType.DM)) {
-		return;
 	}
 
 	const guildPrefix = await getGuildPrefix(msg);

@@ -4,14 +4,10 @@ const cooldowns = new Discord.Collection();
 const { developers } = require('./config.json');
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { isWrongSystem, getMods, logDatabaseQueries, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
+const { getMods, logDatabaseQueries, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user, additionalObjects) {
-	if (reaction.message.guild && isWrongSystem(reaction.message.guild.id, reaction.message.channel.type === Discord.ChannelType.DM)) {
-		return;
-	}
-
 	//Check if the reaction is partial or not
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which needs to be handled

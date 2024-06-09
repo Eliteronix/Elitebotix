@@ -2464,34 +2464,6 @@ module.exports = {
 			guildId: guildId
 		};
 	},
-	isWrongSystem(guildId, isDM) {
-		//Always respond to DMs
-		if (isDM) {
-			return false;
-		}
-		//For the development version
-		//if the message is not in the Dev-Servers then return
-		if (process.env.SERVER === 'Dev') {
-			if (guildId != '800641468321759242' && guildId != '800641735658176553') {
-				return true;
-			}
-			//For the QA version
-			//if the message is in the QA-Servers then return
-		} else if (process.env.SERVER === 'QA') {
-			if (guildId != '800641367083974667' && guildId != '800641819086946344') {
-				return true;
-			}
-			//For the Live version
-			//if the message is in the Dev/QA-Servers then return
-		} else if (process.env.SERVER === 'Live') {
-			if (guildId === '800641468321759242' || guildId === '800641735658176553' || guildId === '800641367083974667' || guildId === '800641819086946344') {
-				return true;
-			}
-		}
-
-		//Otherwise its on the correct server
-		return false;
-	},
 	async getOsuBeatmap(input) {
 		let beatmapId = input.beatmapId;
 		let modBits = 0;

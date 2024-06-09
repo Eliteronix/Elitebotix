@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBBirthdayGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries } = require('./utils');
+const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (member) {
-	if (isWrongSystem(member.guild.id, false)) {
-		return;
-	}
-
 	if (member.id === member.client.user.id) {
 		return;
 	}

@@ -1,12 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { isWrongSystem, logDatabaseQueries } = require('./utils');
+const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
-	if (isWrongSystem(newMember.guild.id, false)) {
-		return;
-	}
-
 	if (oldMember.nickname !== newMember.nickname) {
 		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Nickname');
 		const guild = await DBGuilds.findOne({
