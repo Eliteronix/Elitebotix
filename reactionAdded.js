@@ -169,6 +169,8 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
+	console.log(reaction);
+
 	let firstAttachment = reaction.message.attachments.first();
 
 	if (firstAttachment) {
