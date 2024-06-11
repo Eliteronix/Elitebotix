@@ -174,6 +174,9 @@ module.exports = async function (reaction, user, additionalObjects) {
 	let firstAttachment = reaction.message.attachments.first();
 
 	if (firstAttachment) {
+
+		console.log('attachment', firstAttachment.name);
+
 		if (firstAttachment.name.match(/.+leaderboard.+page.+/g)) {
 			let commandName = firstAttachment.name.match(/.+leaderboard/g);
 			let page = firstAttachment.name.replace(/.+page/g, '').replace('.png', '');
