@@ -169,8 +169,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 		return;
 	}
 
-	console.log(reaction);
-
 	if (!reaction.message.attachments.size) {
 		// Refetch the message to get the attachments
 		reaction.message = await reaction.message.fetch({ force: true });
@@ -179,8 +177,6 @@ module.exports = async function (reaction, user, additionalObjects) {
 	let firstAttachment = reaction.message.attachments.first();
 
 	if (firstAttachment) {
-
-		console.log('attachment', firstAttachment.name);
 
 		if (firstAttachment.name.match(/.+leaderboard.+page.+/g)) {
 			let commandName = firstAttachment.name.match(/.+leaderboard/g);
