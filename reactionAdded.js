@@ -171,6 +171,11 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 	console.log(reaction);
 
+	if (!reaction.message.attachments.size) {
+		// Refetch the message to get the attachments
+		reaction.message = await reaction.message.fetch({ force: true });
+	}
+
 	let firstAttachment = reaction.message.attachments.first();
 
 	if (firstAttachment) {
