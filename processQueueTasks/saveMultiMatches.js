@@ -552,6 +552,21 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 	});
 
 	if (!matchToVerify) {
+		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches find match to verify referee backup');
+		matchToVerify = await DBOsuMultiMatches.findOne({
+			attributes: ['matchId', 'matchName', 'matchStartDate'],
+			where: {
+				tourneyMatch: true,
+				verifiedBy: null,
+				referee: null,
+			},
+			order: [
+				['matchId', 'ASC']
+			]
+		});
+	}
+
+	if (!matchToVerify) {
 		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches find match to verify backup');
 		matchToVerify = await DBOsuMultiMatches.findOne({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
