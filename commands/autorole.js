@@ -148,9 +148,18 @@ module.exports = {
 				}
 			}
 
+			let errorSent = false;
+
 			//Assign the role to every member
 			guildMembers.forEach(async (autoRole) => {
-				await autoRole.roles.add(role);
+				try {
+					await autoRole.roles.add(role);
+				} catch (error) {
+					if (!errorSent) {
+						await interaction.followUp(`Error assigning role to users. Make sure the bot has at least one role above the role it is trying to assign to other users.`);
+						errorSent = true;
+					}
+				}
 			});
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles remove');
