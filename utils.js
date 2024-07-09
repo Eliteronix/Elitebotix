@@ -5448,6 +5448,48 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleted} mappacks older than 4 weeks`);
 
+		// Get all gameIds
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpRedundantEntries gameIds');
+		let gameIds = await DBOsuMultiGameScores.findAll({
+			attributes: ['gameId'],
+			group: ['gameId']
+		});
+
+		gameIds = [...new Set(gameIds.map(score => score.gameId))];
+
+		// Delete all games that don't occur in the list
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpRedundantEntries delete');
+		deleted = await DBOsuMultiGames.destroy({
+			where: {
+				gameId: {
+					[Op.notIn]: gameIds
+				}
+			}
+		});
+
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleted} games that don't have scores`);
+
+		// Get all matchIds
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpRedundantEntries matchIds');
+		matchIds = await DBOsuMultiGames.findAll({
+			attributes: ['matchId'],
+			group: ['matchId']
+		});
+
+		matchIds = [...new Set(matchIds.map(game => game.matchId))];
+
+		// Delete all matches that don't occur in the list
+		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpRedundantEntries delete');
+		deleted = await DBOsuMultiMatches.destroy({
+			where: {
+				matchId: {
+					[Op.notIn]: matchIds
+				}
+			}
+		});
+
+		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleted} matches that don't have games`);
+
 		return await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, 'Finished cleanup');
 	},
 	wrongCluster(client, id) {
