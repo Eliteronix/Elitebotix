@@ -23,6 +23,8 @@ module.exports = {
 			limit: 100,
 		});
 
+		await interaction.followUp(`Found ${missingMatches.length} matches with missing referee info`);
+
 		for (const match of missingMatches) {
 			await interaction.followUp(`Match ID: <https://osu.ppy.sh/community/matches/${match.matchId}>, Match Start Date: ${match.matchStartDate}, Verified At: ${match.verifiedAt}, Verified By: ${match.verifiedBy}`);
 		}
