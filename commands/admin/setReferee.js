@@ -1,5 +1,6 @@
 const { DBOsuMultiMatches } = require('../../dbObjects');
 const { logDatabaseQueries } = require('../../utils');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'setReferee',
