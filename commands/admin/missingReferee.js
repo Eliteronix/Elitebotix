@@ -20,10 +20,13 @@ module.exports = {
 			order: [
 				['matchId', 'ASC'],
 			],
+			limit: 100,
 		});
 
-		console.log(missingMatches);
+		for (const match of missingMatches) {
+			await interaction.followUp(`Match ID: <https://osu.ppy.sh/community/matches/${match.matchId}>, Match Start Date: ${match.matchStartDate}, Verified At: ${match.verifiedAt}, Verified By: ${match.verifiedBy}`);
+		}
 
-		return await interaction.editReply(`Logged matches info`);
+		return await interaction.followUp(`Sent ${missingMatches.length} matches`);
 	},
 };
