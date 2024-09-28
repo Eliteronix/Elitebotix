@@ -5384,7 +5384,8 @@ module.exports = {
 				matchStartDate: {
 					[Op.gte]: weeksAgo
 				}
-			}
+			},
+			silent: true,
 		});
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
