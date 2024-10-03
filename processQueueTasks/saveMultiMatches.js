@@ -578,7 +578,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 				},
 			},
 			order: [
-				['matchId', 'ASC']
+				['updatedAt', 'ASC']
 			]
 		});
 	}
