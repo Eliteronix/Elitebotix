@@ -642,7 +642,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores check');
 			let scores = await DBOsuMultiGameScores.findAll({
-				attributes: ['matchId', 'matchName', 'beatmapId', 'osuUserId', 'gameId', 'matchStartDate'],
+				attributes: ['matchId', 'beatmapId', 'osuUserId', 'gameId', 'matchStartDate'],
 				where: {
 					matchId: matchId,
 				},
@@ -728,7 +728,7 @@ module.exports = {
 			});
 
 			let embed = new EmbedBuilder()
-				.setTitle(scores[0].matchName)
+				.setTitle(match.matchName)
 				.setURL(`https://osu.ppy.sh/mp/${matchId}`)
 				.setColor('#ff0000')
 				.setTimestamp();
@@ -738,7 +738,7 @@ module.exports = {
 					await interaction.followUp({ embeds: [embed] });
 
 					embed = new EmbedBuilder()
-						.setTitle(scores[0].matchName)
+						.setTitle(match.matchName)
 						.setURL(`https://osu.ppy.sh/mp/${matchId}`)
 						.setColor('#ff0000')
 						.setTimestamp();
@@ -765,7 +765,7 @@ module.exports = {
 			await interaction.followUp({ embeds: [embed] });
 
 			embed = new EmbedBuilder()
-				.setTitle(scores[0].matchName)
+				.setTitle(match.matchName)
 				.setURL(`https://osu.ppy.sh/mp/${matchId}`)
 				.setColor('#ff0000')
 				.setTimestamp();
@@ -777,7 +777,7 @@ module.exports = {
 					await interaction.followUp({ embeds: [embed] });
 
 					embed = new EmbedBuilder()
-						.setTitle(scores[0].matchName)
+						.setTitle(match.matchName)
 						.setURL(`https://osu.ppy.sh/mp/${matchId}`)
 						.setColor('#ff0000')
 						.setTimestamp();
