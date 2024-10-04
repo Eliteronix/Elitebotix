@@ -642,7 +642,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores check');
 			let scores = await DBOsuMultiGameScores.findAll({
-				attributes: ['matchId', 'beatmapId', 'osuUserId', 'gameId', 'matchStartDate'],
+				attributes: ['matchId', 'beatmapId', 'osuUserId', 'gameId'],
 				where: {
 					matchId: matchId,
 				},
