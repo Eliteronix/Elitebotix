@@ -206,7 +206,9 @@ module.exports = {
 				if (error.message === 'Not found') {
 					discordUsers.splice(index, 1);
 				} else {
-					console.error('osu-decay.js | compareUser' + error);
+					console.error('osu-decay.js | compareUser', error);
+
+					return await interaction.editReply(`There was an error finding a user to compare to ${user.name}.`);
 				}
 			}
 		}
