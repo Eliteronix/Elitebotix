@@ -129,11 +129,14 @@ module.exports = async function (reaction, user, additionalObjects) {
 				const starBoardMessageEmbed = new Discord.EmbedBuilder()
 					.setAuthor({ name: reaction.message.author.username, iconURL: reaction.message.author.displayAvatarURL() })
 					.setColor('#d9b51c')
-					.setDescription(reaction.message.content)
 					.addFields(
 						{ name: 'Link', value: `[Open](https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id})` },
 					)
 					.setTimestamp();
+
+				if (reaction.message.content) {
+					starBoardMessageEmbed.setDescription(reaction.message.content);
+				}
 
 				reaction.message.attachments.forEach(attachment => {
 					starBoardMessageEmbed
