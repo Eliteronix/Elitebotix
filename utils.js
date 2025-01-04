@@ -6526,7 +6526,7 @@ module.exports = {
 
 					logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
 					let existingQueueTasks = await DBProcessQueue.findAll({
-						attributes: ['additions', 'createdAt'],
+						attributes: ['id', 'additions', 'createdAt'],
 						where: {
 							task: 'duelQueue1v1',
 						},
