@@ -6568,7 +6568,7 @@ module.exports = {
 						if (existingQueueTasks[i].createdAt < oneDayAgo) {
 							existingQueueTasks[i].destroy();
 
-							module.exports.logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 1');
+							logDatabaseQueries(2, 'utils.js DBDiscordUsers updateQueueChannels');
 							let discordUser = await DBDiscordUsers.findOne({
 								attributes: 'userId',
 								where: {
