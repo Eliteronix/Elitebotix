@@ -6558,9 +6558,34 @@ module.exports = {
 					let players = [];
 
 					for (let i = 0; i < existingQueueTasks.length; i++) {
+						let oneDayAgo = new Date();
+						oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
 						let args = existingQueueTasks[i].additions.split(';');
 
 						let currentUser = args[0];
+
+						if (existingQueueTasks[i].createdAt < oneDayAgo) {
+							existingQueueTasks[i].destroy();
+
+							module.exports.logDatabaseQueries(2, 'processQueueTasks/duelQueue1v1.js DBDiscordUsers 1');
+							let discordUser = await DBDiscordUsers.findOne({
+								attributes: 'userId',
+								where: {
+									osuUserId: currentUser
+								}
+							});
+
+							// Message the user
+							if (discordUser) {
+								let user = await c.users.fetch(discordUser.userId);
+
+								await user.send('It seems like there is no fitting opponent in the queue at the moment and you have been removed from the queue for now. Feel free to requeue at any time.');
+							}
+
+							continue;
+						}
+
 						let playername = await getOsuPlayerName(currentUser);
 						let starRating = parseFloat(args[1]);
 
