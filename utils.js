@@ -6521,7 +6521,7 @@ module.exports = {
 
 				let textChannel = await c.channels.cache.get(textChannelId);
 				if (textChannel && textChannel.guildId) {
-					const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+					const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
