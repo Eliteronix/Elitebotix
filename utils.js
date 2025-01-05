@@ -6015,19 +6015,19 @@ module.exports = {
 						throw (error);
 					}
 				}
-				console.log('Duel Match: Creating match');
+				// console.log('Duel Match: Creating match');
 				if (users.length === 2) {
-					console.log(`ETX: (${teamname1}) vs (${teamname2})`)
+					// console.log(`ETX: (${teamname1}) vs (${teamname2})`)
 					channel = await bancho.createLobby(`ETX: (${teamname1}) vs (${teamname2})`);
 				} else {
-					console.log(`ETX Teams: (${teamname1}) vs (${teamname2})`)
+					// console.log(`ETX Teams: (${teamname1}) vs (${teamname2})`)
 					channel = await bancho.createLobby(`ETX Teams: (${teamname1}) vs (${teamname2})`);
 				}
 				client.duels.push(parseInt(channel.lobby.id));
-				console.log('Duel Match: Created match');
+				// console.log('Duel Match: Created match');
 				break;
 			} catch (error) {
-				console.error(i, error);
+				// console.error(i, error);
 				if (i === 4) {
 					console.error(error);
 					if (interaction) {
