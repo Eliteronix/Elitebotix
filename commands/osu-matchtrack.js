@@ -279,30 +279,26 @@ module.exports = {
 							}
 
 							while (json.first_event_id !== json.events[0].id) {
-								await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`, msg.client);
-								let earlierEvents = await fetch(`https://osu.ppy.sh/community/matches/${match.id}?before=${json.events[0].id}&limit=100`)
-									.then(async (res) => {
-										let htmlCode = await res.text();
-										htmlCode = htmlCode.replace(/&quot;/gm, '"');
-										const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
-										const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
-										const matchesRunning = matchRunningRegex.exec(htmlCode);
-										const matchesPaused = matchPausedRegex.exec(htmlCode);
+								await getNewOsuAPIv2TokenIfNecessary();
 
-										let regexMatch = null;
+								const url = new URL(
+									`https://osu.ppy.sh/api/v2/matches/${match.id}?before=${json.events[0].id}&limit=101`
+								);
 
-										if (matchesRunning && matchesRunning[0]) {
-											regexMatch = matchesRunning[0];
-										}
+								const headers = {
+									'Content-Type': 'application/json',
+									'Accept': 'application/json',
+									'Authorization': `Bearer ${osuv2_access_token}`
+								};
 
-										if (matchesPaused && matchesPaused[0]) {
-											regexMatch = matchesPaused[0];
-										}
+								let earlierEvents = await fetch(url, {
+									method: 'GET',
+									headers,
+								}).then(async (response) => {
+									let json = await response.json();
 
-										let json = JSON.parse(regexMatch);
-
-										return json.events;
-									});
+									return json.events;
+								});
 
 								json.events = earlierEvents.concat(json.events);
 							}
