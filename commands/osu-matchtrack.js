@@ -298,7 +298,10 @@ module.exports = {
 									let json = await response.json();
 
 									return json.events;
-								});
+								})
+									.catch(err => {
+										console.error(err);
+									});
 
 								json.events = earlierEvents.concat(json.events);
 							}
@@ -535,7 +538,10 @@ module.exports = {
 									}
 								}
 							}
-						});
+						})
+							.catch(err => {
+								console.error(err);
+							});
 					} catch (e) {
 						if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
 							&& !e.message.endsWith('reason: read ECONNRESET')) {

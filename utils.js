@@ -1308,7 +1308,10 @@ module.exports = {
 					additionalInfo.tournamentBadges.push(badge);
 				}
 			}
-		});
+		})
+			.catch(err => {
+				console.error(err);
+			});
 
 		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
