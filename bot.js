@@ -118,7 +118,7 @@ const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
 const { Op } = require('sequelize');
 
-const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterTimespan: 60000, limiterPrivate: 45, limiterPublic: 9 });
+const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterPublic: 9 });
 
 client.bancho = bancho;
 
