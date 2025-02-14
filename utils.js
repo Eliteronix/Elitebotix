@@ -6436,9 +6436,7 @@ module.exports = {
 
 				(async () => {
 					let mapInfo = await getOsuMapInfo(nextMap);
-					console.log(`Match id: ${lobby.id} | Map id: ${nextMap.beatmapId} | Sending map info`);
 					await channel.sendMessage(mapInfo);
-					console.log(`Match id: ${lobby.id} | Map id: ${nextMap.beatmapId} | ---------------------------> Sent map info`);
 				})();
 
 				await channel.sendMessage('Everyone please ready up!');
