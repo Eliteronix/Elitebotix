@@ -184,6 +184,8 @@ process.on('message', message => {
 process.on('uncaughtException', (error, origin) => {
 	if (error?.code === 'ECONNRESET') {
 		return;
+	} else if (error?.code === 'ETIMEDOUT') {
+		return;
 	}
 	console.error('UNCAUGHT EXCEPTION');
 	console.error(error);
