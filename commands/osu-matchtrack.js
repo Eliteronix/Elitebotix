@@ -439,16 +439,24 @@ module.exports = {
 												try {
 													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
 												} catch (e) {
-													console.error(e);
-													console.error(lastMessage);
+													if (e.message !== 'Unknown Message') {
+														console.error(e);
+														console.error(lastMessage);
+													}
 												}
 											} else {
 												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
 											}
 
-											await lastMessage.react('<:COMPARE:827974793365159997>');
-											await lastMessage.react('🗺️');
-											await lastMessage.react('🥇');
+											try {
+												await lastMessage.react('<:COMPARE:827974793365159997>');
+												await lastMessage.react('🗺️');
+												await lastMessage.react('🥇');
+											} catch (e) {
+												if (e.message !== 'Unknown Message') {
+													console.error(e);
+												}
+											}
 
 											await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
 										} else if (json.events[i].detail.type === 'other') {
