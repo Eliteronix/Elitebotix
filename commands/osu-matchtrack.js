@@ -279,7 +279,7 @@ module.exports = {
 							}
 
 							while (json.first_event_id !== json.events[0].id) {
-								await getNewOsuAPIv2TokenIfNecessary();
+								await getNewOsuAPIv2TokenIfNecessary(client);
 
 								const url = new URL(
 									`https://osu.ppy.sh/api/v2/matches/${match.id}?before=${json.events[0].id}&limit=101`
