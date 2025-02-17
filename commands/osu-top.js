@@ -286,7 +286,7 @@ module.exports = {
 
 		let gamemode = interaction.options.getNumber('gamemode');
 
-		if (!gamemode) {
+		if (gamemode === null) {
 			if (commandUser && commandUser.osuMainMode) {
 				gamemode = commandUser.osuMainMode;
 			} else {
