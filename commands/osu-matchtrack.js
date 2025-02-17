@@ -288,7 +288,7 @@ module.exports = {
 								const headers = {
 									'Content-Type': 'application/json',
 									'Accept': 'application/json',
-									'Authorization': `Bearer ${osuv2_access_token}`
+									'Authorization': `Bearer ${client.osuv2_access_token}`
 								};
 
 								let earlierEvents = await fetch(url, {
