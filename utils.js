@@ -9594,7 +9594,6 @@ async function getOsuMapInfo(dbBeatmap) {
 				tournaments.splice(i, 1);
 				i--;
 				more++;
-				console.log('Filtered out a tournament');
 				break;
 			}
 		}
