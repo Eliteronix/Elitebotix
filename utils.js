@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
-const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms, osuFilterWords } = require('./config.json');
 const Canvas = require('canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -9586,7 +9586,27 @@ async function getOsuMapInfo(dbBeatmap) {
 		}
 	}
 
-	return `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId} | Map played ${mapScores.length} times in: ${tournaments.join(', ')}`;
+	let more = 0;
+
+	for (let i = 0; i < tournaments.length; i++) {
+		for (let j = 0; j < osuFilterWords.length; j++) {
+			if (tournaments[i].toLowerCase().includes(osuFilterWords[j])) {
+				tournaments.splice(i, 1);
+				i--;
+				more++;
+				console.log('Filtered out a tournament');
+				break;
+			}
+		}
+	}
+
+	let tournamentString = `https://osu.ppy.sh/b/${dbBeatmap.beatmapId} | https://beatconnect.io/b/${dbBeatmap.beatmapsetId} | Map played ${mapScores.length} times in: ${tournaments.join(', ')}`;
+
+	if (more > 0) {
+		tournamentString += ` and ${more} more tournaments`;
+	}
+
+	return tournamentString;
 }
 
 async function orderMatchPlayers(lobby, channel, players) {
