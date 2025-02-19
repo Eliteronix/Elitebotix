@@ -5,7 +5,7 @@ const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const osu = require('node-osu');
 const { Op } = require('sequelize');
-const { Beatmap, Calculator } = require('rosu-pp');
+const rosu = require('rosu-pp-js');
 const mapsRetriedTooOften = [];
 const fs = require('fs');
 
@@ -4560,17 +4560,34 @@ module.exports = {
 			combo = 0;
 		}
 
-		let arg = {
-			mods: parseInt(modBits),
-			acc: parseFloat(accuracy),
-			nMisses: parseInt(misses),
-			combo: parseInt(combo),
-		};
-
 		try {
-			let map = new Beatmap({ path: `./maps/${beatmapId}.osu` });
+			let bytes = fs.readFileSync(`./maps/${beatmapId}.osu`);
 
-			return new Calculator(arg).performance(map).pp;
+			// Parse the map.
+			let map = new rosu.Beatmap(bytes);
+
+			// // Optionally convert the beatmap to a specific mode for optionally given mods.
+			// map.convert(rosu.GameMode.Mania, "6K");
+
+			// Calculating performance attributes for a SS
+			// const maxAttrs = new rosu.Performance({ mods: parseInt(modBits) }).calculate(map);
+
+			// Calculating performance attributes for a specific score.
+			const currAttrs = new rosu.Performance({
+				mods: parseInt(modBits),
+				misses: parseInt(misses),
+				accuracy: parseFloat(accuracy),
+				combo: parseInt(combo),
+				hitresultPriority: rosu.HitResultPriority.BestCase,
+				lazer: false
+			}).calculate(map);
+
+			console.log(`PP: ${currAttrs.pp}`);
+
+			// Free the beatmap manually to avoid risking memory leakage.
+			map.free();
+
+			return currAttrs.pp;
 		} catch (e) {
 			if (depth < 3) {
 				const path = `./maps/${beatmapId}.osu`;
