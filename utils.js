@@ -4582,8 +4582,6 @@ module.exports = {
 				lazer: false
 			}).calculate(map);
 
-			console.log(`PP: ${currAttrs.pp}`);
-
 			// Free the beatmap manually to avoid risking memory leakage.
 			map.free();
 
