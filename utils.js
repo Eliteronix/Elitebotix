@@ -2488,9 +2488,9 @@ module.exports = {
 		}
 
 		let lastRework = new Date();
-		lastRework.setUTCFullYear(2024);
-		lastRework.setUTCMonth(10);
-		lastRework.setUTCDate(25);
+		lastRework.setUTCFullYear(2025);
+		lastRework.setUTCMonth(2);
+		lastRework.setUTCDate(7);
 		lastRework.setUTCHours(23);
 
 		let lastMonth = new Date();
