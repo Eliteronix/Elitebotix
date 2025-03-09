@@ -508,6 +508,7 @@ module.exports = {
 					if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
 						multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
 					}
+
 					if (parseInt(multiScores[i].rawMods) % 2 === 1) {
 						multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 					}

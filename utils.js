@@ -4496,7 +4496,7 @@ module.exports = {
 		}
 		return true;
 	},
-	async getOsuPP(beatmapId, modBits, accuracy, misses, combo, client, depth) {
+	async getOsuPP(beatmapId, mode, modBits, accuracy, misses, combo, client, depth) {
 		const fs = require('fs');
 
 		if (!depth) {
@@ -4566,11 +4566,22 @@ module.exports = {
 			// Parse the map.
 			let map = new rosu.Beatmap(bytes);
 
-			// // Optionally convert the beatmap to a specific mode for optionally given mods.
-			// map.convert(rosu.GameMode.Mania, "6K");
+			let mods = module.exports.getMods(modBits);
 
-			// Calculating performance attributes for a SS
-			// const maxAttrs = new rosu.Performance({ mods: parseInt(modBits) }).calculate(map);
+			if (mode && dbBeatmap.mode === 'Standard') {
+				if (mode === 1) {
+					map.convert(rosu.GameMode.Taiko);
+				} else if (mode === 2) {
+					map.convert(rosu.GameMode.Catch);
+				} else if (mode === 3) {
+					map.convert(rosu.GameMode.Mania);
+
+					// TODO: Implement keys conversion
+					// map.convert(rosu.GameMode.Mania, "6K");
+				} else {
+					console.log(`Something went wrong and we got mode ${mode}`);
+				}
+			}
 
 			// Calculating performance attributes for a specific score.
 			const currAttrs = new rosu.Performance({
@@ -4598,7 +4609,7 @@ module.exports = {
 
 				depth++;
 
-				return await module.exports.getOsuPP(beatmapId, modBits, accuracy, misses, combo, client, depth);
+				return await module.exports.getOsuPP(beatmapId, mode, modBits, accuracy, misses, combo, client, depth);
 			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
 				!e.message.includes('Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)')) {
 				console.error(`error with map ${beatmapId}`, e);
@@ -4689,7 +4700,7 @@ module.exports = {
 			if (!outputScore.pp && outputScore.maxCombo) {
 				const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: outputScore.beatmapId, modBits: 0 });
 				if (dbBeatmap) {
-					let pp = await module.exports.getOsuPP(outputScore.beatmapId, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo), client);
+					let pp = await module.exports.getOsuPP(outputScore.beatmapId, inputScore.mode, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo), client);
 
 					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores pp update');
 					try {
@@ -7848,9 +7859,11 @@ module.exports = {
 									if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
 										multiScores[j].gameRawMods = parseInt(multiScores[j].gameRawMods) - 1;
 									}
+
 									if (parseInt(multiScores[j].rawMods) % 2 === 1) {
 										multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
 									}
+
 									multiScores[j] = await multiToBanchoScore(multiScores[j], c);
 
 									if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
@@ -9086,7 +9099,7 @@ module.exports = {
 		if (input.score.pp) {
 			pp = Math.round(input.score.pp);
 		} else {
-			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
+			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
 		}
 
 		ctx.font = '18px comfortaa, sans-serif';
@@ -9101,7 +9114,7 @@ module.exports = {
 			};
 
 			let fcScoreAccuracy = module.exports.getAccuracy(fcScore, 0) * 100;
-			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
+			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
 			if (pp !== fcpp) {
 				pp = `${pp} (${Math.round(fcpp)} FC)`;
 				ctx.font = '16px comfortaa, sans-serif';

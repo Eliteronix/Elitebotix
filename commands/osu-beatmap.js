@@ -573,7 +573,7 @@ async function drawStats(input, accuracy, client) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText(`${accuracy}% Accuracy`, canvas.width / 1000 * 330, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, accuracy, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, beatmap.mods, accuracy, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
 	ctx.font = 'bold 15px comfortaa, sans-serif';
@@ -596,7 +596,7 @@ async function drawStats(input, accuracy, client) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('99% Accuracy', canvas.width / 1000 * 580, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 99.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, beatmap.mods, 99.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
 
 	//Third column
 	if (beatmap.mode === 'Mania') {
@@ -626,7 +626,7 @@ async function drawStats(input, accuracy, client) {
 	ctx.font = 'bold 15px comfortaa, sans-serif';
 	ctx.fillText('100% Accuracy', canvas.width / 1000 * 750, canvas.height / 500 * 410);
 	ctx.font = 'bold 30px comfortaa, sans-serif';
-	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, beatmap.mods, 100.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
+	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, beatmap.mods, 100.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
 
 	const output = [canvas, ctx, beatmap];
 	return output;
