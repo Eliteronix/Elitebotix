@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -1223,7 +1223,7 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1355,7 +1355,7 @@ module.exports = {
 
 		let files = [];
 		//Create as an attachment
-		const matchUpStats = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-matchup-${team1.join('-')}-${team2.join('-')}.png` });
+		const matchUpStats = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-matchup-${team1.join('-')}-${team2.join('-')}.png` });
 
 		files.push(matchUpStats);
 

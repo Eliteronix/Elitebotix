@@ -4,7 +4,7 @@ const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const fs = require('fs');
@@ -900,7 +900,7 @@ module.exports = {
 			const canvasWidth = 1000;
 			const canvasHeight = 775 + additionalHeight;
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -1036,7 +1036,7 @@ module.exports = {
 			ctx.drawImage(avatar, 350, 125, 250, 250);
 
 			//Create as an attachment
-			files.push(new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-history-${osuUser.osuUserId}.png` }));
+			files.push(new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-history-${osuUser.osuUserId}.png` }));
 
 			if (interaction.options.getBoolean('showtournamentdetails')) {
 				// Save the image locally

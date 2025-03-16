@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { developers, logBroadcastEval } = require('../config.json');
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 			//Get context and load the image
 			const ctx = canvas.getContext('2d');
@@ -54,7 +54,7 @@ module.exports = {
 
 
 			//Create as an attachment
-			const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'elitebotix-changelog.png' });
+			const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'elitebotix-changelog.png' });
 
 			if (process.env.SERVER === 'Dev' || process.env.SERVER === 'QA') {
 				msg.reply({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${msg.client.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
@@ -75,10 +75,10 @@ module.exports = {
 						const canvasWidth = 1000;
 
 						//Create Canvas
-						const Canvas = require('canvas');
+						const Canvas = require('@napi-rs/canvas');
 						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-						Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+						Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 						//Get context and load the image
 						const ctx = canvas.getContext('2d');
@@ -110,7 +110,7 @@ module.exports = {
 
 						//Create as an attachment
 						const Discord = require('discord.js');
-						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'elitebotix-changelog.png' });
+						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'elitebotix-changelog.png' });
 
 						let sentMessage = await changelogChannel.send({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${c.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
 						sentMessage.crosspost();

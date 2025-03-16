@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { fitTextOnLeftCanvas, logDatabaseQueries } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -382,7 +382,7 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -416,7 +416,7 @@ module.exports = {
 		}
 
 		//Create as an attachment
-		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'vote.png' });
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'vote.png' });
 
 		const pollMessage = await interaction.channel.send({ content: 'Vote for the options by using the reactions below the image!', files: [attachment] });
 

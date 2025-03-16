@@ -3,7 +3,7 @@ const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, p
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -624,7 +624,7 @@ async function getResultImage(event, users, client) {
 	const canvasWidth = 1000;
 	const canvasHeight = 300 + scores.length * 75 + 15 + teamModeHeight;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -909,14 +909,14 @@ async function getResultImage(event, users, client) {
 	let modBits = getModBits(mods.join(''));
 
 	//Create as an attachment
-	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
+	return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }
 
 async function getPlayingImage(event, client) {
 	const canvasWidth = 1000;
 	const canvasHeight = 300 + 15;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -1002,5 +1002,5 @@ async function getPlayingImage(event, client) {
 	let modBits = getModBits(mods.join(''));
 
 	//Create as an attachment
-	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
+	return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }

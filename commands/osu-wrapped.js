@@ -4,7 +4,7 @@ const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar, logOsuAPICalls } = require('../utils');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fs = require('fs');
 
@@ -480,7 +480,7 @@ module.exports = {
 		const canvasWidth = 1000;
 		const canvasHeight = 500;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -717,7 +717,7 @@ module.exports = {
 		fs.writeFileSync(`./wrappedcards/${year}/${osuUser.osuUserId}.png`, buffer);
 
 		//Create as an attachment
-		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];
 
 		return await interaction.editReply({ content: ' ', files: files });
 	},

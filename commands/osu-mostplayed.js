@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -533,7 +533,7 @@ module.exports = {
 			const canvasWidth = 1000;
 			const canvasHeight = 83 + dataOnPage.length * 41.66666;
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -597,7 +597,7 @@ module.exports = {
 			await drawFooter(elements, totalPages, page);
 
 			//Create as an attachment
-			const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-maps-${amount}-${page}.png` })];
+			const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-maps-${amount}-${page}.png` })];
 
 			//Send the attachment
 			if (csv) {
@@ -661,7 +661,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -684,7 +684,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-${user.id}.png` });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-${user.id}.png` });
 
 				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers Bancho linkedUser');
@@ -730,7 +730,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -749,7 +749,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-ripple-${user.id}.png` });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-ripple-${user.id}.png` });
 
 				//Send attachment
 				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });

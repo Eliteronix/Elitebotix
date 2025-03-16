@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries, getBeatmapCover, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -376,7 +376,7 @@ module.exports = {
 		const canvasWidth = 900;
 		let canvasHeight = 275 + userScoreHeight + amount * 30;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -400,7 +400,7 @@ module.exports = {
 
 		await drawFooter(elements);
 
-		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-map-leaderboard-${dbBeatmap.beatmapId}-${dbBeatmap.mods}.png` });
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-map-leaderboard-${dbBeatmap.beatmapId}-${dbBeatmap.mods}.png` });
 
 		let files = [attachment];
 

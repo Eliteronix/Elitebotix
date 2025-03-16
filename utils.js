@@ -1,6 +1,6 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
 const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms, osuFilterWords } = require('./config.json');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const osu = require('node-osu');
@@ -1126,7 +1126,7 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1231,7 +1231,7 @@ module.exports = {
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 		//Create as an attachment and return
-		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
+		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
 		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
@@ -1403,7 +1403,7 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1473,7 +1473,7 @@ module.exports = {
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 		//Create as an attachment and return
-		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `${stagename}.png` });
+		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${stagename}.png` });
 	}, pause(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	},
@@ -8757,7 +8757,7 @@ module.exports = {
 		const canvasWidth = 1000;
 		const canvasHeight = 500;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -9287,7 +9287,7 @@ module.exports = {
 		module.exports.roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
 
 		//Create as an attachment
-		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${input.user.id}-${input.beatmap.beatmapId}-${input.score.raw_mods}.png` });
+		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-score-${input.user.id}-${input.beatmap.beatmapId}-${input.score.raw_mods}.png` });
 	},
 	async sendMessageToLogChannel(client, channelId, message, crosspost) {
 		if (logBroadcastEval) {

@@ -4,7 +4,7 @@ const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pa
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -959,7 +959,7 @@ module.exports = {
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
@@ -1320,7 +1320,7 @@ module.exports = {
 				}
 
 				//Create as an attachment
-				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });
+				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-league-ratings-${osuUser.id}.png` });
 
 				let sentMessage = null;
 

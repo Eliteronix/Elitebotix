@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -289,7 +289,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				const canvasWidth = 700;
 				const canvasHeight = 350;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -318,7 +318,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				await drawAvatar(elements, server, interaction.client);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
 
 				if (showGraph) {
 					let graph = await getRankHistoryGraph(user.id, mode, interaction.client);
@@ -390,7 +390,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				const canvasWidth = 700;
 				const canvasHeight = 350;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -415,7 +415,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				await drawAvatar(elements, server, interaction.client);
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
 				//Send attachment
 				let sentMessage = await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
@@ -501,7 +501,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 		const canvasWidth = 700;
 		const canvasHeight = 350;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -528,7 +528,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 		await drawAvatar(elements, server, interaction.client);
 
 		//Create as an attachment
-		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
 		//Send attachment
 		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });

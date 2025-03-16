@@ -12,7 +12,7 @@ module.exports = {
 
 		client.shard.broadcastEval(async (c, { args }) => {
 			const Discord = require('discord.js');
-			const Canvas = require('canvas');
+			const Canvas = require('@napi-rs/canvas');
 			const { fitTextOnLeftCanvas } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			const channel = await c.channels.cache.get(args[0]);
@@ -59,7 +59,7 @@ module.exports = {
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
@@ -96,7 +96,7 @@ module.exports = {
 				}
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'vote.png' });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'vote.png' });
 
 				await msg.channel.send({ content: `Results for: \`${args[2]}\``, files: [attachment] });
 			}

@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
@@ -235,7 +235,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	const canvasWidth = 1000;
 	const canvasHeight = 500;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -258,7 +258,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	await drawBackground(elements, interaction.client);
 
 	//Create as an attachment
-	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
+	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
 
 	if (!interaction) {
 		await processingMessage.delete();

@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -369,7 +369,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -394,7 +394,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -458,7 +458,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -479,7 +479,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -528,7 +528,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		const canvasWidth = 1000;
 		const canvasHeight = 83 + limit * 41.66666;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -549,7 +549,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		await drawFooter(elements);
 
 		//Create as an attachment
-		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 		if (csv) {
 			let csv = new ObjectsToCsv(scores);
@@ -577,7 +577,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666 + 50;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -602,7 +602,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);

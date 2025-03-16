@@ -4,7 +4,7 @@ const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -402,7 +402,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 			//Get context and load the image
 			const ctx = canvas.getContext('2d');
@@ -580,7 +580,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 
 			//Create as an attachment
-			const topPlayStats = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-topPlayStats-${user.id}.png` });
+			const topPlayStats = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-topPlayStats-${user.id}.png` });
 
 			const files = [topPlayStats];
 

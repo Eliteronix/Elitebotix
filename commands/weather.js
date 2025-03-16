@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const weather = require('weather-js');
 const util = require('util');
 const { pause, populateMsgFromInteraction, fitTextOnMiddleCanvas, logDatabaseQueries } = require('../utils');
@@ -147,7 +147,7 @@ module.exports = {
 						//Create Canvas
 						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-						Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+						Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 						//Get context and load the image
 						const ctx = canvas.getContext('2d');
@@ -212,7 +212,7 @@ module.exports = {
 						ctx.drawImage(weatherPic, 25, 25, 100, 100);
 
 						//Create as an attachment
-						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `elitebotix-weather-${weather.location.name}.png` });
+						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `elitebotix-weather-${weather.location.name}.png` });
 
 						if (msg.id) {
 							await msg.channel.send({ content: `Weather for ${weather.location.name}`, files: [attachment] });
