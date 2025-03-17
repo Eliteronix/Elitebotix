@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -586,10 +586,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 
 			let content = 'Top play stats';
 
-			const width = 1500; //px
-			const height = 750; //px
-			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
 			(async () => {
 				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiGameScores');
 				let userScores = await DBOsuMultiGameScores.findAll({
@@ -909,37 +905,37 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 								data: totalDatapoints,
 								borderColor: 'rgb(201, 203, 207)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (NM only)',
 								data: NMDatapoints,
 								borderColor: 'rgb(54, 162, 235)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (HD only)',
 								data: HDDatapoints,
 								borderColor: 'rgb(255, 205, 86)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (HR only)',
 								data: HRDatapoints,
 								borderColor: 'rgb(255, 99, 132)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (DT only)',
 								data: DTDatapoints,
 								borderColor: 'rgb(153, 102, 255)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (FM only)',
 								data: FMDatapoints,
 								borderColor: 'rgb(75, 192, 192)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}
 						]
 					};
@@ -1000,7 +996,15 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 						},
 					};
 
-					const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+					const width = 1500; //px
+					const height = 750; //px
+
+					const chart = new ChartJsImage();
+					chart.setConfig(configuration);
+
+					chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+					const imageBuffer = await chart.toBinary();
 
 					const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: `osu-skills-${user.id}.png` });
 

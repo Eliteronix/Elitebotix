@@ -7,7 +7,7 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { developers, showUnknownInteractionError } = require('../config.json');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 
 module.exports = {
 	name: 'osu-profile',
@@ -921,10 +921,6 @@ async function getRankHistoryGraph(osuUserId, mode, client) {
 		labels.push(`${history.length - i} days ago`);
 	}
 
-	const width = 1500; //px
-	const height = 750; //px
-	const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
 	const data = {
 		labels: labels,
 		datasets: [
@@ -934,7 +930,7 @@ async function getRankHistoryGraph(osuUserId, mode, client) {
 				borderColor: 'rgb(96, 183, 202)',
 				fill: 'start',
 				backgroundColor: 'rgba(96, 183, 202, 0.6)',
-				tension: 0.4
+				lineTension: 0.4
 			},
 		]
 	};
@@ -994,7 +990,15 @@ async function getRankHistoryGraph(osuUserId, mode, client) {
 		},
 	};
 
-	const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+	const width = 1500; //px
+	const height = 750; //px
+
+	const chart = new ChartJsImage();
+	chart.setConfig(configuration);
+
+	chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+	const imageBuffer = await chart.toBinary();
 
 	return new Discord.AttachmentBuilder(imageBuffer, { name: `rankHistory-osu-${osuUserId}.png` });
 }

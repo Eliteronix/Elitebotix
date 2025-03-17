@@ -4,7 +4,7 @@ const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches }
 const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -1520,10 +1520,6 @@ module.exports = {
 				FMScores.push(FMScores[0]);
 			}
 
-			const width = 1500; //px
-			const height = 750; //px
-			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
 			const data = {
 				labels: labels,
 				datasets: [
@@ -1532,37 +1528,37 @@ module.exports = {
 						data: totalWinrates,
 						borderColor: 'rgb(201, 203, 207)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Winrate (NM only)',
 						data: NMWinrates,
 						borderColor: 'rgb(54, 162, 235)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Winrate (HD only)',
 						data: HDWinrates,
 						borderColor: 'rgb(255, 205, 86)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Winrate (HR only)',
 						data: HRWinrates,
 						borderColor: 'rgb(255, 99, 132)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Winrate (DT only)',
 						data: DTWinrates,
 						borderColor: 'rgb(153, 102, 255)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Winrate (FM only)',
 						data: FMWinrates,
 						borderColor: 'rgb(75, 192, 192)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}
 				]
 			};
@@ -1623,7 +1619,15 @@ module.exports = {
 				},
 			};
 
-			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+			const width = 1500; //px
+			const height = 750; //px
+
+			const chart = new ChartJsImage();
+			chart.setConfig(configuration);
+
+			chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+			const imageBuffer = await chart.toBinary();
 
 			const matchupWinrateChart = new Discord.AttachmentBuilder(imageBuffer, { name: `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png` });
 
@@ -1637,37 +1641,37 @@ module.exports = {
 						data: totalScores,
 						borderColor: 'rgb(201, 203, 207)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Scores (NM only)',
 						data: NMScores,
 						borderColor: 'rgb(54, 162, 235)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Scores (HD only)',
 						data: HDScores,
 						borderColor: 'rgb(255, 205, 86)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Scores (HR only)',
 						data: HRScores,
 						borderColor: 'rgb(255, 99, 132)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Scores (DT only)',
 						data: DTScores,
 						borderColor: 'rgb(153, 102, 255)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}, {
 						label: 'Cumulated Scores (FM only)',
 						data: FMScores,
 						borderColor: 'rgb(75, 192, 192)',
 						fill: false,
-						tension: 0.4
+						lineTension: 0.4
 					}
 				]
 			};
@@ -1728,7 +1732,12 @@ module.exports = {
 				},
 			};
 
-			const scoresImageBuffer = await canvasRenderService.renderToBuffer(scoresConfiguration);
+			const scoreChart = new ChartJsImage();
+			scoreChart.setConfig(scoresConfiguration);
+
+			scoreChart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+			const scoresImageBuffer = await scoreChart.toBinary();
 
 			const scoresMatchupWinrateChart = new Discord.AttachmentBuilder(scoresImageBuffer, { name: `osu-matchup-${team1.join('-')}-vs-${team2.join('-')}.png` });
 

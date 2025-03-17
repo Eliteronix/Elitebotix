@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../../dbObjects');
 const { logDatabaseQueries } = require('../../utils');
 const { Op } = require('sequelize');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { AttachmentBuilder } = require('discord.js');
 
 module.exports = {
@@ -55,7 +55,7 @@ module.exports = {
 					data: duelRatings,
 					borderColor: 'rgb(54, 162, 235)',
 					fill: false,
-					tension: 0.4
+					lineTension: 0.4
 				},
 			]
 		};
@@ -116,9 +116,13 @@ module.exports = {
 
 		const width = 1500; //px
 		const height = 750; //px
-		const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
-		const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+		const chart = new ChartJsImage();
+		chart.setConfig(configuration);
+
+		chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+		const imageBuffer = await chart.toBinary();
 
 		const attachment = new AttachmentBuilder(imageBuffer, { name: 'totalRating.png' });
 

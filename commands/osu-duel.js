@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
 const fs = require('fs');
@@ -1843,31 +1843,31 @@ module.exports = {
 							data: expectedScores[0],
 							borderColor: 'rgb(54, 162, 235)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (HD only)',
 							data: expectedScores[1],
 							borderColor: 'rgb(255, 205, 86)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (HR only)',
 							data: expectedScores[2],
 							borderColor: 'rgb(255, 99, 132)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (DT only)',
 							data: expectedScores[3],
 							borderColor: 'rgb(153, 102, 255)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (FM only)',
 							data: expectedScores[4],
 							borderColor: 'rgb(75, 192, 192)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}
 					]
 				};
@@ -1928,9 +1928,13 @@ module.exports = {
 
 				const width = 1500; //px
 				const height = 750; //px
-				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
-				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+				const chart = new ChartJsImage();
+				chart.setConfig(configuration);
+
+				chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+				const imageBuffer = await chart.toBinary();
 
 				const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'expectedScores.png' });
 
@@ -2032,10 +2036,6 @@ module.exports = {
 					timestamps.delete(interaction.user.id);
 					return;
 				}
-
-				const width = 1500; //px
-				const height = 750; //px
-				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 				let labels = ['Bronze 1', 'Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1', 'Gold 2', 'Gold 3', 'Platinum 1', 'Platinum 2', 'Platinum 3', 'Diamond 1', 'Diamond 2', 'Diamond 3', 'Master 1', 'Master 2', 'Master 3', 'Grandmaster 1', 'Grandmaster 2', 'Grandmaster 3'];
 				let colors = ['#F07900', '#F07900', '#F07900', '#B5B5B5', '#B5B5B5', '#B5B5B5', '#FFEB47', '#FFEB47', '#FFEB47', '#1DD9A5', '#1DD9A5', '#1DD9A5', '#49B0FF', '#49B0FF', '#49B0FF', '#FFAEFB', '#FFAEFB', '#FFAEFB', '#581CFF', '#581CFF', '#581CFF'];
@@ -2178,7 +2178,15 @@ module.exports = {
 					}
 				};
 
-				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+				const width = 1500; //px
+				const height = 750; //px
+
+				const chart = new ChartJsImage();
+				chart.setConfig(configuration);
+
+				chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+				const imageBuffer = await chart.toBinary();
 
 				const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'osu-league-spread.png' });
 

@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
 const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -403,10 +403,6 @@ module.exports = {
 			return await interaction.followUp('No users left to look for schedules.');
 		}
 
-		const width = 1500; //px
-		const height = 750; //px
-		const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
 		const labels = [];
 		for (let i = 0; i < 24; i++) {
 			labels.push(`${i} UTC`);
@@ -566,7 +562,15 @@ module.exports = {
 			}
 		};
 
-		const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+		const width = 1500; //px
+		const height = 750; //px
+
+		const chart = new ChartJsImage();
+		chart.setConfig(configuration);
+
+		chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+		const imageBuffer = await chart.toBinary();
 
 		const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'osu-schedules.png' });
 

@@ -6,7 +6,7 @@ const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const fs = require('fs');
 
 module.exports = {
@@ -1060,11 +1060,6 @@ module.exports = {
 				fs.writeFileSync(`./historycards/${osuUser.osuUserId}.png`, buffer);
 			}
 
-			//Create chart
-			const width = 1500; //px
-			const height = 750; //px
-			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
 			const data = {
 				labels: labels,
 				datasets: [
@@ -1074,7 +1069,7 @@ module.exports = {
 						borderColor: 'rgb(88, 28, 255)',
 						fill: true,
 						backgroundColor: 'rgba(88, 28, 255, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 					{
 						label: 'Master',
@@ -1082,7 +1077,7 @@ module.exports = {
 						borderColor: 'rgb(255, 174, 251)',
 						fill: true,
 						backgroundColor: 'rgba(255, 174, 251, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 					{
 						label: 'Diamond',
@@ -1090,7 +1085,7 @@ module.exports = {
 						borderColor: 'rgb(73, 176, 255)',
 						fill: true,
 						backgroundColor: 'rgba(73, 176, 255, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 					{
 						label: 'Platinum',
@@ -1098,7 +1093,7 @@ module.exports = {
 						borderColor: 'rgb(29, 217, 165)',
 						fill: true,
 						backgroundColor: 'rgba(29, 217, 165, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 					{
 						label: 'Gold',
@@ -1106,7 +1101,7 @@ module.exports = {
 						borderColor: 'rgb(255, 235, 71)',
 						fill: true,
 						backgroundColor: 'rgba(255, 235, 71, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 					{
 						label: 'Silver',
@@ -1114,7 +1109,7 @@ module.exports = {
 						borderColor: 'rgb(181, 181, 181)',
 						fill: true,
 						backgroundColor: 'rgba(181, 181, 181, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 					{
 						label: 'Bronze',
@@ -1122,7 +1117,7 @@ module.exports = {
 						borderColor: 'rgb(240, 121, 0)',
 						fill: true,
 						backgroundColor: 'rgba(240, 121, 0, 0.6)',
-						tension: 0.4
+						lineTension: 0.4
 					},
 				]
 			};
@@ -1179,7 +1174,17 @@ module.exports = {
 				},
 			};
 
-			const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+			//Create chart
+			const width = 1500; //px
+			const height = 750; //px
+
+			const chart = new ChartJsImage();
+			chart.setConfig(configuration);
+
+			chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+			const imageBuffer = await chart.toBinary();
+
 			files.push(new Discord.AttachmentBuilder(imageBuffer, { name: `duelRatingHistory-${osuUser.osuUserId}.png` }));
 		}
 
