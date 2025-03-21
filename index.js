@@ -226,8 +226,8 @@ const server = http.createServer(async (req, res) => {
 
 	if (route === '/metrics') {
 		// Return all metrics the Prometheus exposition format
-		res.setHeader('Content-Type', register.contentType);
-		res.end(await register.metrics());
+		// res.setHeader('Content-Type', register.contentType);
+		// res.end(await register.metrics());
 	}
 });
 
