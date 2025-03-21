@@ -662,7 +662,7 @@ async function drawLevel(input, server) {
 	ctx.font = '40px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(Math.floor(user.level), canvas.width / 10, canvas.height / 2 + 15 + yOffset);
+	ctx.fillText(Math.floor(user.level).toString(), canvas.width / 10, canvas.height / 2 + 15 + yOffset);
 
 	//Add a faint circle around the level
 	ctx.beginPath();
