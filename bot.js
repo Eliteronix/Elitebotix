@@ -193,6 +193,10 @@ process.on('uncaughtException', (error, origin) => {
 	process.exit(1);
 });
 
+process.on('unhandledRejection', (reason, promise) => {
+	console.error('Unhandled rejection, bot.js:', reason);
+});
+
 //declare what the discord client should do when it's ready
 client.on('ready', readyDiscord);
 

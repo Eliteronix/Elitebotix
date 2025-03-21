@@ -497,3 +497,7 @@ async function processOsuWebRequests(client) {
 		processOsuWebRequests(client);
 	}, 50);
 }
+
+process.on("unhandledRejection", (reason, promise) => {
+	console.error("Unhandled rejection, index.js:", reason);
+});
