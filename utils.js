@@ -6287,7 +6287,15 @@ module.exports = {
 
 					(async () => {
 						let mapInfo = await getOsuMapInfo(nextMap);
-						await channel.sendMessage(mapInfo);
+						try {
+							await channel.sendMessage(mapInfo);
+						} catch (error) {
+							if (error.message === 'Currently disconnected!') {
+								await bancho.connect();
+							} else {
+								console.log(error);
+							}
+						}
 					})();
 
 					if (bestOf === 1) {
