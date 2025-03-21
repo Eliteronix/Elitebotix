@@ -6115,7 +6115,15 @@ module.exports = {
 		}
 
 		while (usersToCheck.length) {
-			await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
+			try {
+				await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
+			} catch (error) {
+				if (error.message === 'Currently disconnected!') {
+					await bancho.connect();
+				} else {
+					console.log(error);
+				}
+			}
 			await new Promise(resolve => setTimeout(resolve, 5000));
 		}
 
