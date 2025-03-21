@@ -6120,6 +6120,7 @@ module.exports = {
 			} catch (error) {
 				if (error.message === 'Currently disconnected!') {
 					await bancho.connect();
+					await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
 				} else {
 					console.log(error);
 				}
@@ -6300,6 +6301,7 @@ module.exports = {
 						} catch (error) {
 							if (error.message === 'Currently disconnected!') {
 								await bancho.connect();
+								await channel.sendMessage(mapInfo);
 							} else {
 								console.log(error);
 							}

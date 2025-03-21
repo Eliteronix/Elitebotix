@@ -162,7 +162,16 @@ module.exports = async function (client, bancho, message) {
 			return Math.abs(ownStarRating - parseFloat(task.additions.split(';')[1])) < 1;
 		});
 
-		return await message.user.sendMessage(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
+		try {
+			return await message.user.sendMessage(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
+		} catch (e) {
+			if (e.message === 'Currently disconnected!') {
+				await bancho.connect();
+				return await message.user.sendMessage(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
+			} else {
+				return console.error('gotBanchoPrivateMessage.js | queue1v1', e);
+			}
+		}
 	} else if (message.message === '!queue1v1-leave' || message.message === '!leave1v1' || message.message === '!leave' || message.message === '!quit' || message.message === '!exit' || message.message === '!stop' || message.message === '!cancel') {
 		await message.user.fetchFromAPI();
 
