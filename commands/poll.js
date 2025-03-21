@@ -383,6 +383,7 @@ module.exports = {
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -396,23 +397,23 @@ module.exports = {
 		}
 
 		// Write the title of the changelog
-		ctx.font = 'bold 35px comfortaa, sans-serif';
+		ctx.font = 'bold 35px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(title, canvas.width / 2, 50);
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = '12px comfortaa, sans-serif';
+		ctx.font = '12px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
 
 		for (let i = 0; i < options.length; i++) {
-			ctx.font = 'bold 25px comfortaa, sans-serif';
+			ctx.font = 'bold 25px comfortaa, arial';
 			ctx.textAlign = 'left';
 			ctx.fillText(`${i + 1}. Option:`, 100, 100 + 100 * i);
-			fitTextOnLeftCanvas(ctx, `${options[i]}`, 25, 'comfortaa, sans-serif', 130 + 100 * i, canvas.width - 100, 100);
+			fitTextOnLeftCanvas(ctx, `${options[i]}`, 25, 'comfortaa, arial', 130 + 100 * i, canvas.width - 100, 100);
 		}
 
 		//Create as an attachment

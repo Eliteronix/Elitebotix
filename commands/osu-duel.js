@@ -960,6 +960,7 @@ module.exports = {
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
@@ -975,7 +976,7 @@ module.exports = {
 				//Footer
 				let today = new Date().toLocaleDateString();
 
-				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.font = 'bold 15px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 
 				ctx.textAlign = 'left';
@@ -987,13 +988,13 @@ module.exports = {
 				//Title
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
-				ctx.font = 'bold 30px comfortaa, sans-serif';
+				ctx.font = 'bold 30px comfortaa, arial';
 				ctx.fillText(`League Ratings for ${osuUser.name}`, 350, 40);
 
 				//Set Duel Rating and League Rank
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
-				ctx.font = 'bold 25px comfortaa, sans-serif';
+				ctx.font = 'bold 25px comfortaa, arial';
 
 				//Current Total Rating
 				ctx.fillText('Current Total Rating', 475, 100);
@@ -1043,7 +1044,7 @@ module.exports = {
 				ctx.fillText(leagueText, 475, 275);
 				ctx.fillText(`(${Math.round(userDuelStarRating.total * 1000) / 1000}*)`, 475, 300);
 
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 
 				//Current NoMod Rating
 				ctx.fillText('NoMod', 100, 350);
@@ -1160,7 +1161,7 @@ module.exports = {
 					//Set Duel Rating and League Rank
 					ctx.fillStyle = '#ffffff';
 					ctx.textAlign = 'center';
-					ctx.font = 'bold 20px comfortaa, sans-serif';
+					ctx.font = 'bold 20px comfortaa, arial';
 					//Season Total Rating
 					ctx.fillText(`${historicalUserDuelStarRatings[i].seasonEnd} Total Rating`, 125, 575 + i * 250);
 					let duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.total);
@@ -1180,7 +1181,7 @@ module.exports = {
 					ctx.fillText(leagueText, 125, 750 + i * 250, 150);
 					ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.total * 1000) / 1000}*)`, 125, 775 + i * 250);
 
-					ctx.font = 'bold 15px comfortaa, sans-serif';
+					ctx.font = 'bold 15px comfortaa, arial';
 
 					//Season NoMod Rating
 					ctx.fillText('NoMod', 287, 600 + i * 250);
@@ -1293,7 +1294,7 @@ module.exports = {
 				if (discordUser) {
 					let derankStats = await getDerankStats(discordUser);
 
-					ctx.font = 'bold 25px comfortaa, sans-serif';
+					ctx.font = 'bold 25px comfortaa, arial';
 					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
 				}
 

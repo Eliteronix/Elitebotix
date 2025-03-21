@@ -481,6 +481,7 @@ module.exports = {
 		const canvasHeight = 500;
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -502,7 +503,7 @@ module.exports = {
 		ctx.drawImage(leagueImage, 0, 0, 1000, 500);
 
 		// Write the title of the player
-		ctx.font = '35px comfortaa, sans-serif';
+		ctx.font = '35px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(`${year} osu! wrapped for ${osuUser.osuName}`, 475, 40);
@@ -518,18 +519,18 @@ module.exports = {
 		ctx.stroke();
 
 		// Write the title of the player
-		ctx.font = '22px comfortaa, sans-serif';
+		ctx.font = '22px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 90);
 
 		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 140);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 165);
 
-		ctx.font = '22px comfortaa, sans-serif';
+		ctx.font = '22px comfortaa, arial';
 		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 220);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 245);
 
 		if (isNaN(duelRating.total) || duelRating.total === null) {
@@ -580,10 +581,10 @@ module.exports = {
 			oldDuelRating.freeMod = 0;
 		}
 
-		ctx.font = '22px comfortaa, sans-serif';
+		ctx.font = '22px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillText('Duel Rating changes:', 50, 300);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.textAlign = 'right';
 		ctx.fillText('Total: ', 106, 325);
 		ctx.fillText(oldDuelRating.total.toFixed(3), 150, 325);
@@ -652,16 +653,16 @@ module.exports = {
 		}
 
 		ctx.textAlign = 'center';
-		ctx.font = '22px comfortaa, sans-serif';
+		ctx.font = '22px comfortaa, arial';
 		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 90);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
 			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 115 + i * 25);
 		}
 
 		ctx.textAlign = 'left';
 		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 300);
-		ctx.font = '11px comfortaa, sans-serif';
+		ctx.font = '11px comfortaa, arial';
 		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
 			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
 			let title = 'Unavailable';
@@ -686,7 +687,7 @@ module.exports = {
 		}
 
 		// Write the title of the player
-		ctx.font = '16px comfortaa, sans-serif';
+		ctx.font = '16px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 		let today = new Date().toLocaleDateString();

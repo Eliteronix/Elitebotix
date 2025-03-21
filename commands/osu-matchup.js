@@ -1224,6 +1224,7 @@ module.exports = {
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1238,7 +1239,7 @@ module.exports = {
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 
 		ctx.textAlign = 'left';
@@ -1249,20 +1250,20 @@ module.exports = {
 
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		ctx.font = 'bold 40px comfortaa, sans-serif';
-		fitTextOnMiddleCanvas(ctx, team1Names.join(' | '), 40, 'comfortaa, sans-serif', 55, 1000, 400);
-		fitTextOnMiddleCanvas(ctx, 'vs.', 40, 'comfortaa, sans-serif', 100, 1000, 400);
-		fitTextOnMiddleCanvas(ctx, team2Names.join(' | '), 40, 'comfortaa, sans-serif', 145, 1000, 400);
+		ctx.font = 'bold 40px comfortaa, arial';
+		fitTextOnMiddleCanvas(ctx, team1Names.join(' | '), 40, 'comfortaa, arial', 55, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, 'vs.', 40, 'comfortaa, arial', 100, 1000, 400);
+		fitTextOnMiddleCanvas(ctx, team2Names.join(' | '), 40, 'comfortaa, arial', 145, 1000, 400);
 
-		ctx.font = 'bold 30px comfortaa, sans-serif';
+		ctx.font = 'bold 30px comfortaa, arial';
 		ctx.fillText('Direct Matchups', 250, 210);
 		ctx.fillText('Indirect Matchups', 750, 210);
 
-		ctx.font = 'bold 10px comfortaa, sans-serif';
+		ctx.font = 'bold 10px comfortaa, arial';
 		ctx.fillText('(All maps played in the same lobby; Duplicate maps count)', 250, 230);
 		ctx.fillText('(All the same maps played in any tournaments; Most recent scores on beatmaps count)', 750, 230);
 
-		ctx.font = 'bold 30px comfortaa, sans-serif';
+		ctx.font = 'bold 30px comfortaa, arial';
 		ctx.fillText('NM', 175, 275);
 		ctx.fillText('HD', 325, 275);
 		ctx.fillText('HR', 175, 365);

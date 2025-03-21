@@ -1127,6 +1127,7 @@ module.exports = {
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1141,7 +1142,7 @@ module.exports = {
 
 		// Write the title of the leaderboard
 		ctx.fillStyle = '#ffffff';
-		module.exports.fitTextOnMiddleCanvas(ctx, title, 35, 'comfortaa, sans-serif', 50, canvas.width, 50);
+		module.exports.fitTextOnMiddleCanvas(ctx, title, 35, 'comfortaa, arial', 50, canvas.width, 50);
 
 		// Write the data
 		ctx.textAlign = 'center';
@@ -1210,16 +1211,16 @@ module.exports = {
 
 			if (data[i].name || data[i].value) {
 				placement++;
-				ctx.font = 'bold 25px comfortaa, sans-serif';
+				ctx.font = 'bold 25px comfortaa, arial';
 				ctx.fillText(`${placement}. ${data[i].name}`, xPosition, yPositionName);
-				ctx.font = '25px comfortaa, sans-serif';
+				ctx.font = '25px comfortaa, arial';
 				ctx.fillText(data[i].value, xPosition, yPositionValue);
 			}
 		}
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 
 		if (page) {
@@ -1404,6 +1405,7 @@ module.exports = {
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1417,7 +1419,7 @@ module.exports = {
 		}
 
 		// Write the stage of the map
-		ctx.font = 'bold 50px comfortaa, sans-serif';
+		ctx.font = 'bold 50px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(stagename, canvas.width / 2, 65);
@@ -1426,13 +1428,13 @@ module.exports = {
 		ctx.fillRect(100, 100, 800, 800);
 
 		// Write the map infos
-		ctx.font = 'bold 50px comfortaa, sans-serif';
+		ctx.font = 'bold 50px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.artist, 40, 'comfortaa, sans-serif', 200, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.title, 40, 'comfortaa, sans-serif', 240, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, sans-serif', 280, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 450, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.artist, 40, 'comfortaa, arial', 200, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.title, 40, 'comfortaa, arial', 240, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, arial', 280, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, arial', 450, canvas.width, 220);
 		let doubletimeMod = '';
 		if (doubletime) {
 			doubletimeMod = '+DoubleTime';
@@ -1455,18 +1457,18 @@ module.exports = {
 			ctx.restore();
 
 			ctx.fillStyle = '#ffffff';
-			ctx.font = 'bold 65px comfortaa, sans-serif';
+			ctx.font = 'bold 65px comfortaa, arial';
 			ctx.fillText('DT', 775, 725);
 		}
-		module.exports.fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 575, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 600, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, sans-serif', 700, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, sans-serif', 750, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, sans-serif', 800, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, arial', 575, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, arial', 600, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, arial', 700, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, arial', 750, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, arial', 800, canvas.width, 220);
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 
 		ctx.textAlign = 'right';
@@ -8758,6 +8760,7 @@ module.exports = {
 		const canvasHeight = 500;
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -8785,7 +8788,7 @@ module.exports = {
 		}
 
 		// Write the title of the beatmap
-		ctx.font = '30px comfortaa, sans-serif';
+		ctx.font = '30px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 
@@ -8801,7 +8804,7 @@ module.exports = {
 		}
 
 		ctx.fillText(outputString, 60, 35);
-		ctx.font = '25px comfortaa, sans-serif';
+		ctx.font = '25px comfortaa, arial';
 
 		const mods = module.exports.getMods(input.score.raw_mods);
 
@@ -8961,7 +8964,7 @@ module.exports = {
 		ctx.stroke();
 
 		//Write rank
-		ctx.font = '70px comfortaa, sans-serif';
+		ctx.font = '70px comfortaa, arial';
 		ctx.textAlign = 'center';
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 4;
@@ -8976,7 +8979,7 @@ module.exports = {
 		}
 
 		//Write Score
-		ctx.font = '60px comfortaa, sans-serif';
+		ctx.font = '60px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 4;
@@ -8985,7 +8988,7 @@ module.exports = {
 		ctx.fillText(module.exports.humanReadable(input.score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
 
 		//Write Played By and Submitted on
-		ctx.font = '10px comfortaa, sans-serif';
+		ctx.font = '10px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#FFFFFF';
 
@@ -9022,7 +9025,7 @@ module.exports = {
 
 		const formattedSubmitDate = `${input.score.raw_date.substring(8, 10)} ${month} ${input.score.raw_date.substring(0, 4)} ${input.score.raw_date.substring(11, 16)}`;
 
-		ctx.font = '10px comfortaa, sans-serif';
+		ctx.font = '10px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Played by', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
@@ -9038,7 +9041,7 @@ module.exports = {
 		if (input.mapRank > 0 || input.mapRank && input.mapRank.includes('/')) {
 			//Draw completion
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 450, canvas.height / 500 * 395, 116, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Global Rank', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
@@ -9057,7 +9060,7 @@ module.exports = {
 
 			//Draw completion
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 453, canvas.height / 500 * 395, 110, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Completion', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
@@ -9069,14 +9072,14 @@ module.exports = {
 
 		//Acc
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Accuracy', canvas.width / 1000 * 600 + 55, canvas.height / 500 * 385);
 		ctx.fillText(`${Math.round(accuracy * 100) / 100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
 		//Combo
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 725, canvas.height / 500 * 365, 130, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
@@ -9102,7 +9105,7 @@ module.exports = {
 			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
 		}
 
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		if (!input.score.perfect) {
 			let fcScore = {
 				counts: {
@@ -9117,7 +9120,7 @@ module.exports = {
 			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
 			if (pp !== fcpp) {
 				pp = `${pp} (${Math.round(fcpp)} FC)`;
-				ctx.font = '16px comfortaa, sans-serif';
+				ctx.font = '16px comfortaa, arial';
 			}
 		}
 
@@ -9135,7 +9138,7 @@ module.exports = {
 		//MAX
 		if (input.mode === 3) {
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 60, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Max', canvas.width / 1000 * 600 + 30, canvas.height / 500 * 445);
@@ -9159,7 +9162,7 @@ module.exports = {
 			xTextOffset = 54;
 		}
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 600 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9168,7 +9171,7 @@ module.exports = {
 		//200
 		if (input.mode === 3) {
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 728, canvas.height / 500 * 425, 60, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('200s', canvas.width / 1000 * 728 + 30, canvas.height / 500 * 445);
@@ -9193,7 +9196,7 @@ module.exports = {
 			xTextOffset = 82;
 		}
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 700 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9215,7 +9218,7 @@ module.exports = {
 				xTextOffset = 46;
 			}
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 800 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText(displayTerm, canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9236,7 +9239,7 @@ module.exports = {
 			xTextOffset = 10;
 		}
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 900 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Miss', canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9245,7 +9248,7 @@ module.exports = {
 		//Draw the footer
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = '12px comfortaa, sans-serif';
+		ctx.font = '12px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
@@ -9255,7 +9258,7 @@ module.exports = {
 			ctx.save();
 			//ctx.translate(newx, newy);
 			ctx.rotate(-Math.PI / 2);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.textAlign = 'center';
 			ctx.fillText(`[${input.server}]`, -canvas.height / 500 * 425, 50, 100);
 			ctx.restore();
@@ -9277,7 +9280,7 @@ module.exports = {
 
 		module.exports.roundedRect(ctx, canvas.width / 900 * 50 + userBackground.height / 10 * 2, canvas.height / 500 * 375 + 5, userBackground.width / 10 * 2 - userBackground.height / 10 * 2 - 5, userBackground.height / 10 * 2 - 10, 5, '00', '00', '00', 0.5);
 
-		ctx.font = '20px comfortaa, sans-serif';
+		ctx.font = '20px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 		ctx.fillText(`Player: ${input.user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);

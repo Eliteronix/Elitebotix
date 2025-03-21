@@ -377,6 +377,7 @@ module.exports = {
 		let canvasHeight = 275 + userScoreHeight + amount * 30;
 
 		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -445,11 +446,11 @@ module.exports = {
 			ctx.drawImage(beatmapStatusIcon, 22, 25, beatmapStatusIcon.width / beatmapStatusIcon.height * 40, 40);
 			ctx.drawImage(modePic, 22, 75, modePic.width / modePic.height * 40, 40);
 
-			ctx.font = 'bold 30px comfortaa, sans-serif';
+			ctx.font = 'bold 30px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'left';
 			ctx.fillText(beatmapTitle, 70, 55);
-			ctx.font = 'bold 23px comfortaa, sans-serif';
+			ctx.font = 'bold 23px comfortaa, arial';
 			ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100} [${beatmapDifficulty}] mapped by ${beatmap.mapper}`, 100, 103.5);
 
 			//Draw mods
@@ -480,7 +481,7 @@ module.exports = {
 			ctx.drawImage(topScoreUserImage, 100, 175, 60.39, 60.39);
 			ctx.restore();
 
-			ctx.font = 'bold 20px comfortaa, sans-serif';
+			ctx.font = 'bold 20px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'left';
 			ctx.fillText('#1', 65, 200);
@@ -525,18 +526,18 @@ module.exports = {
 				topScore.user.name = await getOsuPlayerName(topScore.user.id);
 			}
 			// nickname
-			ctx.font = 'bold 20px comfortaa, sans-serif';
+			ctx.font = 'bold 20px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'left';
 			ctx.fillText(`${topScore.user.name}`, 170, 200);
 
 			// submitted on
-			ctx.font = '12px comfortaa, sans-serif';
+			ctx.font = '12px comfortaa, arial';
 			ctx.textAlign = 'left';
 			ctx.fillStyle = '#FFFFFF';
 			ctx.fillText(getDate(topScore), 170, 228);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'left';
 
@@ -566,7 +567,7 @@ module.exports = {
 			// counts {300}
 			ctx.fillText(`${topScore.counts['300']}`, 475, 232);
 
-			ctx.font = 'bold 8px comfortaa, sans-serif';
+			ctx.font = 'bold 8px comfortaa, arial';
 			ctx.fillStyle = '#898989';
 			ctx.fillText('Total Score', 615, 180);
 			ctx.fillText('Accuracy', 720, 180);
@@ -603,7 +604,7 @@ module.exports = {
 				ctx.drawImage(topScoreUserImage, 100, 175 + 90, 60.39, 60.39);
 				ctx.restore();
 
-				ctx.font = 'bold 20px comfortaa, sans-serif';
+				ctx.font = 'bold 20px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'left';
 
@@ -628,7 +629,7 @@ module.exports = {
 				let gradeOffset = 0;
 				if (userScore.rank) {
 					gradeOffset += 10;
-					ctx.font = 'bold 20px comfortaa, sans-serif';
+					ctx.font = 'bold 20px comfortaa, arial';
 					ctx.fillStyle = '#ffffff';
 					ctx.textAlign = 'left';
 					ctx.fillText(`#${userScore.rank}`, 60, 290);
@@ -656,19 +657,19 @@ module.exports = {
 					topScore.user.name = await getOsuPlayerName(topScore.user.id);
 				}
 				// nickname
-				ctx.font = 'bold 20px comfortaa, sans-serif';
+				ctx.font = 'bold 20px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'left';
 				ctx.fillText(`${topScore.user.name}`, 170, 200 + 90);
 
 
 				// submitted on
-				ctx.font = '12px comfortaa, sans-serif';
+				ctx.font = '12px comfortaa, arial';
 				ctx.textAlign = 'left';
 				ctx.fillStyle = '#FFFFFF';
 				ctx.fillText(getDate(topScore), 170, 228 + 90);
 
-				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.font = 'bold 15px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'left';
 
@@ -698,7 +699,7 @@ module.exports = {
 				// counts {300}
 				ctx.fillText(`${topScore.counts['300']}`, 475, 232 + 90);
 
-				ctx.font = 'bold 8px comfortaa, sans-serif';
+				ctx.font = 'bold 8px comfortaa, arial';
 				ctx.fillStyle = '#898989';
 				ctx.fillText('Total Score', 615, 180 + 90);
 				ctx.fillText('Accuracy', 720, 180 + 90);
@@ -732,7 +733,7 @@ module.exports = {
 				roundedRect(ctx, 50, 220.5 + globalOffset + localOffset, 800, 20, 500 / 70, '70', '57', '63', 0.75);
 
 				ctx.fillStyle = '#FFFFFF';
-				ctx.font = 'bold 10px comfortaa, sans-serif';
+				ctx.font = 'bold 10px comfortaa, arial';
 
 				// rank
 				ctx.fillText(`#${i + 1}`, 63, 235.5 + globalOffset + localOffset);
@@ -781,14 +782,14 @@ module.exports = {
 
 			let today = new Date().toLocaleDateString();
 
-			ctx.font = '23px comfortaa, sans-serif';
+			ctx.font = '23px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			if (acronym) {
 				ctx.textAlign = 'left';
 				ctx.fillText(`Filtered to ${acronym}`, 50, canvas.height - 25);
 			}
 
-			ctx.font = '12px comfortaa, sans-serif';
+			ctx.font = '12px comfortaa, arial';
 			ctx.textAlign = 'right';
 			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 10, canvas.height - 10);
 

@@ -761,6 +761,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+	Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 	//Get context and load the image
 	const ctx = canvas.getContext('2d');
@@ -773,7 +774,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 		}
 	}
 
-	ctx.font = '80px comfortaa, sans-serif';
+	ctx.font = '80px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('A', 1355, 160);

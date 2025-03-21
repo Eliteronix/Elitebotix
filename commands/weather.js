@@ -148,6 +148,7 @@ module.exports = {
 						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
 						Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+						Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 						//Get context and load the image
 						const ctx = canvas.getContext('2d');
@@ -161,24 +162,24 @@ module.exports = {
 						}
 
 						// Write the title
-						ctx.font = 'bold 35px comfortaa, sans-serif';
+						ctx.font = 'bold 35px comfortaa, arial';
 						ctx.fillStyle = '#ffffff';
 						ctx.textAlign = 'center';
-						fitTextOnMiddleCanvas(ctx, `Weather for ${weather.location.name}`, 35, 'comfortaa, sans-serif', 50, canvas.width, 250);
+						fitTextOnMiddleCanvas(ctx, `Weather for ${weather.location.name}`, 35, 'comfortaa, arial', 50, canvas.width, 250);
 
 						// Write the weather of the current day
-						ctx.font = 'bold 30px comfortaa, sans-serif';
+						ctx.font = 'bold 30px comfortaa, arial';
 						ctx.textAlign = 'center';
 						ctx.fillText(`Data from ${weather.current.day} at ${weather.current.observationtime.substring(0, 5)}`, 375, 150);
 						ctx.fillText(`Temp.: ${weather.current.temperature}°${degreeType} | Feels Like: ${weather.current.feelslike}°${degreeType}`, 375, 200);
 						ctx.fillText(`Humidity: ${weather.current.humidity}%`, 375, 250);
 						ctx.fillText(`Wind: ${weather.current.winddisplay}`, 375, 300);
-						ctx.font = 'bold 25px comfortaa, sans-serif';
+						ctx.font = 'bold 25px comfortaa, arial';
 						ctx.fillText(`Forecast for today: ${weather.forecast[1].skytextday}`, 375, 390);
 						ctx.fillText(`${weather.forecast[2].low} - ${weather.forecast[2].high}°${degreeType} | ${weather.forecast[2].precip}% Rain`, 375, 425);
 
 						// Write the forecast
-						ctx.font = 'bold 25px comfortaa, sans-serif';
+						ctx.font = 'bold 25px comfortaa, arial';
 						ctx.textAlign = 'left';
 						ctx.fillText('3-Day Forecast:', 725, 100);
 						ctx.fillText(`${weather.forecast[2].day}:`, 725, 150);
@@ -193,7 +194,7 @@ module.exports = {
 
 						let today = new Date().toLocaleDateString();
 
-						ctx.font = '12px comfortaa, sans-serif';
+						ctx.font = '12px comfortaa, arial';
 						ctx.fillStyle = '#ffffff';
 						ctx.textAlign = 'left';
 						ctx.fillText(`Lat.: ${weather.location.lat} | Long.: ${weather.location.long}`, 5, canvas.height - 5);
