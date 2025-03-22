@@ -16,7 +16,8 @@ module.exports = {
 		"beatmapcovers",
 		"badges",
 		"slimcovers",
-		"avatars"
+		"avatars",
+		"wrappedcards",
 	],
 	env: {
 		PATH: `${process.env.HOME}/.bun/bin:${process.env.PATH}`, // Add "~/.bun/bin/bun" to PATH
