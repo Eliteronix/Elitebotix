@@ -3,7 +3,7 @@ const { showUnknownInteractionError } = require('../config.json');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools, DBOsuPoolAccess } = require('../dbObjects');
 const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, logDatabaseQueries, getMapOsrFile } = require('../utils.js');
 const { Op } = require('sequelize');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const JSZip = require('jszip');
 const fs = require('fs');
@@ -1332,7 +1332,7 @@ async function createMappoolImage(mappool, client) {
 	const canvasWidth = 908;
 	const canvasHeight = mappool.length * 100 + 8;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -1454,5 +1454,5 @@ async function createMappoolImage(mappool, client) {
 	}
 
 	// Return the image
-	return new AttachmentBuilder(canvas.toBuffer(), { name: 'mappool.png' });
+	return new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'mappool.png' });
 }

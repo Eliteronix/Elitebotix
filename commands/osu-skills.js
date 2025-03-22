@@ -1,10 +1,10 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -402,7 +402,8 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+			Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 			//Get context and load the image
 			const ctx = canvas.getContext('2d');
@@ -418,7 +419,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			//Set Duel Rating and League Rank
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Duel Rating', 90, 195);
 
 			logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers duelrating');
@@ -459,7 +460,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 
 			let today = new Date().toLocaleDateString();
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 
 			ctx.textAlign = 'left';
@@ -470,15 +471,15 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
-			ctx.font = 'bold 30px comfortaa, sans-serif';
-			fitTextOnMiddleCanvas(ctx, `Top Play Stats for ${user.name}`, 30, 'comfortaa, sans-serif', 40, canvas.width + 150, 320);
+			ctx.font = 'bold 30px comfortaa, arial';
+			fitTextOnMiddleCanvas(ctx, `Top Play Stats for ${user.name}`, 30, 'comfortaa, arial', 40, canvas.width + 150, 320);
 
 			// ctx.fillText(`Top Play Stats for ${user.name}`, 400, 40);
 
 			ctx.textAlign = 'left';
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('PP', 200, 80);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 
 			let averagepp = 0;
 			for (let i = 0; i < pp.length; i++) {
@@ -487,9 +488,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			averagepp = averagepp / pp.length;
 			ctx.fillText(`${Math.round(pp[pp.length - 1] * 100) / 100} (Lowest) - ${Math.round(averagepp * 100) / 100} (avg) - ${Math.round(pp[0] * 100) / 100} (Highest)`, 200, 100);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Stars', 200, 130);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 
 			let averageStars = 0;
 			for (let i = 0; i < stars.length; i++) {
@@ -498,9 +499,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			averageStars = averageStars / stars.length;
 			ctx.fillText(`${Math.round(stars[stars.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageStars * 100) / 100} (avg) - ${Math.round(stars[0] * 100) / 100} (Highest)`, 200, 150);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Aim', 200, 175);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 
 			let averageAim = 0;
 			for (let i = 0; i < aim.length; i++) {
@@ -509,9 +510,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			averageAim = averageAim / aim.length;
 			ctx.fillText(`${Math.round(aim[aim.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageAim * 100) / 100} (avg) - ${Math.round(aim[0] * 100) / 100} (Highest)`, 200, 195);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Speed', 200, 220);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 
 			let averageSpeed = 0;
 			for (let i = 0; i < speed.length; i++) {
@@ -520,9 +521,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			averageSpeed = averageSpeed / speed.length;
 			ctx.fillText(`${Math.round(speed[speed.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageSpeed * 100) / 100} (avg) - ${Math.round(speed[0] * 100) / 100} (Highest)`, 200, 240);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Accuracy', 200, 265);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 
 			let averageAcc = 0;
 			for (let i = 0; i < acc.length; i++) {
@@ -531,9 +532,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			averageAcc = averageAcc / acc.length;
 			ctx.fillText(`${Math.round(acc[acc.length - 1] * 10000) / 100}% (Lowest) - ${Math.round(averageAcc * 10000) / 100}% (avg) - ${Math.round(acc[0] * 10000) / 100}% (Highest)`, 200, 285);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('BPM', 200, 310);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 
 			let averageBPM = 0;
 			for (let i = 0; i < bpm.length; i++) {
@@ -542,13 +543,13 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			averageBPM = averageBPM / bpm.length;
 			ctx.fillText(`${Math.round(bpm[bpm.length - 1] * 100) / 100} (Lowest) - ${Math.round(averageBPM * 100) / 100} (avg) - ${Math.round(bpm[0] * 100) / 100} (Highest)`, 200, 330);
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Favourite Mods', 30, 370);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 			for (let i = 0; i < mods.length && i < 5; i++) {
 				// ctx.fillText(`${mods[i].modsReadable}`, 30, 390 + i * 20);
-				fitTextOnLeftCanvas(ctx, `${mods[i].modsReadable}`, 18, 'comfortaa, sans-serif', 390 + i * 20, 120, 30);
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				fitTextOnLeftCanvas(ctx, `${mods[i].modsReadable}`, 18, 'comfortaa, arial', 390 + i * 20, 120, 30);
+				ctx.font = 'bold 18px comfortaa, arial';
 				if (mods[i].amount > 1) {
 					ctx.fillText(`Used ${mods[i].amount} times`, 130, 390 + i * 20);
 				} else {
@@ -556,12 +557,12 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				}
 			}
 
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Most Farmed Mappers', 380, 370);
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 			for (let i = 0; i < mappers.length && i < 5; i++) {
-				fitTextOnLeftCanvas(ctx, `${mappers[i].mapper}`, 18, 'comfortaa, sans-serif', 390 + i * 20, 520, 380);
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				fitTextOnLeftCanvas(ctx, `${mappers[i].mapper}`, 18, 'comfortaa, arial', 390 + i * 20, 520, 380);
+				ctx.font = 'bold 18px comfortaa, arial';
 				if (mappers[i].amount > 1) {
 					ctx.fillText(`Used ${mappers[i].amount} times`, 530, 390 + i * 20);
 				} else {
@@ -580,15 +581,11 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			ctx.drawImage(avatar, 10, 10, 160, 160);
 
 			//Create as an attachment
-			const topPlayStats = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-topPlayStats-${user.id}.png` });
+			const topPlayStats = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-topPlayStats-${user.id}.png` });
 
 			const files = [topPlayStats];
 
 			let content = 'Top play stats';
-
-			const width = 1500; //px
-			const height = 750; //px
-			const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 			(async () => {
 				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiGameScores');
@@ -909,37 +906,37 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 								data: totalDatapoints,
 								borderColor: 'rgb(201, 203, 207)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (NM only)',
 								data: NMDatapoints,
 								borderColor: 'rgb(54, 162, 235)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (HD only)',
 								data: HDDatapoints,
 								borderColor: 'rgb(255, 205, 86)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (HR only)',
 								data: HRDatapoints,
 								borderColor: 'rgb(255, 99, 132)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (DT only)',
 								data: DTDatapoints,
 								borderColor: 'rgb(153, 102, 255)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}, {
 								label: 'Evaluation (FM only)',
 								data: FMDatapoints,
 								borderColor: 'rgb(75, 192, 192)',
 								fill: false,
-								tension: 0.4
+								lineTension: 0.4
 							}
 						]
 					};
@@ -1000,7 +997,15 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 						},
 					};
 
-					const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+					const width = 1500; //px
+					const height = 750; //px
+
+					const chart = new ChartJsImage();
+					chart.setConfig(configuration);
+
+					chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+					const imageBuffer = await chart.toBinary();
 
 					const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: `osu-skills-${user.id}.png` });
 

@@ -4,9 +4,9 @@ const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pa
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
 const fs = require('fs');
@@ -959,7 +959,8 @@ module.exports = {
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
@@ -975,7 +976,7 @@ module.exports = {
 				//Footer
 				let today = new Date().toLocaleDateString();
 
-				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.font = 'bold 15px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 
 				ctx.textAlign = 'left';
@@ -987,13 +988,13 @@ module.exports = {
 				//Title
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
-				ctx.font = 'bold 30px comfortaa, sans-serif';
+				ctx.font = 'bold 30px comfortaa, arial';
 				ctx.fillText(`League Ratings for ${osuUser.name}`, 350, 40);
 
 				//Set Duel Rating and League Rank
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
-				ctx.font = 'bold 25px comfortaa, sans-serif';
+				ctx.font = 'bold 25px comfortaa, arial';
 
 				//Current Total Rating
 				ctx.fillText('Current Total Rating', 475, 100);
@@ -1043,7 +1044,7 @@ module.exports = {
 				ctx.fillText(leagueText, 475, 275);
 				ctx.fillText(`(${Math.round(userDuelStarRating.total * 1000) / 1000}*)`, 475, 300);
 
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 
 				//Current NoMod Rating
 				ctx.fillText('NoMod', 100, 350);
@@ -1160,7 +1161,7 @@ module.exports = {
 					//Set Duel Rating and League Rank
 					ctx.fillStyle = '#ffffff';
 					ctx.textAlign = 'center';
-					ctx.font = 'bold 20px comfortaa, sans-serif';
+					ctx.font = 'bold 20px comfortaa, arial';
 					//Season Total Rating
 					ctx.fillText(`${historicalUserDuelStarRatings[i].seasonEnd} Total Rating`, 125, 575 + i * 250);
 					let duelLeague = getOsuDuelLeague(historicalUserDuelStarRatings[i].ratings.total);
@@ -1180,7 +1181,7 @@ module.exports = {
 					ctx.fillText(leagueText, 125, 750 + i * 250, 150);
 					ctx.fillText(`(${Math.round(historicalUserDuelStarRatings[i].ratings.total * 1000) / 1000}*)`, 125, 775 + i * 250);
 
-					ctx.font = 'bold 15px comfortaa, sans-serif';
+					ctx.font = 'bold 15px comfortaa, arial';
 
 					//Season NoMod Rating
 					ctx.fillText('NoMod', 287, 600 + i * 250);
@@ -1293,7 +1294,7 @@ module.exports = {
 				if (discordUser) {
 					let derankStats = await getDerankStats(discordUser);
 
-					ctx.font = 'bold 25px comfortaa, sans-serif';
+					ctx.font = 'bold 25px comfortaa, arial';
 					ctx.fillText(`Duel Rank: #${humanReadable(derankStats.expectedPpRankOsu)}`, 190, 287);
 				}
 
@@ -1320,7 +1321,7 @@ module.exports = {
 				}
 
 				//Create as an attachment
-				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-league-ratings-${osuUser.id}.png` });
+				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-league-ratings-${osuUser.id}.png` });
 
 				let sentMessage = null;
 
@@ -1843,31 +1844,31 @@ module.exports = {
 							data: expectedScores[0],
 							borderColor: 'rgb(54, 162, 235)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (HD only)',
 							data: expectedScores[1],
 							borderColor: 'rgb(255, 205, 86)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (HR only)',
 							data: expectedScores[2],
 							borderColor: 'rgb(255, 99, 132)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (DT only)',
 							data: expectedScores[3],
 							borderColor: 'rgb(153, 102, 255)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}, {
 							label: 'Expected Rating (FM only)',
 							data: expectedScores[4],
 							borderColor: 'rgb(75, 192, 192)',
 							fill: false,
-							tension: 0.4
+							lineTension: 0.4
 						}
 					]
 				};
@@ -1928,9 +1929,13 @@ module.exports = {
 
 				const width = 1500; //px
 				const height = 750; //px
-				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
-				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+				const chart = new ChartJsImage();
+				chart.setConfig(configuration);
+
+				chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+				const imageBuffer = await chart.toBinary();
 
 				const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'expectedScores.png' });
 
@@ -2032,10 +2037,6 @@ module.exports = {
 					timestamps.delete(interaction.user.id);
 					return;
 				}
-
-				const width = 1500; //px
-				const height = 750; //px
-				const canvasRenderService = new ChartJSNodeCanvas({ width, height });
 
 				let labels = ['Bronze 1', 'Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1', 'Gold 2', 'Gold 3', 'Platinum 1', 'Platinum 2', 'Platinum 3', 'Diamond 1', 'Diamond 2', 'Diamond 3', 'Master 1', 'Master 2', 'Master 3', 'Grandmaster 1', 'Grandmaster 2', 'Grandmaster 3'];
 				let colors = ['#F07900', '#F07900', '#F07900', '#B5B5B5', '#B5B5B5', '#B5B5B5', '#FFEB47', '#FFEB47', '#FFEB47', '#1DD9A5', '#1DD9A5', '#1DD9A5', '#49B0FF', '#49B0FF', '#49B0FF', '#FFAEFB', '#FFAEFB', '#FFAEFB', '#581CFF', '#581CFF', '#581CFF'];
@@ -2178,7 +2179,15 @@ module.exports = {
 					}
 				};
 
-				const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+				const width = 1500; //px
+				const height = 750; //px
+
+				const chart = new ChartJsImage();
+				chart.setConfig(configuration);
+
+				chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+				const imageBuffer = await chart.toBinary();
 
 				const attachment = new Discord.AttachmentBuilder(imageBuffer, { name: 'osu-league-spread.png' });
 

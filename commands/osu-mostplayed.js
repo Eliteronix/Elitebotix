@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -533,7 +533,8 @@ module.exports = {
 			const canvasWidth = 1000;
 			const canvasHeight = 83 + dataOnPage.length * 41.66666;
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+			Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -566,7 +567,7 @@ module.exports = {
 					// Nothing
 				}
 				ctx.restore();
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 				ctx.fillStyle = '#FF66AB';
 				ctx.textAlign = 'right';
 
@@ -576,19 +577,19 @@ module.exports = {
 				if (beatmapTitle.length > maxSize) {
 					beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 				}
-				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.font = 'bold 15px comfortaa, arial';
 				ctx.fillStyle = '#FFFFFF';
 				ctx.textAlign = 'left';
 				ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
 
 				// Draw playcount per beatmap
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 				ctx.fillStyle = '#FFCC22';
 				ctx.textAlign = 'right';
 				ctx.fillText('➤ ' + dataOnPage[i].playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 				//Write mapper per map
-				ctx.font = 'bold 10px comfortaa, sans-serif';
+				ctx.font = 'bold 10px comfortaa, arial';
 				ctx.fillStyle = '#98838C';
 				ctx.textAlign = 'left';
 				ctx.fillText(`Mapped by ${dataOnPage[i].mapper}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
@@ -597,7 +598,7 @@ module.exports = {
 			await drawFooter(elements, totalPages, page);
 
 			//Create as an attachment
-			const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-maps-${amount}-${page}.png` })];
+			const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-maps-${amount}-${page}.png` })];
 
 			//Send the attachment
 			if (csv) {
@@ -661,7 +662,8 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -684,7 +686,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-${user.id}.png` });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-${user.id}.png` });
 
 				//TODO: add attributes and logdatabasequeries
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers Bancho linkedUser');
@@ -730,7 +732,8 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -749,7 +752,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-mostplayed-ripple-${user.id}.png` });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-ripple-${user.id}.png` });
 
 				//Send attachment
 				await msg.channel.send({ content: `\`${user.name}\`: <https://ripple.moe/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
@@ -791,7 +794,7 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 				// Nothing
 			}
 			ctx.restore();
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 			ctx.fillStyle = '#FF66AB';
 			ctx.textAlign = 'right';
 
@@ -801,19 +804,19 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 			if (beatmapTitle.length > maxSize) {
 				beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 			}
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillStyle = '#FFFFFF';
 			ctx.textAlign = 'left';
 			ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
 
 			// Draw playcount per beatmap
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
 			ctx.fillText('➤ ' + link[i].count, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 			//Write mapper per map
-			ctx.font = 'bold 10px comfortaa, sans-serif';
+			ctx.font = 'bold 10px comfortaa, arial';
 			ctx.fillStyle = '#98838C';
 			ctx.textAlign = 'left';
 			ctx.fillText(`Mapped by ${link[i].beatmapset.creator}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
@@ -842,7 +845,7 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 					// Nothing
 				}
 				ctx.restore();
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 				ctx.fillStyle = '#FF66AB';
 				ctx.textAlign = 'right';
 
@@ -852,19 +855,19 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 				if (beatmapTitle.length > maxSize) {
 					beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 				}
-				ctx.font = 'bold 15px comfortaa, sans-serif';
+				ctx.font = 'bold 15px comfortaa, arial';
 				ctx.fillStyle = '#FFFFFF';
 				ctx.textAlign = 'left';
 				ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
 
 				// Draw playcount per beatmap
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 				ctx.fillStyle = '#FFCC22';
 				ctx.textAlign = 'right';
 				ctx.fillText('➤ ' + link.beatmaps[i].playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 				//Write mapper per map
-				ctx.font = 'bold 10px comfortaa, sans-serif';
+				ctx.font = 'bold 10px comfortaa, arial';
 				ctx.fillStyle = '#98838C';
 				ctx.textAlign = 'left';
 				ctx.fillText(`Mapped by ${beatmaps[j].mapper}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
@@ -923,7 +926,7 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 				ctx.clip();
 				let beatmapImage = await getMapListCover(beatmap.beatmapsetId, beatmap.beatmapId, client);
 				ctx.drawImage(beatmapImage, canvas.width / 23, 500 / 8 + (500 / 12) * i, 38, 38);
-				ctx.font = 'bold 18px comfortaa, sans-serif';
+				ctx.font = 'bold 18px comfortaa, arial';
 				ctx.fillStyle = '#FF66AB';
 				ctx.textAlign = 'right';
 			} catch (e) {
@@ -937,19 +940,19 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 			if (beatmapTitle.length > maxSize) {
 				beatmapTitle = beatmapTitle.substring(0, maxSize - 3) + '...';
 			}
-			ctx.font = 'bold 15px comfortaa, sans-serif';
+			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillStyle = '#FFFFFF';
 			ctx.textAlign = 'left';
 			ctx.fillText(beatmapTitle, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
 
 			// Draw playcount per beatmap
-			ctx.font = 'bold 18px comfortaa, sans-serif';
+			ctx.font = 'bold 18px comfortaa, arial';
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
 			ctx.fillText('➤ ' + mostplayed[i].playcount, (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
 
 			//Write mapper per map
-			ctx.font = 'bold 10px comfortaa, sans-serif';
+			ctx.font = 'bold 10px comfortaa, arial';
 			ctx.fillStyle = '#98838C';
 			ctx.textAlign = 'left';
 			ctx.fillText(`Mapped by ${beatmap.mapper}`, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
@@ -983,7 +986,7 @@ async function drawTitle(input, server) {
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
 
 	// Write the title of the player
-	ctx.font = '30px comfortaa, sans-serif';
+	ctx.font = '30px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 500 / 12);
@@ -998,7 +1001,7 @@ async function drawFooter(input, totalPages, page) {
 
 	let today = new Date().toLocaleDateString();
 
-	ctx.font = '12px comfortaa, sans-serif';
+	ctx.font = '12px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'right';
 	ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);

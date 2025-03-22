@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
@@ -235,7 +235,8 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	const canvasWidth = 1000;
 	const canvasHeight = 500;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+	Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -258,7 +259,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	await drawBackground(elements, interaction.client);
 
 	//Create as an attachment
-	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
+	const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-beatmap-${beatmap.beatmapId}-${beatmap.mods}.png` });
 
 	if (!interaction) {
 		await processingMessage.delete();
@@ -460,7 +461,7 @@ async function drawTitle(input) {
 	}
 
 	// Write the title of the map
-	ctx.font = 'bold 25px comfortaa, sans-serif';
+	ctx.font = 'bold 25px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(beatmapTitle, canvas.width / 3 * 2, canvas.height / 100 * 7);
@@ -532,16 +533,16 @@ async function drawStats(input, accuracy, client) {
 	}
 
 	// Write the stats of the map
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'left';
 	//First column
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Ranked Status', canvas.width / 1000 * 330, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(beatmap.approvalStatus, canvas.width / 1000 * 330, canvas.height / 500 * 200);
 
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Difficulty Rating', canvas.width / 1000 * 330, canvas.height / 500 * 230);
 
 	let adjustedStarRating = adjustStarRating(beatmap.starRating, beatmap.approachRate, beatmap.circleSize, beatmap.mods);
@@ -552,7 +553,7 @@ async function drawStats(input, accuracy, client) {
 		adjustedRatingString = ` (${Math.round(adjustedStarRating * 100) / 100}* ETX)`;
 	}
 
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${Math.round(beatmap.starRating * 100) / 100}*${adjustedRatingString}`, canvas.width / 1000 * 330, canvas.height / 500 * 260, 220);
 
 	let beatmapMapper = beatmap.mapper;
@@ -561,71 +562,71 @@ async function drawStats(input, accuracy, client) {
 		beatmapMapper = beatmapMapper.substring(0, maxSizeMapper - 3) + '...';
 	}
 
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Mapper', canvas.width / 1000 * 330, canvas.height / 500 * 290);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(beatmapMapper, canvas.width / 1000 * 330, canvas.height / 500 * 320);
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('User Rating', canvas.width / 1000 * 330, canvas.height / 500 * 350);
-	ctx.font = 'bold 20px comfortaa, sans-serif';
+	ctx.font = 'bold 20px comfortaa, arial';
 	ctx.fillText(userRatingDisplay, canvas.width / 1000 * 330, canvas.height / 500 * 375);
 
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText(`${accuracy}% Accuracy`, canvas.width / 1000 * 330, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, beatmap.mods, accuracy, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Circle Size', canvas.width / 1000 * 580, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`CS ${beatmap.circleSize}`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 230);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`AR ${beatmap.approachRate}`, canvas.width / 1000 * 580, canvas.height / 500 * 260);
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 290);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`OD ${beatmap.overallDifficulty}`, canvas.width / 1000 * 580, canvas.height / 500 * 320);
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 350);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 380);
 
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('99% Accuracy', canvas.width / 1000 * 580, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, beatmap.mods, 99.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 580, canvas.height / 500 * 440);
 
 	//Third column
 	if (beatmap.mode === 'Mania') {
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillText('# of objects', canvas.width / 1000 * 750, canvas.height / 500 * 170);
-		ctx.font = 'bold 30px comfortaa, sans-serif';
+		ctx.font = 'bold 30px comfortaa, arial';
 		ctx.fillText(`${parseInt(beatmap.circles) + parseInt(beatmap.sliders) + parseInt(beatmap.spinners)}`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
 	} else {
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillText('Maximum Combo', canvas.width / 1000 * 750, canvas.height / 500 * 170);
-		ctx.font = 'bold 30px comfortaa, sans-serif';
+		ctx.font = 'bold 30px comfortaa, arial';
 		ctx.fillText(`${beatmap.maxCombo}x`, canvas.width / 1000 * 750, canvas.height / 500 * 200);
 	}
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Beats per Minute', canvas.width / 1000 * 750, canvas.height / 500 * 230);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${Math.round(beatmap.bpm * 100) / 100} BPM`, canvas.width / 1000 * 750, canvas.height / 500 * 260);
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Length', canvas.width / 1000 * 750, canvas.height / 500 * 290);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${totalLength} Total`, canvas.width / 1000 * 750, canvas.height / 500 * 320);
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('Length (Drain)', canvas.width / 1000 * 750, canvas.height / 500 * 350);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${drainLength} Drain`, canvas.width / 1000 * 750, canvas.height / 500 * 380);
 
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('100% Accuracy', canvas.width / 1000 * 750, canvas.height / 500 * 410);
-	ctx.font = 'bold 30px comfortaa, sans-serif';
+	ctx.font = 'bold 30px comfortaa, arial';
 	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, beatmap.mods, 100.00, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 750, canvas.height / 500 * 440);
 
 	const output = [canvas, ctx, beatmap];
@@ -639,7 +640,7 @@ async function drawFooter(input) {
 
 	let today = new Date().toLocaleDateString();
 
-	ctx.font = 'bold 15px comfortaa, sans-serif';
+	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 
 	ctx.textAlign = 'left';

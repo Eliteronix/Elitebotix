@@ -1,6 +1,6 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
 const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms, osuFilterWords } = require('./config.json');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const osu = require('node-osu');
@@ -1126,7 +1126,8 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1141,7 +1142,7 @@ module.exports = {
 
 		// Write the title of the leaderboard
 		ctx.fillStyle = '#ffffff';
-		module.exports.fitTextOnMiddleCanvas(ctx, title, 35, 'comfortaa, sans-serif', 50, canvas.width, 50);
+		module.exports.fitTextOnMiddleCanvas(ctx, title, 35, 'comfortaa, arial', 50, canvas.width, 50);
 
 		// Write the data
 		ctx.textAlign = 'center';
@@ -1210,16 +1211,16 @@ module.exports = {
 
 			if (data[i].name || data[i].value) {
 				placement++;
-				ctx.font = 'bold 25px comfortaa, sans-serif';
+				ctx.font = 'bold 25px comfortaa, arial';
 				ctx.fillText(`${placement}. ${data[i].name}`, xPosition, yPositionName);
-				ctx.font = '25px comfortaa, sans-serif';
+				ctx.font = '25px comfortaa, arial';
 				ctx.fillText(data[i].value, xPosition, yPositionValue);
 			}
 		}
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 
 		if (page) {
@@ -1231,7 +1232,7 @@ module.exports = {
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 		//Create as an attachment and return
-		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: filename });
+		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
 		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
@@ -1403,7 +1404,8 @@ module.exports = {
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
@@ -1417,7 +1419,7 @@ module.exports = {
 		}
 
 		// Write the stage of the map
-		ctx.font = 'bold 50px comfortaa, sans-serif';
+		ctx.font = 'bold 50px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(stagename, canvas.width / 2, 65);
@@ -1426,13 +1428,13 @@ module.exports = {
 		ctx.fillRect(100, 100, 800, 800);
 
 		// Write the map infos
-		ctx.font = 'bold 50px comfortaa, sans-serif';
+		ctx.font = 'bold 50px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
-		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.artist, 40, 'comfortaa, sans-serif', 200, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.title, 40, 'comfortaa, sans-serif', 240, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, sans-serif', 280, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, sans-serif', 450, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.artist, 40, 'comfortaa, arial', 200, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, beatmap.title, 40, 'comfortaa, arial', 240, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `Mapper: ${beatmap.creator}`, 40, 'comfortaa, arial', 280, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `[${beatmap.version}]`, 100, 'comfortaa, arial', 450, canvas.width, 220);
 		let doubletimeMod = '';
 		if (doubletime) {
 			doubletimeMod = '+DoubleTime';
@@ -1455,25 +1457,25 @@ module.exports = {
 			ctx.restore();
 
 			ctx.fillStyle = '#ffffff';
-			ctx.font = 'bold 65px comfortaa, sans-serif';
+			ctx.font = 'bold 65px comfortaa, arial';
 			ctx.fillText('DT', 775, 725);
 		}
-		module.exports.fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, sans-serif', 575, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, sans-serif', 600, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, sans-serif', 700, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, sans-serif', 750, canvas.width, 220);
-		module.exports.fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, sans-serif', 800, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `Mods: Freemod${doubletimeMod}`, 50, 'comfortaa, arial', 575, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, '(All mods allowed except: Relax, Autopilot, Auto, ScoreV2)', 25, 'comfortaa, arial', 600, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `Length: ${Math.floor(beatmap.length.total / 60)}:${(beatmap.length.total % 60).toString().padStart(2, '0')}`, 35, 'comfortaa, arial', 700, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `SR: ${Math.round(beatmap.difficulty.rating * 100) / 100} | ${beatmap.bpm} BPM`, 35, 'comfortaa, arial', 750, canvas.width, 220);
+		module.exports.fitTextOnMiddleCanvas(ctx, `CS ${beatmap.difficulty.size} | HP ${beatmap.difficulty.drain} | OD ${beatmap.difficulty.overall} | AR ${beatmap.difficulty.approach}`, 35, 'comfortaa, arial', 800, canvas.width, 220);
 
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 10);
 
 		//Create as an attachment and return
-		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `${stagename}.png` });
+		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `${stagename}.png` });
 	}, pause(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	},
@@ -6097,14 +6099,14 @@ module.exports = {
 
 		let matchMessages = [];
 		await lobby.setPassword(password);
-		await channel.sendMessage('!mp addref Eliteronix');
-		await channel.sendMessage('!mp map 975342 0');
+		await trySendBanchoChannelMessage(channel, '!mp addref Eliteronix');
+		await trySendBanchoChannelMessage(channel, '!mp map 975342 0');
 		if (users.length > 2) {
-			await channel.sendMessage(`!mp set 2 3 ${users.length + 1}`);
+			await trySendBanchoChannelMessage(channel, `!mp set 2 3 ${users.length + 1}`);
 		} else {
-			await channel.sendMessage(`!mp set 0 3 ${users.length + 1}`);
+			await trySendBanchoChannelMessage(channel, `!mp set 0 3 ${users.length + 1}`);
 		}
-		await channel.sendMessage('!mp lock');
+		await trySendBanchoChannelMessage(channel, '!mp lock');
 
 		if (queued) {
 			for (let i = 0; i < users.length; i++) {
@@ -6113,7 +6115,7 @@ module.exports = {
 		}
 
 		while (usersToCheck.length) {
-			await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
+			await trySendBanchoChannelMessage(channel, `!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
 			await new Promise(resolve => setTimeout(resolve, 5000));
 		}
 
@@ -6139,7 +6141,7 @@ module.exports = {
 		let mapIndex = 0;
 
 		for (let i = 0; i < users.length; i++) {
-			await channel.sendMessage(`!mp invite #${users[i].osuUserId}`);
+			await trySendBanchoChannelMessage(channel, `!mp invite #${users[i].osuUserId}`);
 			let user = await client.users.fetch(users[i].userId);
 			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
@@ -6151,7 +6153,7 @@ module.exports = {
 			await pingMessage.delete();
 		}
 		//Start the timer to close the lobby if not everyone joined by then
-		await channel.sendMessage('!mp timer 300');
+		await trySendBanchoChannelMessage(channel, '!mp timer 300');
 
 		let playerIds = users.map(user => user.osuUserId);
 		let scores = [0, 0];
@@ -6191,7 +6193,7 @@ module.exports = {
 					}
 
 					//Not everyone joined and the lobby will be closed
-					await channel.sendMessage('The lobby will be closed as not everyone joined.');
+					await trySendBanchoChannelMessage(channel, 'The lobby will be closed as not everyone joined.');
 					await new Promise(resolve => setTimeout(resolve, 60000));
 					return await lobby.closeLobby();
 				} else if (lobbyStatus === 'Waiting for start') {
@@ -6206,14 +6208,14 @@ module.exports = {
 					if (waitedForMapdownload || !playerHasNoMap) {
 						//just start; we waited another minute already
 						waitedForMapdownload = false;
-						await channel.sendMessage('!mp start 5');
+						await trySendBanchoChannelMessage(channel, '!mp start 5');
 						await new Promise(resolve => setTimeout(resolve, 3000));
 						await lobby.updateSettings();
 						lobbyStatus === 'Map being played';
 					} else {
 						waitedForMapdownload = true;
-						await channel.sendMessage('A player is missing the map. Waiting only 1 minute longer.');
-						await channel.sendMessage('!mp timer 60');
+						await trySendBanchoChannelMessage(channel, 'A player is missing the map. Waiting only 1 minute longer.');
+						await trySendBanchoChannelMessage(channel, '!mp timer 60');
 					}
 				}
 			}
@@ -6230,7 +6232,7 @@ module.exports = {
 			}
 
 			if (!playerIds.includes(obj.player.user.id.toString())) {
-				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+				trySendBanchoChannelMessage(channel, `!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
 				let allPlayersJoined = true;
 				for (let i = 0; i < users.length && allPlayersJoined; i++) {
@@ -6241,9 +6243,9 @@ module.exports = {
 				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
 
-					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
+					await trySendBanchoChannelMessage(channel, `Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
-					await channel.sendMessage('Looking for a map...');
+					await trySendBanchoChannelMessage(channel, 'Looking for a map...');
 
 					let nextMap = null;
 					let tries = 0;
@@ -6257,8 +6259,8 @@ module.exports = {
 							avoidMaps.push(nextMap.beatmapId);
 						}
 
-						await channel.sendMessage('!mp abort');
-						await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
+						await trySendBanchoChannelMessage(channel, '!mp abort');
+						await trySendBanchoChannelMessage(channel, `!mp map ${nextMap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 						await lobby.updateSettings();
 						tries++;
@@ -6277,7 +6279,7 @@ module.exports = {
 						|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
 						|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
 					) {
-						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+						await trySendBanchoChannelMessage(channel, `!mp mods ${modPools[mapIndex]} ${noFail}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
@@ -6285,16 +6287,16 @@ module.exports = {
 
 					(async () => {
 						let mapInfo = await getOsuMapInfo(nextMap);
-						await channel.sendMessage(mapInfo);
+						await trySendBanchoChannelMessage(channel, mapInfo);
 					})();
 
 					if (bestOf === 1) {
-						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+						await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 					} else if (modPools[mapIndex] === 'FreeMod') {
-						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
+						await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 					}
-					await channel.sendMessage('Everyone please ready up!');
-					await channel.sendMessage('!mp timer 120');
+					await trySendBanchoChannelMessage(channel, 'Everyone please ready up!');
+					await trySendBanchoChannelMessage(channel, '!mp timer 120');
 				}
 			}
 		});
@@ -6308,12 +6310,12 @@ module.exports = {
 				}
 			}
 			if (currentMapSelected && lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
-				await channel.sendMessage('!mp start 5');
+				await trySendBanchoChannelMessage(channel, '!mp start 5');
 				await new Promise(resolve => setTimeout(resolve, 3000));
 				await lobby.updateSettings();
 				lobbyStatus === 'Map being played';
 			} else if (!currentMapSelected && lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
-				await channel.sendMessage('Give me a moment, I am still searching for the best map ;w;');
+				await trySendBanchoChannelMessage(channel, 'Give me a moment, I am still searching for the best map ;w;');
 			}
 		});
 
@@ -6384,7 +6386,7 @@ module.exports = {
 				scoreTeam1 = Math.round(scoreTeam1);
 				scoreTeam2 = Math.round(scoreTeam2);
 
-				await channel.sendMessage(`Bo${bestOf} | ${teamname1}: ${module.exports.humanReadable(scoreTeam1)} | ${teamname2}: ${module.exports.humanReadable(scoreTeam2)} | Difference: ${module.exports.humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
+				await trySendBanchoChannelMessage(channel, `Bo${bestOf} | ${teamname1}: ${module.exports.humanReadable(scoreTeam1)} | ${teamname2}: ${module.exports.humanReadable(scoreTeam2)} | Difference: ${module.exports.humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
 				await lobby.closeLobby();
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -6412,13 +6414,13 @@ module.exports = {
 			} else {
 				scores[1]++;
 			}
-			await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
+			await trySendBanchoChannelMessage(channel, `Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
 
 			if (scores[0] < (bestOf + 1) / 2 && scores[1] < (bestOf + 1) / 2) {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
-				await channel.sendMessage('Looking for a map...');
+				await trySendBanchoChannelMessage(channel, 'Looking for a map...');
 
 				let nextMap = null;
 				let tries = 0;
@@ -6433,8 +6435,8 @@ module.exports = {
 						avoidMaps.push(nextMap.beatmapId);
 					}
 
-					await channel.sendMessage('!mp abort');
-					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
+					await trySendBanchoChannelMessage(channel, '!mp abort');
+					await trySendBanchoChannelMessage(channel, `!mp map ${nextMap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
 					tries++;
@@ -6453,7 +6455,7 @@ module.exports = {
 					|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
 					|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
 				) {
-					await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+					await trySendBanchoChannelMessage(channel, `!mp mods ${modPools[mapIndex]} ${noFail}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
 				}
@@ -6462,25 +6464,25 @@ module.exports = {
 
 				(async () => {
 					let mapInfo = await getOsuMapInfo(nextMap);
-					await channel.sendMessage(mapInfo);
+					await trySendBanchoChannelMessage(channel, mapInfo);
 				})();
 
-				await channel.sendMessage('Everyone please ready up!');
+				await trySendBanchoChannelMessage(channel, 'Everyone please ready up!');
 				if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
-					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
+					await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 				} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === bestOf - 1) {
-					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+					await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 				}
-				await channel.sendMessage('!mp timer 120');
+				await trySendBanchoChannelMessage(channel, '!mp timer 120');
 			} else {
 				lobbyStatus = 'Lobby finished';
 
 				if (scores[0] === (bestOf + 1) / 2) {
-					await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
+					await trySendBanchoChannelMessage(channel, `Congratulations ${teamname1} for winning the match!`);
 				} else {
-					await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
+					await trySendBanchoChannelMessage(channel, `Congratulations ${teamname2} for winning the match!`);
 				}
-				await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
+				await trySendBanchoChannelMessage(channel, 'Thank you for playing! The lobby will automatically close in one minute.');
 				await new Promise(resolve => setTimeout(resolve, 5000));
 
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -8757,7 +8759,8 @@ module.exports = {
 		const canvasWidth = 1000;
 		const canvasHeight = 500;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -8785,7 +8788,7 @@ module.exports = {
 		}
 
 		// Write the title of the beatmap
-		ctx.font = '30px comfortaa, sans-serif';
+		ctx.font = '30px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 
@@ -8801,7 +8804,7 @@ module.exports = {
 		}
 
 		ctx.fillText(outputString, 60, 35);
-		ctx.font = '25px comfortaa, sans-serif';
+		ctx.font = '25px comfortaa, arial';
 
 		const mods = module.exports.getMods(input.score.raw_mods);
 
@@ -8961,7 +8964,7 @@ module.exports = {
 		ctx.stroke();
 
 		//Write rank
-		ctx.font = '70px comfortaa, sans-serif';
+		ctx.font = '70px comfortaa, arial';
 		ctx.textAlign = 'center';
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 4;
@@ -8976,7 +8979,7 @@ module.exports = {
 		}
 
 		//Write Score
-		ctx.font = '60px comfortaa, sans-serif';
+		ctx.font = '60px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 4;
@@ -8985,7 +8988,7 @@ module.exports = {
 		ctx.fillText(module.exports.humanReadable(input.score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
 
 		//Write Played By and Submitted on
-		ctx.font = '10px comfortaa, sans-serif';
+		ctx.font = '10px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#FFFFFF';
 
@@ -9022,7 +9025,7 @@ module.exports = {
 
 		const formattedSubmitDate = `${input.score.raw_date.substring(8, 10)} ${month} ${input.score.raw_date.substring(0, 4)} ${input.score.raw_date.substring(11, 16)}`;
 
-		ctx.font = '10px comfortaa, sans-serif';
+		ctx.font = '10px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Played by', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
@@ -9038,7 +9041,7 @@ module.exports = {
 		if (input.mapRank > 0 || input.mapRank && input.mapRank.includes('/')) {
 			//Draw completion
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 450, canvas.height / 500 * 395, 116, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Global Rank', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
@@ -9057,7 +9060,7 @@ module.exports = {
 
 			//Draw completion
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 453, canvas.height / 500 * 395, 110, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Completion', canvas.width / 1000 * 453 + 55, canvas.height / 500 * 415);
@@ -9069,14 +9072,14 @@ module.exports = {
 
 		//Acc
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 365, 110, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Accuracy', canvas.width / 1000 * 600 + 55, canvas.height / 500 * 385);
 		ctx.fillText(`${Math.round(accuracy * 100) / 100}%`, canvas.width / 1000 * 600 + 55, canvas.height / 500 * 410);
 		//Combo
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 725, canvas.height / 500 * 365, 130, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
@@ -9102,7 +9105,7 @@ module.exports = {
 			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
 		}
 
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		if (!input.score.perfect) {
 			let fcScore = {
 				counts: {
@@ -9117,7 +9120,7 @@ module.exports = {
 			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
 			if (pp !== fcpp) {
 				pp = `${pp} (${Math.round(fcpp)} FC)`;
-				ctx.font = '16px comfortaa, sans-serif';
+				ctx.font = '16px comfortaa, arial';
 			}
 		}
 
@@ -9135,7 +9138,7 @@ module.exports = {
 		//MAX
 		if (input.mode === 3) {
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 600, canvas.height / 500 * 425, 60, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Max', canvas.width / 1000 * 600 + 30, canvas.height / 500 * 445);
@@ -9159,7 +9162,7 @@ module.exports = {
 			xTextOffset = 54;
 		}
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 600 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9168,7 +9171,7 @@ module.exports = {
 		//200
 		if (input.mode === 3) {
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 728, canvas.height / 500 * 425, 60, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('200s', canvas.width / 1000 * 728 + 30, canvas.height / 500 * 445);
@@ -9193,7 +9196,7 @@ module.exports = {
 			xTextOffset = 82;
 		}
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 700 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9215,7 +9218,7 @@ module.exports = {
 				xTextOffset = 46;
 			}
 			module.exports.roundedRect(ctx, canvas.width / 1000 * 800 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText(displayTerm, canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9236,7 +9239,7 @@ module.exports = {
 			xTextOffset = 10;
 		}
 		module.exports.roundedRect(ctx, canvas.width / 1000 * 900 + xRectOffset, canvas.height / 500 * 425, 80 + widthOffset, 50, 5, '00', '00', '00', 0.5);
-		ctx.font = '18px comfortaa, sans-serif';
+		ctx.font = '18px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Miss', canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 445);
@@ -9245,7 +9248,7 @@ module.exports = {
 		//Draw the footer
 		let today = new Date().toLocaleDateString();
 
-		ctx.font = '12px comfortaa, sans-serif';
+		ctx.font = '12px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - canvas.height / 70);
@@ -9255,7 +9258,7 @@ module.exports = {
 			ctx.save();
 			//ctx.translate(newx, newy);
 			ctx.rotate(-Math.PI / 2);
-			ctx.font = '18px comfortaa, sans-serif';
+			ctx.font = '18px comfortaa, arial';
 			ctx.textAlign = 'center';
 			ctx.fillText(`[${input.server}]`, -canvas.height / 500 * 425, 50, 100);
 			ctx.restore();
@@ -9277,7 +9280,7 @@ module.exports = {
 
 		module.exports.roundedRect(ctx, canvas.width / 900 * 50 + userBackground.height / 10 * 2, canvas.height / 500 * 375 + 5, userBackground.width / 10 * 2 - userBackground.height / 10 * 2 - 5, userBackground.height / 10 * 2 - 10, 5, '00', '00', '00', 0.5);
 
-		ctx.font = '20px comfortaa, sans-serif';
+		ctx.font = '20px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 		ctx.fillText(`Player: ${input.user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
@@ -9287,7 +9290,7 @@ module.exports = {
 		module.exports.roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
 
 		//Create as an attachment
-		return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-score-${input.user.id}-${input.beatmap.beatmapId}-${input.score.raw_mods}.png` });
+		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-score-${input.user.id}-${input.beatmap.beatmapId}-${input.score.raw_mods}.png` });
 	},
 	async sendMessageToLogChannel(client, channelId, message, crosspost) {
 		if (logBroadcastEval) {
@@ -9650,7 +9653,7 @@ async function orderMatchPlayers(lobby, channel, players) {
 			}
 
 			if (slot && slot.team !== expectedTeam) {
-				channel.sendMessage(`!mp team #${players[i].osuUserId} ${expectedTeam}`);
+				trySendBanchoChannelMessage(channel, `!mp team #${players[i].osuUserId} ${expectedTeam}`);
 			}
 		}
 	}
@@ -9662,7 +9665,7 @@ async function orderMatchPlayers(lobby, channel, players) {
 	while (players.length && hasEmptySlots) {
 		if (!movedSomeone) {
 			//Move someone to last slot if that is empty
-			await channel.sendMessage(`!mp move #${players[0].osuUserId} ${initialPlayerAmount + 1}`);
+			await trySendBanchoChannelMessage(channel, `!mp move #${players[0].osuUserId} ${initialPlayerAmount + 1}`);
 			await new Promise(resolve => setTimeout(resolve, 2000));
 		}
 
@@ -9697,7 +9700,7 @@ async function orderMatchPlayers(lobby, channel, players) {
 			}
 
 			if (players[i].slot !== slotIndex && emptySlots.includes(players[i].slot)) {
-				await channel.sendMessage(`!mp move #${players[i].osuUserId} ${players[i].slot + 1}`);
+				await trySendBanchoChannelMessage(channel, `!mp move #${players[i].osuUserId} ${players[i].slot + 1}`);
 				await new Promise(resolve => setTimeout(resolve, 2000));
 				emptySlots.splice(emptySlots.indexOf(players[i].slot), 1);
 				emptySlots.push(slotIndex);
@@ -9707,6 +9710,19 @@ async function orderMatchPlayers(lobby, channel, players) {
 				i--;
 				continue;
 			}
+		}
+	}
+}
+
+async function trySendBanchoChannelMessage(channel, message) {
+	try {
+		await channel.sendMessage(message);
+	} catch (error) {
+		if (error.message === 'Currently disconnected!') {
+			await channel.banchojs.connect();
+			await channel.sendMessage(message);
+		} else {
+			console.log(error);
 		}
 	}
 }

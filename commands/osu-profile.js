@@ -1,13 +1,13 @@
 const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { developers, showUnknownInteractionError } = require('../config.json');
-const { ChartJSNodeCanvas } = require('chartjs-node-canvas');
+const ChartJsImage = require('chartjs-to-image');
 
 module.exports = {
 	name: 'osu-profile',
@@ -289,7 +289,8 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				const canvasWidth = 700;
 				const canvasHeight = 350;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -318,7 +319,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				await drawAvatar(elements, server, interaction.client);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` })];
 
 				if (showGraph) {
 					let graph = await getRankHistoryGraph(user.id, mode, interaction.client);
@@ -390,7 +391,8 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				const canvasWidth = 700;
 				const canvasHeight = 350;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -415,7 +417,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				await drawAvatar(elements, server, interaction.client);
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
 				//Send attachment
 				let sentMessage = await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
@@ -501,7 +503,8 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 		const canvasWidth = 700;
 		const canvasHeight = 350;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -528,7 +531,7 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 		await drawAvatar(elements, server, interaction.client);
 
 		//Create as an attachment
-		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
+		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
 		//Send attachment
 		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
@@ -555,7 +558,7 @@ async function drawTitle(input, server, mode) {
 	}
 
 	// Write the title of the player
-	ctx.font = '30px comfortaa, sans-serif';
+	ctx.font = '30px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
@@ -594,7 +597,7 @@ async function drawRank(input, interaction) {
 	let pp = humanReadable(Math.floor(user.pp.raw));
 
 	// Write the title of the player
-	ctx.font = '18px comfortaa, sans-serif';
+	ctx.font = '18px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'right';
 	ctx.fillText(`Global Rank: #${globalRank} |`, canvas.width / 2, 60 + yOffset);
@@ -656,10 +659,10 @@ async function drawLevel(input, server) {
 	const yOffset = 25;
 
 	// Write the text for the floored level of the player
-	ctx.font = '40px comfortaa, sans-serif';
+	ctx.font = '40px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	ctx.fillText(Math.floor(user.level), canvas.width / 10, canvas.height / 2 + 15 + yOffset);
+	ctx.fillText(Math.floor(user.level).toString(), canvas.width / 10, canvas.height / 2 + 15 + yOffset);
 
 	//Add a faint circle around the level
 	ctx.beginPath();
@@ -700,7 +703,7 @@ async function drawLevel(input, server) {
 	const ranksOffset = 40;
 
 	//Score and Accuracy
-	ctx.font = 'bold 14px comfortaa, sans-serif';
+	ctx.font = 'bold 14px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('Ranked:', canvas.width / 4 + 15, canvas.height / 2 + ranksOffset * -1 + 6 - 8 + yOffset);
@@ -727,7 +730,7 @@ async function drawRanks(input) {
 
 	const ranksOffset = 30;
 
-	ctx.font = 'bold 16px comfortaa, sans-serif';
+	ctx.font = 'bold 16px comfortaa, arial';
 	ctx.textAlign = 'left';
 	//get SSH
 
@@ -765,7 +768,7 @@ async function drawPlays(input, server) {
 
 	let yOffset = 25;
 
-	ctx.font = 'bold 16px comfortaa, sans-serif';
+	ctx.font = 'bold 16px comfortaa, arial';
 	ctx.textAlign = 'center';
 
 	const playHours = Math.floor(user.secondsPlayed / 60 / 60);
@@ -816,7 +819,7 @@ async function drawFooter(input, server) {
 	let today = new Date().toLocaleDateString();
 
 	// Write the title of the player
-	ctx.font = '12px comfortaa, sans-serif';
+	ctx.font = '12px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 
 	if (server !== 'ripple') {
@@ -921,10 +924,6 @@ async function getRankHistoryGraph(osuUserId, mode, client) {
 		labels.push(`${history.length - i} days ago`);
 	}
 
-	const width = 1500; //px
-	const height = 750; //px
-	const canvasRenderService = new ChartJSNodeCanvas({ width, height });
-
 	const data = {
 		labels: labels,
 		datasets: [
@@ -934,7 +933,7 @@ async function getRankHistoryGraph(osuUserId, mode, client) {
 				borderColor: 'rgb(96, 183, 202)',
 				fill: 'start',
 				backgroundColor: 'rgba(96, 183, 202, 0.6)',
-				tension: 0.4
+				lineTension: 0.4
 			},
 		]
 	};
@@ -994,7 +993,15 @@ async function getRankHistoryGraph(osuUserId, mode, client) {
 		},
 	};
 
-	const imageBuffer = await canvasRenderService.renderToBuffer(configuration);
+	const width = 1500; //px
+	const height = 750; //px
+
+	const chart = new ChartJsImage();
+	chart.setConfig(configuration);
+
+	chart.setWidth(width).setHeight(height).setBackgroundColor('#000000');
+
+	const imageBuffer = await chart.toBinary();
 
 	return new Discord.AttachmentBuilder(imageBuffer, { name: `rankHistory-osu-${osuUserId}.png` });
 }

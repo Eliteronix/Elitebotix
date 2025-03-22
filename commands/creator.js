@@ -1,5 +1,5 @@
 const { AttachmentBuilder, EmbedBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -47,7 +47,7 @@ module.exports = {
 		const roddyAvatar = await Canvas.loadImage(roddyUser.displayAvatarURL().replace('.webp', '.png'));
 		ctx.drawImage(roddyAvatar, 133, 0, 128, canvas.height);
 
-		const file = new AttachmentBuilder(canvas.toBuffer(), { name: 'profileImages.jpg' });
+		const file = new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'profileImages.jpg' });
 
 		//Create new embed
 		const creatorInfoEmbed = new EmbedBuilder()

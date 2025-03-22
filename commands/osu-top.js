@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -369,7 +369,8 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -394,7 +395,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -458,7 +459,8 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -479,7 +481,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -528,7 +530,8 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		const canvasWidth = 1000;
 		const canvasHeight = 83 + limit * 41.66666;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 		//Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -549,7 +552,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		await drawFooter(elements);
 
 		//Create as an attachment
-		const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 		if (csv) {
 			let csv = new ObjectsToCsv(scores);
@@ -577,7 +580,8 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				const canvasWidth = 1000;
 				const canvasHeight = 83 + limit * 41.66666 + 50;
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -602,7 +606,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				await drawFooter(elements);
 
 				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-top-${user.id}-mode${mode}.png` })];
+				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
 
 				if (csv) {
 					let csv = new ObjectsToCsv(scores);
@@ -713,10 +717,10 @@ async function drawTitle(input, server, mode, sorting, order) {
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
 
 	// Write the title of the player
-	ctx.font = '30px comfortaa, sans-serif';
+	ctx.font = '30px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
-	fitTextOnMiddleCanvas(ctx, title, 30, 'comfortaa, sans-serif', 41, canvas.width, 25);
+	fitTextOnMiddleCanvas(ctx, title, 30, 'comfortaa, arial', 41, canvas.width, 25);
 
 	const output = [canvas, ctx, user];
 	return output;
@@ -730,7 +734,7 @@ async function drawFooter(input) {
 	let today = new Date().toLocaleDateString();
 
 	try {
-		ctx.font = '12px comfortaa, sans-serif';
+		ctx.font = '12px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'right';
 		ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - canvas.width / 140, canvas.height - 5);
@@ -1024,7 +1028,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		const rankImage = await Canvas.loadImage(getRankImage(sortedScores[i].rank));
 		ctx.drawImage(rankImage, canvas.width / 35, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 - 500 / 31.25 / 2, 32, 16);
 
-		ctx.font = 'bold 18px comfortaa, sans-serif';
+		ctx.font = 'bold 18px comfortaa, arial';
 		ctx.fillStyle = '#FF66AB';
 		ctx.textAlign = 'right';
 		ctx.fillText(humanReadable(Math.round(sortedScores[i].pp)) + 'pp', (canvas.width / 35) * 34, 500 / 8 + (500 / 12) * i + 500 / 13 / 2 + 500 / 70);
@@ -1036,7 +1040,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		}
 
 		//Write Difficulty per map
-		ctx.font = 'bold 10px comfortaa, sans-serif';
+		ctx.font = 'bold 10px comfortaa, arial';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'left';
 		ctx.fillText(beatmaps[i].difficulty, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
@@ -1066,7 +1070,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		}
 
 		//Write achieved on per map
-		ctx.font = 'bold 10px comfortaa, sans-serif';
+		ctx.font = 'bold 10px comfortaa, arial';
 		ctx.fillStyle = '#A08C95';
 		ctx.textAlign = 'left';
 		if (server === 'tournaments' || server === 'mixed' && sortedScores[i].matchName) {
@@ -1086,7 +1090,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		}
 
 		// Write accuracy and combo per map
-		ctx.font = 'bold 10px comfortaa, sans-serif';
+		ctx.font = 'bold 10px comfortaa, arial';
 		ctx.fillStyle = '#FFCC22';
 		ctx.textAlign = 'right';
 		ctx.fillText(combo, (canvas.width / 28) * 23.4, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
@@ -1094,7 +1098,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 
 		if (tracking) {
 			// Write hits
-			ctx.font = 'bold 10px comfortaa, sans-serif';
+			ctx.font = 'bold 10px comfortaa, arial';
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
 
@@ -1138,7 +1142,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		}
 
 		//Write title and sortingText per map
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.textAlign = 'left';
 		ctx.fillText(beatmapTitle + sortingText, (canvas.width / 35) * 3, 500 / 8 + (500 / 12) * i + 500 / 12 / 2);
@@ -1188,7 +1192,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			}
 		}
 
-		ctx.font = '15px comfortaa, sans-serif';
+		ctx.font = '15px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
 		if (server === 'tournaments') {

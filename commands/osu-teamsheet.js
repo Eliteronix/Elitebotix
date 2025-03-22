@@ -3,7 +3,7 @@ const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuTeamSheets, DBOsuPoolAccess, DBOsuMultiGameScores } = require('../dbObjects');
 const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const osu = require('node-osu');
 
 const discordUsers = {};
@@ -855,7 +855,7 @@ module.exports = {
 		const canvasWidth = 1408 + 400 * players.length;
 		const canvasHeight = 208 + 100 * tourneyMaps.length;
 
-		Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 		// Create Canvas
 		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -1325,7 +1325,7 @@ module.exports = {
 		}
 
 		// Create as an attachment
-		const files = [new AttachmentBuilder(canvas.toBuffer(), { name: 'teamsheet.png' })];
+		const files = [new AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'teamsheet.png' })];
 
 		let links = tourneyMaps.map(map => `[${map.modPool}${map.modPoolCount}](<https://osu.ppy.sh/b/${map.beatmapId}>)`);
 

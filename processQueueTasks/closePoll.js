@@ -12,7 +12,7 @@ module.exports = {
 
 		client.shard.broadcastEval(async (c, { args }) => {
 			const Discord = require('discord.js');
-			const Canvas = require('canvas');
+			const Canvas = require('@napi-rs/canvas');
 			const { fitTextOnLeftCanvas } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			const channel = await c.channels.cache.get(args[0]);
@@ -59,7 +59,8 @@ module.exports = {
 				//Create Canvas
 				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-				Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 				//Get context and load the image
 				const ctx = canvas.getContext('2d');
@@ -73,14 +74,14 @@ module.exports = {
 				}
 
 				// Write the title of the changelog
-				ctx.font = 'bold 35px comfortaa, sans-serif';
+				ctx.font = 'bold 35px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'center';
 				ctx.fillText(args[2], canvas.width / 2, 50);
 
 				let today = new Date().toLocaleDateString();
 
-				ctx.font = '12px comfortaa, sans-serif';
+				ctx.font = '12px comfortaa, arial';
 				ctx.fillStyle = '#ffffff';
 				ctx.textAlign = 'right';
 				ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
@@ -89,14 +90,14 @@ module.exports = {
 					ctx.fillStyle = 'rgba(128, 216, 255, 0.4)';
 					ctx.fillRect(95, 75 + 100 * i, (canvas.width - 190) / highestVotes * results[i].votes, 65);
 					ctx.fillStyle = 'rgba(255, 255, 255, 1)';
-					ctx.font = 'bold 25px comfortaa, sans-serif';
+					ctx.font = 'bold 25px comfortaa, arial';
 					ctx.textAlign = 'left';
 					ctx.fillText(results[i].name, 100, 100 + 100 * i);
-					fitTextOnLeftCanvas(ctx, `${results[i].votes} Vote(s)`, 25, 'comfortaa, sans-serif', 130 + 100 * i, canvas.width - 100, 100);
+					fitTextOnLeftCanvas(ctx, `${results[i].votes} Vote(s)`, 25, 'comfortaa, arial', 130 + 100 * i, canvas.width - 100, 100);
 				}
 
 				//Create as an attachment
-				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'vote.png' });
+				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'vote.png' });
 
 				await msg.channel.send({ content: `Results for: \`${args[2]}\``, files: [attachment] });
 			}

@@ -118,7 +118,7 @@ const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
 const { Op } = require('sequelize');
 
-const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1, limiterPublic: 9 });
+const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1 });
 
 client.bancho = bancho;
 
@@ -191,6 +191,10 @@ process.on('uncaughtException', (error, origin) => {
 	console.error(error);
 	console.error(origin);
 	process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+	console.error('Unhandled rejection, bot.js:', reason);
 });
 
 //declare what the discord client should do when it's ready

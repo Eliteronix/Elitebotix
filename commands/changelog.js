@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { developers, logBroadcastEval } = require('../config.json');
 
 module.exports = {
@@ -22,7 +22,8 @@ module.exports = {
 			//Create Canvas
 			const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-			Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+			Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+			Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 			//Get context and load the image
 			const ctx = canvas.getContext('2d');
@@ -36,25 +37,25 @@ module.exports = {
 			}
 
 			// Write the title of the changelog
-			ctx.font = 'bold 35px comfortaa, sans-serif';
+			ctx.font = 'bold 35px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText(title, canvas.width / 2, 50);
 
 			let today = new Date().toLocaleDateString();
 
-			ctx.font = '12px comfortaa, sans-serif';
+			ctx.font = '12px comfortaa, arial';
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'right';
 			ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
 
-			ctx.font = 'bold 25px comfortaa, sans-serif';
+			ctx.font = 'bold 25px comfortaa, arial';
 			ctx.textAlign = 'left';
 			ctx.fillText(argArray[0], 100, 150);
 
 
 			//Create as an attachment
-			const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'elitebotix-changelog.png' });
+			const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'elitebotix-changelog.png' });
 
 			if (process.env.SERVER === 'Dev' || process.env.SERVER === 'QA') {
 				msg.reply({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${msg.client.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
@@ -75,10 +76,10 @@ module.exports = {
 						const canvasWidth = 1000;
 
 						//Create Canvas
-						const Canvas = require('canvas');
+						const Canvas = require('@napi-rs/canvas');
 						const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-						Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+						Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
 
 						//Get context and load the image
 						const ctx = canvas.getContext('2d');
@@ -92,25 +93,25 @@ module.exports = {
 						}
 
 						// Write the title of the changelog
-						ctx.font = 'bold 35px comfortaa, sans-serif';
+						ctx.font = 'bold 35px comfortaa, arial';
 						ctx.fillStyle = '#ffffff';
 						ctx.textAlign = 'center';
 						ctx.fillText(title, canvas.width / 2, 50);
 
 						let today = new Date().toLocaleDateString();
 
-						ctx.font = '12px comfortaa, sans-serif';
+						ctx.font = '12px comfortaa, arial';
 						ctx.fillStyle = '#ffffff';
 						ctx.textAlign = 'right';
 						ctx.fillText(`Made by Elitebotix on ${today}`, canvas.width - 5, canvas.height - 5);
 
-						ctx.font = 'bold 25px comfortaa, sans-serif';
+						ctx.font = 'bold 25px comfortaa, arial';
 						ctx.textAlign = 'left';
 						ctx.fillText(argArray[0], 100, 150);
 
 						//Create as an attachment
 						const Discord = require('discord.js');
-						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'elitebotix-changelog.png' });
+						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'elitebotix-changelog.png' });
 
 						let sentMessage = await changelogChannel.send({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${c.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
 						sentMessage.crosspost();

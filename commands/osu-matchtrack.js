@@ -3,7 +3,7 @@ const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, p
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 const { DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -624,7 +624,8 @@ async function getResultImage(event, users, client) {
 	const canvasWidth = 1000;
 	const canvasHeight = 300 + scores.length * 75 + 15 + teamModeHeight;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+	Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -683,7 +684,7 @@ async function getResultImage(event, users, client) {
 
 	//Write Title and Artist
 	ctx.fillStyle = '#ffffff';
-	ctx.font = '30px comfortaa, sans-serif';
+	ctx.font = '30px comfortaa, arial';
 	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
 	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.team_type).width);
 
@@ -739,7 +740,7 @@ async function getResultImage(event, users, client) {
 		}
 
 		// Write the username
-		ctx.font = 'bold 25px comfortaa, sans-serif';
+		ctx.font = 'bold 25px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#F0DBE4';
 		try {
@@ -798,37 +799,37 @@ async function getResultImage(event, users, client) {
 		}
 
 		// Write the combo
-		ctx.font = 'bold 12px comfortaa, sans-serif';
+		ctx.font = 'bold 12px comfortaa, arial';
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('Combo', 500, 330 + i * 75);
 
-		ctx.font = 'bold 20px comfortaa, sans-serif';
+		ctx.font = 'bold 20px comfortaa, arial';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText(humanReadable(scores[i].max_combo), 550, 330 + i * 75);
 
 		// Write the accuracy
-		ctx.font = 'bold 12px comfortaa, sans-serif';
+		ctx.font = 'bold 12px comfortaa, arial';
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText('Accuracy', 638, 330 + i * 75);
 
-		ctx.font = 'bold 20px comfortaa, sans-serif';
+		ctx.font = 'bold 20px comfortaa, arial';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText(`${Math.round(scores[i].accuracy * 10000) / 100}%`, 700, 330 + i * 75);
 
 		// Write the score
-		ctx.font = 'bold 22px comfortaa, sans-serif';
+		ctx.font = 'bold 22px comfortaa, arial';
 		ctx.fillStyle = '#FF66AB';
 		ctx.textAlign = 'right';
 		ctx.fillText(humanReadable(scores[i].score), 960, 330 + i * 75);
 
 		let scoreTextWidth = ctx.measureText(humanReadable(scores[i].score)).width;
 
-		ctx.font = 'bold 12px comfortaa, sans-serif';
+		ctx.font = 'bold 12px comfortaa, arial';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Score', 953 - scoreTextWidth, 330 + i * 75);
 
 		// Write the counts
-		ctx.font = 'bold 10px comfortaa, sans-serif';
+		ctx.font = 'bold 10px comfortaa, arial';
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#F0DBE4';
 		if (scores[i].mode_int === 3) {
@@ -867,18 +868,18 @@ async function getResultImage(event, users, client) {
 		roundedRect(ctx, 25, 300 + scores.length * 75, 950, 65, 10, '70', '57', '63', 0.95);
 
 		// Write the teams and scores
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Red Team', 50, 325 + scores.length * 75);
-		ctx.font = 'bold 25px comfortaa, sans-serif';
+		ctx.font = 'bold 25px comfortaa, arial';
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText(humanReadable(redScore), 50, 350 + scores.length * 75);
 
 		ctx.textAlign = 'right';
-		ctx.font = 'bold 15px comfortaa, sans-serif';
+		ctx.font = 'bold 15px comfortaa, arial';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Blue Team', 950, 325 + scores.length * 75);
-		ctx.font = 'bold 25px comfortaa, sans-serif';
+		ctx.font = 'bold 25px comfortaa, arial';
 		ctx.fillStyle = '#F0DBE4';
 		ctx.fillText(humanReadable(blueScore), 950, 350 + scores.length * 75);
 
@@ -909,14 +910,15 @@ async function getResultImage(event, users, client) {
 	let modBits = getModBits(mods.join(''));
 
 	//Create as an attachment
-	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
+	return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }
 
 async function getPlayingImage(event, client) {
 	const canvasWidth = 1000;
 	const canvasHeight = 300 + 15;
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+	Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -975,7 +977,7 @@ async function getPlayingImage(event, client) {
 
 	//Write Title and Artist
 	ctx.fillStyle = '#ffffff';
-	ctx.font = '30px comfortaa, sans-serif';
+	ctx.font = '30px comfortaa, arial';
 	ctx.fillText(`${event.game.beatmap.beatmapset.title} [${event.game.beatmap.version}]`, 30, 240, 900 - ctx.measureText(event.game.scoring_type).width);
 	ctx.fillText(`${event.game.beatmap.beatmapset.artist}`, 30, 280, 900 - ctx.measureText(event.game.team_type).width);
 
@@ -1002,5 +1004,5 @@ async function getPlayingImage(event, client) {
 	let modBits = getModBits(mods.join(''));
 
 	//Create as an attachment
-	return new Discord.AttachmentBuilder(canvas.toBuffer(), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
+	return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
 }

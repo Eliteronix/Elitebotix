@@ -226,8 +226,8 @@ const server = http.createServer(async (req, res) => {
 
 	if (route === '/metrics') {
 		// Return all metrics the Prometheus exposition format
-		res.setHeader('Content-Type', register.contentType);
-		res.end(await register.metrics());
+		// res.setHeader('Content-Type', register.contentType);
+		// res.end(await register.metrics());
 	}
 });
 
@@ -249,6 +249,10 @@ if (process.env.SERVER === 'Dev') {
 		totalShards: 1
 	});
 }
+
+manager.on('Error', error => {
+	console.error('index.js | manager error' + error);
+});
 
 manager.on('shardCreate', shard => {
 	// eslint-disable-next-line no-console
@@ -493,3 +497,7 @@ async function processOsuWebRequests(client) {
 		processOsuWebRequests(client);
 	}, 50);
 }
+
+process.on("unhandledRejection", (reason, promise) => {
+	console.error("Unhandled rejection, index.js:", reason);
+});

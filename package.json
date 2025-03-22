@@ -4,17 +4,17 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"start": "node --unhandled-rejections=warn --use_strict index.js",
+		"start": "bun run --unhandled-rejections=warn --use_strict index.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"lint": "eslint"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@napi-rs/canvas": "^0.1.68",
 		"bancho.js": "^0.12.0",
-		"canvas": "^2.10.2",
-		"chart.js": "^3.9.1",
-		"chartjs-node-canvas": "^4.1.4",
+		"chart.js": "^4.4.8",
+		"chartjs-to-image": "^1.2.2",
 		"discord.js": "^14.7.1",
 		"dotenv": "^16.0.3",
 		"expr-eval": "^2.0.2",

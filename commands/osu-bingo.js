@@ -3,7 +3,7 @@ const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
-const Canvas = require('canvas');
+const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const fs = require('fs');
@@ -760,7 +760,8 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	//Create Canvas
 	const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-	Canvas.registerFont('./other/Comfortaa-Bold.ttf', { family: 'comfortaa' });
+	Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+	Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
 	//Get context and load the image
 	const ctx = canvas.getContext('2d');
@@ -773,7 +774,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 		}
 	}
 
-	ctx.font = '80px comfortaa, sans-serif';
+	ctx.font = '80px comfortaa, arial';
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = 'center';
 	ctx.fillText('A', 1355, 160);
@@ -898,7 +899,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 
 	fs.writeFileSync(`./bingocards/${message.id}.png`, buffer);
 
-	const bingoCard = new Discord.AttachmentBuilder(canvas.toBuffer(), { name: 'bingo.png' });
+	const bingoCard = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: 'bingo.png' });
 
 	try {
 		await message.fetch();
