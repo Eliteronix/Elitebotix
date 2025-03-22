@@ -6099,14 +6099,14 @@ module.exports = {
 
 		let matchMessages = [];
 		await lobby.setPassword(password);
-		await channel.sendMessage('!mp addref Eliteronix');
-		await channel.sendMessage('!mp map 975342 0');
+		await trySendBanchoChannelMessage(channel, '!mp addref Eliteronix');
+		await trySendBanchoChannelMessage(channel, '!mp map 975342 0');
 		if (users.length > 2) {
-			await channel.sendMessage(`!mp set 2 3 ${users.length + 1}`);
+			await trySendBanchoChannelMessage(channel, `!mp set 2 3 ${users.length + 1}`);
 		} else {
-			await channel.sendMessage(`!mp set 0 3 ${users.length + 1}`);
+			await trySendBanchoChannelMessage(channel, `!mp set 0 3 ${users.length + 1}`);
 		}
-		await channel.sendMessage('!mp lock');
+		await trySendBanchoChannelMessage(channel, '!mp lock');
 
 		if (queued) {
 			for (let i = 0; i < users.length; i++) {
@@ -6115,16 +6115,7 @@ module.exports = {
 		}
 
 		while (usersToCheck.length) {
-			try {
-				await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
-			} catch (error) {
-				if (error.message === 'Currently disconnected!') {
-					await bancho.connect();
-					await channel.sendMessage(`!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
-				} else {
-					console.log(error);
-				}
-			}
+			await trySendBanchoChannelMessage(channel, `!where ${usersToCheck[0].osuName.replaceAll(' ', '_')}`);
 			await new Promise(resolve => setTimeout(resolve, 5000));
 		}
 
@@ -6150,7 +6141,7 @@ module.exports = {
 		let mapIndex = 0;
 
 		for (let i = 0; i < users.length; i++) {
-			await channel.sendMessage(`!mp invite #${users[i].osuUserId}`);
+			await trySendBanchoChannelMessage(channel, `!mp invite #${users[i].osuUserId}`);
 			let user = await client.users.fetch(users[i].userId);
 			await messageUserWithRetries(user, interaction, `Your match has been created. <https://osu.ppy.sh/mp/${lobby.id}>\nPlease join it using the sent invite ingame.\nIf you did not receive an invite search for the lobby \`${lobby.name}\` and enter the password \`${password}\``);
 		}
@@ -6162,7 +6153,7 @@ module.exports = {
 			await pingMessage.delete();
 		}
 		//Start the timer to close the lobby if not everyone joined by then
-		await channel.sendMessage('!mp timer 300');
+		await trySendBanchoChannelMessage(channel, '!mp timer 300');
 
 		let playerIds = users.map(user => user.osuUserId);
 		let scores = [0, 0];
@@ -6202,7 +6193,7 @@ module.exports = {
 					}
 
 					//Not everyone joined and the lobby will be closed
-					await channel.sendMessage('The lobby will be closed as not everyone joined.');
+					await trySendBanchoChannelMessage(channel, 'The lobby will be closed as not everyone joined.');
 					await new Promise(resolve => setTimeout(resolve, 60000));
 					return await lobby.closeLobby();
 				} else if (lobbyStatus === 'Waiting for start') {
@@ -6217,14 +6208,14 @@ module.exports = {
 					if (waitedForMapdownload || !playerHasNoMap) {
 						//just start; we waited another minute already
 						waitedForMapdownload = false;
-						await channel.sendMessage('!mp start 5');
+						await trySendBanchoChannelMessage(channel, '!mp start 5');
 						await new Promise(resolve => setTimeout(resolve, 3000));
 						await lobby.updateSettings();
 						lobbyStatus === 'Map being played';
 					} else {
 						waitedForMapdownload = true;
-						await channel.sendMessage('A player is missing the map. Waiting only 1 minute longer.');
-						await channel.sendMessage('!mp timer 60');
+						await trySendBanchoChannelMessage(channel, 'A player is missing the map. Waiting only 1 minute longer.');
+						await trySendBanchoChannelMessage(channel, '!mp timer 60');
 					}
 				}
 			}
@@ -6241,7 +6232,7 @@ module.exports = {
 			}
 
 			if (!playerIds.includes(obj.player.user.id.toString())) {
-				channel.sendMessage(`!mp kick #${obj.player.user.id}`);
+				trySendBanchoChannelMessage(channel, `!mp kick #${obj.player.user.id}`);
 			} else if (lobbyStatus === 'Joining phase') {
 				let allPlayersJoined = true;
 				for (let i = 0; i < users.length && allPlayersJoined; i++) {
@@ -6252,9 +6243,9 @@ module.exports = {
 				if (allPlayersJoined) {
 					lobbyStatus = 'Waiting for start';
 
-					await channel.sendMessage(`Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
+					await trySendBanchoChannelMessage(channel, `Average star rating of the mappool: ${Math.round(averageStarRating * 100) / 100}`);
 
-					await channel.sendMessage('Looking for a map...');
+					await trySendBanchoChannelMessage(channel, 'Looking for a map...');
 
 					let nextMap = null;
 					let tries = 0;
@@ -6268,8 +6259,8 @@ module.exports = {
 							avoidMaps.push(nextMap.beatmapId);
 						}
 
-						await channel.sendMessage('!mp abort');
-						await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
+						await trySendBanchoChannelMessage(channel, '!mp abort');
+						await trySendBanchoChannelMessage(channel, `!mp map ${nextMap.beatmapId}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 						await lobby.updateSettings();
 						tries++;
@@ -6288,7 +6279,7 @@ module.exports = {
 						|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
 						|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
 					) {
-						await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+						await trySendBanchoChannelMessage(channel, `!mp mods ${modPools[mapIndex]} ${noFail}`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 
@@ -6296,25 +6287,16 @@ module.exports = {
 
 					(async () => {
 						let mapInfo = await getOsuMapInfo(nextMap);
-						try {
-							await channel.sendMessage(mapInfo);
-						} catch (error) {
-							if (error.message === 'Currently disconnected!') {
-								await bancho.connect();
-								await channel.sendMessage(mapInfo);
-							} else {
-								console.log(error);
-							}
-						}
+						await trySendBanchoChannelMessage(channel, mapInfo);
 					})();
 
 					if (bestOf === 1) {
-						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+						await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 					} else if (modPools[mapIndex] === 'FreeMod') {
-						await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
+						await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 					}
-					await channel.sendMessage('Everyone please ready up!');
-					await channel.sendMessage('!mp timer 120');
+					await trySendBanchoChannelMessage(channel, 'Everyone please ready up!');
+					await trySendBanchoChannelMessage(channel, '!mp timer 120');
 				}
 			}
 		});
@@ -6328,12 +6310,12 @@ module.exports = {
 				}
 			}
 			if (currentMapSelected && lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
-				await channel.sendMessage('!mp start 5');
+				await trySendBanchoChannelMessage(channel, '!mp start 5');
 				await new Promise(resolve => setTimeout(resolve, 3000));
 				await lobby.updateSettings();
 				lobbyStatus === 'Map being played';
 			} else if (!currentMapSelected && lobbyStatus === 'Waiting for start' && playersInLobby === users.length) {
-				await channel.sendMessage('Give me a moment, I am still searching for the best map ;w;');
+				await trySendBanchoChannelMessage(channel, 'Give me a moment, I am still searching for the best map ;w;');
 			}
 		});
 
@@ -6404,7 +6386,7 @@ module.exports = {
 				scoreTeam1 = Math.round(scoreTeam1);
 				scoreTeam2 = Math.round(scoreTeam2);
 
-				await channel.sendMessage(`Bo${bestOf} | ${teamname1}: ${module.exports.humanReadable(scoreTeam1)} | ${teamname2}: ${module.exports.humanReadable(scoreTeam2)} | Difference: ${module.exports.humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
+				await trySendBanchoChannelMessage(channel, `Bo${bestOf} | ${teamname1}: ${module.exports.humanReadable(scoreTeam1)} | ${teamname2}: ${module.exports.humanReadable(scoreTeam2)} | Difference: ${module.exports.humanReadable(Math.abs(scoreTeam1 - scoreTeam2))} | Winner: ${winner}`);
 			} else {
 				await lobby.closeLobby();
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -6432,13 +6414,13 @@ module.exports = {
 			} else {
 				scores[1]++;
 			}
-			await channel.sendMessage(`Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
+			await trySendBanchoChannelMessage(channel, `Score: ${teamname1} | ${scores[0]} - ${scores[1]} | ${teamname2}`);
 
 			if (scores[0] < (bestOf + 1) / 2 && scores[1] < (bestOf + 1) / 2) {
 				mapIndex++;
 				lobbyStatus = 'Waiting for start';
 
-				await channel.sendMessage('Looking for a map...');
+				await trySendBanchoChannelMessage(channel, 'Looking for a map...');
 
 				let nextMap = null;
 				let tries = 0;
@@ -6453,8 +6435,8 @@ module.exports = {
 						avoidMaps.push(nextMap.beatmapId);
 					}
 
-					await channel.sendMessage('!mp abort');
-					await channel.sendMessage(`!mp map ${nextMap.beatmapId}`);
+					await trySendBanchoChannelMessage(channel, '!mp abort');
+					await trySendBanchoChannelMessage(channel, `!mp map ${nextMap.beatmapId}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
 					tries++;
@@ -6473,7 +6455,7 @@ module.exports = {
 					|| modPools[mapIndex] === 'HR' && !((lobby.mods[0].shortMod === 'hr' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'hr')) //Only HR has HR and NF
 					|| modPools[mapIndex] === 'DT' && !((lobby.mods[0].shortMod === 'dt' && lobby.mods[1].shortMod === 'nf') || (lobby.mods[0].shortMod === 'nf' && lobby.mods[1].shortMod === 'dt')) //Only DT has DT and NF
 				) {
-					await channel.sendMessage(`!mp mods ${modPools[mapIndex]} ${noFail}`);
+					await trySendBanchoChannelMessage(channel, `!mp mods ${modPools[mapIndex]} ${noFail}`);
 					await new Promise(resolve => setTimeout(resolve, 5000));
 					await lobby.updateSettings();
 				}
@@ -6482,25 +6464,25 @@ module.exports = {
 
 				(async () => {
 					let mapInfo = await getOsuMapInfo(nextMap);
-					await channel.sendMessage(mapInfo);
+					await trySendBanchoChannelMessage(channel, mapInfo);
 				})();
 
-				await channel.sendMessage('Everyone please ready up!');
+				await trySendBanchoChannelMessage(channel, 'Everyone please ready up!');
 				if (modPools[mapIndex] === 'FreeMod' && mapIndex < bestOf - 1) {
-					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
+					await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be 0.5x of the score achieved.');
 				} else if (modPools[mapIndex] === 'FreeMod' && mapIndex === bestOf - 1) {
-					await channel.sendMessage('Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
+					await trySendBanchoChannelMessage(channel, 'Valid Mods: HD, HR, EZ (x1.7) | NM will be just as achieved.');
 				}
-				await channel.sendMessage('!mp timer 120');
+				await trySendBanchoChannelMessage(channel, '!mp timer 120');
 			} else {
 				lobbyStatus = 'Lobby finished';
 
 				if (scores[0] === (bestOf + 1) / 2) {
-					await channel.sendMessage(`Congratulations ${teamname1} for winning the match!`);
+					await trySendBanchoChannelMessage(channel, `Congratulations ${teamname1} for winning the match!`);
 				} else {
-					await channel.sendMessage(`Congratulations ${teamname2} for winning the match!`);
+					await trySendBanchoChannelMessage(channel, `Congratulations ${teamname2} for winning the match!`);
 				}
-				await channel.sendMessage('Thank you for playing! The lobby will automatically close in one minute.');
+				await trySendBanchoChannelMessage(channel, 'Thank you for playing! The lobby will automatically close in one minute.');
 				await new Promise(resolve => setTimeout(resolve, 5000));
 
 				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -9671,7 +9653,7 @@ async function orderMatchPlayers(lobby, channel, players) {
 			}
 
 			if (slot && slot.team !== expectedTeam) {
-				channel.sendMessage(`!mp team #${players[i].osuUserId} ${expectedTeam}`);
+				trySendBanchoChannelMessage(channel, `!mp team #${players[i].osuUserId} ${expectedTeam}`);
 			}
 		}
 	}
@@ -9683,7 +9665,7 @@ async function orderMatchPlayers(lobby, channel, players) {
 	while (players.length && hasEmptySlots) {
 		if (!movedSomeone) {
 			//Move someone to last slot if that is empty
-			await channel.sendMessage(`!mp move #${players[0].osuUserId} ${initialPlayerAmount + 1}`);
+			await trySendBanchoChannelMessage(channel, `!mp move #${players[0].osuUserId} ${initialPlayerAmount + 1}`);
 			await new Promise(resolve => setTimeout(resolve, 2000));
 		}
 
@@ -9718,7 +9700,7 @@ async function orderMatchPlayers(lobby, channel, players) {
 			}
 
 			if (players[i].slot !== slotIndex && emptySlots.includes(players[i].slot)) {
-				await channel.sendMessage(`!mp move #${players[i].osuUserId} ${players[i].slot + 1}`);
+				await trySendBanchoChannelMessage(channel, `!mp move #${players[i].osuUserId} ${players[i].slot + 1}`);
 				await new Promise(resolve => setTimeout(resolve, 2000));
 				emptySlots.splice(emptySlots.indexOf(players[i].slot), 1);
 				emptySlots.push(slotIndex);
@@ -9728,6 +9710,19 @@ async function orderMatchPlayers(lobby, channel, players) {
 				i--;
 				continue;
 			}
+		}
+	}
+}
+
+async function trySendBanchoChannelMessage(channel, message) {
+	try {
+		await channel.sendMessage(message);
+	} catch (error) {
+		if (error.message === 'Currently disconnected!') {
+			await channel.banchojs.connect();
+			await channel.sendMessage(message);
+		} else {
+			console.log(error);
 		}
 	}
 }
