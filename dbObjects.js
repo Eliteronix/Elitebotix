@@ -4,7 +4,7 @@ const guilds = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/guilds.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/guilds.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -19,7 +19,7 @@ const discordUsers = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/discordUsers.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/discordUsers.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -34,7 +34,7 @@ const serverActivity = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/serverActivity.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/serverActivity.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -49,7 +49,7 @@ const processQueue = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/processQueue.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/processQueue.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -64,7 +64,7 @@ const osuData = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/osuData.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/osuData.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -79,7 +79,7 @@ const elitiriData = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/elitiriData.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/elitiriData.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -94,7 +94,7 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/multiScores.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiScores.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -109,7 +109,7 @@ const multiMatches = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/multiMatches.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiMatches.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -124,7 +124,7 @@ const multiGames = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/multiGames.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGames.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -139,7 +139,7 @@ const multiGameScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/multiGameScores.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGameScores.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -154,7 +154,7 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/beatmaps.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/beatmaps.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
@@ -169,7 +169,7 @@ const soloScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: false,
-	storage: 'databases/soloScores.sqlite',
+	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/soloScores.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
 		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
