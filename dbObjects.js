@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+require('dotenv').config();
 
 const guilds = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
