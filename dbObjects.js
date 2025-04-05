@@ -181,48 +181,63 @@ const soloScores = new Sequelize('database', 'username', 'password', {
 	}
 });
 
-const DBGuilds = require('./models/DBGuilds')(guilds, Sequelize.DataTypes);
-const DBReactionRoles = require('./models/DBReactionRoles')(guilds, Sequelize.DataTypes);
-const DBReactionRolesHeader = require('./models/DBReactionRolesHeader')(guilds, Sequelize.DataTypes);
-const DBAutoRoles = require('./models/DBAutoRoles')(guilds, Sequelize.DataTypes);
-const DBTemporaryVoices = require('./models/DBTemporaryVoices')(guilds, Sequelize.DataTypes);
-const DBActivityRoles = require('./models/DBActivityRoles')(guilds, Sequelize.DataTypes);
-const DBStarBoardMessages = require('./models/DBStarBoardMessages')(guilds, Sequelize.DataTypes);
-const DBTickets = require('./models/DBTickets')(guilds, Sequelize.DataTypes);
-const DBBirthdayGuilds = require('./models/DBBirthdayGuilds')(guilds, Sequelize.DataTypes);
-const DBOsuGuildTrackers = require('./models/DBOsuGuildTrackers')(guilds, Sequelize.DataTypes);
+const elitebotixBanchoProcessQueue = new Sequelize('database', 'username', 'password', {
+	host: 'localhost',
+	dialect: 'sqlite',
+	logging: false,
+	storage: `${process.env.ELITEBOTIXBANCHOROOTPATH}/databases/processQueue.sqlite`,
+	retry: {
+		max: 25, // Maximum retry 15 times
+		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
+		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
+	},
+	pool: {
+		max: 7,
+	}
+});
 
-const DBDiscordUsers = require('./models/DBDiscordUsers')(discordUsers, Sequelize.DataTypes);
+const DBGuilds = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBGuilds`)(guilds, Sequelize.DataTypes);
+const DBReactionRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBReactionRoles`)(guilds, Sequelize.DataTypes);
+const DBReactionRolesHeader = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBReactionRolesHeader`)(guilds, Sequelize.DataTypes);
+const DBAutoRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBAutoRoles`)(guilds, Sequelize.DataTypes);
+const DBTemporaryVoices = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBTemporaryVoices`)(guilds, Sequelize.DataTypes);
+const DBActivityRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBActivityRoles`)(guilds, Sequelize.DataTypes);
+const DBStarBoardMessages = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBStarBoardMessages`)(guilds, Sequelize.DataTypes);
+const DBTickets = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBTickets`)(guilds, Sequelize.DataTypes);
+const DBBirthdayGuilds = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBBirthdayGuilds`)(guilds, Sequelize.DataTypes);
+const DBOsuGuildTrackers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuGuildTrackers`)(guilds, Sequelize.DataTypes);
 
-const DBServerUserActivity = require('./models/DBServerUserActivity')(serverActivity, Sequelize.DataTypes);
+const DBDiscordUsers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBDiscordUsers`)(discordUsers, Sequelize.DataTypes);
 
-const DBProcessQueue = require('./models/DBProcessQueue')(processQueue, Sequelize.DataTypes);
+const DBServerUserActivity = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBServerUserActivity`)(serverActivity, Sequelize.DataTypes);
 
-const DBMOTDPoints = require('./models/DBMOTDPoints')(osuData, Sequelize.DataTypes);
-const DBOsuTourneyFollows = require('./models/DBOsuTourneyFollows')(osuData, Sequelize.DataTypes);
-const DBDuelRatingHistory = require('./models/DBDuelRatingHistory')(osuData, Sequelize.DataTypes);
-const DBOsuForumPosts = require('./models/DBOsuForumPosts')(osuData, Sequelize.DataTypes);
-const DBOsuTrackingUsers = require('./models/DBOsuTrackingUsers')(osuData, Sequelize.DataTypes);
-const DBOsuMappools = require('./models/DBOsuMappools')(osuData, Sequelize.DataTypes);
-const DBOsuPoolAccess = require('./models/DBOsuPoolAccess')(osuData, Sequelize.DataTypes);
-const DBOsuTeamSheets = require('./models/DBOsuTeamSheets')(osuData, Sequelize.DataTypes);
+const DBProcessQueue = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBProcessQueue`)(processQueue, Sequelize.DataTypes);
 
-const DBElitiriCupSignUp = require('./models/DBElitiriCupSignUp')(elitiriData, Sequelize.DataTypes);
-const DBElitiriCupStaff = require('./models/DBElitiriCupStaff')(elitiriData, Sequelize.DataTypes);
-const DBElitiriCupSubmissions = require('./models/DBElitiriCupSubmissions')(elitiriData, Sequelize.DataTypes);
-const DBElitiriCupLobbies = require('./models/DBElitiriCupLobbies')(elitiriData, Sequelize.DataTypes);
+const DBMOTDPoints = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBMOTDPoints`)(osuData, Sequelize.DataTypes);
+const DBOsuTourneyFollows = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTourneyFollows`)(osuData, Sequelize.DataTypes);
+const DBDuelRatingHistory = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBDuelRatingHistory`)(osuData, Sequelize.DataTypes);
+const DBOsuForumPosts = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuForumPosts`)(osuData, Sequelize.DataTypes);
+const DBOsuTrackingUsers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTrackingUsers`)(osuData, Sequelize.DataTypes);
+const DBOsuMappools = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMappools`)(osuData, Sequelize.DataTypes);
+const DBOsuPoolAccess = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuPoolAccess`)(osuData, Sequelize.DataTypes);
+const DBOsuTeamSheets = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTeamSheets`)(osuData, Sequelize.DataTypes);
 
-const DBOsuMultiScores = require('./models/DBOsuMultiScores')(multiScores, Sequelize.DataTypes);
+const DBElitiriCupSignUp = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupSignUp`)(elitiriData, Sequelize.DataTypes);
+const DBElitiriCupStaff = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupStaff`)(elitiriData, Sequelize.DataTypes);
+const DBElitiriCupSubmissions = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupSubmissions`)(elitiriData, Sequelize.DataTypes);
+const DBElitiriCupLobbies = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupLobbies`)(elitiriData, Sequelize.DataTypes);
 
-const DBOsuMultiMatches = require('./models/DBOsuMultiMatches')(multiMatches, Sequelize.DataTypes);
+const DBOsuMultiScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiScores`)(multiScores, Sequelize.DataTypes);
 
-const DBOsuMultiGames = require('./models/DBOsuMultiGames')(multiGames, Sequelize.DataTypes);
+const DBOsuMultiMatches = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiMatches`)(multiMatches, Sequelize.DataTypes);
 
-const DBOsuMultiGameScores = require('./models/DBOsuMultiGameScores')(multiGameScores, Sequelize.DataTypes);
+const DBOsuMultiGames = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiGames`)(multiGames, Sequelize.DataTypes);
 
-const DBOsuBeatmaps = require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
+const DBOsuMultiGameScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiGameScores`)(multiGameScores, Sequelize.DataTypes);
 
-const DBOsuSoloScores = require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
+const DBOsuBeatmaps = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuBeatmaps`)(beatmaps, Sequelize.DataTypes);
+
+const DBElitebotixBanchoProcessQueue = require(`${process.env.ELITEBOTIXBANCHOROOTPATH}/models/DBOsuSoloScores`)(elitebotixBanchoProcessQueue, Sequelize.DataTypes);
 
 module.exports = {
 	DBGuilds,
@@ -255,5 +270,6 @@ module.exports = {
 	DBOsuTeamSheets,
 	DBOsuMultiMatches,
 	DBOsuMultiGames,
-	DBOsuMultiGameScores
+	DBOsuMultiGameScores,
+	DBElitebotixBanchoProcessQueue,
 };

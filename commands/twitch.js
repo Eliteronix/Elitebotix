@@ -1,5 +1,5 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
 const { logDatabaseQueries } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -184,6 +184,12 @@ module.exports = {
 						}
 					}, { context: { channelName: discordUser.twitchName } });
 
+					await DBElitebotixBanchoProcessQueue.create({
+						task: 'joinTwitchChannel',
+						additions: discordUser.twitchName,
+						date: new Date(),
+					});
+
 					await interaction.editReply(`Your twitch account has been connected. To verify your twitch account, please type \`!verify ${interaction.user.username}#${interaction.user.discriminator}\` in your twitch chat.`);
 				} else {
 					await interaction.editReply('The twitch account you entered does not exist.');
@@ -249,6 +255,12 @@ module.exports = {
 						c.twitchClient.join(channelName);
 					}
 				}, { context: { channelName: discordUser.twitchName } });
+
+				await DBElitebotixBanchoProcessQueue.create({
+					task: 'joinTwitchChannel',
+					additions: discordUser.twitchName,
+					date: new Date(),
+				});
 			}
 			discordUser.save();
 		} else if (interaction.options.getSubcommand() === 'togglemapsync') {
@@ -289,6 +301,12 @@ module.exports = {
 						c.twitchClient.join(channelName);
 					}
 				}, { context: { channelName: discordUser.twitchName } });
+
+				await DBElitebotixBanchoProcessQueue.create({
+					task: 'joinTwitchChannel',
+					additions: discordUser.twitchName,
+					date: new Date(),
+				});
 			}
 			await discordUser.save();
 		}

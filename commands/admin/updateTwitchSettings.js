@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../../dbObjects');
+const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../../dbObjects');
 const { logBroadcastEval } = require('../../config.json');
 const { logDatabaseQueries } = require('../../utils');
 
@@ -54,6 +54,12 @@ module.exports = {
 					c.twitchClient.join(channelName);
 				}
 			}, { context: { channelName: discordUser.twitchName } });
+
+			await DBElitebotixBanchoProcessQueue.create({
+				task: 'joinTwitchChannel',
+				additions: discordUser.twitchName,
+				date: new Date(),
+			});
 		}
 	},
 };
