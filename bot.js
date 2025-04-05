@@ -1,7 +1,7 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
 console.log('Bot is starting...');
-const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries } = require('./utils');
+const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries, reconnectToBanchoAndChannels } = require('./utils');
 
 require('dotenv').config();
 
@@ -156,6 +156,16 @@ process.on('message', message => {
 			//Listen to messages
 			bancho.on('PM', async (message) => {
 				gotBanchoPrivateMessage(client, bancho, message);
+			});
+
+			bancho.on('error', async (error) => {
+				if (error.message === 'Timeout reached') {
+					console.error('Timeout reached, reconnecting...');
+				} else {
+					console.error('Bancho error index.js:', error);
+				}
+
+				await reconnectToBanchoAndChannels(bancho);
 			});
 		}
 	} else if (message.type == 'totalShards') {

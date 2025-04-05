@@ -4506,12 +4506,12 @@ module.exports = {
 		}
 
 		//Check if the maps folder exists and create it if necessary
-		if (!fs.existsSync('./maps')) {
-			fs.mkdirSync('./maps');
+		if (!fs.existsSync(`${process.env.ELITEBOTIXROOTPATH}/maps`)) {
+			fs.mkdirSync(`${process.env.ELITEBOTIXROOTPATH}/maps`);
 		}
 
 		//Check if the map is already downloaded and download if necessary
-		const path = `./maps/${beatmapId}.osu`;
+		const path = `${process.env.ELITEBOTIXROOTPATH}/maps/${beatmapId}.osu`;
 
 		//Force download if the map is recently updated in the database and therefore probably updated
 		const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
@@ -4534,13 +4534,19 @@ module.exports = {
 					return null;
 				}
 
-				let permission = await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`, client);
+				let permission = null;
+
+				if (!client) {
+					permission = true;
+				} else {
+					permission = await module.exports.awaitWebRequestPermission(`https://osu.ppy.sh/osu/${beatmapId}`, client);
+				}
 
 				if (permission) {
 					const res = await fetch(`https://osu.ppy.sh/osu/${beatmapId}`);
 
 					await new Promise((resolve, reject) => {
-						const fileStream = fs.createWriteStream(`./maps/${beatmapId}.osu`);
+						const fileStream = fs.createWriteStream(`${process.env.ELITEBOTIXROOTPATH}/maps/${beatmapId}.osu`);
 						res.body.pipe(fileStream);
 						res.body.on('error', (err) => {
 							reject(err);
@@ -4563,7 +4569,7 @@ module.exports = {
 		}
 
 		try {
-			let bytes = fs.readFileSync(`./maps/${beatmapId}.osu`);
+			let bytes = fs.readFileSync(`${process.env.ELITEBOTIXROOTPATH}/maps/${beatmapId}.osu`);
 
 			// Parse the map.
 			let map = new rosu.Beatmap(bytes);
@@ -4601,7 +4607,7 @@ module.exports = {
 			return currAttrs.pp;
 		} catch (e) {
 			if (depth < 3) {
-				const path = `./maps/${beatmapId}.osu`;
+				const path = `${process.env.ELITEBOTIXROOTPATH}/maps/${beatmapId}.osu`;
 
 				try {
 					fs.unlinkSync(path);
@@ -9330,7 +9336,22 @@ module.exports = {
 				crosspost: crosspost
 			}
 		});
-	}
+	},
+	async reconnectToBanchoAndChannels(bancho) {
+		try {
+			await bancho.connect();
+
+			for (const channel in bancho.channels) {
+				await bancho.channels[channel].join();
+				await module.exports.trySendMessage(bancho.channels[channel], 'Reconnected after unexpected disconnect. Sorry for the inconvenience!');
+				console.log('Joined channel', channel);
+			}
+		} catch (e) {
+			if (e.message !== 'Already connected/connecting') {
+				console.error('Error reconnecting: ', e);
+			}
+		}
+	},
 };
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
