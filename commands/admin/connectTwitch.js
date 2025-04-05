@@ -63,6 +63,12 @@ module.exports = {
 					}
 				}, { context: { channelName: discordUser.twitchName } });
 
+				await DBElitebotixBanchoProcessQueue.create({
+					task: 'joinTwitchChannel',
+					additions: discordUser.twitchName,
+					date: new Date(),
+				});
+
 				await interaction.followUp('The twitch account has been connected.');
 			} else {
 				await interaction.editReply('The twitch account you entered does not exist.');
