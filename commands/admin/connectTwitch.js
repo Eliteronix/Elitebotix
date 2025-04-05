@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../../dbObjects');
+const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../../dbObjects');
 const { logBroadcastEval } = require('../../config.json');
 const { logDatabaseQueries } = require('../../utils');
 
