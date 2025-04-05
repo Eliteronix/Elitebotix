@@ -237,6 +237,8 @@ const DBOsuMultiGameScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/D
 
 const DBOsuBeatmaps = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuBeatmaps`)(beatmaps, Sequelize.DataTypes);
 
+const DBOsuSoloScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuSoloScores`)(soloScores, Sequelize.DataTypes);
+
 const DBElitebotixBanchoProcessQueue = require(`${process.env.ELITEBOTIXBANCHOROOTPATH}/models/DBProcessQueue`)(elitebotixBanchoProcessQueue, Sequelize.DataTypes);
 
 module.exports = {
