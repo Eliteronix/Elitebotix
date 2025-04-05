@@ -9336,7 +9336,22 @@ module.exports = {
 				crosspost: crosspost
 			}
 		});
-	}
+	},
+	async reconnectToBanchoAndChannels(bancho) {
+		try {
+			await bancho.connect();
+
+			for (const channel in bancho.channels) {
+				await bancho.channels[channel].join();
+				await module.exports.trySendMessage(bancho.channels[channel], 'Reconnected after unexpected disconnect. Sorry for the inconvenience!');
+				console.log('Joined channel', channel);
+			}
+		} catch (e) {
+			if (e.message !== 'Already connected/connecting') {
+				console.error('Error reconnecting: ', e);
+			}
+		}
+	},
 };
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {
