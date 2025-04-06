@@ -14,5 +14,6 @@
 		"followSymlinks": false
 	},
 	"name": "Elitebotix",
-	"nodeArgs": "--use_strict"
+	"nodeArgs": "--use_strict",
+	"log_date_format": "YYYY-MM-DD HH:mm:ss"
 }
