@@ -1,6 +1,6 @@
 const { populateMsgFromInteraction, logMatchCreation, getOsuUserServerMode, logDatabaseQueries, getNextMap, addMatchMessage } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { DBDiscordUsers, DBProcessQueue, DBOsuMultiGameScores, } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBOsuMultiGameScores, DBElitebotixBanchoProcessQueue, } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -160,7 +160,11 @@ module.exports = {
 		let dtStarRating = null;
 		let fmStarRating = null;
 
+		let settings = {};
+
 		if (interaction) {
+			settings.interaction = interaction.token;
+
 			try {
 				await interaction.deferReply({ ephemeral: true });
 			} catch (error) {
@@ -179,20 +183,28 @@ module.exports = {
 			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 				if (interaction.options._hoistedOptions[i].name === 'password') {
 					password = interaction.options._hoistedOptions[i].value;
+					settings.password = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'condition') {
 					winCondition = interaction.options._hoistedOptions[i].value;
+					settings.winCondition = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'mods') {
 					modsInput = interaction.options._hoistedOptions[i].value;
+					settings.modsInput = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'nmstarrating') {
 					nmStarRating = interaction.options._hoistedOptions[i].value;
+					settings.nmStarRating = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'hdstarrating') {
 					hdStarRating = interaction.options._hoistedOptions[i].value;
+					settings.hdStarRating = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'hrstarrating') {
 					hrStarRating = interaction.options._hoistedOptions[i].value;
+					settings.hrStarRating = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'dtstarrating') {
 					dtStarRating = interaction.options._hoistedOptions[i].value;
+					settings.dtStarRating = interaction.options._hoistedOptions[i].value;
 				} else if (interaction.options._hoistedOptions[i].name === 'fmstarrating') {
 					fmStarRating = interaction.options._hoistedOptions[i].value;
+					settings.fmStarRating = interaction.options._hoistedOptions[i].value;
 				}
 			}
 		}
@@ -206,11 +218,11 @@ module.exports = {
 			createMessage = `Creating lobby with password ${password} ...`;
 		}
 
-		if (interaction) {
-			await interaction.editReply(createMessage);
-		} else {
-			await msg.user.sendMessage(createMessage);
-		}
+		// if (interaction) {
+		// 	await interaction.editReply(createMessage);
+		// } else {
+		// 	await msg.user.sendMessage(createMessage);
+		// }
 
 		//get the commandUser
 		let commandUser = null;
@@ -236,6 +248,12 @@ module.exports = {
 				return msg.user.sendMessage('Please connect and verify your account with the bot on discord as a backup by using: /osu-link connect [https://discord.gg/Asz5Gfe Discord]');
 			}
 		}
+
+		return await DBElitebotixBanchoProcessQueue.create({
+			task: 'autohost',
+			additions: `${commandUser.osuUserId};${JSON.stringify(settings)}`,
+			date: new Date(),
+		});
 
 		//Fill in star ratings if needed
 		if (!nmStarRating) {
