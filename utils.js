@@ -3352,7 +3352,7 @@ module.exports = {
 						userScores[i].verifiedAt === null
 					)
 				) {
-					if (input.client.knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
+					if (input.client && input.client.knownSuspiciousMatches.indexOf(userScores[i].matchId) === -1) {
 						input.client.knownSuspiciousMatches.push(userScores[i].matchId);
 
 						await module.exports.sendMessageToLogChannel(input.client, process.env.SUSPICIOUSACTIVITYLOG, `Found suspicious unverified match: https://osu.ppy.sh/community/matches/${userScores[i].matchId}\nReason: More than 15% misses on a map`);
