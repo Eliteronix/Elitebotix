@@ -57,11 +57,11 @@ module.exports = {
 					console.log('Broadcasting commands/admin/connectTwitch.js to shards...');
 				}
 
-				await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
-					if (c.shardId === 0) {
-						c.twitchClient.join(channelName);
-					}
-				}, { context: { channelName: discordUser.twitchName } });
+				// await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
+				// 	if (c.shardId === 0) {
+				// 		c.twitchClient.join(channelName);
+				// 	}
+				// }, { context: { channelName: discordUser.twitchName } });
 
 				await DBElitebotixBanchoProcessQueue.create({
 					task: 'joinTwitchChannel',

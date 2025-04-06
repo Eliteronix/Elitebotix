@@ -141,22 +141,22 @@ process.on('message', message => {
 			restartProcessQueueTask();
 		}
 
-		twitchConnect(client, bancho).then(twitch => {
-			client.twitchClient = twitch;
-		});
+		// twitchConnect(client, bancho).then(twitch => {
+		// 	client.twitchClient = twitch;
+		// });
 
 		//Connect for the first shard
 		if (!wrongCluster(client)) {
 			if (process.env.SERVER === 'Live') {
-				bancho.connect();
+				// bancho.connect();
 			}
 
 			bancho.lastUserMaps = new Discord.Collection();
 
 			//Listen to messages
-			bancho.on('PM', async (message) => {
-				gotBanchoPrivateMessage(client, bancho, message);
-			});
+			// bancho.on('PM', async (message) => {
+			// 	gotBanchoPrivateMessage(client, bancho, message);
+			// });
 
 			bancho.on('error', async (error) => {
 				if (error.message === 'Timeout reached') {
