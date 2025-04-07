@@ -164,6 +164,7 @@ module.exports = {
 
 		if (interaction) {
 			settings.interaction = interaction.token;
+			settings.messageId = interaction.id;
 
 			try {
 				await interaction.deferReply({ ephemeral: true });
