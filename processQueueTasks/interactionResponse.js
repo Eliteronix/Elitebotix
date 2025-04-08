@@ -5,15 +5,14 @@ module.exports = {
 			const Discord = require('discord.js');
 			
 			let args = additions.split(';');
-			console.log(args[0]);
-			console.log(args[1]);
-			console.log(args[2]);
 
 			let interaction = new Discord.InteractionWebhook(c, c.application.id, args[0]);
 
 			console.log(interaction);
 
 			let message = await interaction.fetchMessage();
+
+			console.log(message);
 
 			console.log(interaction);
 
