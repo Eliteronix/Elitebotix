@@ -6,7 +6,7 @@ module.exports = {
 
 		let interaction = new Discord.InteractionWebhook(client, client.application.id, args[0]);
 
-		await interaction.send(args[2]);
+		await interaction.send(args[1]);
 
 		processQueueEntry.destroy();
 	},
