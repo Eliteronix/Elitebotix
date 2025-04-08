@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {			
-		let args = additions.split(';');
+		let args = processQueueEntry.additions.split(';');
 
 		let interaction = new Discord.InteractionWebhook(client, client.application.id, args[0]);
 
