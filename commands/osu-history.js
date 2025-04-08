@@ -300,7 +300,11 @@ module.exports = {
 			}
 
 			if (new Date() - lastUpdate > 15000) {
-				await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				if (error.message === 'Invalid Webhook Token') {
+					await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				} else {
+					return console.error(error);
+				}
 				lastUpdate = new Date();
 			}
 
