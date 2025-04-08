@@ -178,12 +178,6 @@ module.exports = {
 						console.log('Broadcasting commands/twitch.js join twitch channel connect to shards...');
 					}
 
-					// await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
-					// 	if (c.shardId === 0) {
-					// 		c.twitchClient.join(channelName);
-					// 	}
-					// }, { context: { channelName: discordUser.twitchName } });
-
 					await DBElitebotixBanchoProcessQueue.create({
 						task: 'joinTwitchChannel',
 						additions: discordUser.twitchName,
@@ -250,12 +244,6 @@ module.exports = {
 					console.log('Broadcasting commands/twitch.js join twitch channel togglemp to shards...');
 				}
 
-				// await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
-				// 	if (c.shardId === 0) {
-				// 		c.twitchClient.join(channelName);
-				// 	}
-				// }, { context: { channelName: discordUser.twitchName } });
-
 				await DBElitebotixBanchoProcessQueue.create({
 					task: 'joinTwitchChannel',
 					additions: discordUser.twitchName,
@@ -295,12 +283,6 @@ module.exports = {
 					// eslint-disable-next-line no-console
 					console.log('Broadcasting commands/twitch.js join twitch channel togglemapsync to shards...');
 				}
-
-				// await interaction.client.shard.broadcastEval(async (c, { channelName }) => {
-				// 	if (c.shardId === 0) {
-				// 		c.twitchClient.join(channelName);
-				// 	}
-				// }, { context: { channelName: discordUser.twitchName } });
 
 				await DBElitebotixBanchoProcessQueue.create({
 					task: 'joinTwitchChannel',

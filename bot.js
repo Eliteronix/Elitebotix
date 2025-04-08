@@ -109,7 +109,7 @@ const emojiDelete = require('./emojiDelete');
 const interactionCreate = require('./interactionCreate');
 
 //Get executeNextProcessQueueTask
-const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays, updateTwitchNames } = require('./utils');
+const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays } = require('./utils');
 
 const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
@@ -121,7 +121,6 @@ client.bancho = bancho;
 
 //login with the Discord client using the Token from the .env file
 client.login(process.env.BOTTOKEN);
-client.twitchClient = null;
 
 //Get manager messages
 process.webRequestsWaiting = [];
@@ -340,7 +339,6 @@ setTimeout(() => {
 	cleanUpDuplicates(client);
 	getForumPosts(client);
 	checkOsuTracks(client);
-	updateTwitchNames(client);
 	resetSaveMultiMatches();
 
 	setInterval(() => checkForBirthdays(client), 300000);

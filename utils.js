@@ -8177,57 +8177,6 @@ module.exports = {
 
 		return await Canvas.loadImage(path);
 	},
-	async updateTwitchNames(client) {
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers updateTwitchNames');
-		let twitchUsers = await DBDiscordUsers.findAll({
-			attributes: ['id', 'twitchName', 'twitchId'],
-			where: {
-				twitchId: {
-					[Op.not]: null,
-				},
-			},
-		});
-
-		let response = await fetch(`https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`, {
-			method: 'POST',
-		});
-
-		let json = await response.json();
-
-		let accessToken = json.access_token;
-
-		for (let i = 0; i < twitchUsers.length; i++) {
-			await new Promise(resolve => setTimeout(resolve, 5000));
-			response = await fetch(`https://api.twitch.tv/helix/users?id=${twitchUsers[i].twitchId}`, {
-				headers: {
-					'Client-ID': process.env.TWITCH_CLIENT_ID,
-					'Authorization': `Bearer ${accessToken}`
-				}
-			});
-
-			if (response.status === 200) {
-				let json = await response.json();
-				if (json.data.length > 0) {
-					if (twitchUsers[i].twitchName !== json.data[0].login) {
-						if (logBroadcastEval) {
-							// eslint-disable-next-line no-console
-							console.log('Broadcasting utils.js join twitch channel to shards...');
-						}
-
-						await client.shard.broadcastEval(async (c, { channelName }) => {
-							if (c.shardId === 0) {
-								c.twitchClient.join(channelName);
-							}
-						}, { context: { channelName: json.data[0].login } });
-					}
-
-					twitchUsers[i].twitchName = json.data[0].login;
-					twitchUsers[i].twitchId = json.data[0].id;
-					await twitchUsers[i].save();
-				}
-			}
-		}
-	},
 	async awaitWebRequestPermission(request, client) {
 		let randomString = Math.random().toString(36).substring(2);
 
