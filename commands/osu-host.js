@@ -1,7 +1,7 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { getOsuPlayerName, logDatabaseQueries, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getAdditionalOsuInfo } = require('../utils');
-const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../dbObjects');
+const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores, DBProcessQueue } = require('../dbObjects');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
@@ -334,7 +334,13 @@ module.exports = {
 				for (let j = 0; j < multiScores.length; j++) {
 					let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
 
-					multiScores[j].matchName = match.matchName;
+					if (match) {
+						multiScores[j].matchName = match.matchName;
+					} else {
+						multiScores[j].matchName = 'Unknown Match | Reimporting...';
+
+						await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${multiScores[j].matchId}`, priority: 1, date: new Date() });
+					}
 				}
 
 				if (new Date() - lastUpdate > 15000) {
