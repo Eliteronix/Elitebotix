@@ -13,6 +13,10 @@ module.exports = {
 
 			console.log(interaction);
 
+			let message = await interaction.fetchMessage();
+
+			console.log(interaction);
+
 			await interaction.editMessage(args[1], args[2]);
 			} catch (e) {
 				console.error(e);
