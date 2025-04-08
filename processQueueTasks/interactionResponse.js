@@ -1,21 +1,12 @@
+const Discord = require('discord.js');
+
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
-		client.shard.broadcastEval(async (c, { additions }) => {
-			try{
-			const Discord = require('discord.js');
-			
-			let args = additions.split(';');
-			console.log(args[0]);
-			console.log(args[1]);
-			console.log(args[2]);
+	async execute(client, bancho, processQueueEntry) {			
+		let args = processQueueEntry.additions.split(';');
 
-			let interaction = new Discord.InteractionWebhook(c, c.application.id, args[0]);
+		let interaction = new Discord.InteractionWebhook(client, client.application.id, args[0]);
 
-			await interaction.editMessage(args[1], args[2]);
-			} catch (e) {
-				console.error(e);
-			}
-		}, { context: { additions: processQueueEntry.additions } });
+		await interaction.send(args[1]);
 
 		processQueueEntry.destroy();
 	},
