@@ -11,6 +11,8 @@ module.exports = {
 
 			let interaction = new Discord.InteractionWebhook(c, c.application.id, args[0]);
 
+			console.log(interaction);
+
 			await interaction.editMessage(args[1], args[2]);
 			} catch (e) {
 				console.error(e);
