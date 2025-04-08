@@ -1,7 +1,7 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
 console.log('Bot is starting...');
-const { twitchConnect, wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries, reconnectToBanchoAndChannels } = require('./utils');
+const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries, reconnectToBanchoAndChannels } = require('./utils');
 
 require('dotenv').config();
 
@@ -108,9 +108,6 @@ const emojiDelete = require('./emojiDelete');
 //Get interactionCreate
 const interactionCreate = require('./interactionCreate');
 
-//Get gotBanchoPrivateMessage
-const gotBanchoPrivateMessage = require('./gotBanchoPrivateMessage');
-
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays, updateTwitchNames } = require('./utils');
 
@@ -141,22 +138,10 @@ process.on('message', message => {
 			restartProcessQueueTask();
 		}
 
-		// twitchConnect(client, bancho).then(twitch => {
-		// 	client.twitchClient = twitch;
-		// });
-
 		//Connect for the first shard
 		if (!wrongCluster(client)) {
-			if (process.env.SERVER === 'Live') {
-				// bancho.connect();
-			}
 
 			bancho.lastUserMaps = new Discord.Collection();
-
-			//Listen to messages
-			// bancho.on('PM', async (message) => {
-			// 	gotBanchoPrivateMessage(client, bancho, message);
-			// });
 
 			bancho.on('error', async (error) => {
 				if (error.message === 'Timeout reached') {
