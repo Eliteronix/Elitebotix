@@ -300,9 +300,9 @@ module.exports = {
 			}
 
 			if (new Date() - lastUpdate > 15000) {
-				try{
+				try {
 					await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
-				} catch (error){
+				} catch (error) {
 					if (error.message !== 'Invalid Webhook Token') {
 						return console.error(error);
 					}
@@ -636,7 +636,13 @@ module.exports = {
 
 				for (let i = 0; i < tourneysPlayed.length; i++) {
 					if (new Date() - lastUpdate > 15000) {
-						await interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
+						try {
+							await interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 
