@@ -1544,35 +1544,37 @@ module.exports = {
 					// eslint-disable-next-line no-console
 					console.log('Broadcasting utils.js sameMatchGettingImported to shards...');
 				}
+				let sameMatchGettingImported = false;
+				if (client) {
+					sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
+						if (c.shardId === 0) {
+							if (c.matchesGettingImported === undefined) {
+								c.matchesGettingImported = [];
+							}
 
-				let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
-					if (c.shardId === 0) {
-						if (c.matchesGettingImported === undefined) {
-							c.matchesGettingImported = [];
+							let minutesAgo = new Date();
+							minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
+
+							let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
+
+							if (match) {
+								return match.games;
+							} else {
+								c.matchesGettingImported.push({
+									matchId: matchId,
+									games: games,
+									date: new Date()
+								});
+								return false;
+							}
 						}
-
-						let minutesAgo = new Date();
-						minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
-
-						let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
-
-						if (match) {
-							return match.games;
-						} else {
-							c.matchesGettingImported.push({
-								matchId: matchId,
-								games: games,
-								date: new Date()
-							});
-							return false;
+					}, {
+						context: {
+							matchId: match.id,
+							games: match.games.length
 						}
-					}
-				}, {
-					context: {
-						matchId: match.id,
-						games: match.games.length
-					}
-				});
+					});
+				}
 
 				sameMatchGettingImported = sameMatchGettingImported[0];
 
@@ -1598,25 +1600,28 @@ module.exports = {
 					// eslint-disable-next-line no-console
 					console.log('Broadcasting utils.js waitForADifferentImport to shards...');
 				}
+				let sameMatchGettingImported = false;
 
-				let sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
-					if (c.shardId === 0) {
-						if (c.matchesGettingImported === undefined) {
-							c.matchesGettingImported = [];
-						}
+				if (client) {
+					sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
+						if (c.shardId === 0) {
+							if (c.matchesGettingImported === undefined) {
+								c.matchesGettingImported = [];
+							}
 
-						let match = c.matchesGettingImported.find(m => m.matchId === matchId);
-						if (match) {
-							return true;
-						} else {
-							return false;
+							let match = c.matchesGettingImported.find(m => m.matchId === matchId);
+							if (match) {
+								return true;
+							} else {
+								return false;
+							}
 						}
-					}
-				}, {
-					context: {
-						matchId: match.id,
-					}
-				});
+					}, {
+						context: {
+							matchId: match.id,
+						}
+					});
+				}
 
 				sameMatchGettingImported = sameMatchGettingImported[0];
 
@@ -2415,15 +2420,17 @@ module.exports = {
 				console.log('Broadcasting utils.js remove sameMatchesGettingImported to shards...');
 			}
 
-			await client.shard.broadcastEval(async (c, { matchId }) => {
-				if (c.shardId === 0) {
-					c.matchesGettingImported = c.matchesGettingImported.filter(m => m.matchId !== matchId);
-				}
-			}, {
-				context: {
-					matchId: match.id,
-				}
-			});
+			if (client) {
+				await client.shard.broadcastEval(async (c, { matchId }) => {
+					if (c.shardId === 0) {
+						c.matchesGettingImported = c.matchesGettingImported.filter(m => m.matchId !== matchId);
+					}
+				}, {
+					context: {
+						matchId: match.id,
+					}
+				});
+			}
 		} catch (err) {
 			//Ignore
 		}
