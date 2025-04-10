@@ -4212,6 +4212,8 @@ module.exports = {
 			// Free the beatmap manually to avoid risking memory leakage.
 			map.free();
 
+			console.log(currAttrs.pp, 'pp');
+
 			return currAttrs.pp;
 		} catch (e) {
 			if (depth < 3) {
