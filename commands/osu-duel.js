@@ -826,12 +826,10 @@ module.exports = {
 
 				updateQueueChannels(interaction.client);
 
-				// createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
-
 				await interaction.editReply('Sending duel match to bancho process...');
 
 				let settings = {
-					interaction: interaction.id,
+					interaction: interaction.token,
 					averageStarRating: averageStarRating,
 					lowerBound: lowerBound,
 					upperBound: upperBound,
