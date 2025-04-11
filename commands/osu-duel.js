@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
+const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -826,7 +826,24 @@ module.exports = {
 
 				updateQueueChannels(interaction.client);
 
-				createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
+				// createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
+
+				let settings = {
+					interaction: interaction,
+					averageStarRating: averageStarRating,
+					lowerBound: lowerBound,
+					upperBound: upperBound,
+					bestOf: bestOf,
+					onlyRanked: onlyRanked,
+					users: everyUser,
+					queued: false,
+				};
+
+				await DBElitebotixBanchoProcessQueue.create({
+					task: 'osu-duel',
+					additions: JSON.stringify(settings),
+					date: new Date(),
+				});
 			} else if (interaction.options._subcommand === 'rating') {
 				let processingMessage = null;
 				if (interaction.id) {
