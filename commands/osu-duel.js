@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, createDuelMatch, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
+const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');

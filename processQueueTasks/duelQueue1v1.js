@@ -1,5 +1,5 @@
-const { DBProcessQueue, DBDiscordUsers } = require('../dbObjects');
-const { createDuelMatch, updateQueueChannels, logDatabaseQueries } = require('../utils');
+const { DBProcessQueue, DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
+const { updateQueueChannels, logDatabaseQueries } = require('../utils');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
@@ -94,7 +94,22 @@ module.exports = {
 			await otherQueueTask.destroy();
 			updateQueueChannels(client);
 
-			createDuelMatch(client, bancho, null, averageStarRating, lowerBound, upperBound, 7, false, [firstUser, secondUser], true);
+			let settings = {
+				interaction: null,
+				averageStarRating: averageStarRating,
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				bestOf: 7,
+				onlyRanked: false,
+				users: [firstUser, secondUser],
+				queued: true,
+			};
+
+			await DBElitebotixBanchoProcessQueue.create({
+				task: 'osu-duel',
+				additions: JSON.stringify(settings),
+				date: new Date(),
+			});
 		} else {
 			let date = new Date();
 			date.setUTCMinutes(date.getUTCMinutes() + 1);

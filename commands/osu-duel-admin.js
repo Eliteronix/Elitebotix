@@ -1,5 +1,5 @@
-const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
-const { logDatabaseQueries, getUserDuelStarRating, createDuelMatch, updateQueueChannels } = require('../utils');
+const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
+const { logDatabaseQueries, getUserDuelStarRating, updateQueueChannels } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -392,7 +392,24 @@ module.exports = {
 
 			updateQueueChannels(interaction.client);
 
-			createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
+			await interaction.editReply('Sending duel match to bancho process...');
+
+			let settings = {
+				interaction: interaction.token,
+				averageStarRating: averageStarRating,
+				lowerBound: lowerBound,
+				upperBound: upperBound,
+				bestOf: bestOf,
+				onlyRanked: onlyRanked,
+				users: everyUser,
+				queued: false,
+			};
+
+			await DBElitebotixBanchoProcessQueue.create({
+				task: 'osu-duel',
+				additions: JSON.stringify(settings),
+				date: new Date(),
+			});
 		}
 	},
 };
