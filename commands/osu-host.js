@@ -266,547 +266,535 @@ module.exports = {
 
 		interaction.client.hostCommands.push(randomString);
 
-		if (interaction.options.getSubcommand() === 'tournamenttopplays') {
-			let tourneyTops = [];
+		try {
+			if (interaction.options.getSubcommand() === 'tournamenttopplays') {
+				let tourneyTops = [];
 
-			let lastUpdate = new Date();
+				let lastUpdate = new Date();
 
-			for (let i = 0; i < file.length; i++) {
-				let osuUserId = file[i].trim();
+				for (let i = 0; i < file.length; i++) {
+					let osuUserId = file[i].trim();
 
-				let osuName = await getOsuPlayerName(osuUserId);
+					let osuName = await getOsuPlayerName(osuUserId);
 
-				if (new Date() - lastUpdate > 15000) {
-					await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
-				}
-
-				//Get all scores from tournaments
-				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiGameScores');
-				let multiScores = await DBOsuMultiGameScores.findAll({
-					attributes: [
-						'id',
-						'score',
-						'gameRawMods',
-						'rawMods',
-						'teamType',
-						'pp',
-						'beatmapId',
-						'createdAt',
-						'osuUserId',
-						'count50',
-						'count100',
-						'count300',
-						'countGeki',
-						'countKatu',
-						'countMiss',
-						'maxCombo',
-						'perfect',
-						'mode',
-						'gameStartDate',
-						'matchId',
-					],
-					where: {
-						osuUserId: osuUserId,
-						mode: 0,
-						tourneyMatch: true,
-						score: {
-							[Op.gte]: 10000,
-						},
-					}
-				});
-
-				let matchIds = [...new Set(multiScores.map(score => score.matchId))];
-
-				logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiMatches');
-				let multiMatches = await DBOsuMultiMatches.findAll({
-					attributes: [
-						'matchId',
-						'matchName',
-					],
-					where: {
-						matchId: {
-							[Op.in]: matchIds,
-						},
-					}
-				});
-
-				for (let j = 0; j < multiScores.length; j++) {
-					let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
-
-					if (match) {
-						multiScores[j].matchName = match.matchName;
-					} else {
-						multiScores[j].matchName = 'Unknown Match | Reimporting...';
-
-						await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${multiScores[j].matchId}`, priority: 1, date: new Date() });
-					}
-				}
-
-				if (new Date() - lastUpdate > 15000) {
-					processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
-				}
-
-				for (let j = 0; j < multiScores.length; j++) {
 					if (new Date() - lastUpdate > 15000) {
-						processingMessage.edit(`Processing ${osuName} (Removing irrelevant scores from ${multiScores.length} found scores) (Account ${i + 1}/${file.length})...`);
+						await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
 						lastUpdate = new Date();
 					}
 
-					if (getMods(parseInt(multiScores[j].gameRawMods) + parseInt(multiScores[j].rawMods)).includes('RX')) {
-						multiScores.splice(j, 1);
-						j--;
-						continue;
-					}
+					//Get all scores from tournaments
+					logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiGameScores');
+					let multiScores = await DBOsuMultiGameScores.findAll({
+						attributes: [
+							'id',
+							'score',
+							'gameRawMods',
+							'rawMods',
+							'teamType',
+							'pp',
+							'beatmapId',
+							'createdAt',
+							'osuUserId',
+							'count50',
+							'count100',
+							'count300',
+							'countGeki',
+							'countKatu',
+							'countMiss',
+							'maxCombo',
+							'perfect',
+							'mode',
+							'gameStartDate',
+							'matchId',
+						],
+						where: {
+							osuUserId: osuUserId,
+							mode: 0,
+							tourneyMatch: true,
+							score: {
+								[Op.gte]: 10000,
+							},
+						}
+					});
 
-					if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1) {
-						multiScores.splice(j, 1);
-						j--;
-						continue;
-					}
-				}
+					let matchIds = [...new Set(multiScores.map(score => score.matchId))];
 
-				if (new Date() - lastUpdate > 15000) {
-					processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores after removing irrelevant scores) (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
-				}
+					logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiMatches');
+					let multiMatches = await DBOsuMultiMatches.findAll({
+						attributes: [
+							'matchId',
+							'matchName',
+						],
+						where: {
+							matchId: {
+								[Op.in]: matchIds,
+							},
+						}
+					});
 
-				//Translate the scores to bancho scores
-				for (let j = 0; j < multiScores.length; j++) {
-					if (new Date() - lastUpdate > 15000) {
-						processingMessage.edit(`Processing ${osuName} (Score ${j + 1}/${multiScores.length}) (Account ${i + 1}/${file.length})...`);
-						lastUpdate = new Date();
-					}
-					if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
-						multiScores[j].gameRawMods = parseInt(multiScores[j].gameRawMods) - 1;
-					}
-					if (parseInt(multiScores[j].rawMods) % 2 === 1) {
-						multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
-					}
+					for (let j = 0; j < multiScores.length; j++) {
+						let match = multiMatches.find(match => match.matchId === multiScores[j].matchId);
 
-					multiScores[j] = await multiToBanchoScore(multiScores[j], interaction.client);
+						if (match) {
+							multiScores[j].matchName = match.matchName;
+						} else {
+							multiScores[j].matchName = 'Unknown Match | Reimporting...';
 
-					if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
-						multiScores.splice(j, 1);
-						j--;
-						continue;
-					}
-				}
-
-				//Sort scores by pp descending
-				multiScores.sort((a, b) => {
-					return parseFloat(b.pp) - parseFloat(a.pp);
-				});
-
-				//Remove duplicates by beatmapId
-				for (let j = 0; j < multiScores.length; j++) {
-					for (let k = j + 1; k < multiScores.length; k++) {
-						if (multiScores[j].beatmapId === multiScores[k].beatmapId) {
-							multiScores.splice(k, 1);
-							k--;
+							await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${multiScores[j].matchId}`, priority: 1, date: new Date() });
 						}
 					}
-				}
 
-				//Feed the scores into the array
-				let scoreCount = 0;
-				for (let j = 0; j < multiScores.length && scoreCount < amountPerPlayer; j++) {
 					if (new Date() - lastUpdate > 15000) {
-						processingMessage.edit(`Processing ${osuName} (Adding score ${j + 1}/${amountPerPlayer} to the output) (Account ${i + 1}/${file.length})...`);
+						processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${file.length})...`);
 						lastUpdate = new Date();
 					}
-					multiScores[j].beatmap = await getOsuBeatmap({ beatmapId: multiScores[j].beatmapId });
-					if (onlyRanked) {
-						if (!multiScores[j].beatmap || multiScores[j].beatmap && multiScores[j].beatmap.approvalStatus !== 'Approved' && multiScores[j].beatmap.approvalStatus !== 'Ranked') {
+
+					for (let j = 0; j < multiScores.length; j++) {
+						if (new Date() - lastUpdate > 15000) {
+							processingMessage.edit(`Processing ${osuName} (Removing irrelevant scores from ${multiScores.length} found scores) (Account ${i + 1}/${file.length})...`);
+							lastUpdate = new Date();
+						}
+
+						if (getMods(parseInt(multiScores[j].gameRawMods) + parseInt(multiScores[j].rawMods)).includes('RX')) {
+							multiScores.splice(j, 1);
+							j--;
+							continue;
+						}
+
+						if (multiScores[j].teamType === 3 || multiScores[j].teamType === 1) {
+							multiScores.splice(j, 1);
+							j--;
 							continue;
 						}
 					}
-					if (multiScores[j].pp) {
-						tourneyTops.push(multiScores[j]);
-						scoreCount++;
-					}
-				}
-			}
 
-			let exportScores = [];
-
-			for (let i = 0; i < tourneyTops.length; i++) {
-				if (tourneyTops[i].beatmap) {
-					exportScores.push({
-						osuUserId: tourneyTops[i].user.id,
-						pp: tourneyTops[i].pp,
-						approvalStatus: tourneyTops[i].beatmap.approvalStatus,
-						beatmapId: tourneyTops[i].beatmapId,
-						score: tourneyTops[i].score,
-						raw_date: tourneyTops[i].raw_date,
-						rank: tourneyTops[i].rank,
-						raw_mods: tourneyTops[i].raw_mods,
-						title: tourneyTops[i].beatmap.title,
-						artist: tourneyTops[i].beatmap.artist,
-						difficulty: tourneyTops[i].beatmap.difficulty,
-						mode: tourneyTops[i].beatmap.mode,
-					});
-				} else {
-					exportScores.push({
-						osuUserId: tourneyTops[i].user.id,
-						pp: tourneyTops[i].pp,
-						approvalStatus: 'Deleted',
-						beatmapId: tourneyTops[i].beatmapId,
-						score: tourneyTops[i].score,
-						raw_date: tourneyTops[i].raw_date,
-						rank: tourneyTops[i].rank,
-						raw_mods: tourneyTops[i].raw_mods,
-						title: 'Unavailable',
-						artist: 'Unavailable',
-						difficulty: 'Unavailable',
-						mode: 'Unavailable',
-					});
-				}
-			}
-
-			await processingMessage.delete();
-
-			let data = [];
-			for (let i = 0; i < exportScores.length; i++) {
-				data.push(exportScores[i]);
-
-				if (i % 10000 === 0 && i > 0 || exportScores.length - 1 === i) {
-					let csv = new ObjectsToCsv(data);
-					csv = await csv.toString();
-					const buffer = Buffer.from(csv);
-					//Create as an attachment
-					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournament-topplays.csv' });
-
-					await interaction.channel.send({ content: 'Tournament Top Plays', files: [attachment] });
-					data = [];
-				}
-			}
-
-			if (interaction.client.hostCommands.includes(randomString)) {
-				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
-			}
-		} else if (interaction.options.getSubcommand() === 'duelratings') {
-			let csvData = [];
-
-			let lastUpdate = new Date();
-
-			for (let i = 0; i < file.length; i++) {
-				let osuUserId = file[i].trim();
-
-				if (new Date() - lastUpdate > 15000) {
-					let osuName = await getOsuPlayerName(osuUserId);
-					processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
-				}
-
-				try {
-					let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId, client: interaction.client });
-
-					csvData.push({
-						osuUserId: osuUserId,
-						duelRating: duelRating.total,
-						noModDuelRating: duelRating.noMod,
-						noModDuelRatingLimited: duelRating.Limited,
-						hiddenDuelRating: duelRating.hidden,
-						hiddenDuelRatingLimited: duelRating.hiddenLimited,
-						hardRockDuelRating: duelRating.hardRock,
-						hardRockDuelRatingLimited: duelRating.hardRockLimited,
-						doubleTimeDuelRating: duelRating.doubleTime,
-						doubleTimeDuelRatingLimited: duelRating.doubleTimeLimited,
-						freeModDuelRating: duelRating.freeMod,
-						freeModDuelRatingLimited: duelRating.freeModLimited,
-						provisional: duelRating.provisional,
-						outdated: duelRating.outdated,
-					});
-				} catch (e) {
-					csvData.push({
-						osuUserId: osuUserId,
-						duelRating: e.message,
-						noModDuelRating: 'Unavailable',
-						noModDuelRatingLimited: 'Unavailable',
-						hiddenDuelRating: 'Unavailable',
-						hiddenDuelRatingLimited: 'Unavailable',
-						hardRockDuelRating: 'Unavailable',
-						hardRockDuelRatingLimited: 'Unavailable',
-						doubleTimeDuelRating: 'Unavailable',
-						doubleTimeDuelRatingLimited: 'Unavailable',
-						freeModDuelRating: 'Unavailable',
-						freeModDuelRatingLimited: 'Unavailable',
-						provisional: 'Unavailable',
-						outdated: 'Unavailable',
-					});
-				}
-			}
-
-			await processingMessage.delete();
-
-			let data = [];
-			for (let i = 0; i < csvData.length; i++) {
-				data.push(csvData[i]);
-
-				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
-					let csv = new ObjectsToCsv(data);
-					csv = await csv.toString();
-					const buffer = Buffer.from(csv);
-					//Create as an attachment
-					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'duelratings.csv' });
-
-					await interaction.channel.send({ content: 'Duel Ratings', files: [attachment] });
-					data = [];
-				}
-			}
-
-			if (interaction.client.hostCommands.includes(randomString)) {
-				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
-			}
-		} else if (interaction.options.getSubcommand() === 'duelratingdata') {
-			let lastUpdate = new Date();
-
-			for (let i = 0; i < file.length; i++) {
-				let osuUserId = file[i].trim();
-
-				let osuName = await getOsuPlayerName(osuUserId);
-
-				if (new Date() - lastUpdate > 15000) {
-					processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
-				}
-
-				try {
-					let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId, client: interaction.client, forceUpdate: true });
-
-					let scores = [
-						duelRating.scores.NM,
-						duelRating.scores.HD,
-						duelRating.scores.HR,
-						duelRating.scores.DT,
-						duelRating.scores.FM
-					];
-
-					for (let i = 0; i < scores.length; i++) {
-						scores[i].sort((a, b) => a.score - b.score);
-
-						for (let j = 0; j < scores[i].length; j++) {
-							let outlierText = '';
-							if (scores[i][j].outlier) {
-								outlierText = ' [outlier - not counted]';
-							}
-							let date = new Date(scores[i][j].matchStartDate);
-							scores[i][j] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | Expected SR: ${scores[i][j].expectedRating.toFixed(2)} | https://osu.ppy.sh/b/${scores[i][j].beatmapId} | Match: https://osu.ppy.sh/mp/${scores[i][j].matchId} | ${outlierText}`;
-						}
-
-						if (i === 0) {
-							scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
-						} else if (i === 1) {
-							scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
-						} else if (i === 2) {
-							scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
-						} else if (i === 3) {
-							scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
-						} else if (i === 4) {
-							scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
-						}
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores after removing irrelevant scores) (Account ${i + 1}/${file.length})...`);
+						lastUpdate = new Date();
 					}
 
-					scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUserId}.txt` });
+					//Translate the scores to bancho scores
+					for (let j = 0; j < multiScores.length; j++) {
+						if (new Date() - lastUpdate > 15000) {
+							processingMessage.edit(`Processing ${osuName} (Score ${j + 1}/${multiScores.length}) (Account ${i + 1}/${file.length})...`);
+							lastUpdate = new Date();
+						}
+						if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
+							multiScores[j].gameRawMods = parseInt(multiScores[j].gameRawMods) - 1;
+						}
+						if (parseInt(multiScores[j].rawMods) % 2 === 1) {
+							multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
+						}
 
-					await interaction.user.send({ content: `Duel Scores and Weights for ${osuName} (\`${osuUserId}\`)`, files: [scores] });
-				} catch (e) {
-					await interaction.user.send(`Error getting duel scores and weights for ${osuName} (\`${osuUserId}\`): ${e.message}`);
-				}
-			}
+						multiScores[j] = await multiToBanchoScore(multiScores[j], interaction.client);
 
-			processingMessage.edit('Finished processing all accounts.');
-
-			if (interaction.client.hostCommands.includes(randomString)) {
-				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
-			}
-		} else if (interaction.options.getSubcommand() === 'ppwithtournamenttopplays') {
-			let csvData = [];
-
-			let lastUpdate = new Date();
-
-			const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-				// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-				notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-				completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-				parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-			});
-
-			for (let i = 0; i < file.length; i++) {
-				let osuUserId = file[i].trim();
-
-				if (new Date() - lastUpdate > 15000) {
-					let osuName = await getOsuPlayerName(osuUserId);
-					processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
-				}
-
-				let scores = [];
-
-				let user = await osuApi.getUser({ u: osuUserId, m: 0 });
-
-				let banchoTopPlays = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 });
-
-				let topPlayData = await getTournamentTopPlayData(osuUserId, 0, interaction.client);
-
-				let tournamentTopPlays = topPlayData.scores;
-
-				scores = banchoTopPlays.concat(tournamentTopPlays);
-
-				scores.sort((a, b) => {
-					return parseFloat(b.pp) - parseFloat(a.pp);
-				});
-
-				// Remove duplicates
-				for (let i = 0; i < scores.length; i++) {
-					for (let j = i + 1; j < scores.length; j++) {
-						if (scores[i].beatmapId == scores[j].beatmapId) {
-							scores.splice(j, 1);
+						if (!multiScores[j].pp || parseFloat(multiScores[j].pp) > 2000 || !parseFloat(multiScores[j].pp)) {
+							multiScores.splice(j, 1);
 							j--;
+							continue;
+						}
+					}
+
+					//Sort scores by pp descending
+					multiScores.sort((a, b) => {
+						return parseFloat(b.pp) - parseFloat(a.pp);
+					});
+
+					//Remove duplicates by beatmapId
+					for (let j = 0; j < multiScores.length; j++) {
+						for (let k = j + 1; k < multiScores.length; k++) {
+							if (multiScores[j].beatmapId === multiScores[k].beatmapId) {
+								multiScores.splice(k, 1);
+								k--;
+							}
+						}
+					}
+
+					//Feed the scores into the array
+					let scoreCount = 0;
+					for (let j = 0; j < multiScores.length && scoreCount < amountPerPlayer; j++) {
+						if (new Date() - lastUpdate > 15000) {
+							processingMessage.edit(`Processing ${osuName} (Adding score ${j + 1}/${amountPerPlayer} to the output) (Account ${i + 1}/${file.length})...`);
+							lastUpdate = new Date();
+						}
+						multiScores[j].beatmap = await getOsuBeatmap({ beatmapId: multiScores[j].beatmapId });
+						if (onlyRanked) {
+							if (!multiScores[j].beatmap || multiScores[j].beatmap && multiScores[j].beatmap.approvalStatus !== 'Approved' && multiScores[j].beatmap.approvalStatus !== 'Ranked') {
+								continue;
+							}
+						}
+						if (multiScores[j].pp) {
+							tourneyTops.push(multiScores[j]);
+							scoreCount++;
 						}
 					}
 				}
 
-				// Calculate total pp
-				let banchoTotalPP = parseFloat(user.pp.raw);
+				let exportScores = [];
 
-				// Calculate the part of the pp that is coming from the bancho top 100
-				let banchoTopPlaysPP = 0;
-
-				for (let i = 0; i < banchoTopPlays.length; i++) {
-					banchoTopPlaysPP += parseFloat(banchoTopPlays[i].pp) * Math.pow(0.95, (i));
-				}
-
-				let additionalPP = banchoTotalPP - banchoTopPlaysPP;
-
-				// Calculate the pp with the new scores
-				let newScoresPP = 0;
-
-				for (let i = 0; i < scores.length && i < 100; i++) {
-					newScoresPP += parseFloat(scores[i].pp) * Math.pow(0.95, (i));
-				}
-
-				logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 1');
-				let discordUsers = await DBDiscordUsers.findAll({
-					attributes: ['osuPP', 'osuRank'],
-				});
-
-				let totalRankedPP = newScoresPP + additionalPP;
-
-				//Find the closest users to the PP values
-				let closestRankedPPUser = discordUsers[0];
-				for (let i = 0; i < discordUsers.length; i++) {
-					let currentDiscordUserPP = discordUsers[i].osuPP;
-					let closestRankedPP = closestRankedPPUser.osuPP;
-
-					if (Math.abs(currentDiscordUserPP - totalRankedPP) < Math.abs(closestRankedPP - totalRankedPP)) {
-						closestRankedPPUser = discordUsers[i];
+				for (let i = 0; i < tourneyTops.length; i++) {
+					if (tourneyTops[i].beatmap) {
+						exportScores.push({
+							osuUserId: tourneyTops[i].user.id,
+							pp: tourneyTops[i].pp,
+							approvalStatus: tourneyTops[i].beatmap.approvalStatus,
+							beatmapId: tourneyTops[i].beatmapId,
+							score: tourneyTops[i].score,
+							raw_date: tourneyTops[i].raw_date,
+							rank: tourneyTops[i].rank,
+							raw_mods: tourneyTops[i].raw_mods,
+							title: tourneyTops[i].beatmap.title,
+							artist: tourneyTops[i].beatmap.artist,
+							difficulty: tourneyTops[i].beatmap.difficulty,
+							mode: tourneyTops[i].beatmap.mode,
+						});
+					} else {
+						exportScores.push({
+							osuUserId: tourneyTops[i].user.id,
+							pp: tourneyTops[i].pp,
+							approvalStatus: 'Deleted',
+							beatmapId: tourneyTops[i].beatmapId,
+							score: tourneyTops[i].score,
+							raw_date: tourneyTops[i].raw_date,
+							rank: tourneyTops[i].rank,
+							raw_mods: tourneyTops[i].raw_mods,
+							title: 'Unavailable',
+							artist: 'Unavailable',
+							difficulty: 'Unavailable',
+							mode: 'Unavailable',
+						});
 					}
 				}
 
-				csvData.push({
-					osuUserId: user.id,
-					banchoPP: banchoTotalPP,
-					banchoRank: user.pp.rank,
-					adaptedPP: totalRankedPP,
-					adaptedRank: closestRankedPPUser.osuRank,
-				});
-			}
+				await processingMessage.delete();
 
-			await processingMessage.delete();
+				let data = [];
+				for (let i = 0; i < exportScores.length; i++) {
+					data.push(exportScores[i]);
 
-			let data = [];
-			for (let i = 0; i < csvData.length; i++) {
-				data.push(csvData[i]);
+					if (i % 10000 === 0 && i > 0 || exportScores.length - 1 === i) {
+						let csv = new ObjectsToCsv(data);
+						csv = await csv.toString();
+						const buffer = Buffer.from(csv);
+						//Create as an attachment
+						const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournament-topplays.csv' });
 
-				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
-					let csv = new ObjectsToCsv(data);
-					csv = await csv.toString();
-					const buffer = Buffer.from(csv);
-					//Create as an attachment
-					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentpp.csv' });
-
-					await interaction.channel.send({ content: 'PP with tournament top plays', files: [attachment] });
-					data = [];
+						await interaction.channel.send({ content: 'Tournament Top Plays', files: [attachment] });
+						data = [];
+					}
 				}
-			}
+			} else if (interaction.options.getSubcommand() === 'duelratings') {
+				let csvData = [];
 
-			if (interaction.client.hostCommands.includes(randomString)) {
-				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
-			}
-		} else if (interaction.options.getSubcommand() === 'tournamentbanned') {
-			let csvData = [];
+				let lastUpdate = new Date();
 
-			let lastUpdate = new Date();
+				for (let i = 0; i < file.length; i++) {
+					let osuUserId = file[i].trim();
 
-			for (let i = 0; i < file.length; i++) {
-				let osuUserId = file[i].trim();
+					if (new Date() - lastUpdate > 15000) {
+						let osuName = await getOsuPlayerName(osuUserId);
+						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						lastUpdate = new Date();
+					}
 
-				if (new Date() - lastUpdate > 15000) {
+					try {
+						let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId, client: interaction.client });
+
+						csvData.push({
+							osuUserId: osuUserId,
+							duelRating: duelRating.total,
+							noModDuelRating: duelRating.noMod,
+							noModDuelRatingLimited: duelRating.Limited,
+							hiddenDuelRating: duelRating.hidden,
+							hiddenDuelRatingLimited: duelRating.hiddenLimited,
+							hardRockDuelRating: duelRating.hardRock,
+							hardRockDuelRatingLimited: duelRating.hardRockLimited,
+							doubleTimeDuelRating: duelRating.doubleTime,
+							doubleTimeDuelRatingLimited: duelRating.doubleTimeLimited,
+							freeModDuelRating: duelRating.freeMod,
+							freeModDuelRatingLimited: duelRating.freeModLimited,
+							provisional: duelRating.provisional,
+							outdated: duelRating.outdated,
+						});
+					} catch (e) {
+						csvData.push({
+							osuUserId: osuUserId,
+							duelRating: e.message,
+							noModDuelRating: 'Unavailable',
+							noModDuelRatingLimited: 'Unavailable',
+							hiddenDuelRating: 'Unavailable',
+							hiddenDuelRatingLimited: 'Unavailable',
+							hardRockDuelRating: 'Unavailable',
+							hardRockDuelRatingLimited: 'Unavailable',
+							doubleTimeDuelRating: 'Unavailable',
+							doubleTimeDuelRatingLimited: 'Unavailable',
+							freeModDuelRating: 'Unavailable',
+							freeModDuelRatingLimited: 'Unavailable',
+							provisional: 'Unavailable',
+							outdated: 'Unavailable',
+						});
+					}
+				}
+
+				await processingMessage.delete();
+
+				let data = [];
+				for (let i = 0; i < csvData.length; i++) {
+					data.push(csvData[i]);
+
+					if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+						let csv = new ObjectsToCsv(data);
+						csv = await csv.toString();
+						const buffer = Buffer.from(csv);
+						//Create as an attachment
+						const attachment = new Discord.AttachmentBuilder(buffer, { name: 'duelratings.csv' });
+
+						await interaction.channel.send({ content: 'Duel Ratings', files: [attachment] });
+						data = [];
+					}
+				}
+			} else if (interaction.options.getSubcommand() === 'duelratingdata') {
+				let lastUpdate = new Date();
+
+				for (let i = 0; i < file.length; i++) {
+					let osuUserId = file[i].trim();
+
 					let osuName = await getOsuPlayerName(osuUserId);
-					processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
-					lastUpdate = new Date();
+
+					if (new Date() - lastUpdate > 15000) {
+						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						lastUpdate = new Date();
+					}
+
+					try {
+						let duelRating = await getUserDuelStarRating({ osuUserId: osuUserId, client: interaction.client, forceUpdate: true });
+
+						let scores = [
+							duelRating.scores.NM,
+							duelRating.scores.HD,
+							duelRating.scores.HR,
+							duelRating.scores.DT,
+							duelRating.scores.FM
+						];
+
+						for (let i = 0; i < scores.length; i++) {
+							scores[i].sort((a, b) => a.score - b.score);
+
+							for (let j = 0; j < scores[i].length; j++) {
+								let outlierText = '';
+								if (scores[i][j].outlier) {
+									outlierText = ' [outlier - not counted]';
+								}
+								let date = new Date(scores[i][j].matchStartDate);
+								scores[i][j] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | Expected SR: ${scores[i][j].expectedRating.toFixed(2)} | https://osu.ppy.sh/b/${scores[i][j].beatmapId} | Match: https://osu.ppy.sh/mp/${scores[i][j].matchId} | ${outlierText}`;
+							}
+
+							if (i === 0) {
+								scores[i] = 'NM Scores & Weights:\n' + scores[i].join('\n');
+							} else if (i === 1) {
+								scores[i] = 'HD Scores & Weights:\n' + scores[i].join('\n');
+							} else if (i === 2) {
+								scores[i] = 'HR Scores & Weights:\n' + scores[i].join('\n');
+							} else if (i === 3) {
+								scores[i] = 'DT Scores & Weights:\n' + scores[i].join('\n');
+							} else if (i === 4) {
+								scores[i] = 'FM Scores & Weights:\n' + scores[i].join('\n');
+							}
+						}
+
+						scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUserId}.txt` });
+
+						await interaction.user.send({ content: `Duel Scores and Weights for ${osuName} (\`${osuUserId}\`)`, files: [scores] });
+					} catch (e) {
+						await interaction.user.send(`Error getting duel scores and weights for ${osuName} (\`${osuUserId}\`): ${e.message}`);
+					}
 				}
 
-				logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 2');
-				let discordUser = await DBDiscordUsers.findOne({
-					where: {
-						osuUserId: osuUserId,
-					},
+				processingMessage.edit('Finished processing all accounts.');
+			} else if (interaction.options.getSubcommand() === 'ppwithtournamenttopplays') {
+				let csvData = [];
+
+				let lastUpdate = new Date();
+
+				const osuApi = new osu.Api(process.env.OSUTOKENV1, {
+					// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
+					notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
+					completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
+					parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 				});
 
-				if (discordUser && discordUser.tournamentBannedUntil && discordUser.tournamentBannedUntil > new Date()) {
-					csvData.push({
-						osuUserId: osuUserId,
-						tournamentBannedUntil: new Date(discordUser.tournamentBannedUntil).toLocaleDateString('en-GB', { timeZone: 'UTC' }),
-						tournamentBannedReason: discordUser.tournamentBannedReason,
+				for (let i = 0; i < file.length; i++) {
+					let osuUserId = file[i].trim();
+
+					if (new Date() - lastUpdate > 15000) {
+						let osuName = await getOsuPlayerName(osuUserId);
+						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						lastUpdate = new Date();
+					}
+
+					let scores = [];
+
+					let user = await osuApi.getUser({ u: osuUserId, m: 0 });
+
+					let banchoTopPlays = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 });
+
+					let topPlayData = await getTournamentTopPlayData(osuUserId, 0, interaction.client);
+
+					let tournamentTopPlays = topPlayData.scores;
+
+					scores = banchoTopPlays.concat(tournamentTopPlays);
+
+					scores.sort((a, b) => {
+						return parseFloat(b.pp) - parseFloat(a.pp);
 					});
 
-					continue;
-				}
+					// Remove duplicates
+					for (let i = 0; i < scores.length; i++) {
+						for (let j = i + 1; j < scores.length; j++) {
+							if (scores[i].beatmapId == scores[j].beatmapId) {
+								scores.splice(j, 1);
+								j--;
+							}
+						}
+					}
 
-				let additionalInfo = await getAdditionalOsuInfo(osuUserId);
+					// Calculate total pp
+					let banchoTotalPP = parseFloat(user.pp.raw);
 
-				if (additionalInfo.tournamentBan && additionalInfo.tournamentBan.tournamentBannedUntil > new Date()) {
+					// Calculate the part of the pp that is coming from the bancho top 100
+					let banchoTopPlaysPP = 0;
+
+					for (let i = 0; i < banchoTopPlays.length; i++) {
+						banchoTopPlaysPP += parseFloat(banchoTopPlays[i].pp) * Math.pow(0.95, (i));
+					}
+
+					let additionalPP = banchoTotalPP - banchoTopPlaysPP;
+
+					// Calculate the pp with the new scores
+					let newScoresPP = 0;
+
+					for (let i = 0; i < scores.length && i < 100; i++) {
+						newScoresPP += parseFloat(scores[i].pp) * Math.pow(0.95, (i));
+					}
+
+					logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 1');
+					let discordUsers = await DBDiscordUsers.findAll({
+						attributes: ['osuPP', 'osuRank'],
+					});
+
+					let totalRankedPP = newScoresPP + additionalPP;
+
+					//Find the closest users to the PP values
+					let closestRankedPPUser = discordUsers[0];
+					for (let i = 0; i < discordUsers.length; i++) {
+						let currentDiscordUserPP = discordUsers[i].osuPP;
+						let closestRankedPP = closestRankedPPUser.osuPP;
+
+						if (Math.abs(currentDiscordUserPP - totalRankedPP) < Math.abs(closestRankedPP - totalRankedPP)) {
+							closestRankedPPUser = discordUsers[i];
+						}
+					}
+
 					csvData.push({
-						osuUserId: osuUserId,
-						tournamentBannedUntil: new Date(additionalInfo.tournamentBan.tournamentBannedUntil).toLocaleDateString('en-GB', { timeZone: 'UTC' }),
-						tournamentBannedReason: additionalInfo.tournamentBan.description,
+						osuUserId: user.id,
+						banchoPP: banchoTotalPP,
+						banchoRank: user.pp.rank,
+						adaptedPP: totalRankedPP,
+						adaptedRank: closestRankedPPUser.osuRank,
 					});
 				}
-			}
 
-			await processingMessage.delete();
+				await processingMessage.delete();
 
-			if (csvData.length === 0) {
-				if (interaction.client.hostCommands.includes(randomString)) {
-					interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
+				let data = [];
+				for (let i = 0; i < csvData.length; i++) {
+					data.push(csvData[i]);
+
+					if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+						let csv = new ObjectsToCsv(data);
+						csv = await csv.toString();
+						const buffer = Buffer.from(csv);
+						//Create as an attachment
+						const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentpp.csv' });
+
+						await interaction.channel.send({ content: 'PP with tournament top plays', files: [attachment] });
+						data = [];
+					}
+				}
+			} else if (interaction.options.getSubcommand() === 'tournamentbanned') {
+				let csvData = [];
+
+				let lastUpdate = new Date();
+
+				for (let i = 0; i < file.length; i++) {
+					let osuUserId = file[i].trim();
+
+					if (new Date() - lastUpdate > 15000) {
+						let osuName = await getOsuPlayerName(osuUserId);
+						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						lastUpdate = new Date();
+					}
+
+					logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 2');
+					let discordUser = await DBDiscordUsers.findOne({
+						where: {
+							osuUserId: osuUserId,
+						},
+					});
+
+					if (discordUser && discordUser.tournamentBannedUntil && discordUser.tournamentBannedUntil > new Date()) {
+						csvData.push({
+							osuUserId: osuUserId,
+							tournamentBannedUntil: new Date(discordUser.tournamentBannedUntil).toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+							tournamentBannedReason: discordUser.tournamentBannedReason,
+						});
+
+						continue;
+					}
+
+					let additionalInfo = await getAdditionalOsuInfo(osuUserId);
+
+					if (additionalInfo.tournamentBan && additionalInfo.tournamentBan.tournamentBannedUntil > new Date()) {
+						csvData.push({
+							osuUserId: osuUserId,
+							tournamentBannedUntil: new Date(additionalInfo.tournamentBan.tournamentBannedUntil).toLocaleDateString('en-GB', { timeZone: 'UTC' }),
+							tournamentBannedReason: additionalInfo.tournamentBan.description,
+						});
+					}
 				}
 
-				return await interaction.channel.send({ content: 'No tournament banned users found.' });
-			}
+				await processingMessage.delete();
 
-			let data = [];
-			for (let i = 0; i < csvData.length; i++) {
-				data.push(csvData[i]);
+				if (csvData.length === 0) {
+					if (interaction.client.hostCommands.includes(randomString)) {
+						interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
+					}
 
-				if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
-					let csv = new ObjectsToCsv(data);
-					csv = await csv.toString();
-					const buffer = Buffer.from(csv);
-					//Create as an attachment
-					const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentbans.csv' });
+					return await interaction.channel.send({ content: 'No tournament banned users found.' });
+				}
 
-					await interaction.channel.send({ content: 'Tournament banned users', files: [attachment] });
-					data = [];
+				let data = [];
+				for (let i = 0; i < csvData.length; i++) {
+					data.push(csvData[i]);
+
+					if (i % 10000 === 0 && i > 0 || csvData.length - 1 === i) {
+						let csv = new ObjectsToCsv(data);
+						csv = await csv.toString();
+						const buffer = Buffer.from(csv);
+						//Create as an attachment
+						const attachment = new Discord.AttachmentBuilder(buffer, { name: 'tournamentbans.csv' });
+
+						await interaction.channel.send({ content: 'Tournament banned users', files: [attachment] });
+						data = [];
+					}
 				}
 			}
+		} catch (error) {
+			console.error('osu-host backup catch', error);
+		}
 
-			if (interaction.client.hostCommands.includes(randomString)) {
-				interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
-			}
+		if (interaction.client.hostCommands.includes(randomString)) {
+			interaction.client.hostCommands.splice(interaction.client.hostCommands.indexOf(randomString), 1);
 		}
 	},
 };
