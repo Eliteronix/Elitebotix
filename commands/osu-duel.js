@@ -829,7 +829,7 @@ module.exports = {
 				// createDuelMatch(additionalObjects[0], additionalObjects[1], interaction, averageStarRating, lowerBound, upperBound, bestOf, onlyRanked, everyUser);
 
 				let settings = {
-					interaction: interaction,
+					interaction: interaction.id,
 					averageStarRating: averageStarRating,
 					lowerBound: lowerBound,
 					upperBound: upperBound,
