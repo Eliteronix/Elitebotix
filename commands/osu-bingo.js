@@ -583,7 +583,7 @@ module.exports = {
 
 		try {
 			const eliteronixUser = await interaction.client.users.fetch('138273136285057025');
-			await eliteronixUser.send(`A bingo match has been started by <@${commandUser.userId}> with the following players: ${uniqueUsers.join('>, <')}.`);
+			await eliteronixUser.send(`A bingo match has been started by <@${commandUser.userId}> with the following players: <${uniqueUsers.join('>, <@')}>.`);
 		} catch (error) {
 			console.error(error);
 		}
