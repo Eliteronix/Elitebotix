@@ -23,7 +23,7 @@ module.exports = {
 		});
 
 		if (process.env.SERVER === 'Dev') {
-			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 0);
+			return await processIncompleteScores(osuApi, client, processQueueEntry, '964656429485154364', 5);
 		}
 
 		logOsuAPICalls('processQueueTasks/saveMultiMatches.js main');
