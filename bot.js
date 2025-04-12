@@ -201,6 +201,7 @@ function readyDiscord() {
 	console.log('The Bot is ready.');
 
 	client.startDate = new Date();
+	client.duels = [];
 	client.otherMatches = [];
 	client.matchTracks = [];
 	client.bingoMatches = [];
