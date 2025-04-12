@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
@@ -263,8 +263,12 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						}
 					}
 
-					const IRCUser = bancho.getUser(osuUser.name);
-					IRCUser.sendMessage(`The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					await DBElitebotixBanchoProcessQueue.create({
+						task: 'osu-duel',
+						additions: `${osuUser.id};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
+						date: new Date(),
+					});
+
 					await interaction.editReply(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 				} else {
 					let verificationCode = Math.random().toString(36).substring(8);
@@ -305,8 +309,11 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						}
 					}
 
-					const IRCUser = bancho.getUser(osuUser.name);
-					IRCUser.sendMessage(`The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+					await DBElitebotixBanchoProcessQueue.create({
+						task: 'osu-duel',
+						additions: `${osuUser.id};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
+						date: new Date(),
+					});
 
 					await interaction.editReply(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 				}
@@ -431,8 +438,12 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 								}
 							}
 
-							const IRCUser = bancho.getUser(osuUser.name);
-							IRCUser.sendMessage(`The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`);
+							await DBElitebotixBanchoProcessQueue.create({
+								task: 'osu-duel',
+								additions: `${discordUser.osuUserId};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
+								date: new Date(),
+							});
+
 							await interaction.editReply(`A verification code has been sent to \`${osuUser.name}\` using osu! dms!\nIf you did not receive a message then open your game client and try again.\nIf that didn't work make sure to have messages by non-friends enabled.`);
 						})
 						.catch(async (err) => {
