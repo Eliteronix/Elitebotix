@@ -291,6 +291,11 @@ module.exports = {
 			multiScores[i].matchStartDate = match.matchStartDate;
 		}
 
+		if (multiScores.length === 0) {
+			console.error('osu-wrapped: No scores found for user', osuUser.osuUserId, 'in year', year);
+			return await interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
+		}
+
 		let matchesChecked = [];
 		let matchesWon = 0;
 		let matchesLost = 0;
