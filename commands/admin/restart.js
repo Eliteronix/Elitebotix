@@ -31,7 +31,6 @@ module.exports = {
 	async execute(interaction) {
 		let guildSizes = await interaction.client.shard.fetchClientValues('guilds.cache.size');
 		let startDates = await interaction.client.shard.fetchClientValues('startDate');
-		let duels = await interaction.client.shard.fetchClientValues('duels');
 		let other = await interaction.client.shard.fetchClientValues('otherMatches');
 		let matchtracks = await interaction.client.shard.fetchClientValues('matchTracks');
 		let bingoMatches = await interaction.client.shard.fetchClientValues('bingoMatches');
@@ -39,33 +38,13 @@ module.exports = {
 		let update = await interaction.client.shard.fetchClientValues('update');
 
 		// eslint-disable-next-line no-console
-		console.log('duels', duels);
-
-		let matches = duels.flat();
-		for (let i = 0; i < matches.length; i++) {
-			logDatabaseQueries(4, 'commands/admin/restart.js DBProcessQueue');
-			let processQueueTask = await DBProcessQueue.count({
-				where: {
-					task: 'importMatch',
-					additions: matches[i],
-				},
-			});
-
-			if (processQueueTask) {
-				continue;
-			}
-
-			let date = new Date();
-			await DBProcessQueue.create({ guildId: 'None', task: 'importMatch', additions: `${matches[i]};0`, priority: 1, date: date });
-		}
-		// eslint-disable-next-line no-console
 		console.log('other', other);
 		// eslint-disable-next-line no-console
 		console.log('matchtracks', matchtracks);
 
-		const dividingLine = '---------|------------------|--------|-------|-------|------------|-------|---------|--------\n';
+		const dividingLine = '---------|------------------|--------|-------|------------|-------|---------|--------\n';
 
-		let output = `\`\`\`Cur.: ${interaction.client.shardId.toString().padStart(2, '0')} | Started          | Guilds | Duels | Other | Matchtrack | Bingo | HostCmd | Update\n`;
+		let output = `\`\`\`Cur.: ${interaction.client.shardId.toString().padStart(2, '0')} | Started          | Guilds | Other | Matchtrack | Bingo | HostCmd | Update\n`;
 		for (let i = 0; i < guildSizes.length; i++) {
 			try {
 				if ((output + dividingLine).length > 1997) {
@@ -78,14 +57,13 @@ module.exports = {
 				let startDate = new Date(startDates[i]);
 				let startedString = `${startDate.getUTCHours().toString().padStart(2, '0')}:${startDate.getUTCMinutes().toString().padStart(2, '0')} ${startDate.getUTCDate().toString().padStart(2, '0')}.${(startDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${startDate.getUTCFullYear()}`;
 				let guildSize = guildSizes[i].toString().padStart(6, ' ');
-				let duelSize = duels[i].length.toString().padStart(5, ' ');
 				let otherSize = other[i].length.toString().padStart(5, ' ');
 				let matchtrackSize = matchtracks[i].length.toString().padStart(10, ' ');
 				let bingoMatchSize = bingoMatches[i].length.toString().padStart(5, ' ');
 				let hostCommandSize = hostCommands[i].length.toString().padStart(7, ' ');
 				let updateString = update[i].toString().padStart(6, ' ');
 
-				const shardLine = `Shard ${i.toString().padStart(2, '0')} | ${startedString} | ${guildSize} | ${duelSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
+				const shardLine = `Shard ${i.toString().padStart(2, '0')} | ${startedString} | ${guildSize} | ${otherSize} | ${matchtrackSize} | ${bingoMatchSize} | ${hostCommandSize} | ${updateString}\n`;
 
 				if ((output + shardLine).length > 1997) {
 					output = output + '```';
@@ -117,9 +95,9 @@ module.exports = {
 		// Restart relevant ones
 		await interaction.client.shard.broadcastEval(async (c, { condition }) => {
 			if (condition === 'all' ||
-				condition === 'free' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0 ||
+				condition === 'free' && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0 ||
 				!isNaN(condition) && c.shardId === parseInt(condition) ||
-				condition === 'update' && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
+				condition === 'update' && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
 				process.exit();
 			} else if (condition === 'update') {
