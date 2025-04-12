@@ -547,7 +547,7 @@ module.exports = {
 				}
 
 				// Attach match log
-				let attachment = new Discord.AttachmentBuilder(`./matchLogs/${channel.lobby.id}.txt`, { name: `${channel.lobby.id}.txt` });
+				let attachment = new Discord.AttachmentBuilder(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs/${channel.lobby.id}.txt`, { name: `${channel.lobby.id}.txt` });
 
 				let user = await client.users.fetch(args[0]);
 				await user.send({ content: `The scheduled Qualifier match has finished. <https://osu.ppy.sh/mp/${lobby.id}>\nMatch: \`${args[5]}\`\nScheduled players: ${players}\nMappool: ${args[6]}`, files: [attachment] });

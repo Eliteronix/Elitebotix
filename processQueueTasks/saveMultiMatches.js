@@ -438,11 +438,11 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 			// Get all matchLogs that contain "Looking for a map..." and are not verified
 			const fs = require('fs');
 
-			let matchLogFiles = fs.readdirSync('./matchLogs');
+			let matchLogFiles = fs.readdirSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`);
 			let matchLogsToVerify = [];
 
 			for (let i = 0; i < matchLogFiles.length; i++) {
-				let matchLog = fs.readFileSync(`./matchLogs/${matchLogFiles[i]}`, 'utf8');
+				let matchLog = fs.readFileSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs/${matchLogFiles[i]}`, 'utf8');
 
 				if (matchLog.includes('[Eliteronix]: Looking for a map...') || matchLog.includes('[Elitebotix]: Looking for a map...')) {
 					matchLogsToVerify.push(matchLogFiles[i].replace('.txt', ''));

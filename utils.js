@@ -7303,11 +7303,11 @@ module.exports = {
 		const fs = require('fs');
 
 		//Check if the matchLogs folder exists and create it if necessary
-		if (!fs.existsSync('./matchLogs')) {
-			fs.mkdirSync('./matchLogs');
+		if (!fs.existsSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`)) {
+			fs.mkdirSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`);
 		}
 
-		fs.writeFile(`./matchLogs/${matchId}.txt`, matchLog, function (err) {
+		fs.writeFile(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs/${matchId}.txt`, matchLog, function (err) {
 			if (err) {
 				return console.error(err);
 			}
