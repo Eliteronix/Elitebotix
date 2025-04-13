@@ -22,7 +22,13 @@ module.exports = {
 				message = `Follow Notification:\n\`${players.join('`, `')}\` played one or more rounds in a match.\n${args[3]}\n(Qualifier MP Links are hidden)`;
 			}
 
-			await user.send(message);
+			try {
+				await user.send(message);
+			} catch (error) {
+				if (error.message !== 'Cannot send messages to this user') {
+					console.error(error);
+				}
+			}
 		}
 		processQueueEntry.destroy();
 	},
