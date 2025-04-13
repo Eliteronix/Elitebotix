@@ -857,42 +857,6 @@ module.exports = {
 				scheduledMatches.push(`\`\`\`Scheduled:\nInternal ID: ${tourneyMatchNotifications[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 			}
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 2');
-			const tourneyMatchReferees = await DBProcessQueue.findAll({
-				where: {
-					guildId: interaction.guildId,
-					task: 'tourneyMatchReferee'
-				}
-			});
-
-			for (let i = 0; i < tourneyMatchReferees.length; i++) {
-				let additions = tourneyMatchReferees[i].additions.split(';');
-				let players = additions[3].replaceAll('|', ',').split(',');
-				let dbPlayers = [];
-				for (let j = 0; j < players.length; j++) {
-					//TODO: add attributes and logdatabasequeries
-					logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 3');
-					const dbDiscordUser = await DBDiscordUsers.findOne({
-						where: { id: players[j] }
-					});
-					dbPlayers.push(dbDiscordUser);
-				}
-
-				// Sort players by id desc
-				dbPlayers.sort((a, b) => (a.id > b.id) ? 1 : -1);
-
-				players = additions[3];
-				for (let j = 0; j < dbPlayers.length; j++) {
-					players = players.replace(dbPlayers[j].dataValues.id, dbPlayers[j].dataValues.osuName);
-				}
-
-				const matchDate = tourneyMatchReferees[i].date;
-				matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
-
-				scheduledMatches.push(`\`\`\`Scheduled (Already pinged):\nInternal ID: ${tourneyMatchReferees[i].id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
-			}
-
 			if (!scheduledMatches.length) {
 				return interaction.followUp('No matches scheduled.');
 			} else {
@@ -921,7 +885,7 @@ module.exports = {
 				}
 			});
 
-			if (processQueueTask && (processQueueTask.task === 'tourneyMatchNotification' || processQueueTask.task === 'tourneyMatchReferee')) {
+			if (processQueueTask && processQueueTask.task === 'tourneyMatchNotification') {
 				let additions = processQueueTask.additions.split(';');
 				let players = additions[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
@@ -943,11 +907,7 @@ module.exports = {
 				}
 
 				const matchDate = processQueueTask.date;
-				if (processQueueTask.task === 'tourneyMatchNotification') {
-					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
-				} else if (processQueueTask.task === 'tourneyMatchReferee') {
-					matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 10);
-				}
+				matchDate.setUTCMinutes(matchDate.getUTCMinutes() + 15);
 
 				interaction.followUp(`The following match has been removed and is no longer scheduled to happen:\n\`\`\`Internal ID: ${processQueueTask.id}\nTime: ${matchDate.getUTCDate().toString().padStart(2, '0')}.${(matchDate.getUTCMonth() + 1).toString().padStart(2, '0')}.${matchDate.getUTCFullYear()} ${matchDate.getUTCHours().toString().padStart(2, '0')}:${matchDate.getUTCMinutes().toString().padStart(2, '0')} UTC\nMatch: ${additions[5]}\nScheduled players: ${players}\nMappool: ${additions[6]}\`\`\``);
 
