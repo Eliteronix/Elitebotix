@@ -147,8 +147,7 @@ module.exports = {
 				return await processQueueEntry.save();
 			})
 			.catch(async (error) => {
-				console.error(error.message);
-				console.error(error.message, error, `[${client.shardId}] API Key Index ${parseInt(matchId) % process.env.OSUTOKENSV1.split('-').length} going same importMatch.js https://osu.ppy.sh/community/matches/${parseInt(matchId)}`);
+				console.error(error, `[${client.shardId}] API Key Index ${parseInt(matchId) % process.env.OSUTOKENSV1.split('-').length} going same importMatch.js https://osu.ppy.sh/community/matches/${parseInt(matchId)}`);
 				//Go same if error
 				let date = new Date();
 				date.setUTCMinutes(date.getUTCMinutes() + 5);
