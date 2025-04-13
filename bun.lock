@@ -20,9 +20,9 @@
         "node-osu": "^2.2.1",
         "objects-to-csv": "^1.3.6",
         "prom-client": "^14.1.1",
-        "rosu-pp-js": "^2.0.0",
+        "rosu-pp-js": "^3.0.0",
         "sequelize": "^6.26.0",
-        "sqlite3": "^5.1.2",
+        "sqlite3": "^5.1.7",
         "tmi.js": "^1.8.5",
         "weather-js": "^2.0.0",
       },
@@ -648,7 +648,7 @@
 
     "rimraf": ["rimraf@3.0.2", "", { "dependencies": { "glob": "^7.1.3" }, "bin": { "rimraf": "bin.js" } }, "sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA=="],
 
-    "rosu-pp-js": ["rosu-pp-js@2.0.0", "", {}, "sha512-gm5jrcuwzBy7muCBB9/WAK+olbbHsD2KARO13eh4QF3aFRLIo6O65XkRbkE7IBph+YCh5dWfWgoWVfQnz6BOGQ=="],
+    "rosu-pp-js": ["rosu-pp-js@3.0.0", "", {}, "sha512-jqeOUPEj2sIY/z8adkYCZNebizS5NY/z5uHf7V3U2zXc2tWdUBh6jtbCwhbScThJMeebH4ADgzbrKRx1VeFRWw=="],
 
     "run-parallel": ["run-parallel@1.2.0", "", { "dependencies": { "queue-microtask": "^1.2.2" } }, "sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA=="],
 
