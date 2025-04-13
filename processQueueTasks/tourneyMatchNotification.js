@@ -1,4 +1,4 @@
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { logBroadcastEval } = require('../config.json');
 
@@ -65,8 +65,8 @@ module.exports = {
 
 				console.log(`[${c.shardId}] Sending match notification to ${dbPlayers.join(', ')} for match ${args[5]} at ${matchTime} (invite send time: ${inviteSendTime})`);
 				await channel.send(`Hi, I will be reffing your match <@${dbPlayers.join('>, <@')}>!\nYour match starts <t:${Date.parse(matchTime) / 1000}:R>. Invites will be sent <t:${inviteSendTime}:R>.\nIngame invites will be sent out by \`${process.env.OSUNAME}\` - be sure to allow DMs on discord as a backup.`);
-				logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue create');
-				DBProcessQueue.create({ guildId: processQueueEntry.guildId, task: 'tourneyMatchReferee', priority: 10, additions: processQueueEntry.additions, date: inviteTime });
+				logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBElitebotixBanchoProcessQueue create');
+				DBElitebotixBanchoProcessQueue.create({ task: 'tourneyMatchReferee', additions: processQueueEntry.additions, date: inviteTime });
 			}
 		}, { context: { channelId: args[1], processQueueEntryId: processQueueEntry.id } });
 
