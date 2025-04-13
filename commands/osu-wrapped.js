@@ -321,7 +321,13 @@ module.exports = {
 			// }
 
 			if (new Date() - lastUpdate > 15000) {
-				await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				try {
+					await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
+				} catch (error) {
+					if (error.message !== 'Invalid Webhook Token') {
+						throw error;
+					}
+				}
 				lastUpdate = new Date();
 			}
 
@@ -725,6 +731,14 @@ module.exports = {
 		//Create as an attachment
 		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-wrapped-${osuUser.osuUserId}-${year}.png` })];
 
-		return await interaction.editReply({ content: ' ', files: files });
+		try {
+			await interaction.editReply({ content: ' ', files: files });
+		} catch (error) {
+			if (error.message === 'Invalid Webhook Token') {
+				await interaction.channel.send({ content: ' ', files: files });
+			} else {
+				throw error;
+			}
+		}
 	},
 };
