@@ -382,7 +382,7 @@ module.exports = {
 							matchesLost++;
 						}
 					} catch (error) {
-						console.error(ownScores, matchScores);
+						console.log(ownScores.map(entry => entry.dataValues), matchScores.map(entry => entry.dataValues));
 						console.error(error);
 					}
 				}
