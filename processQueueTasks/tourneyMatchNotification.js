@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
+const { DBDiscordUsers } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { logBroadcastEval } = require('../config.json');
 
@@ -13,7 +13,7 @@ module.exports = {
 		}
 
 		let foundChannel = await client.shard.broadcastEval(async (c, { channelId, processQueueEntryId }) => {
-			const { DBDiscordUsers, DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+			const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			logDatabaseQueries(2, 'processQueueTasks/tourneyFollow.js DBProcessQueue');
