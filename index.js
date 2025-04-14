@@ -269,6 +269,8 @@ manager.on('shardCreate', shard => {
 			shard.send({ type: 'totalShards', data: { totalShards: manager.shards.size } });
 		});
 	});
+
+	shard.on('error', error => console.error('Shard error index.js', error));
 });
 
 manager.spawn()
