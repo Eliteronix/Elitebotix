@@ -125,8 +125,8 @@ client.login(process.env.BOTTOKEN);
 //Get manager messages
 process.webRequestsWaiting = [];
 process.on('message', message => {
-	console.log(message);
 	if (!message.type) return false;
+	console.log(message);
 
 	if (message.type == 'shardId') {
 		// eslint-disable-next-line no-console
