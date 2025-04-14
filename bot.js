@@ -126,7 +126,6 @@ client.login(process.env.BOTTOKEN);
 process.webRequestsWaiting = [];
 process.on('message', message => {
 	if (!message.type) return false;
-	console.log(message);
 
 	if (message.type == 'shardId') {
 		// eslint-disable-next-line no-console
