@@ -125,6 +125,7 @@ client.login(process.env.BOTTOKEN);
 //Get manager messages
 process.webRequestsWaiting = [];
 process.on('message', message => {
+	console.log(message);
 	if (!message.type) return false;
 
 	if (message.type == 'shardId') {
