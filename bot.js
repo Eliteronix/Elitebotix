@@ -133,6 +133,15 @@ process.on('message', message => {
 		client.shardId = message.data.shardId;
 		process.shardId = message.data.shardId;
 
+		// log websocket connection
+		if (message.data.shardId === 7) {
+			client.on('shardDisconnect', (event, shardId) => console.log(`[${shardId}] Shard disconnected with code: ${event.code} and reason: ${event.reason}`));
+			client.on('shardReconnecting', (shardId) => console.log(`[${shardId}] Shard reconnecting...`));
+			client.on('shardReady', (shardId) => console.log(`[${shardId}] Shard ready!`));
+			client.on('shardResume', (shardId, replayedEvents) => console.log(`[${shardId}] Shard resumed with ${replayedEvents} events replayed`));
+			client.on('shardError', (error, shardId) => console.log(`[${shardId}] Shard error: ${error}`));
+		}
+
 		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
 		}
