@@ -271,6 +271,13 @@ manager.on('shardCreate', shard => {
 	});
 
 	shard.on('error', error => console.error('Shard error index.js', error));
+
+	shard.on('death', () => console.log(shard.id, 'death'));
+	shard.on('disconnect', () => console.log(shard.id, 'disconnect'));
+	shard.on('ready', () => console.log(shard.id, 'ready'));
+	shard.on('reconnecting', () => console.log(shard.id, 'reconnecting'));
+	shard.on('resume', () => console.log(shard.id, 'resume'));
+	shard.on('spawn', () => console.log(shard.id, 'spawn'));
 });
 
 manager.spawn()
