@@ -140,6 +140,14 @@ process.on('message', message => {
 			client.on('shardReady', (shardId) => console.log(`[${shardId}] Shard ready!`));
 			client.on('shardResume', (shardId, replayedEvents) => console.log(`[${shardId}] Shard resumed with ${replayedEvents} events replayed`));
 			client.on('shardError', (error, shardId) => console.log(`[${shardId}] Shard error: ${error}`));
+
+			//log what what the client.ws is receiving
+			client.on('raw', (packet) => {
+				if (packet.t) {
+					// eslint-disable-next-line no-console
+					console.log(`[${client.shardId}] ${packet.t} received`);
+				}
+			});
 		}
 
 		if (!wrongCluster(client)) {
