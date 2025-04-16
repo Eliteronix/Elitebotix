@@ -141,13 +141,6 @@ process.on('message', message => {
 			//client.on('shardResume', (shardId, replayedEvents) => console.log(`[${shardId}] Shard resumed with ${replayedEvents} events replayed`));
 			//client.on('shardError', (error, shardId) => console.log(`[${shardId}] Shard error: ${error}`));
 
-			//log what what the client.ws is receiving
-			client.on('raw', (packet) => {
-				if (packet.t && client.shardId === 7) {
-					// eslint-disable-next-line no-console
-					console.log(`[${client.shardId}] ${packet.t} received`);
-				}
-			});
 		}
 
 		if (!wrongCluster(client)) {
@@ -286,6 +279,14 @@ function readyDiscord() {
 	}, 60000);
 
 }
+
+//log what what the client.ws is receiving
+client.on('raw', (packet) => {
+	if (packet.t && client.shardId === 7) {
+		// eslint-disable-next-line no-console
+		console.log(`[${client.shardId}] ${packet.t} received`);
+	}
+});
 
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
