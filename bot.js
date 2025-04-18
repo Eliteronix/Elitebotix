@@ -300,6 +300,7 @@ client.ws.on('debug', (info) => {
 	}
 });
 
+// Debug logging for heartbeat etc
 client.on('debug', (msg) => {
 	if (client.shard.ids[0] === 7) {
 		console.log(`[DEBUG][Shard ${client.shard?.ids?.[0]}]: ${msg}`);
