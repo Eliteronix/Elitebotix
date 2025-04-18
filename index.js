@@ -270,7 +270,17 @@ manager.on('shardCreate', shard => {
 		});
 	});
 
-	shard.on('error', error => console.error('Shard error index.js', error));
+	shard.on('disconnect', (event) => {
+		console.warn(`Shard ${shard.id} disconnected with code ${event.code} and reason: ${event.reason}`);
+	});
+
+	shard.on('reconnect', () => {
+		console.log(`Shard ${shard.id} is reconnecting...`);
+	});
+
+	shard.on('error', (error) => {
+		console.error(`Shard ${shard.id} encountered an error:`, error);
+	});
 
 	shard.on('death', () => console.log(shard.id, 'death'));
 	shard.on('disconnect', () => console.log(shard.id, 'disconnect'));
