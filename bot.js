@@ -307,14 +307,14 @@ client.on('debug', (msg) => {
 	}
 });
 
-const eventLoopLag = require('event-loop-lag')(1000); // check every 1s
+// const eventLoopLag = require('event-loop-lag')(1000); // check every 1s
 
-setInterval(() => {
-	const lag = eventLoopLag();
-	if (lag > 200) {
-		console.warn(`[Shard ${client.shard.ids[0]}] Event loop lag detected: ${lag}ms`);
-	}
-}, 5000);
+// setInterval(() => {
+// 	const lag = eventLoopLag();
+// 	if (lag > 200) {
+// 		console.warn(`[Shard ${client.shard.ids[0]}] Event loop lag detected: ${lag}ms`);
+// 	}
+// }, 5000);
 
 let reconnects = 0;
 
@@ -331,7 +331,7 @@ const blocked = require('blocked-at');
 blocked((time, stack) => {
 	console.warn(`[LAG DETECTED] Blocked for ${time}ms`);
 	console.warn(stack);
-}, { threshold: 1000 }); // logs only if > 1 second of lag
+}, { threshold: 10000 });
 
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
