@@ -8357,10 +8357,6 @@ async function executeFoundTask(client, bancho, nextTask) {
 		if (nextTask && !module.exports.wrongCluster(client, nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
-			if (client.shardId === 7) {
-				console.log(`Executing process queue task ${nextTask.task} with id ${nextTask.id}...`);
-			}
-
 			await task.execute(client, bancho, nextTask);
 		}
 	} catch (e) {
