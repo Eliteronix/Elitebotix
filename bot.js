@@ -288,6 +288,18 @@ function readyDiscord() {
 // 	}
 // });
 
+client.ws.on('close', (code, reason) => {
+	console.warn(`[Shard ${client.shard.ids[0]}] WebSocket closed. Code: ${code}, Reason: ${reason}`);
+});
+
+client.ws.on('debug', (info) => {
+	console.log(`[Shard ${client.shard.ids[0]}] WS Debug: ${info}`);
+});
+
+client.on('debug', (msg) => {
+	console.log(`[DEBUG][Shard ${client.shard?.ids?.[0]}]: ${msg}`);
+});
+
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
 client.on('messageUpdate', messageUpdate);
