@@ -239,16 +239,8 @@ let osuWebRequestQueue = [];
 let manager = new ShardingManager('./bot.js', {
 	token: process.env.BOTTOKEN,
 	execArgv: ['--use_strict', '--unhandled-rejections=warn', '--max-old-space-size=4096'],
-	totalShards: 9
+	totalShards: 'auto'
 });
-
-if (process.env.SERVER === 'Dev') {
-	manager = new ShardingManager('./bot.js', {
-		token: process.env.BOTTOKEN,
-		execArgv: ['--use_strict', '--unhandled-rejections=warn', '--max-old-space-size=4096'],
-		totalShards: 1
-	});
-}
 
 manager.on('Error', error => {
 	console.error('index.js | manager error' + error);
