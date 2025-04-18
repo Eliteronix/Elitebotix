@@ -435,93 +435,292 @@ async function processIncompleteScores(osuApi, client, processQueueEntry, channe
 					}
 				});
 		} else {
-			// Get all matchLogs that contain "Looking for a map..." and are not verified
-			const fs = require('fs');
-			if (!fs.existsSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`)) {
-				fs.mkdirSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`);
-			}
-			let matchLogFiles = fs.readdirSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`);
-			let matchLogsToVerify = [];
-
-			for (let i = 0; i < matchLogFiles.length; i++) {
-				let matchLog = fs.readFileSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs/${matchLogFiles[i]}`, 'utf8');
-
-				if (matchLog.includes('[Eliteronix]: Looking for a map...') || matchLog.includes('[Elitebotix]: Looking for a map...')) {
-					matchLogsToVerify.push(matchLogFiles[i].replace('.txt', ''));
-				}
-			}
-
-			logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches');
-			let matchesToVerify = await DBOsuMultiMatches.findAll({
+			// Verify matches instead
+			logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches verify matches');
+			incompleteMatch = await DBOsuMultiMatches.findOne({
 				attributes: ['matchId'],
 				where: {
+					tourneyMatch: true,
 					verifiedAt: null,
-					matchId: {
-						[Op.in]: matchLogsToVerify,
+					verifiedBy: null,
+					matchName: {
+						[Op.startsWith]: 'ROMAI'
 					},
 					matchEndDate: {
 						[Op.not]: null,
 					},
 				},
-				group: ['matchId'],
+				order: [
+					['matchId', 'ASC']
+				]
 			});
 
-			matchesToVerify = matchesToVerify.map(match => match.matchId);
+			if (incompleteMatch) {
+				// Fetch the match and check if the match was created by DarkerSniper
+				logOsuAPICalls('processQueueTasks/saveMultiMatches.js DarkerSniper match check');
+				await osuApi.getMatch({ mp: incompleteMatch.matchId })
+					.then(async (match) => {
+						try {
+							await awaitWebRequestPermission(`https://osu.ppy.sh/community/matches/${match.id}`, client);
+							await fetch(`https://osu.ppy.sh/community/matches/${match.id}`)
+								.then(async (res) => {
+									let htmlCode = await res.text();
+									htmlCode = htmlCode.replace(/&quot;/gm, '"');
+									const matchRunningRegex = /{"match".+,"current_game_id":\d+}/gm;
+									const matchPausedRegex = /{"match".+,"current_game_id":null}/gm;
+									const matchesRunning = matchRunningRegex.exec(htmlCode);
+									const matchesPaused = matchPausedRegex.exec(htmlCode);
 
-			if (matchesToVerify.length) {
-				// If there is a match to verify
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Elitebotix duel match');
-				await DBOsuMultiMatches.update({
-					tourneyMatch: true,
-					verifiedAt: new Date(),
-					verifiedBy: 31050083, // Elitebotix
-					verificationComment: 'Elitebotix Duel Match',
-					referee: 31050083, // Elitebotix
-				}, {
-					where: {
-						matchId: {
-							[Op.in]: matchesToVerify,
-						},
-					},
-				});
+									let regexMatch = null;
+									if (matchesRunning && matchesRunning[0]) {
+										regexMatch = matchesRunning[0];
+									}
 
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Elitebotix duel match');
-				await DBOsuMultiGames.update({
-					tourneyMatch: true,
-				}, {
-					where: {
-						matchId: {
-							[Op.in]: matchesToVerify,
-						},
-					},
-				});
+									if (matchesPaused && matchesPaused[0]) {
+										regexMatch = matchesPaused[0];
+									}
 
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Elitebotix duel match');
-				await DBOsuMultiGameScores.update({
-					tourneyMatch: true,
-				}, {
-					where: {
-						matchId: {
-							[Op.in]: matchesToVerify,
-						},
-					},
-				});
+									if (regexMatch) {
+										let json = JSON.parse(regexMatch);
 
-				for (let i = 0; i < matchesToVerify.length; i++) {
-					if (logVerificationProcess) {
-						// eslint-disable-next-line no-console
-						console.log(`Match ${matchesToVerify[i]} verified - Elitebotix Duel Match`);
-					}
+										if (json.events[0].detail.type === 'match-created') {
+											if (json.events[0].user_id === 13448067) {
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update DarkerSniper match');
+												await DBOsuMultiMatches.update({
+													tourneyMatch: true,
+													verifiedAt: new Date(),
+													verifiedBy: 31050083, // Elitebotix
+													verificationComment: 'Match created by DarkerSniper',
+													referee: json.events[0].user_id,
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
 
-					await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Elitebotix Duel Match\`\`\`https://osu.ppy.sh/mp/${matchesToVerify[i]} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
-				}
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update DarkerSniper match');
+												await DBOsuMultiGames.update({
+													tourneyMatch: true,
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
+
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update DarkerSniper match');
+												await DBOsuMultiGameScores.update({
+													tourneyMatch: true,
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
+
+												if (logVerificationProcess) {
+													// eslint-disable-next-line no-console
+													console.log(`Match ${match.id} verified - Match created by DarkerSniper`);
+												}
+
+												await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Match created by DarkerSniper\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
+											} else {
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update DarkerSniper match');
+												await DBOsuMultiMatches.update({
+													tourneyMatch: false,
+													verifiedAt: new Date(),
+													verifiedBy: 31050083, // Elitebotix
+													verificationComment: 'Match not created by DarkerSniper',
+													referee: json.events[0].user_id,
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
+
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update DarkerSniper match');
+												await DBOsuMultiGames.update({
+													tourneyMatch: false,
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
+
+												logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update DarkerSniper match');
+												await DBOsuMultiGameScores.update({
+													tourneyMatch: false,
+												}, {
+													where: {
+														matchId: match.id,
+													},
+												});
+
+												if (logVerificationProcess) {
+													// eslint-disable-next-line no-console
+													console.log(`Match ${match.id} verified as fake - Match not created by DarkerSniper`);
+												}
+
+												await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`ini\n[Changed]\`\`\`\`\`\`diff\n- Valid: False\nComment: Match not created by DarkerSniper\`\`\`https://osu.ppy.sh/mp/${match.id} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
+											}
+										} else {
+											logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update not determinable DarkerSniper match');
+											await DBOsuMultiMatches.update({
+												verifiedBy: 31050083, // Elitebotix
+												verificationComment: 'Not determinable if match was created by DarkerSniper',
+											}, {
+												where: {
+													matchId: match.id,
+												},
+											});
+
+											if (logVerificationProcess) {
+												// eslint-disable-next-line no-console
+												console.log(`Match ${match.id} not verified - Not determinable if match was created by DarkerSniper`);
+											}
+										}
+									}
+								});
+						} catch (e) {
+							if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
+								&& !e.message.endsWith('reason: read ECONNRESET')) {
+								console.error(e);
+							}
+							// Go same if error
+							secondsToWait = secondsToWait + 60;
+						}
+					})
+					.catch(async (err) => {
+						if (err.message === 'Not found') {
+							//If its not found anymore it should be fake because it must be created in a different way
+							logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update fake DarkerSniper match');
+							await DBOsuMultiMatches.update({
+								tourneyMatch: false,
+								verifiedAt: new Date(),
+								verifiedBy: 31050083, // Elitebotix
+								verificationComment: 'ROMAI not found - Fake because DarkerSniper uses !mp make to create matches',
+							}, {
+								where: {
+									matchId: incompleteMatch.matchId,
+								},
+							});
+
+							logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update fake DarkerSniper match');
+							await DBOsuMultiGames.update({
+								tourneyMatch: false,
+							}, {
+								where: {
+									matchId: incompleteMatch.matchId,
+								},
+							});
+
+							logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update fake DarkerSniper match');
+							await DBOsuMultiGameScores.update({
+								tourneyMatch: false,
+							}, {
+								where: {
+									matchId: incompleteMatch.matchId,
+								},
+							});
+
+							if (logVerificationProcess) {
+								// eslint-disable-next-line no-console
+								console.log(`Match ${incompleteMatch.matchId} verified as fake - ROMAI not found - Fake because DarkerSniper uses !mp make to create matches`);
+							}
+
+							await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`ini\n[Changed]\`\`\`\`\`\`diff\n- Valid: False\nComment: ROMAI not found - Fake because DarkerSniper uses !mp make to create matches\`\`\`https://osu.ppy.sh/mp/${incompleteMatch.matchId} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
+						} else {
+							// Go same if error
+							secondsToWait = secondsToWait + 60;
+						}
+					});
 			} else {
-				const result = await verifyAnyMatch(osuApi, client, logVerificationProcess);
+				// Get all matchLogs that contain "Looking for a map..." and are not verified
+				const fs = require('fs');
+				if (!fs.existsSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`)) {
+					fs.mkdirSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`);
+				}
+				let matchLogFiles = fs.readdirSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs`);
+				let matchLogsToVerify = [];
 
-				//await addMissingRefereeInfo(osuApi, client);
+				for (let i = 0; i < matchLogFiles.length; i++) {
+					let matchLog = fs.readFileSync(`${process.env.ELITEBOTIXBANCHOROOTPATH}/matchLogs/${matchLogFiles[i]}`, 'utf8');
 
-				if (result === true) {
-					secondsToWait = secondsToWait + 60;
+					if (matchLog.includes('[Eliteronix]: Looking for a map...') || matchLog.includes('[Elitebotix]: Looking for a map...')) {
+						matchLogsToVerify.push(matchLogFiles[i].replace('.txt', ''));
+					}
+				}
+
+				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches');
+				let matchesToVerify = await DBOsuMultiMatches.findAll({
+					attributes: ['matchId'],
+					where: {
+						verifiedAt: null,
+						matchId: {
+							[Op.in]: matchLogsToVerify,
+						},
+						matchEndDate: {
+							[Op.not]: null,
+						},
+					},
+					group: ['matchId'],
+				});
+
+				matchesToVerify = matchesToVerify.map(match => match.matchId);
+
+				if (matchesToVerify.length) {
+					// If there is a match to verify
+					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches update Elitebotix duel match');
+					await DBOsuMultiMatches.update({
+						tourneyMatch: true,
+						verifiedAt: new Date(),
+						verifiedBy: 31050083, // Elitebotix
+						verificationComment: 'Elitebotix Duel Match',
+						referee: 31050083, // Elitebotix
+					}, {
+						where: {
+							matchId: {
+								[Op.in]: matchesToVerify,
+							},
+						},
+					});
+
+					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGames update Elitebotix duel match');
+					await DBOsuMultiGames.update({
+						tourneyMatch: true,
+					}, {
+						where: {
+							matchId: {
+								[Op.in]: matchesToVerify,
+							},
+						},
+					});
+
+					logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiGameScores update Elitebotix duel match');
+					await DBOsuMultiGameScores.update({
+						tourneyMatch: true,
+					}, {
+						where: {
+							matchId: {
+								[Op.in]: matchesToVerify,
+							},
+						},
+					});
+
+					for (let i = 0; i < matchesToVerify.length; i++) {
+						if (logVerificationProcess) {
+							// eslint-disable-next-line no-console
+							console.log(`Match ${matchesToVerify[i]} verified - Elitebotix Duel Match`);
+						}
+
+						await sendMessageToLogChannel(client, process.env.VERIFICATIONLOG, `\`\`\`diff\n+ Valid: True\nComment: Elitebotix Duel Match\`\`\`https://osu.ppy.sh/mp/${matchesToVerify[i]} was verified by ${client.user.username}#${client.user.discriminator} (<@${client.user.id}> | <https://osu.ppy.sh/users/31050083>)`);
+					}
+				} else {
+					const result = await verifyAnyMatch(osuApi, client, logVerificationProcess);
+
+					//await addMissingRefereeInfo(osuApi, client);
+
+					if (result === true) {
+						secondsToWait = secondsToWait + 60;
+					}
 				}
 			}
 		}
@@ -595,11 +794,11 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 		//return await addMissingRefereeInfo(osuApi, client);
 	}
 
-	if (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm')) {
-		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches Last step of verification - ETX or o!mm not verifyable');
+	if (matchToVerify.matchName.startsWith('ETX') || matchToVerify.matchName.startsWith('o!mm') || matchToVerify.matchName.startsWith('ROMAI')) {
+		logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches Last step of verification - ETX, o!mm or ROMAI not verifyable');
 		await DBOsuMultiMatches.update({
 			verifiedBy: 31050083, // Elitebotix
-			verificationComment: 'Last step of verification - ETX or o!mm not verifyable',
+			verificationComment: 'Last step of verification - ETX, o!mm or ROMAI not verifyable',
 		}, {
 			where: {
 				matchId: matchToVerify.matchId,
@@ -608,7 +807,7 @@ async function verifyAnyMatch(osuApi, client, logVerificationProcess) {
 
 		if (logVerificationProcess) {
 			// eslint-disable-next-line no-console
-			console.log(`Match ${matchToVerify.matchId} verified - Last step of verification - ETX or o!mm not verifyable`);
+			console.log(`Match ${matchToVerify.matchId} verified - Last step of verification - ETX, o!mm or ROMAI not verifyable`);
 		}
 		return;
 	}
