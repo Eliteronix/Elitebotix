@@ -1,6 +1,6 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -98,7 +98,7 @@ module.exports = {
 		),
 	async execute(msg, args, interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);

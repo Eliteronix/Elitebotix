@@ -1,4 +1,4 @@
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
@@ -31,7 +31,7 @@ module.exports = {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -62,7 +62,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('There are no reminders set for you');
 			}
-			return await interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders set for you', flags: MessageFlags.Ephemeral });
 		}
 
 		let setReminders = [];
@@ -91,6 +91,6 @@ module.exports = {
 					return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 				});
 		}
-		return await interaction.editReply({ content: message, ephemeral: true });
+		return await interaction.editReply({ content: message, flags: MessageFlags.Ephemeral });
 	}
 };

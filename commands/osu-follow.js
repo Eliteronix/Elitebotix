@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { getOsuPlayerName, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 
@@ -152,7 +152,7 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);

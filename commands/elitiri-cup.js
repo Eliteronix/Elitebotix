@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObj
 const { getGuildPrefix, logDatabaseQueries, populateMsgFromInteraction } = require('../utils');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 const Discord = require('discord.js');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'elitiri-cup',
@@ -68,7 +69,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('The registration period has ended.');
 				}
-				return await interaction.reply({ content: 'The registration period has ended.', ephemeral: true });
+				return await interaction.reply({ content: 'The registration period has ended.', flags: MessageFlags.Ephemeral });
 			}
 
 			let guildPrefix = await getGuildPrefix(msg);
@@ -163,7 +164,7 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply('The registration period has ended and signups can\'t be changed anymore.');
 				}
-				return await interaction.reply({ content: 'The registration period has ended and signups can\'t be changed anymore.', ephemeral: true });
+				return await interaction.reply({ content: 'The registration period has ended and signups can\'t be changed anymore.', flags: MessageFlags.Ephemeral });
 			}
 
 			const guildPrefix = await getGuildPrefix(msg);
@@ -239,7 +240,7 @@ async function sendMessage(msg, interaction, content) {
 				msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
 			});
 	}
-	return await interaction.reply({ content: content, ephemeral: true });
+	return await interaction.reply({ content: content, flags: MessageFlags.Ephemeral });
 }
 
 async function createProcessQueueTask(bracketName) {

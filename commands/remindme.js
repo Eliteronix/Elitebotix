@@ -2,6 +2,7 @@ const { DBProcessQueue } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'remindme',
@@ -141,7 +142,7 @@ module.exports = {
 
 		if (interaction) {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -213,7 +214,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 			}
-			return await interaction.editReply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, ephemeral: true });
+			return await interaction.editReply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, flags: MessageFlags.Ephemeral });
 		}
 
 		if (now.getTime() === date.getTime()) {
@@ -221,7 +222,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
 			}
-			return await interaction.editReply({ content: 'You didn\'t specify when I should remind you.', ephemeral: true });
+			return await interaction.editReply({ content: 'You didn\'t specify when I should remind you.', flags: MessageFlags.Ephemeral });
 		}
 
 		logDatabaseQueries(4, 'commands/remindme.js DBProcessQueue create');
@@ -231,6 +232,6 @@ module.exports = {
 			return msg.reply('Reminder has been set. Be sure to have DMs enabled for the bot.');
 		}
 
-		return await interaction.editReply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', ephemeral: true });
+		return await interaction.editReply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', flags: MessageFlags.Ephemeral });
 	},
 };

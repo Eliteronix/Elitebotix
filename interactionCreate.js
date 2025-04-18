@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 const cooldowns = new Discord.Collection();
-const { PermissionsBitField } = require('discord.js');
+const { PermissionsBitField, MessageFlags } = require('discord.js');
 const { developers, salesmen } = require('./config.json');
 
 module.exports = async function (client, bancho, interaction) {
@@ -50,13 +50,13 @@ module.exports = async function (client, bancho, interaction) {
 			const botPermissions = interaction.channel.permissionsFor(member);
 			if (!botPermissions || !botPermissions.has(PermissionsBitField.Flags.ViewChannel)) {
 				//The bot can't possibly answer the message
-				return await interaction.reply({ content: 'I can\'t view this channel.', ephemeral: true });
+				return await interaction.reply({ content: 'I can\'t view this channel.', flags: MessageFlags.Ephemeral });
 			}
 
 			//Check the command permissions
 			if (command.botPermissions) {
 				if (!botPermissions.has(command.botPermissions)) {
-					return await interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, ephemeral: true });
+					return await interaction.reply({ content: `I need the ${command.botPermissionsTranslated} permission to do this!`, flags: MessageFlags.Ephemeral });
 				}
 			}
 		}
@@ -83,7 +83,7 @@ module.exports = async function (client, bancho, interaction) {
 			} else if (now < expirationTime) {
 				const timeLeft = (expirationTime - now) / 1000;
 				try {
-					await interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, ephemeral: true });
+					await interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, flags: MessageFlags.Ephemeral });
 				} catch (error) {
 					if (error.message !== 'Unknown interaction') {
 						console.error('interactionCreate.js | Cooldown message', error);

@@ -1,5 +1,6 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'help',
@@ -114,7 +115,7 @@ module.exports = {
 	},
 	async execute(msg, args, interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
@@ -132,7 +133,7 @@ module.exports = {
 			const command = commands.get(commandname) || commands.find(c => c.aliases && c.aliases.includes(commandname));
 
 			if (!command) {
-				return await interaction.editReply({ content: 'That\'s not a valid command!', ephemeral: true });
+				return await interaction.editReply({ content: 'That\'s not a valid command!', flags: MessageFlags.Ephemeral });
 			}
 
 			const data = [];

@@ -1,4 +1,4 @@
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
 const { Op } = require('sequelize');
@@ -150,7 +150,7 @@ module.exports = {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -182,7 +182,7 @@ module.exports = {
 
 		//reminders check
 		if (reminders.length === 0) {
-			return await interaction.editReply({ content: 'There are no reminders set for you', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders set for you', flags: MessageFlags.Ephemeral });
 		}
 
 		let userReminderId;
@@ -219,7 +219,7 @@ module.exports = {
 		try {
 			reminderDate = reminders[Number(userReminderId) - 1].date;
 		} catch (error) {
-			return await interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
+			return await interaction.editReply({ content: 'There are no reminders with the given ID', flags: MessageFlags.Ephemeral });
 		}
 
 		if (years || months || weeks || days || hours || minutes) {
@@ -239,7 +239,7 @@ module.exports = {
 			try {
 				reminderId = reminders[Number(userReminderId) - 1].id;
 			} catch (error) {
-				return await interaction.editReply({ content: 'There are no reminders with the given ID', ephemeral: true });
+				return await interaction.editReply({ content: 'There are no reminders with the given ID', flags: MessageFlags.Ephemeral });
 			}
 			//If no reminder with the given Id
 			//destroy previous reminder
@@ -262,7 +262,7 @@ module.exports = {
 					hour: 'numeric', // numeric, 2-digit
 					minute: 'numeric', // numeric, 2-digit
 					second: 'numeric', // numeric, 2-digit
-				})}\``, ephemeral: true
+				})}\``, flags: MessageFlags.Ephemeral
 			});
 		}
 	}

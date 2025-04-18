@@ -1,8 +1,7 @@
 const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
-const { PermissionsBitField } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
-const { SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'activityrole',
@@ -149,7 +148,7 @@ module.exports = {
 		),
 	async execute(msg, args, interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);

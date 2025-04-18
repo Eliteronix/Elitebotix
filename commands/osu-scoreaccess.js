@@ -1,5 +1,5 @@
 const { showUnknownInteractionError } = require('../config.json');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { logDatabaseQueries, getIDFromPotentialOsuLink, getOsuPlayerName, logOsuAPICalls } = require('../utils');
 const { DBDiscordUsers, DBOsuPoolAccess } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -232,7 +232,7 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
@@ -649,9 +649,9 @@ module.exports = {
 
 			for (let i = 0; i < poolAccess.length; i++) {
 				if (poolAccess[i].spreadsheetId) {
-					await interaction.followUp({ content: `You granted access to the spreadsheet <https://docs.google.com/spreadsheets/d/${poolAccess[i].spreadsheetId}> to ${await getOsuPlayerName(poolAccess[i].accessTakerId)}.`, ephemeral: true });
+					await interaction.followUp({ content: `You granted access to the spreadsheet <https://docs.google.com/spreadsheets/d/${poolAccess[i].spreadsheetId}> to ${await getOsuPlayerName(poolAccess[i].accessTakerId)}.`, flags: MessageFlags.Ephemeral });
 				} else {
-					await interaction.followUp({ content: `You granted access to the pool \`${poolAccess[i].mappoolName.replace(/`/g, '')}\` to ${await getOsuPlayerName(poolAccess[i].accessTakerId)}.`, ephemeral: true });
+					await interaction.followUp({ content: `You granted access to the pool \`${poolAccess[i].mappoolName.replace(/`/g, '')}\` to ${await getOsuPlayerName(poolAccess[i].accessTakerId)}.`, flags: MessageFlags.Ephemeral });
 				}
 			}
 		}

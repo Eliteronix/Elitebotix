@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { DBReactionRolesHeader, DBReactionRoles } = require('../dbObjects');
 const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -372,7 +372,7 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -427,7 +427,7 @@ module.exports = {
 						.setFooter({ text: `Reactionrole - EmbedId: ${embedId}` });
 
 					if (!msg.id) {
-						await interaction.editReply({ content: 'Embed will be created', ephemeral: true });
+						await interaction.editReply({ content: 'Embed will be created', flags: MessageFlags.Ephemeral });
 					}
 					//Send embed
 					const embedMessage = await msg.channel.send({ embeds: [reactionRoleEmbed] });
@@ -463,7 +463,7 @@ module.exports = {
 							if (msg.id) {
 								msg.reply('Couldn\'t find an embed with this EmbedId');
 							} else {
-								await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+								await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 							}
 							logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed remove destroy 1');
 							DBReactionRolesHeader.destroy({
@@ -474,7 +474,7 @@ module.exports = {
 						//Get the message object
 						const embedMessage = await embedChannel.messages.fetch({ message: embedMessageId });
 						if (!msg.id) {
-							await interaction.editReply({ content: 'Embed will be deleted', ephemeral: true });
+							await interaction.editReply({ content: 'Embed will be deleted', flags: MessageFlags.Ephemeral });
 						}
 						//Delete the embed
 						await embedMessage.delete();
@@ -487,7 +487,7 @@ module.exports = {
 						if (msg.id) {
 							msg.reply('Couldn\'t find an embed with this EmbedId');
 						} else {
-							await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+							await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 						}
 					}
 				} else {
@@ -518,12 +518,12 @@ module.exports = {
 							if (msg.id) {
 								return msg.reply('The title for the specified embed has been changed.');
 							}
-							return await interaction.editReply({ content: 'The title for the specified embed has been changed.', ephemeral: true });
+							return await interaction.editReply({ content: 'The title for the specified embed has been changed.', flags: MessageFlags.Ephemeral });
 						} else {
 							if (msg.id) {
 								return msg.reply('Couldn\'t find an embed with this EmbedId');
 							}
-							return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+							return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 						}
 					} else if (args[3].toLowerCase() === 'description') {
 						logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRolesHeader embed change description');
@@ -547,12 +547,12 @@ module.exports = {
 							if (msg.id) {
 								return msg.reply('The description for the specified embed has been changed.');
 							}
-							return await interaction.editReply({ content: 'The description for the specified embed has been changed.', ephemeral: true });
+							return await interaction.editReply({ content: 'The description for the specified embed has been changed.', flags: MessageFlags.Ephemeral });
 						} else {
 							if (msg.id) {
 								return msg.reply('Couldn\'t find an embed with this EmbedId');
 							}
-							return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+							return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 						}
 					} else if (args[3].toLowerCase() === 'color') {
 						if (args[4].startsWith('#') && args[4].length === 7) {
@@ -580,18 +580,18 @@ module.exports = {
 								if (msg.id) {
 									return msg.reply('The color for the specified embed has been changed.');
 								}
-								return await interaction.editReply({ content: 'The color for the specified embed has been changed.', ephemeral: true });
+								return await interaction.editReply({ content: 'The color for the specified embed has been changed.', flags: MessageFlags.Ephemeral });
 							} else {
 								if (msg.id) {
 									return msg.reply('Couldn\'t find an embed with this EmbedId');
 								}
-								return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+								return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 							}
 						} else {
 							if (msg.id) {
 								return msg.reply('Please send a color in a format like \'#0099ff\'');
 							}
-							return await interaction.editReply({ content: 'Please send a color in a format like \'#0099ff\'', ephemeral: true });
+							return await interaction.editReply({ content: 'Please send a color in a format like \'#0099ff\'', flags: MessageFlags.Ephemeral });
 						}
 					} else if (args[3].toLowerCase() === 'image') {
 
@@ -618,12 +618,12 @@ module.exports = {
 							if (msg.id) {
 								return msg.reply('The image for the specified embed has been changed.');
 							}
-							return await interaction.editReply({ content: 'The image for the specified embed has been changed.', ephemeral: true });
+							return await interaction.editReply({ content: 'The image for the specified embed has been changed.', flags: MessageFlags.Ephemeral });
 						} else {
 							if (msg.id) {
 								return msg.reply('Couldn\'t find an embed with this EmbedId');
 							}
-							return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+							return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 						}
 					} else {
 						msg.reply('Please specify what you want to change: <title/description/color/image>');
@@ -675,12 +675,12 @@ module.exports = {
 									if (msg.id) {
 										return msg.reply('There is already a reactionrole with this emoji in the specified embed.');
 									}
-									return await interaction.editReply({ content: 'There is already a reactionrole with this emoji in the specified embed.', ephemeral: true });
+									return await interaction.editReply({ content: 'There is already a reactionrole with this emoji in the specified embed.', flags: MessageFlags.Ephemeral });
 								} else if (reactionRolesRole) {
 									if (msg.id) {
 										return msg.reply('There is already a reactionrole with this role in the specified embed.');
 									}
-									return await interaction.editReply({ content: 'There is already a reactionrole with this role in the specified embed.', ephemeral: true });
+									return await interaction.editReply({ content: 'There is already a reactionrole with this role in the specified embed.', flags: MessageFlags.Ephemeral });
 								} else {
 									const emoji = args[3];
 									args.shift();
@@ -698,7 +698,7 @@ module.exports = {
 										if (msg.id) {
 											return msg.reply('You can only have a maximum of 20 reactionroles in one embed.');
 										}
-										return await interaction.editReply({ content: 'You can only have a maximum of 20 reactionroles in one embed.', ephemeral: true });
+										return await interaction.editReply({ content: 'You can only have a maximum of 20 reactionroles in one embed.', flags: MessageFlags.Ephemeral });
 									}
 
 									logDatabaseQueries(4, 'commands/reactionrole.js DBReactionRoles role add create');
@@ -706,7 +706,7 @@ module.exports = {
 									if (msg.id) {
 										msg.reply('The role has been added as an reactionrole.');
 									} else {
-										await interaction.editReply({ content: 'The role has been added as an reactionrole.', ephemeral: true });
+										await interaction.editReply({ content: 'The role has been added as an reactionrole.', flags: MessageFlags.Ephemeral });
 									}
 
 									//Edit embed
@@ -716,7 +716,7 @@ module.exports = {
 								if (msg.id) {
 									return msg.reply('Couldn\'t find an embed with this EmbedId');
 								}
-								return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+								return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 							}
 						} else {
 							msg.reply('You didn\'t provide a description for the role!');
@@ -758,13 +758,13 @@ module.exports = {
 								editEmbed(msg, reactionRolesHeader, additionalObjects[0]);
 
 								if (interaction) {
-									await interaction.editReply({ content: 'The role has been removed', ephemeral: true });
+									await interaction.editReply({ content: 'The role has been removed', flags: MessageFlags.Ephemeral });
 								}
 							} else {
 								if (msg.id) {
 									return msg.reply('There were no reactionrole found in the embed with this emoji.');
 								}
-								return await interaction.editReply({ content: 'There were no reactionrole found in the embed with this emoji.', ephemeral: true });
+								return await interaction.editReply({ content: 'There were no reactionrole found in the embed with this emoji.', flags: MessageFlags.Ephemeral });
 							}
 						}
 					}
@@ -804,7 +804,7 @@ module.exports = {
 								reactionRolesEmoji.save()
 									.then(editEmbed(msg, reactionRolesHeader, additionalObjects[0]));
 								if (interaction) {
-									await interaction.editReply({ content: 'The emoji has been changed', ephemeral: true });
+									await interaction.editReply({ content: 'The emoji has been changed', flags: MessageFlags.Ephemeral });
 								}
 							} else if (args[4].toLowerCase() === 'description') {
 								args.shift();
@@ -816,7 +816,7 @@ module.exports = {
 								reactionRolesEmoji.save()
 									.then(editEmbed(msg, reactionRolesHeader, additionalObjects[0]));
 								if (interaction) {
-									await interaction.editReply({ content: 'The description has been changed', ephemeral: true });
+									await interaction.editReply({ content: 'The description has been changed', flags: MessageFlags.Ephemeral });
 								}
 							} else {
 								msg.reply('Please specify if you want to change the emoji or the description.');
@@ -826,13 +826,13 @@ module.exports = {
 							if (msg.id) {
 								return msg.reply('Couldn\'t find a reactionrole with this emoji in the specified embed.');
 							}
-							return await interaction.editReply({ content: 'Couldn\'t find a reactionrole with this emoji in the specified embed.', ephemeral: true });
+							return await interaction.editReply({ content: 'Couldn\'t find a reactionrole with this emoji in the specified embed.', flags: MessageFlags.Ephemeral });
 						}
 					} else {
 						if (msg.id) {
 							return msg.reply('Couldn\'t find an embed with this EmbedId');
 						}
-						return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', ephemeral: true });
+						return await interaction.editReply({ content: 'Couldn\'t find an embed with this EmbedId', flags: MessageFlags.Ephemeral });
 					}
 				} else {
 					msg.reply('Please specify what Id the embed has you want to add a role to. (Can be found in the footer of the embed.)');

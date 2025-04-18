@@ -1,5 +1,5 @@
 const { populateMsgFromInteraction, getOsuUserServerMode } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -102,7 +102,7 @@ module.exports = {
 		msg = await populateMsgFromInteraction(interaction);
 
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
@@ -156,7 +156,7 @@ module.exports = {
 						}
 
 						if (modeString === '') {
-							return await interaction.editReply({ content: `${gamemode} is not a valid input. Use "s/t/c/m" or a combination of them for modes`, ephemeral: true });
+							return await interaction.editReply({ content: `${gamemode} is not a valid input. Use "s/t/c/m" or a combination of them for modes`, flags: MessageFlags.Ephemeral });
 						} else {
 							commandUser.tournamentPingsMode = modeString;
 							await commandUser.save();

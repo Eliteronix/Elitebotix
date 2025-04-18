@@ -2,6 +2,7 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { DBElitiriCupSignUp, DBElitiriCupLobbies, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue } = require('../dbObjects');
 const { currentElitiriCup, currentElitiriCupTopQualsFirstLobby, currentElitiriCupMiddleQualsFirstLobby, currentElitiriCupLowerQualsFirstLobby, currentElitiriCupBeginnerQualsFirstLobby, currentElitiriCupRefSheetId } = require('../config.json');
 const { populateMsgFromInteraction } = require('../utils');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'elitiri-lobby',
@@ -27,7 +28,7 @@ module.exports = {
 				}
 			}
 
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			args.push(lobbyId);
 		}
 

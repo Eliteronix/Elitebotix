@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -222,7 +222,7 @@ module.exports = {
 				if (interaction.commandName === 'osu-beatmap') {
 					await interaction.followUp({ content: `Could not find beatmap \`${map.replace(/`/g, '')}\`.` });
 				} else {
-					await interaction.followUp({ content: `Could not find beatmap \`${map.replace(/`/g, '')}\`.`, ephemeral: true });
+					await interaction.followUp({ content: `Could not find beatmap \`${map.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 				}
 			}
 		});
@@ -406,7 +406,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	//Send attachment
 	if (interaction.commandName !== 'osu-beatmap') {
-		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, ephemeral: true });
+		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, flags: MessageFlags.Ephemeral });
 	} else {
 		try {
 			const sentMessage = await interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });

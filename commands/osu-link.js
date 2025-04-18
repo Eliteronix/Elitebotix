@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -126,7 +126,7 @@ module.exports = {
 		}
 
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);

@@ -1,4 +1,4 @@
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
 const { DBOsuSoloScores, DBDiscordUsers, DBOsuTeamSheets, DBOsuMappools, DBOsuBeatmaps } = require('../dbObjects');
 const { getMods, logDatabaseQueries, getOsuBeatmap, getModBits, getIDFromPotentialOsuLink } = require('../utils.js');
@@ -115,7 +115,7 @@ module.exports = {
 		),
 	async execute(msg, args, interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
@@ -343,7 +343,7 @@ module.exports = {
 			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
 			await DBOsuSoloScores.bulkCreate(newScores);
 
-			await interaction.followUp({ content: `Successfully uploaded ${newScores.length} new guesstimate!`, ephemeral: true });
+			await interaction.followUp({ content: `Successfully uploaded ${newScores.length} new guesstimate!`, flags: MessageFlags.Ephemeral });
 
 			updateTeamSheets(interaction, discordUser, newScores);
 		}

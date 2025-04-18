@@ -1,6 +1,6 @@
 const { DBOsuTrackingUsers, DBDiscordUsers, DBOsuGuildTrackers } = require('../dbObjects');
 const osu = require('node-osu');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, logOsuAPICalls } = require('../utils');
@@ -528,7 +528,7 @@ module.exports = {
 	async execute(msg, args, interaction) {
 		if (interaction.options.getSubcommand() === 'enable') {
 			try {
-				await interaction.reply({ content: 'Processing...', ephemeral: true });
+				await interaction.reply({ content: 'Processing...', flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -589,7 +589,7 @@ module.exports = {
 						osuUser.osuName = user.name;
 					} catch (error) {
 						console.error(error);
-						await interaction.followUp({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, ephemeral: true });
+						await interaction.followUp({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 						continue;
 					}
 				}
@@ -775,7 +775,7 @@ module.exports = {
 					guildTracker.acronym) {
 					await guildTracker.save();
 
-					await interaction.followUp({ content: `Tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+					await interaction.followUp({ content: `Tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, flags: MessageFlags.Ephemeral });
 
 					continue;
 				}
@@ -796,13 +796,13 @@ module.exports = {
 					await userTimer.destroy();
 				}
 
-				await interaction.followUp({ content: `Not tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, ephemeral: true });
+				await interaction.followUp({ content: `Not tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, flags: MessageFlags.Ephemeral });
 			}
 
-			return await interaction.editReply({ content: 'Finished processing.', ephemeral: true });
+			return await interaction.editReply({ content: 'Finished processing.', flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			try {
-				await interaction.reply({ content: 'Processing...', ephemeral: true });
+				await interaction.reply({ content: 'Processing...', flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -859,7 +859,7 @@ module.exports = {
 						osuUser.osuName = user.name;
 					} catch (error) {
 						console.error(error);
-						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 						continue;
 					}
 				}
@@ -874,7 +874,7 @@ module.exports = {
 				});
 
 				if (!userTimer) {
-					await interaction.editReply({ content: `Currently not tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+					await interaction.editReply({ content: `Currently not tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, flags: MessageFlags.Ephemeral });
 					continue;
 				}
 
@@ -890,7 +890,7 @@ module.exports = {
 				});
 
 				if (!guildTracker) {
-					await interaction.editReply({ content: `Currently not tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+					await interaction.editReply({ content: `Currently not tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, flags: MessageFlags.Ephemeral });
 					continue;
 				}
 
@@ -986,7 +986,7 @@ module.exports = {
 					guildTracker.acronym) {
 					await guildTracker.save();
 
-					await interaction.followUp({ content: `Updated tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, ephemeral: true });
+					await interaction.followUp({ content: `Updated tracking \`${osuUser.osuName.replace(/`/g, '')}\` in <#${interaction.channel.id}>.`, flags: MessageFlags.Ephemeral });
 
 					continue;
 				}
@@ -1007,13 +1007,13 @@ module.exports = {
 					await userTimer.destroy();
 				}
 
-				await interaction.followUp({ content: `Removed tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, ephemeral: true });
+				await interaction.followUp({ content: `Removed tracking \`${osuUser.osuName.replace(/`/g, '')}\` because no attributes are going to be tracked.`, flags: MessageFlags.Ephemeral });
 			}
 
-			return await interaction.editReply({ content: 'Finished processing.', ephemeral: true });
+			return await interaction.editReply({ content: 'Finished processing.', flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'list') {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -1081,7 +1081,7 @@ module.exports = {
 						osuUser.osuName = user.name;
 					} catch (error) {
 						console.error(error);
-						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\` anymore.`, ephemeral: true });
+						await interaction.followUp({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\` anymore.`, flags: MessageFlags.Ephemeral });
 						continue;
 					}
 				}
@@ -1213,13 +1213,13 @@ module.exports = {
 					currentOutput.push(output.shift());
 				}
 
-				await interaction.followUp({ content: currentOutput.join('\n\n'), ephemeral: true });
+				await interaction.followUp({ content: currentOutput.join('\n\n'), flags: MessageFlags.Ephemeral });
 				currentOutput = [];
 				currentOutputLength = 0;
 			}
 		} else if (interaction.options.getSubcommand() === 'tourneyenable') {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -1261,10 +1261,10 @@ module.exports = {
 
 			await guildTracker.save();
 
-			return interaction.followUp({ content: `Match activity tracking updated for ${acronym} in this channel.`, ephemeral: true });
+			return interaction.followUp({ content: `Match activity tracking updated for ${acronym} in this channel.`, flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'tourneydisable') {
 			try {
-				await interaction.deferReply({ ephemeral: true });
+				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -1289,10 +1289,10 @@ module.exports = {
 			if (guildTracker) {
 				await guildTracker.destroy();
 
-				return interaction.followUp({ content: `Match activity tracking disabled for ${acronym} in this channel.`, ephemeral: true });
+				return interaction.followUp({ content: `Match activity tracking disabled for ${acronym} in this channel.`, flags: MessageFlags.Ephemeral });
 			}
 
-			return interaction.followUp({ content: `Match activity tracking is not enabled for ${acronym} in this channel.`, ephemeral: true });
+			return interaction.followUp({ content: `Match activity tracking is not enabled for ${acronym} in this channel.`, flags: MessageFlags.Ephemeral });
 		}
 	},
 };

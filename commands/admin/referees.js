@@ -3,6 +3,7 @@ const { logDatabaseQueries, logOsuAPICalls, getOsuPlayerName, humanReadable } = 
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
 const osu = require('node-osu');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'referees',
@@ -48,7 +49,7 @@ module.exports = {
 				osuUser.osuName = user.name;
 			} catch (error) {
 				console.error(error);
-				await interaction.followUp({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, ephemeral: true });
+				await interaction.followUp({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 			}
 		}
 

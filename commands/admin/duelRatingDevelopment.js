@@ -4,6 +4,7 @@ const { Op } = require('sequelize');
 const { getUserDuelStarRating, logDatabaseQueries, logOsuAPICalls } = require('../../utils');
 const ChartJsImage = require('chartjs-to-image');
 const Discord = require('discord.js');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'duelRatingDevelopment',
@@ -71,7 +72,7 @@ module.exports = {
 				osuUser.osuUserId = user.id;
 				osuUser.osuName = user.name;
 			} catch (error) {
-				return await interaction.editReply({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, ephemeral: true });
+				return await interaction.editReply({ content: `Could not find user \`${username.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 			}
 		}
 
@@ -92,7 +93,7 @@ module.exports = {
 		});
 
 		if (!oldestScore) {
-			return await processingMessage.edit({ content: 'No scores found for this user', ephemeral: true });
+			return await processingMessage.edit({ content: 'No scores found for this user', flags: MessageFlags.Ephemeral });
 		}
 
 		let duelRatings = [await getUserDuelStarRating({ osuUserId: osuUser.osuUserId, client: interaction.client })];

@@ -3,6 +3,7 @@ const osu = require('node-osu');
 const { DBElitiriCupSignUp } = require('../dbObjects.js');
 const { getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction, logOsuAPICalls } = require('../utils.js');
 const { currentElitiriCup } = require('../config.json');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'elitiri-check',
@@ -19,7 +20,7 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			let modpool = null;
 			let id = null;
@@ -49,19 +50,19 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
 			}
-			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
+			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', flags: MessageFlags.Ephemeral });
 		} else if (!elitiriSignUp && args[2].toLowerCase() !== 'top' && args[2].toLowerCase() !== 'middle' && args[2].toLowerCase() !== 'lower' && args[2].toLowerCase() !== 'beginner') {
 			if (msg.id) {
 				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.');
 			}
-			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', ephemeral: true });
+			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.\nFor checking a specific bracket manually add Top, Middle, Lower or Beginner after the BeatmapID.', flags: MessageFlags.Ephemeral });
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
 			if (msg.id) {
 				return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
 			}
-			return await interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
+			return await interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', flags: MessageFlags.Ephemeral });
 		}
 
 		let bracket = '';
@@ -255,14 +256,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply({ embeds: [viabilityEmbed] });
 				}
-				return await interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
+				return await interaction.editReply({ embeds: [viabilityEmbed], flags: MessageFlags.Ephemeral });
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
 						return await msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 					}
-					return await interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
+					return await interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 				} else {
 					console.error(err);
 				}

@@ -3,6 +3,7 @@ const osu = require('node-osu');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
 const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction, logOsuAPICalls } = require('../utils.js');
 const { currentElitiriCup, currentElitiriCupStartOfSubmissions, currentElitiriCupEndOfSubmissions } = require('../config.json');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
 	name: 'elitiri-submit',
@@ -19,7 +20,7 @@ module.exports = {
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			let modpool = null;
 			let id = null;
@@ -47,7 +48,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('It seems like you are not registered for any bracket of the Elitiri Cup.');
 			}
-			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.', ephemeral: true });
+			return await interaction.editReply({ content: 'It seems like you are not registered for any bracket of the Elitiri Cup.', flags: MessageFlags.Ephemeral });
 		}
 
 		if (args[0].toLowerCase() === 'list') {
@@ -144,7 +145,7 @@ module.exports = {
 
 				return;
 			}
-			return await interaction.editReply({ embeds: [submissionsEmbed], ephemeral: true });
+			return await interaction.editReply({ embeds: [submissionsEmbed], flags: MessageFlags.Ephemeral });
 		}
 
 		let now = new Date();
@@ -160,7 +161,7 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('The submission period hasn\'t started yet and maps can\'t be submitted yet.');
 			}
-			return await interaction.editReply({ content: 'The submission period hasn\'t started yet and maps can\'t be submitted yet.', ephemeral: true });
+			return await interaction.editReply({ content: 'The submission period hasn\'t started yet and maps can\'t be submitted yet.', flags: MessageFlags.Ephemeral });
 		}
 
 		let endOfSubmission = new Date();
@@ -175,14 +176,14 @@ module.exports = {
 			if (msg.id) {
 				return msg.reply('The submission period has ended and maps can\'t be changed anymore.');
 			}
-			return await interaction.editReply({ content: 'The submission period has ended and maps can\'t be changed anymore.', ephemeral: true });
+			return await interaction.editReply({ content: 'The submission period has ended and maps can\'t be changed anymore.', flags: MessageFlags.Ephemeral });
 		}
 
 		if (args[0].toLowerCase() !== 'nm' && args[0].toLowerCase() !== 'hd' && args[0].toLowerCase() !== 'hr' && args[0].toLowerCase() !== 'dt' && args[0].toLowerCase() !== 'fm') {
 			if (msg.id) {
 				return msg.reply('Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)');
 			}
-			return await interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', ephemeral: true });
+			return await interaction.editReply({ content: 'Please specify in which pool the map is supposed to be as the first argument. (NM, HD, HR, DT, FM)', flags: MessageFlags.Ephemeral });
 		}
 
 		let bracketNameParts = elitiriSignUp.bracketName.split(' ');
@@ -224,7 +225,7 @@ module.exports = {
 					if (msg.id) {
 						return msg.reply({ embeds: [viabilityEmbed] });
 					}
-					return await interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
+					return await interaction.editReply({ embeds: [viabilityEmbed], flags: MessageFlags.Ephemeral });
 				}
 
 				//The map has to have audio
@@ -442,14 +443,14 @@ module.exports = {
 				if (msg.id) {
 					return msg.reply({ embeds: [viabilityEmbed] });
 				}
-				return await interaction.editReply({ embeds: [viabilityEmbed], ephemeral: true });
+				return await interaction.editReply({ embeds: [viabilityEmbed], flags: MessageFlags.Ephemeral });
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
 					if (msg.id) {
 						return await msg.reply(`Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`);
 					}
-					return await interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, ephemeral: true });
+					return await interaction.editReply({ content: `Could not find beatmap \`${args[1].replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 				} else {
 					console.error(err);
 				}

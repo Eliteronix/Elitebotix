@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('@napi-rs/canvas');
@@ -897,7 +897,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`, flags: MessageFlags.Ephemeral });
 						}
 					} else {
 						osuUser.name = getIDFromPotentialOsuLink(username);
@@ -935,7 +935,7 @@ module.exports = {
 
 					if (!user) {
 						if (interaction.id) {
-							return await interaction.editReply({ content: `Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`, ephemeral: true });
+							return await interaction.editReply({ content: `Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 						} else {
 							return processingMessage.edit(`Could not find user \`${osuUser.name.replace(/`/g, '')}\`.`);
 						}
@@ -1664,7 +1664,7 @@ module.exports = {
 				}
 			} else if (interaction.options._subcommand === 'data') {
 				try {
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 				} catch (error) {
 					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 						console.error(error);
@@ -1694,7 +1694,7 @@ module.exports = {
 							osuUser.id = discordUser.osuUserId;
 							osuUser.name = discordUser.osuName;
 						} else {
-							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`, ephemeral: true });
+							return await interaction.editReply({ content: `\`${interaction.options._hoistedOptions[0].value.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`, flags: MessageFlags.Ephemeral });
 						}
 					} else {
 						osuUser.id = getIDFromPotentialOsuLink(interaction.options._hoistedOptions[0].value);
@@ -1731,7 +1731,7 @@ module.exports = {
 						});
 
 					if (!user) {
-						return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, ephemeral: true });
+						return await interaction.editReply({ content: `Could not find user \`${osuUser.id.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 					}
 
 					osuUser.id = user.id;
@@ -2017,7 +2017,7 @@ module.exports = {
 				explaination.push('After doing some adaptions to counter mods effects on the score each score will be assigned a weight using a bell curve with the highest weight at 350k; dropping lower on both sides to not get too hard and not too easy maps.');
 				explaination.push('You can find the weight graph here: <https://www.desmos.com/calculator/netnkpeupv>');
 				explaination.push('');
-				await interaction.editReply({ content: explaination.join('\n'), ephemeral: true });
+				await interaction.editReply({ content: explaination.join('\n'), flags: MessageFlags.Ephemeral });
 				explaination = [];
 				explaination.push('3. Step:');
 				explaination.push('Each score and its weight will be put into a star rating step. (A 5.0 map will be put into the 4.8, 4.9, 5.0, 5.1 and 5.2 steps)');
@@ -2042,7 +2042,7 @@ module.exports = {
 				explaination.push('**What does outdated mean?**');
 				explaination.push('An outdated rank means that there have not been equal to or more than 5 scores in the past 6 months.');
 
-				return await interaction.followUp({ content: explaination.join('\n'), files: files, ephemeral: true });
+				return await interaction.followUp({ content: explaination.join('\n'), files: files, flags: MessageFlags.Ephemeral });
 			} else if (interaction.options._subcommand === 'rating-spread') {
 				try {
 					await interaction.deferReply();
@@ -2217,7 +2217,7 @@ module.exports = {
 				await interaction.editReply({ content: `${guildName} osu! Duel League Rating Spread`, files: [attachment] });
 			} else if (interaction.options._subcommand === 'rating-updates') {
 				try {
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 				} catch (error) {
 					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 						console.error(error);
@@ -2266,7 +2266,7 @@ module.exports = {
 				return await interaction.editReply('You will no longer receive osu! Duel rating updates.');
 			} else if (interaction.options._subcommand === 'queue1v1') {
 				try {
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 				} catch (error) {
 					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 						console.error(error);
@@ -2358,7 +2358,7 @@ module.exports = {
 				return await interaction.editReply(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
 			} else if (interaction.options._subcommand === 'queue1v1-leave') {
 				try {
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 				} catch (error) {
 					if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 						console.error(error);

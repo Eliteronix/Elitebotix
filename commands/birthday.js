@@ -1,8 +1,7 @@
-const { PermissionsBitField } = require('discord.js');
 const { DBDiscordUsers, DBBirthdayGuilds } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
-const { SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { logDatabaseQueries } = require('../utils');
 
 module.exports = {
@@ -110,7 +109,7 @@ module.exports = {
 	// eslint-disable-next-line no-unused-vars
 	async execute(msg, args, interaction, additionalObjects) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 				console.error(error);
@@ -178,7 +177,7 @@ module.exports = {
 				month: 'long',
 				day: 'numeric',
 			});
-			return await interaction.editReply({ content: `Your birthday has been set for \`${dateString}\``, ephemeral: true });
+			return await interaction.editReply({ content: `Your birthday has been set for \`${dateString}\``, flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'enable') {
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds enable');
 			let currentGuild = await DBBirthdayGuilds.count({
@@ -189,7 +188,7 @@ module.exports = {
 			});
 
 			if (currentGuild) {
-				return await interaction.editReply({ content: `You are already sharing your birthday on ${interaction.guild.name}`, ephemeral: true });
+				return await interaction.editReply({ content: `You are already sharing your birthday on ${interaction.guild.name}`, flags: MessageFlags.Ephemeral });
 			}
 
 			logDatabaseQueries(4, 'commands/birthday.js DBDiscordUsers enable');
@@ -204,7 +203,7 @@ module.exports = {
 			});
 
 			if (!dbDiscordUser || dbDiscordUser && !dbDiscordUser.birthday) {
-				return await interaction.editReply({ content: `You currently don't have your birthday set. Please set your birthday first by using </birthday set:${interaction.client.slashCommandData.find(command => command.name === 'birthday').id}>`, ephemeral: true });
+				return await interaction.editReply({ content: `You currently don't have your birthday set. Please set your birthday first by using </birthday set:${interaction.client.slashCommandData.find(command => command.name === 'birthday').id}>`, flags: MessageFlags.Ephemeral });
 			}
 
 			let now = new Date();
@@ -221,7 +220,7 @@ module.exports = {
 				birthdayTime: nextBirthday,
 			});
 
-			return await interaction.editReply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, ephemeral: true });
+			return await interaction.editReply({ content: `Your birthday will now be shared on ${interaction.guild.name}`, flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			logDatabaseQueries(4, 'commands/birthday.js DBBirthdayGuilds disable');
 			let currentGuild = await DBBirthdayGuilds.findOne({
@@ -234,12 +233,12 @@ module.exports = {
 
 			//No guild found
 			if (!currentGuild) {
-				return await interaction.editReply({ content: 'You were not sharing your birthday on this server.', ephemeral: true });
+				return await interaction.editReply({ content: 'You were not sharing your birthday on this server.', flags: MessageFlags.Ephemeral });
 			}
 
 			//Delete guild
 			await currentGuild.destroy();
-			return await interaction.editReply({ content: `Your birthday will no longer be shared on ${interaction.guild.name}`, ephemeral: true });
+			return await interaction.editReply({ content: `Your birthday will no longer be shared on ${interaction.guild.name}`, flags: MessageFlags.Ephemeral });
 		}
 	}
 };

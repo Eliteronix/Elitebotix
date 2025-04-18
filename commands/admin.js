@@ -1,5 +1,5 @@
 const { developers, showUnknownInteractionError } = require('../config.json');
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const fs = require('node:fs');
 
 const peopleThatWantData = [
@@ -78,7 +78,7 @@ module.exports = {
 	async execute(msg, args, interaction, additionalObjects) {
 		if (!developers.includes(interaction.user.id) && !(interaction.options.getString('command') === 'verifiedMatches' && peopleThatWantData.includes(interaction.user.id))) {
 			try {
-				return await interaction.reply({ content: 'Only developers may use this command.', ephemeral: true });
+				return await interaction.reply({ content: 'Only developers may use this command.', flags: MessageFlags.Ephemeral });
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
