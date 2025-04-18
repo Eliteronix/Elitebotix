@@ -288,10 +288,6 @@ client.on('raw', (packet) => {
 	}
 });
 
-// shard.connection?.on('close', (code, reason) => {
-// 	console.warn(`Low-level close on shard ${shard.id}: Code ${code}, Reason ${reason}`);
-// });
-
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
 client.on('messageUpdate', messageUpdate);

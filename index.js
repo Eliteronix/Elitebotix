@@ -278,6 +278,9 @@ manager.on('shardCreate', shard => {
 	shard.on('reconnecting', () => console.log(shard.id, 'reconnecting'));
 	shard.on('resume', () => console.log(shard.id, 'resume'));
 	shard.on('spawn', () => console.log(shard.id, 'spawn'));
+	shard.connection?.on('close', (code, reason) => {
+		console.warn(`Low-level close on shard ${shard.id}: Code ${code}, Reason ${reason}`);
+	});
 });
 
 manager.spawn()
