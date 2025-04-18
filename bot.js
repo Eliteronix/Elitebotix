@@ -307,6 +307,15 @@ client.on('debug', (msg) => {
 	}
 });
 
+const eventLoopLag = require('event-loop-lag')(1000); // check every 1s
+
+setInterval(() => {
+	const lag = eventLoopLag();
+	if (lag > 200) {
+		console.warn(`[Shard ${client.shard.ids[0]}] Event loop lag detected: ${lag}ms`);
+	}
+}, 5000);
+
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
 client.on('messageUpdate', messageUpdate);
