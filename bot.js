@@ -326,6 +326,13 @@ client.on('shardReconnecting', () => {
 	}
 });
 
+const blocked = require('blocked-at');
+
+blocked((time, stack) => {
+	console.warn(`[LAG DETECTED] Blocked for ${time}ms`);
+	console.warn(stack);
+}, { threshold: 1000 }); // logs only if > 1 second of lag
+
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
 client.on('messageUpdate', messageUpdate);
