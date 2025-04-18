@@ -281,12 +281,12 @@ function readyDiscord() {
 }
 
 //log what what the client.ws is receiving
-client.on('raw', (packet) => {
-	if (packet.t && client.shardId === 7) {
-		// eslint-disable-next-line no-console
-		console.log(`[${client.shardId}] ${packet.t} received`);
-	}
-});
+// client.on('raw', (packet) => {
+// 	if (packet.t && client.shardId === 7) {
+// 		// eslint-disable-next-line no-console
+// 		console.log(`[${client.shardId}] ${packet.t} received`);
+// 	}
+// });
 
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
