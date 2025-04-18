@@ -288,24 +288,24 @@ function readyDiscord() {
 // 	}
 // });
 
-client.ws.on('close', (code, reason) => {
-	if (client.shard.ids[0] === 7) {
-		console.warn(`[Shard ${client.shard.ids[0]}] WebSocket closed. Code: ${code}, Reason: ${reason}`);
-	}
-});
+// client.ws.on('close', (code, reason) => {
+// 	if (client.shard.ids[0] === 7) {
+// 		console.warn(`[Shard ${client.shard.ids[0]}] WebSocket closed. Code: ${code}, Reason: ${reason}`);
+// 	}
+// });
 
-client.ws.on('debug', (info) => {
-	if (client.shard.ids[0] === 7) {
-		console.log(`[Shard ${client.shard.ids[0]}] WS Debug: ${info}`);
-	}
-});
+// client.ws.on('debug', (info) => {
+// 	if (client.shard.ids[0] === 7) {
+// 		console.log(`[Shard ${client.shard.ids[0]}] WS Debug: ${info}`);
+// 	}
+// });
 
-// Debug logging for heartbeat etc
-client.on('debug', (msg) => {
-	if (client.shard.ids[0] === 7) {
-		console.log(`[DEBUG][Shard ${client.shard?.ids?.[0]}]: ${msg}`);
-	}
-});
+// // Debug logging for heartbeat etc
+// client.on('debug', (msg) => {
+// 	if (client.shard.ids[0] === 7) {
+// 		console.log(`[DEBUG][Shard ${client.shard?.ids?.[0]}]: ${msg}`);
+// 	}
+// });
 
 // const eventLoopLag = require('event-loop-lag')(1000); // check every 1s
 
