@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 
 module.exports = async function (guild) {
-	console.log(`guildCreate.js | ${guild.name} (${guild.id}) added!`);
 	let message = `Thanks for adding me to the server!\nUse </help:${guild.client.slashCommandData.find(command => command.name === 'help').id}> to get a list of commands!\nTo provide feedback please use </feedback:${guild.client.slashCommandData.find(command => command.name === 'feedback').id}>`;
 
 	try {
