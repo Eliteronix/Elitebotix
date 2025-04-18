@@ -316,6 +316,16 @@ setInterval(() => {
 	}
 }, 5000);
 
+let reconnects = 0;
+
+client.on('shardReconnecting', () => {
+	reconnects++;
+	if (reconnects >= 10) {
+		console.error(`[Shard ${client.shard.ids[0]}] Too many reconnects, exiting...`);
+		process.exit(1);
+	}
+});
+
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
 client.on('messageUpdate', messageUpdate);

@@ -35,6 +35,7 @@ module.exports = {
 				//Fetch all members
 				let members = null;
 				try {
+					console.log(c.shardId, 'Fetching members...');
 					members = await guild.members.fetch({ time: 300000 });
 
 					members = members.filter(member => member.user.bot !== true).map(member => member);
