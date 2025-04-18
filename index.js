@@ -293,6 +293,14 @@ manager.on('shardCreate', shard => {
 	});
 });
 
+manager.on('shardError', (error, shardId) => {
+	console.error(`Shard ${shardId} encountered an error:`, error);
+});
+
+manager.on('shardDisconnect', (event, shardId) => {
+	console.warn(`Shard ${shardId} disconnected with code ${event.code} and reason: ${event.reason}`);
+});
+
 manager.spawn()
 	.then(shards => {
 		shards.forEach(shard => {
