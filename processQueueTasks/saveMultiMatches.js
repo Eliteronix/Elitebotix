@@ -8,6 +8,12 @@ const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	async execute(client, bancho, processQueueEntry) {
+		let date = new Date();
+		date.setUTCMinutes(date.getUTCMinutes() + 5);
+		processQueueEntry.date = date;
+		processQueueEntry.beingExecuted = false;
+		return await processQueueEntry.save();
+
 		// console.log(client.shardId, 'saveMultiMatches');
 		let args = processQueueEntry.additions.split(';');
 
