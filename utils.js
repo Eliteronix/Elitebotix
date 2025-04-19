@@ -1538,6 +1538,10 @@ module.exports = {
 		let matchAlreadyGetsImported = true;
 		let waitForADifferentImport = false;
 
+		if (!client) {
+			matchAlreadyGetsImported = false;
+		}
+
 		while (matchAlreadyGetsImported) {
 			try {
 				if (logBroadcastEval) {
@@ -1545,36 +1549,34 @@ module.exports = {
 					console.log('Broadcasting utils.js sameMatchGettingImported to shards...');
 				}
 				let sameMatchGettingImported = false;
-				if (client) {
-					sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
-						if (c.shardId === 0) {
-							if (c.matchesGettingImported === undefined) {
-								c.matchesGettingImported = [];
-							}
-
-							let minutesAgo = new Date();
-							minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
-
-							let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
-
-							if (match) {
-								return match.games;
-							} else {
-								c.matchesGettingImported.push({
-									matchId: matchId,
-									games: games,
-									date: new Date()
-								});
-								return false;
-							}
+				sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
+					if (c.shardId === 0) {
+						if (c.matchesGettingImported === undefined) {
+							c.matchesGettingImported = [];
 						}
-					}, {
-						context: {
-							matchId: match.id,
-							games: match.games.length
+
+						let minutesAgo = new Date();
+						minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
+
+						let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
+
+						if (match) {
+							return match.games;
+						} else {
+							c.matchesGettingImported.push({
+								matchId: matchId,
+								games: games,
+								date: new Date()
+							});
+							return false;
 						}
-					});
-				}
+					}
+				}, {
+					context: {
+						matchId: match.id,
+						games: match.games.length
+					}
+				});
 
 				sameMatchGettingImported = sameMatchGettingImported[0];
 
