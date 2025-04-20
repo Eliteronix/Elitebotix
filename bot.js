@@ -133,16 +133,6 @@ process.on('message', message => {
 		client.shardId = message.data.shardId;
 		process.shardId = message.data.shardId;
 
-		// log websocket connection
-		if (message.data.shardId === 7) {
-			//client.on('shardDisconnect', (event, shardId) => console.log(`[${shardId}] Shard disconnected with code: ${event.code} and reason: ${event.reason}`));
-			//client.on('shardReconnecting', (shardId) => console.log(`[${shardId}] Shard reconnecting...`));
-			//client.on('shardReady', (shardId) => console.log(`[${shardId}] Shard ready!`));
-			//client.on('shardResume', (shardId, replayedEvents) => console.log(`[${shardId}] Shard resumed with ${replayedEvents} events replayed`));
-			//client.on('shardError', (error, shardId) => console.log(`[${shardId}] Shard error: ${error}`));
-
-		}
-
 		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
 		}
@@ -277,44 +267,7 @@ function readyDiscord() {
 
 		startJiraCardSync(client);
 	}, 60000);
-
 }
-
-//log what what the client.ws is receiving
-// client.on('raw', (packet) => {
-// 	if (packet.t && client.shardId === 7) {
-// 		// eslint-disable-next-line no-console
-// 		console.log(`[${client.shardId}] ${packet.t} received`);
-// 	}
-// });
-
-// client.ws.on('close', (code, reason) => {
-// 	if (client.shard.ids[0] === 7) {
-// 		console.warn(`[Shard ${client.shard.ids[0]}] WebSocket closed. Code: ${code}, Reason: ${reason}`);
-// 	}
-// });
-
-// client.ws.on('debug', (info) => {
-// 	if (client.shard.ids[0] === 7) {
-// 		console.log(`[Shard ${client.shard.ids[0]}] WS Debug: ${info}`);
-// 	}
-// });
-
-// // Debug logging for heartbeat etc
-// client.on('debug', (msg) => {
-// 	if (client.shard.ids[0] === 7) {
-// 		console.log(`[DEBUG][Shard ${client.shard?.ids?.[0]}]: ${msg}`);
-// 	}
-// });
-
-// const eventLoopLag = require('event-loop-lag')(1000); // check every 1s
-
-// setInterval(() => {
-// 	const lag = eventLoopLag();
-// 	if (lag > 200) {
-// 		console.warn(`[Shard ${client.shard.ids[0]}] Event loop lag detected: ${lag}ms`);
-// 	}
-// }, 5000);
 
 const blocked = require('blocked-at');
 

@@ -262,27 +262,27 @@ manager.on('shardCreate', shard => {
 		});
 	});
 
-	shard.on('disconnect', (event) => {
-		console.warn(`Shard ${shard.id} disconnected with code ${event.code} and reason: ${event.reason}`);
-	});
+	// shard.on('disconnect', (event) => {
+	// 	console.warn(`Shard ${shard.id} disconnected with code ${event.code} and reason: ${event.reason}`);
+	// });
 
-	shard.on('reconnect', () => {
-		console.log(`Shard ${shard.id} is reconnecting...`);
-	});
+	// shard.on('reconnect', () => {
+	// 	console.log(`Shard ${shard.id} is reconnecting...`);
+	// });
 
-	shard.on('error', (error) => {
-		console.error(`Shard ${shard.id} encountered an error:`, error);
-	});
+	// shard.on('error', (error) => {
+	// 	console.error(`Shard ${shard.id} encountered an error:`, error);
+	// });
 
-	shard.on('death', () => console.log(shard.id, 'death'));
-	shard.on('disconnect', () => console.log(shard.id, 'disconnect'));
-	shard.on('ready', () => console.log(shard.id, 'ready'));
-	shard.on('reconnecting', () => console.log(shard.id, 'reconnecting'));
-	shard.on('resume', () => console.log(shard.id, 'resume'));
-	shard.on('spawn', () => console.log(shard.id, 'spawn'));
-	shard.connection?.on('close', (code, reason) => {
-		console.warn(`Low-level close on shard ${shard.id}: Code ${code}, Reason ${reason}`);
-	});
+	// shard.on('death', () => console.log(shard.id, 'death'));
+	// shard.on('disconnect', () => console.log(shard.id, 'disconnect'));
+	// shard.on('ready', () => console.log(shard.id, 'ready'));
+	// shard.on('reconnecting', () => console.log(shard.id, 'reconnecting'));
+	// shard.on('resume', () => console.log(shard.id, 'resume'));
+	// shard.on('spawn', () => console.log(shard.id, 'spawn'));
+	// shard.connection?.on('close', (code, reason) => {
+	// 	console.warn(`Low-level close on shard ${shard.id}: Code ${code}, Reason ${reason}`);
+	// });
 });
 
 manager.on('shardError', (error, shardId) => {
