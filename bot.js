@@ -272,7 +272,7 @@ function readyDiscord() {
 const blocked = require('blocked-at');
 
 blocked((time, stack) => {
-	console.warn(`[LAG DETECTED] Blocked for ${time}ms`);
+	console.warn(`[${client.shardId}][LAG DETECTED] Blocked for ${time}ms`);
 	console.warn(stack);
 }, { threshold: 10000 });
 
