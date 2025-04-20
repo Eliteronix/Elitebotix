@@ -311,9 +311,6 @@ manager.spawn()
 					let request = message.replace('osu! website ', '');
 
 					osuWebRequestQueue.push({ string: request.split(' ')[0], link: request.split(' ')[1] });
-				} else if (typeof message === 'string' && message.startsWith('saveMultiMatches')) {
-					const timeBehind = message.split(' ')[1];
-					timeBehindMatchCreation.set(parseInt(timeBehind));
 				} else if (typeof message === 'string' && message.startsWith('traceDatabaseQueries:')) {
 					if (message.includes('DBOsuBeatmaps')) {
 						beatmapsAccessInTheLastMinute.inc();

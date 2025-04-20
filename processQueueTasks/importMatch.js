@@ -98,7 +98,7 @@ module.exports = {
 				//Match has not been completed yet / 6 hours didn't pass
 				await saveOsuMultiScores(match, client);
 
-				logDatabaseQueries(2, 'processQueueTasks/saveMultiMatches.js DBOsuMultiMatches');
+				logDatabaseQueries(2, 'processQueueTasks/importMatch.js DBOsuMultiMatches');
 				let playedRounds = DBOsuMultiMatches.count({
 					where: {
 						matchId: matchId,

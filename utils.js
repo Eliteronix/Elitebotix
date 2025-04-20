@@ -8363,19 +8363,8 @@ async function executeFoundTask(client, bancho, nextTask) {
 		}
 	} catch (e) {
 		console.error('Error executing process queue task', e);
-		if (nextTask.task === 'saveMultiMatches') {
-			nextTask.beingExecuted = false;
-			await new Promise(resolve => setTimeout(resolve, 10000));
-			try {
-				await nextTask.save();
-			} catch (e) {
-				await new Promise(resolve => setTimeout(resolve, 10000));
-				await nextTask.save();
-			}
-		} else {
-			console.error('Process Queue entry:', nextTask);
-			nextTask.destroy();
-		}
+		console.error('Process Queue entry:', nextTask);
+		nextTask.destroy();
 	}
 }
 

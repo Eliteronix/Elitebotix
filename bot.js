@@ -345,7 +345,7 @@ setTimeout(() => {
 	cleanUpDuplicates(client);
 	getForumPosts(client);
 	checkOsuTracks(client);
-	resetSaveMultiMatches();
+	resetImportMatches();
 
 	setInterval(() => checkForBirthdays(client), 300000);
 
@@ -439,9 +439,9 @@ async function checkOsuTracks(client) {
 	}, 1000);
 }
 
-async function resetSaveMultiMatches() {
+async function resetImportMatches() {
 	try {
-		const tasksToReset = ['saveMultiMatches', 'importMatch'];
+		const tasksToReset = ['importMatch'];
 
 		logDatabaseQueries(2, 'bot.js DBProcessQueue');
 		const task = await DBProcessQueue.findOne({
@@ -464,10 +464,10 @@ async function resetSaveMultiMatches() {
 			// console.log(`Reset ${task.task} task`);
 		}
 	} catch (e) {
-		console.error('bot.js | resetSaveMultiMatches' + e);
+		console.error('bot.js | resetImportMatches' + e);
 	}
 
 	setTimeout(() => {
-		resetSaveMultiMatches();
+		resetImportMatches();
 	}, 10000);
 }
