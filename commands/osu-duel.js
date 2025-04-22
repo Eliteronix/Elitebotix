@@ -1029,7 +1029,14 @@ module.exports = {
 								}
 							} else {
 								if (interaction.id) {
-									return await interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+									try {
+										return await interaction.editReply('The API seems to be running into errors right now.\nPlease try again later.');
+									} catch (error) {
+										if (error.message !== 'Unknown Message') {
+											console.error(error);
+										}
+										return;
+									}
 								} else {
 									return processingMessage.edit('The API seems to be running into errors right now.\nPlease try again later.');
 								}
