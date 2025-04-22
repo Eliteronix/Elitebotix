@@ -4176,7 +4176,7 @@ module.exports = {
 			}
 		} catch (err) {
 			if (!err.message.match(/request to https:\/\/osu.ppy.sh\/osu\/\d+ failed, reason: Parse Error: Invalid header value char/gm)) {
-				console.error(err);
+				console.error(err, 'error message:', err.message);
 			}
 			return;
 		}
