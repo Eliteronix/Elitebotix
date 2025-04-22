@@ -4175,8 +4175,19 @@ module.exports = {
 				}
 			}
 		} catch (err) {
-			if (!err.message.match(/request to https:\/\/osu.ppy.sh\/osu\/\d+ failed, reason: Parse Error: Invalid header value char/gm)) {
-				console.error(err, 'error message:', err.message);
+			if (err.message.match(/Malformed_HTTP_Response fetching "https:\/\/osu.ppy.sh\/osu\/\d+". For more information, pass `verbose: true` in the second argument to fetch\(\)/gm)) {
+				if (depth < 3) {
+					depth++;
+					console.log(beatmapId, 'Malformed_HTTP_Response');
+
+					return await module.exports.getOsuPP(beatmapId, mode, modBits, accuracy, misses, combo, client, depth);
+				} else {
+					mapsRetriedTooOften.push(beatmapId);
+					console.log(beatmapId, 'Malformed_HTTP_Response, added to retry list');
+					return null;
+				}
+			} else if (!err.message.match(/request to https:\/\/osu.ppy.sh\/osu\/\d+ failed, reason: Parse Error: Invalid header value char/gm)) {
+				console.error(err);
 			}
 			return;
 		}
