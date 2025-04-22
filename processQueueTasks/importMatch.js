@@ -58,10 +58,6 @@ module.exports = {
 
 					client.shard.broadcastEval(async (c, { message, matchID }) => {
 						// Remove match from client
-						while (c.duels.indexOf(matchID) > -1) {
-							c.duels.splice(c.duels.indexOf(matchID), 1);
-						}
-
 						while (c.otherMatches.indexOf(matchID) > -1) {
 							c.otherMatches.splice(c.otherMatches.indexOf(matchID), 1);
 						}
@@ -83,7 +79,7 @@ module.exports = {
 							await channel.send(message);
 						}
 
-						if (c.update === 1 && c.duels.length === 0 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
+						if (c.update === 1 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
 							process.exit();
 						}
