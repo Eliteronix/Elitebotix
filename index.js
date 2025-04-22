@@ -254,11 +254,21 @@ manager.on('shardCreate', shard => {
 	shard.on('ready', () => {
 		// console.log(`[DEBUG/SHARD] Shard ${shard.id} connected to Discord's Gateway.`);
 		// Sending the data to the shard.
-		shard.send({ type: 'shardId', data: { shardId: shard.id } });
+		shard.send({ type: 'shardId', data: { shardId: shard.id } })
+			.catch(error => {
+				if (error.message !== 'Channel closed') {
+					console.error('index.js | shardId' + error);
+				}
+			});
 
 		// Send the total amount of shards to all shards.
 		manager.shards.forEach(shard => {
-			shard.send({ type: 'totalShards', data: { totalShards: manager.shards.size } });
+			shard.send({ type: 'totalShards', data: { totalShards: manager.shards.size } })
+				.catch(error => {
+					if (error.message !== 'Channel closed') {
+						console.error('index.js | totalShards' + error);
+					}
+				});
 		});
 	});
 
