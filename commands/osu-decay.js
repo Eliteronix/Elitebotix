@@ -236,6 +236,12 @@ module.exports = {
 
 		let decayTime = Math.round(7 * 24 * 60 * 60 * 1000 / averageDecayPerWeek * currentRankDifference);
 
-		return await interaction.editReply(`${user.name} would reach rank #${humanReadable(decayRank)} <t:${Math.round((decayTime + new Date().getTime()) / 1000)}:R> (Currently #${humanReadable(user.pp.rank)}).`);
+		try {
+			return await interaction.editReply(`${user.name} would reach rank #${humanReadable(decayRank)} <t:${Math.round((decayTime + new Date().getTime()) / 1000)}:R> (Currently #${humanReadable(user.pp.rank)}).`);
+		} catch (error) {
+			if (error.message !== 'Unknown Message') {
+				console.error('osu-decay.js | interaction.editReply', error);
+			}
+		}
 	},
 };
