@@ -425,7 +425,7 @@ module.exports = {
 								gamesLost++;
 							}
 						} catch (error) {
-							console.error(error, ownScore, otherScore, multiScores[i].matchId);
+							console.error(error, ownScore, otherScore, multiScores[i].matchId, gameScores);
 						}
 					} else if (gameScores[0].teamType === 2) {
 						let team = ownScore.team;
