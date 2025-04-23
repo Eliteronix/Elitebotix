@@ -4441,6 +4441,9 @@ module.exports = {
 						},
 						{
 							[Op.like]: 'o!mm%:%',
+						},
+						{
+							[Op.like]: 'ROMAI%:%',
 						}
 					]
 				},
