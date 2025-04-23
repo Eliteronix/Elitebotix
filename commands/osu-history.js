@@ -8,6 +8,7 @@ const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const ChartJsImage = require('chartjs-to-image');
 const fs = require('fs');
+const Sequelize = require('sequelize');
 
 module.exports = {
 	name: 'osu-history',
