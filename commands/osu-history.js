@@ -193,6 +193,7 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores 2');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
+				[Sequelize.fn('min', Sequelize.col('id')), 'id'],
 				'score',
 				'gameRawMods',
 				'rawMods',
