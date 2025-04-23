@@ -193,7 +193,6 @@ module.exports = {
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores 2');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
-				'id',
 				'score',
 				'gameRawMods',
 				'rawMods',
@@ -225,7 +224,6 @@ module.exports = {
 				}
 			},
 			group: [
-				'id',
 				'score',
 				'gameRawMods',
 				'rawMods',
