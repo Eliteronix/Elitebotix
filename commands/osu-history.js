@@ -370,14 +370,10 @@ module.exports = {
 				if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
 					let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
-					try {
-						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
-							matchesWon++;
-						} else {
-							matchesLost++;
-						}
-					} catch (error) {
-						console.error(error, ownScore, otherScore, multiScores[i].matchId);
+					if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
+						matchesWon++;
+					} else {
+						matchesLost++;
 					}
 				} else if (gameScores[0].teamType === 2) {
 					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
@@ -417,14 +413,10 @@ module.exports = {
 					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
 						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
-						try {
-							if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
-								gamesWon++;
-							} else {
-								gamesLost++;
-							}
-						} catch (error) {
-							console.error(error, ownScore, otherScore, multiScores[i].matchId, gameScores);
+						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
+							gamesWon++;
+						} else {
+							gamesLost++;
 						}
 					} else if (gameScores[0].teamType === 2) {
 						let team = ownScore.team;
@@ -464,14 +456,10 @@ module.exports = {
 					if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
 						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
-						try {
-							if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
-								matchWonAgainst = true;
-							} else {
-								matchLostAgainst = true;
-							}
-						} catch (error) {
-							console.error(error, ownScore, otherScore, multiScores[i].matchId);
+						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
+							matchWonAgainst = true;
+						} else {
+							matchLostAgainst = true;
 						}
 					} else if (gameScores[0].teamType === 2) {
 						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
