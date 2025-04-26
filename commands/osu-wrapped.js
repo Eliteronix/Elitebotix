@@ -7,6 +7,7 @@ const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelSta
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fs = require('fs');
+const Sequelize = require('sequelize');
 
 module.exports = {
 	name: 'osu-wrapped',
