@@ -267,43 +267,53 @@ function readyDiscord() {
 
 		startJiraCardSync(client);
 	}, 60000);
+
+	const blocked = require('blocked-at');
+
+	const { logBroadcastEval } = require('./config.json');
+
+	blocked((time, stack) => {
+		console.warn(`[${client.shardId}][LAG DETECTED] Blocked for ${time.toFixed()}ms`);
+		console.warn(stack);
+
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting bot.js event loop blocked...');
+		}
+
+		let header = '###';
+
+		if (time.toFixed() > 10000) {
+			header = '#';
+		} else if (time.toFixed() > 5000) {
+			header = '##';
+		}
+
+		client.shard.broadcastEval(async (c, { message }) => {
+			let guildId = null;
+			let channelId = null;
+			if (process.env.SERVER === 'Dev') {
+				guildId = '800641468321759242';
+				channelId = '1365819208545603605';
+			} else {
+				guildId = '727407178499096597';
+				channelId = '1365819043306672208';
+			}
+
+			const guild = await c.guilds.cache.get(guildId);
+
+			if (!guild || guild.shardId !== c.shardId) {
+				return;
+			}
+
+			const channel = await guild.channels.cache.get(channelId);
+
+			if (!channel) return;
+
+			await channel.send(message);
+		}, { context: { message: `### Shard ${client.shardId} Blocked for ${time.toFixed()}ms\n\`\`\`${stack.join('\n')}\`\`\`` } });
+	}, { threshold: 1000 });
 }
-
-const blocked = require('blocked-at');
-
-blocked((time, stack) => {
-	console.warn(`[${client.shardId}][LAG DETECTED] Blocked for ${time}ms`);
-	console.warn(stack);
-
-	if (logBroadcastEval) {
-		// eslint-disable-next-line no-console
-		console.log('Broadcasting bot.js event loop blocked...');
-	}
-
-	client.shard.broadcastEval(async (c, { message }) => {
-		let guildId = null;
-		let channelId = null;
-		if (process.env.SERVER === 'Dev') {
-			guildId = '800641468321759242';
-			channelId = '1365819208545603605';
-		} else {
-			guildId = '727407178499096597';
-			channelId = '1365819043306672208';
-		}
-
-		const guild = await c.guilds.cache.get(guildId);
-
-		if (!guild || guild.shardId !== c.shardId) {
-			return;
-		}
-
-		const channel = await guild.channels.cache.get(channelId);
-
-		if (!channel) return;
-
-		await channel.send(message);
-	}, { context: { message: `[${client.shardId}][LAG DETECTED] Blocked for ${time}ms\n\`\`\`${stack.join('\\n')}\`\`\`` } });
-}, { threshold: 10000 });
 
 client.on('messageCreate', msg => gotMessage(msg, bancho));
 
