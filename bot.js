@@ -280,9 +280,9 @@ function readyDiscord() {
 
 		let header = '###';
 
-		if (time.toFixed() > 10000) {
+		if (time.toFixed() > 20000) {
 			header = '#';
-		} else if (time.toFixed() > 5000) {
+		} else if (time.toFixed() > 10000) {
 			header = '##';
 		}
 
@@ -308,8 +308,8 @@ function readyDiscord() {
 			if (!channel) return;
 
 			await channel.send(message);
-		}, { context: { message: `### Shard ${client.shardId} Blocked for ${time.toFixed()}ms\n\`\`\`${stack.join('\n')}\`\`\`` } });
-	}, { threshold: 1000 });
+		}, { context: { message: `${header} Shard ${client.shardId} Blocked for ${time.toFixed()}ms\n\`\`\`${stack.join('\n')}\`\`\`` } });
+	}, { threshold: 5000 });
 }
 
 client.on('messageCreate', msg => gotMessage(msg, bancho));
