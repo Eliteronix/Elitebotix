@@ -273,9 +273,6 @@ function readyDiscord() {
 	const { logBroadcastEval } = require('./config.json');
 
 	blocked((time, stack) => {
-		console.warn(`[${client.shardId}][LAG DETECTED] Blocked for ${time.toFixed()}ms`);
-		console.warn(stack);
-
 		if (logBroadcastEval) {
 			// eslint-disable-next-line no-console
 			console.log('Broadcasting bot.js event loop blocked...');
