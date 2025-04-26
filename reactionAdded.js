@@ -500,7 +500,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				//Setup artificial interaction
 				let interaction = {
 					id: null,
-					client: reaction.message.client,
+					client: reaction.client,
 					channel: reaction.message.channel,
 					user: user,
 					options: {
