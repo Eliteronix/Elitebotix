@@ -454,7 +454,7 @@ manager.spawn()
 		});
 	})
 	.catch(error => {
-		console.error('index.js | shard spawn' + error);
+		console.error('index.js | shard spawn', error);
 	});
 
 setInterval(() => {
