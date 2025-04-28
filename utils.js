@@ -1732,10 +1732,10 @@ module.exports = {
 			weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
 
 			let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
-				attributes: ['matchId', 'matchName'],
+				attributes: ['matchId'],
 				where: {
-					matchId: {
-						[Op.in]: sameTournamentGames.map(m => m.matchId)
+					matchName: {
+						[Op.like]: `%${acronym}%:%`,
 					},
 					matchStartDate: {
 						[Op.gte]: weeksPrior
@@ -1747,7 +1747,7 @@ module.exports = {
 			});
 
 			for (let i = 0; i < sameTournamentGames.length; i++) {
-				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId && m.matchName.toLowerCase().includes(acronym));
+				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
 
 				if (!match) {
 					sameTournamentGames.splice(i, 1);
