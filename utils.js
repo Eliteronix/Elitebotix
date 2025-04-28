@@ -1737,6 +1737,9 @@ module.exports = {
 					matchName: {
 						[Op.like]: `%${acronym}%:%`,
 					},
+					matchId: {
+						[Op.in]: sameTournamentGames.map(m => m.matchId)
+					},
 					matchStartDate: {
 						[Op.gte]: weeksPrior
 					},
