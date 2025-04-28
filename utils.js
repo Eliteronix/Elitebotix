@@ -1737,9 +1737,6 @@ module.exports = {
 					matchId: {
 						[Op.in]: sameTournamentGames.map(m => m.matchId)
 					},
-					matchName: {
-						[Op.like]: `%${acronym}%:%`,
-					},
 					matchStartDate: {
 						[Op.gte]: weeksPrior
 					},
@@ -1750,7 +1747,7 @@ module.exports = {
 			});
 
 			for (let i = 0; i < sameTournamentGames.length; i++) {
-				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
+				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId && m.matchName.toLowerCase().includes(acronym));
 
 				if (!match) {
 					sameTournamentGames.splice(i, 1);
