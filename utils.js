@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
-const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms, osuFilterWords } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms } = require('./config.json');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
