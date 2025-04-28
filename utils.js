@@ -1732,7 +1732,7 @@ module.exports = {
 			weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
 
 			let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
-				attributes: ['matchId'],
+				attributes: ['matchId', 'matchName'],
 				where: {
 					matchId: {
 						[Op.in]: sameTournamentGames.map(m => m.matchId)
