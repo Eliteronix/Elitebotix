@@ -1735,7 +1735,7 @@ module.exports = {
 				attributes: ['matchId'],
 				where: {
 					matchName: {
-						[Op.like]: `%${acronym}%:%`,
+						[Op.like]: `${acronym}%:%`,
 					},
 					matchId: {
 						[Op.in]: sameTournamentGames.map(m => m.matchId)
