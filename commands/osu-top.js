@@ -792,7 +792,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		let gatariUserBest = await fetch(`https://api.gatari.pw/user/scores/best?id=${user.id}&l=${limit}&p=1&mode=${mode}`)
 			.then(async (response) => {
 				const responseJson = await response.json();
-				if (!responseJson.scores.length) {
+				if (!responseJson.scores || !responseJson.scores.length) {
 					await interaction.followUp(`Couldn't find user best for \`${user.name.replace(/`/g, '')}\` on Gatari.`);
 					return;
 				}
