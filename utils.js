@@ -2124,6 +2124,7 @@ module.exports = {
 			attributes: [
 				'id',
 				'matchName',
+				'acronym',
 				'tourneyMatch',
 				'matchStartDate',
 				'matchEndDate'
@@ -2135,6 +2136,7 @@ module.exports = {
 
 		if (existingMatch) {
 			existingMatch.matchName = match.name;
+			existingMatch.acronym = acronym;
 			existingMatch.tourneyMatch = tourneyMatch;
 			existingMatch.matchStartDate = match.raw_start;
 			existingMatch.matchEndDate = match.raw_end;
@@ -2145,6 +2147,7 @@ module.exports = {
 			await DBOsuMultiMatches.create({
 				matchId: match.id,
 				matchName: match.name,
+				acronym: acronym,
 				tourneyMatch: tourneyMatch,
 				matchStartDate: match.raw_start,
 				matchEndDate: match.raw_end,
