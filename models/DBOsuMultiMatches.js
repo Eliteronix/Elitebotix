@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		matchId: DataTypes.INTEGER,
 		matchName: DataTypes.STRING,
+		acronym: DataTypes.STRING,
 		referee: DataTypes.INTEGER,
 		tourneyMatch: DataTypes.BOOLEAN,
 		matchStartDate: DataTypes.DATE,
@@ -19,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
 		indexes: [
 			{
 				unique: false,
-				fields: ['matchId', 'tourneyMatch', 'matchName', 'verifiedAt', 'verifiedBy', 'verificationComment']
+				fields: ['matchId', 'tourneyMatch', 'matchName', 'acronym', 'verifiedAt', 'verifiedBy', 'verificationComment']
 			}
 		]
 	});

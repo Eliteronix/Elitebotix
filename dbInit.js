@@ -191,53 +191,53 @@ require('./models/DBOsuBeatmaps')(beatmaps, Sequelize.DataTypes);
 
 require('./models/DBOsuSoloScores')(soloScores, Sequelize.DataTypes);
 
-guilds.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('guilds database synced');
-		guilds.close();
-	})
-	.catch(console.error);
+// guilds.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('guilds database synced');
+// 		guilds.close();
+// 	})
+// 	.catch(console.error);
 
-discordUsers.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('discordUsers database synced');
-		discordUsers.close();
-	})
-	.catch(console.error);
+// discordUsers.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('discordUsers database synced');
+// 		discordUsers.close();
+// 	})
+// 	.catch(console.error);
 
-serverActivity.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('serverActivity database synced');
-		serverActivity.close();
-	})
-	.catch(console.error);
+// serverActivity.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('serverActivity database synced');
+// 		serverActivity.close();
+// 	})
+// 	.catch(console.error);
 
-processQueue.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('processQueue database synced');
-		processQueue.close();
-	})
-	.catch(console.error);
+// processQueue.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('processQueue database synced');
+// 		processQueue.close();
+// 	})
+// 	.catch(console.error);
 
-osuData.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('osuData database synced');
-		osuData.close();
-	})
-	.catch(console.error);
+// osuData.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('osuData database synced');
+// 		osuData.close();
+// 	})
+// 	.catch(console.error);
 
-elitiriData.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('elitiriData database synced');
-		elitiriData.close();
-	})
-	.catch(console.error);
+// elitiriData.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('elitiriData database synced');
+// 		elitiriData.close();
+// 	})
+// 	.catch(console.error);
 
 multiMatches.sync({ alter: true })
 	.then(async () => {
@@ -247,34 +247,34 @@ multiMatches.sync({ alter: true })
 	})
 	.catch(console.error);
 
-multiGames.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('multiGames database synced');
-		multiGames.close();
-	})
-	.catch(console.error);
+// multiGames.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('multiGames database synced');
+// 		multiGames.close();
+// 	})
+// 	.catch(console.error);
 
-multiGameScores.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('multiGameScores database synced');
-		multiGameScores.close();
-	})
-	.catch(console.error);
+// multiGameScores.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('multiGameScores database synced');
+// 		multiGameScores.close();
+// 	})
+// 	.catch(console.error);
 
-beatmaps.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('beatmaps database synced');
-		beatmaps.close();
-	})
-	.catch(console.error);
+// beatmaps.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('beatmaps database synced');
+// 		beatmaps.close();
+// 	})
+// 	.catch(console.error);
 
-soloScores.sync({ alter: true })
-	.then(async () => {
-		// eslint-disable-next-line no-console
-		console.log('soloScores database synced');
-		soloScores.close();
-	})
-	.catch(console.error);
+// soloScores.sync({ alter: true })
+// 	.then(async () => {
+// 		// eslint-disable-next-line no-console
+// 		console.log('soloScores database synced');
+// 		soloScores.close();
+// 	})
+// 	.catch(console.error);
