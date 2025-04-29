@@ -238,9 +238,6 @@ function readyDiscord() {
 		let notDone = true;
 		while (notDone) {
 			try {
-				// eslint-disable-next-line no-console
-				console.log(`[${client.shardId}] Started refreshing ${commands.length} application (/) commands.`);
-
 				const data = await rest.put(
 					Routes.applicationCommands(client.user.id),
 					{ body: commands },
