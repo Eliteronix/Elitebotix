@@ -128,7 +128,7 @@ process.on('message', message => {
 
 	if (message.type == 'shardId') {
 		// eslint-disable-next-line no-console
-		console.log(`The shard id is: ${message.data.shardId}`);
+		console.log(`Shard ${message.data.shardId} is ready.`);
 		client.shardId = message.data.shardId;
 		process.shardId = message.data.shardId;
 
@@ -195,10 +195,6 @@ client.on('ready', readyDiscord);
 
 //declare the function which will be used when ready
 function readyDiscord() {
-	//log a message when ready
-	// eslint-disable-next-line no-console
-	console.log('The Bot is ready.');
-
 	client.startDate = new Date();
 	client.duels = [];
 	client.otherMatches = [];
