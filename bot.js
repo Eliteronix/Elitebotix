@@ -244,7 +244,7 @@ function readyDiscord() {
 		while (notDone) {
 			try {
 				// eslint-disable-next-line no-console
-				console.log(`Started refreshing ${commands.length} application (/) commands.`);
+				console.log(`[${client.shardId}] Started refreshing ${commands.length} application (/) commands.`);
 
 				const data = await rest.put(
 					Routes.applicationCommands(client.user.id),
@@ -252,7 +252,7 @@ function readyDiscord() {
 				);
 
 				// eslint-disable-next-line no-console
-				console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+				console.log(`[${client.shardId}] Successfully reloaded ${data.length} application (/) commands.`);
 
 				client.slashCommandData = data;
 				notDone = false;
