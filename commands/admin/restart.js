@@ -99,7 +99,9 @@ module.exports = {
 				!isNaN(condition) && c.shardId === parseInt(condition) ||
 				condition === 'update' && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
-				process.exit();
+				setTimeout(() => {
+					process.exit();
+				}, c.shardId * 1000);
 			} else if (condition === 'update') {
 				c.update = 1;
 			}
