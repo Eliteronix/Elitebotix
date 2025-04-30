@@ -10,7 +10,6 @@ module.exports = {
 	name: 'reffedMatches',
 	usage: '<username>',
 	async execute(interaction) {
-		//TODO: Check for use of acronym instead of match name
 		let username = interaction.options.getString('argument');
 
 		//Get the user from the database if possible
