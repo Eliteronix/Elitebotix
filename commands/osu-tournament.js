@@ -42,7 +42,6 @@ module.exports = {
 				.setRequired(true)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Check for use of acronym instead of match name
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -70,17 +69,7 @@ module.exports = {
 		let tournamentScores = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {
-				[Op.or]: [
-					{
-						matchName: {
-							[Op.like]: `${acronym}:%`,
-						},
-					}, {
-						matchName: {
-							[Op.like]: `${acronym} :%`,
-						}
-					}
-				],
+				acronym: acronym,
 				tourneyMatch: true,
 			},
 			order: [
