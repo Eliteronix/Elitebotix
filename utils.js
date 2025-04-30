@@ -1734,9 +1734,7 @@ module.exports = {
 			let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId'],
 				where: {
-					matchName: {
-						[Op.like]: `${acronym}%:%`,
-					},
+					acronym: acronym,
 					matchId: {
 						[Op.in]: sameTournamentGames.map(m => m.matchId)
 					},
