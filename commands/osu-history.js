@@ -617,8 +617,8 @@ module.exports = {
 						attributes: ['matchId', 'matchName', 'matchStartDate'],
 						where: {
 							tourneyMatch: true,
-							matchName: {
-								[Op.or]: eval('[' + acronyms.map(acronym => `{[Op.like]: '${acronym}:%'}`).join(', ') + ']'),
+							acronym: {
+								[Op.in]: acronyms,
 							},
 						},
 						group: ['matchId', 'matchName', 'matchStartDate'],
