@@ -5,7 +5,7 @@ const Canvas = require('@napi-rs/canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, matchMakingAcronyms } = require('../config.json');
 const Sequelize = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
 const { Op } = require('sequelize');
@@ -450,17 +450,7 @@ module.exports = {
 							[Op.in]: matchIds
 						},
 						acronym: {
-							[Op.or]: [
-								{
-									[Op.like]: 'ETX%',
-								},
-								{
-									[Op.like]: 'o!mm%',
-								},
-								{
-									[Op.like]: 'ROMAI%',
-								},
-							]
+							[Op.in]: matchMakingAcronyms
 						},
 					},
 					group: ['matchId']
