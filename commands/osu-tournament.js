@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const { DBOsuMultiMatches } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
 module.exports = {
