@@ -225,7 +225,6 @@ module.exports = {
 				.setRequired(false)
 		),
 	async execute(msg, args, interaction) {
-		//TODO: Check for use of acronym instead of match name
 		try {
 			await interaction.deferReply();
 		} catch (error) {
