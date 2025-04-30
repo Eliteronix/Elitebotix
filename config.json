@@ -13,14 +13,14 @@
 	"traceOsuAPICalls": false,
 	"showUnknownInteractionError": false,
 	"logBroadcastEval": false,
-	"noWarmUpAcronyms": [
-		"etx",
-		"etx teams",
-		"o!mm ranked",
-		"o!mm private",
-		"o!mm team ranked",
-		"o!mm team private",
-		"motd",
+	"matchMakingAcronyms": [
+		"ETX",
+		"ETX Teams",
+		"o!mm Ranked",
+		"o!mm Private",
+		"o!mm Team Ranked",
+		"o!mm Team Private",
+		"MOTD",
 		"ROMAI"
 	],
 	"currentElitiriCup": "Elitiri Winter Cup 2022",

@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
-const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, noWarmUpAcronyms } = require('./config.json');
+const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, matchMakingAcronyms } = require('./config.json');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -1709,7 +1709,7 @@ module.exports = {
 
 		let sameTournamentGames = null;
 
-		if (!noWarmUpAcronyms.includes(acronym)) {
+		if (!matchMakingAcronyms.includes(acronym)) {
 			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames warmup detection same tourney');
 			sameTournamentGames = await DBOsuMultiGames.findAll({
 				attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
@@ -1797,7 +1797,7 @@ module.exports = {
 
 			let warmupDecidedByAmount = false;
 
-			if (!noWarmUpAcronyms.includes(acronym)) {
+			if (!matchMakingAcronyms.includes(acronym)) {
 				let warmupCheckResult = await checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames);
 
 				warmup = warmupCheckResult.warmup;
@@ -2027,7 +2027,7 @@ module.exports = {
 					await DBOsuMultiGameScores.bulkCreate(newScores)
 						.then(async (scores) => {
 							// Update warmup flags if needed
-							if (!noWarmUpAcronyms.includes(acronym)) {
+							if (!matchMakingAcronyms.includes(acronym)) {
 								for (let i = 0; i < scores.length; i++) {
 									if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
 										let modPool = module.exports.getScoreModpool(scores[i]);
@@ -8398,7 +8398,7 @@ async function checkWarmup(match, gameIndex, tourneyMatch, sameTournamentGames, 
 	let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 	//Matches without warmups
-	if (!tourneyMatch || gameIndex > 1 || noWarmUpAcronyms.includes(acronym)) {
+	if (!tourneyMatch || gameIndex > 1 || matchMakingAcronyms.includes(acronym)) {
 		// console.log('Not a warmup due to naming / map #');
 		return { warmup: false, byAmount: false };
 	}
