@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
@@ -181,7 +181,7 @@ module.exports = {
 
 		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 2');
 		let multiMatches = await DBOsuMultiMatches.findAll({
-			attributes: ['matchId', 'matchName', 'matchStartDate'],
+			attributes: ['matchId', 'matchName', 'acronym', 'matchStartDate'],
 			where: {
 				matchId: {
 					[Op.in]: multiMatchIds
@@ -257,6 +257,7 @@ module.exports = {
 			let match = multiMatches.find(match => match.matchId === multiScores[i].matchId);
 
 			multiScores[i].matchName = match.matchName;
+			multiScores[i].acronym = match.acronym;
 			multiScores[i].matchStartDate = match.matchStartDate;
 		}
 
@@ -539,7 +540,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].matchName.startsWith('ETX:') || multiScores[i].matchName.startsWith('ETX Teams:') || multiScores[i].matchName.startsWith('o!mm Ranked:') || multiScores[i].matchName.startsWith('o!mm Team Ranked:') || multiScores[i].matchName.startsWith('o!mm Private:') || multiScores[i].matchName.startsWith('o!mm Team Private:')) {
+			if (matchMakingAcronyms.includes(multiScores[i].acronym)) {
 				continue;
 			}
 
