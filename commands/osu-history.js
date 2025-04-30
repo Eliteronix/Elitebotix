@@ -185,8 +185,8 @@ module.exports = {
 				matchId: {
 					[Op.in]: multiMatchIds
 				},
-				matchName: {
-					[Op.notLike]: 'MOTD:%',
+				acronym: {
+					[Op.not]: 'MOTD',
 				},
 			},
 		});
