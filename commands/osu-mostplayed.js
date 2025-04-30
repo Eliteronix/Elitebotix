@@ -442,6 +442,7 @@ module.exports = {
 
 				let matchIds = [...new Set(mostplayedGrouped.map(item => item.matchId))];
 
+				//TODO: Check for use of acronym instead of match name
 				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiMatches 2');
 				let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 					attributes: ['matchId'],

@@ -288,8 +288,9 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		],
 	});
 
+	//TODO: Check where acronym could be used instead
 	const matchData = await DBOsuMultiMatches.findAll({
-		attributes: ['matchId', 'matchName', 'matchStartDate'],
+		attributes: ['matchId', 'matchName', 'acronym', 'matchStartDate'],
 		where: {
 			matchId: {
 				[Op.in]: mapGames.map((game) => {
@@ -306,10 +307,11 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	for (let i = 0; i < mapGames.length; i++) {
 		if (mapGames[i].matchId === matchData[0].matchId) {
 			mapGames[i].matchName = matchData[0].matchName;
+			mapGames[i].acronym = matchData[0].acronym;
 			mapGames[i].matchStartDate = matchData[0].matchStartDate;
 
-			// if matchName starts with MOTD, remove it from mapScores
-			if (mapGames[i].matchName.startsWith('MOTD:')) {
+			// if acronym starts with MOTD, remove it from mapScores
+			if (mapGames[i].acronym === 'MOTD') {
 				mapGames.splice(i, 1);
 				i--;
 			}

@@ -12,7 +12,8 @@
 		"beatmapcovers",
 		"badges",
 		"slimcovers",
-		"avatars"
+		"avatars",
+		"historycardswithdetails"
 	],
 	"watch_options": {
 		"followSymlinks": false

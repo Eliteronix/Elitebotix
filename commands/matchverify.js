@@ -222,6 +222,7 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
+			//TODO: Check for places to use acronym instead of matchName
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list');
 			let matchNames = await DBOsuMultiMatches.findAll({
 				Attributes: ['matchName'],

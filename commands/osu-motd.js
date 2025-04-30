@@ -450,6 +450,7 @@ module.exports = {
 				)
 		),
 	async execute(msg, args, interaction, additionalObjects) {
+		//TODO: Check for use of acronym instead of match name
 		//TODO: Remove message code and replace with interaction code
 		let lowerStarLimit = 0;
 		let higherStarLimit = 10;
