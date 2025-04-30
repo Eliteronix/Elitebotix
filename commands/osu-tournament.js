@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const { DBOsuMultiMatches } = require('../dbObjects');
 const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
 
 module.exports = {
 	name: 'osu-tournament',
@@ -54,13 +54,7 @@ module.exports = {
 
 		let acronym = interaction.options.getString('acronym');
 
-		if (acronym.toLowerCase() === 'o!mm ranked'
-			|| acronym.toLowerCase() === 'o!mm private'
-			|| acronym.toLowerCase() === 'o!mm team ranked'
-			|| acronym.toLowerCase() === 'o!mm team private'
-			|| acronym.toLowerCase() === 'etx'
-			|| acronym.toLowerCase() === 'etx teams') {
-
+		if (matchMakingAcronyms.map(acronym => acronym.toLowerCase()).includes(acronym.toLowerCase())) {
 			return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
 		}
 
