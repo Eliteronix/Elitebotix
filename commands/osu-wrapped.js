@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGames, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, matchMakingAcronyms } = require('../config.json');
 const { Op } = require('sequelize');
 const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
@@ -481,7 +481,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].matchName.startsWith('ETX:') || multiScores[i].matchName.startsWith('ETX Teams:') || multiScores[i].matchName.startsWith('o!mm Ranked:') || multiScores[i].matchName.startsWith('o!mm Team Ranked:') || multiScores[i].matchName.startsWith('o!mm Private:') || multiScores[i].matchName.startsWith('o!mm Team Private:')) {
+			if (matchMakingAcronyms.includes(multiScores[i].acronym)) {
 				continue;
 			}
 
