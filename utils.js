@@ -2761,8 +2761,8 @@ module.exports = {
 										matchId: {
 											[Op.in]: tourneyScores.map(x => x.matchId),
 										},
-										matchName: {
-											[Op.notLike]: 'MOTD:%',
+										acronym: {
+											[Op.not]: 'MOTD',
 										},
 									}
 								});
@@ -3296,27 +3296,21 @@ module.exports = {
 					{
 						[Op.not]: [
 							{
-								matchName: {
-									[Op.like]: 'FEM2:%' //Femboy 2 has challenges including missing on purpose
-								}
+								acronym: 'FEM2' //Femboy 2 has challenges including missing on purpose
 							}
 						],
 					},
 					{
 						[Op.not]: [
 							{
-								matchName: {
-									[Op.like]: 'ZKFC S2:%' //Requires getting a specific score
-								}
+								acronym: 'ZKFC S2' //Requires getting a specific score
 							}
 						]
 					},
 					{
 						[Op.not]: [
 							{
-								matchName: {
-									[Op.like]: 'NDC2:%' //Requires getting a specific score
-								}
+								acronym: 'NDC2:' //Requires getting a specific score
 							}
 						]
 					},
