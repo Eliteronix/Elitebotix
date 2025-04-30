@@ -222,10 +222,12 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
-			//TODO: Check for places to use acronym instead of matchName
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list');
-			let matchNames = await DBOsuMultiMatches.findAll({
-				Attributes: ['matchName'],
+			let acronyms = await DBOsuMultiMatches.findAll({
+				attributes: [
+					'acronym',
+					[DBOsuMultiMatches.sequelize.fn('COUNT', DBOsuMultiMatches.sequelize.col('acronym')), 'count'],
+				],
 				where: {
 					matchEndDate: {
 						[Op.not]: null,
@@ -236,34 +238,26 @@ module.exports = {
 						[Op.notIn]: matchIdsGettingProcessed,
 					},
 				},
-				group: ['matchName'],
+				group: ['acronym'],
+				order: [
+					[DBOsuMultiMatches.sequelize.fn('COUNT', DBOsuMultiMatches.sequelize.col('acronym')), 'DESC'],
+					['acronym', 'ASC'],
+				],
 				limit: 50000,
 			});
 
-			let acronyms = [];
-			for (let i = 0; i < matchNames.length; i++) {
-				let matchAcronym = matchNames[i].matchName.replace(/:.*/gm, '');
-
-				let existingAcronym = acronyms.find((acronym) => acronym.acronym === matchAcronym);
-
-				if (existingAcronym) {
-					existingAcronym.count++;
-				} else {
-					acronyms.push({
-						acronym: matchAcronym,
-						count: 1,
-					});
-				}
-			}
-
-			//Sort acronyms by count ASC
-			acronyms.sort((a, b) => {
-				return a.count - b.count;
+			acronyms = acronyms.map(acronym => {
+				return {
+					acronym: acronym.acronym,
+					count: acronym.get('count'),
+				};
 			});
+
+			let first20Acronyms = acronyms.slice(0, 20);
 
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list unverifiedScores');
 			let unverifiedScores = await DBOsuMultiMatches.findAll({
-				Attributes: ['matchId', 'matchName'],
+				attributes: ['matchId', 'matchName', 'acronym', 'verificationComment'],
 				where: {
 					matchEndDate: {
 						[Op.not]: null,
@@ -273,110 +267,10 @@ module.exports = {
 					matchId: {
 						[Op.notIn]: matchIdsGettingProcessed,
 					},
-					[Op.or]: [
-						{
-							matchName: {
-								[Op.like]: `${acronyms[0].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[1].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[2].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[3].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[4].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[5].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[6].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[7].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[8].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[9].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[10].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[11].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[12].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[13].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[14].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[15].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[16].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[17].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[18].acronym}:%`,
-							},
-						},
-						{
-							matchName: {
-								[Op.like]: `${acronyms[19].acronym}:%`,
-							},
-						},
-					],
+					acronym: {
+						[Op.in]: first20Acronyms.map(acronym => acronym.acronym),
+					},
 				},
-				group: ['matchId', 'matchName'],
 				limit: 100,
 			});
 
@@ -385,7 +279,7 @@ module.exports = {
 			let orderedUnverifiedScores = [];
 			for (let i = 0; i < acronyms.length; i++) {
 				let acronym = acronyms[i].acronym;
-				let acronymScores = unverifiedScores.filter((score) => score.matchName.startsWith(acronym + ':'));
+				let acronymScores = unverifiedScores.filter((score) => score.acronym === acronym);
 
 				orderedUnverifiedScores = orderedUnverifiedScores.concat(acronymScores);
 			}
@@ -658,7 +552,7 @@ module.exports = {
 
 			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches check');
 			let match = await DBOsuMultiMatches.findOne({
-				attributes: ['matchName', 'matchStartDate'],
+				attributes: ['matchName', 'acronym', 'matchStartDate'],
 				where: {
 					matchId: matchId,
 				},
@@ -669,7 +563,7 @@ module.exports = {
 			}
 
 			if (!acronym) {
-				acronym = match.matchName.replace(/:.*/gm, '');
+				acronym = match.acronym;
 			}
 
 			let mapsPlayed = [];
@@ -700,9 +594,7 @@ module.exports = {
 					matchStartDate: {
 						[Op.between]: [weeksBeforeMatch, weeksAfterMatch],
 					},
-					matchName: {
-						[Op.like]: `${acronym}:%`,
-					},
+					acronym: acronym
 				},
 			});
 
@@ -856,17 +748,7 @@ module.exports = {
 			let userScores = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
 				where: {
-					[Op.or]: [
-						{
-							matchName: {
-								[Op.like]: `${acronym}:%`,
-							},
-						}, {
-							matchName: {
-								[Op.like]: `${acronym} :%`,
-							}
-						}
-					],
+					acronym: acronym,
 					tourneyMatch: true,
 					verifiedAt: null,
 					matchEndDate: {
