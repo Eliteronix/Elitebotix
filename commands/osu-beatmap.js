@@ -4,7 +4,7 @@ const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMo
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
-const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
+const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
 
 module.exports = {
 	name: 'osu-beatmap',
@@ -335,7 +335,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 		totalScores += mapGames[i].scores;
 
-		if (mapGames[i].matchName.startsWith('ETX') || mapGames[i].matchName.startsWith('o!mm')) {
+		if (matchMakingAcronyms.includes(mapGames[i].acronym)) {
 			matchMakingScores += mapGames[i].scores;
 		}
 
@@ -391,7 +391,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	}
 
 	//TODO: Number is wrong
-	tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
+	tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 
 	if (tournaments.length === 0) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
