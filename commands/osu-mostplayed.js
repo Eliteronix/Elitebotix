@@ -450,14 +450,17 @@ module.exports = {
 						matchId: {
 							[Op.in]: matchIds
 						},
-						matchName: {
+						acronym: {
 							[Op.or]: [
 								{
-									[Op.like]: 'ETX%:%',
+									[Op.like]: 'ETX%',
 								},
 								{
-									[Op.like]: 'o!mm%:%',
-								}
+									[Op.like]: 'o!mm%',
+								},
+								{
+									[Op.like]: 'ROMAI%',
+								},
 							]
 						},
 					},
