@@ -309,6 +309,7 @@ module.exports = {
 				attributes: [
 					'matchId',
 					'matchName',
+					'acronym',
 				],
 				where: {
 					matchId: {
@@ -323,6 +324,7 @@ module.exports = {
 				let match = multiMatches.find(match => match.matchId === score.matchId);
 
 				score.matchName = match.matchName;
+				score.acronym = match.acronym;
 			}
 
 			let addedUserScores = [];
@@ -342,7 +344,7 @@ module.exports = {
 
 				//Check acronym
 				if (acronym) {
-					if (!multiScores[i].matchName.trim().startsWith(acronym)) {
+					if (multiScores[i].acronym !== acronym) {
 						continue;
 					}
 				}
