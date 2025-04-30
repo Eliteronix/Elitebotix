@@ -101,7 +101,7 @@ module.exports = {
 
 				setTimeout(() => {
 					process.exit();
-				}, c.shardId * 1000);
+				}, c.shardId * 3000);
 			} else if (condition === 'update') {
 				c.update = 1;
 			}
