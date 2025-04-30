@@ -3284,6 +3284,7 @@ module.exports = {
 			attributes: [
 				'matchId',
 				'matchName',
+				'acronym',
 				'matchStartDate',
 				'verifiedBy',
 				'verifiedAt'
@@ -3329,6 +3330,7 @@ module.exports = {
 			}
 
 			userScores[i].matchName = match.matchName;
+			userScores[i].acronym = match.acronym;
 			userScores[i].matchStartDate = match.matchStartDate;
 			userScores[i].verifiedBy = match.verifiedBy;
 			userScores[i].verifiedAt = match.verifiedAt;
@@ -3355,7 +3357,7 @@ module.exports = {
 
 				if (100 / totalHits * parseInt(userScores[i].countMiss) > 15 &&
 					(
-						((userScores[i].matchName.startsWith('ETX') || userScores[i].matchName.startsWith('o!mm')) && userScores[i].verifiedBy === '31050083') ||
+						(matchMakingAcronyms.includes(userScores[i].acronym) && userScores[i].verifiedBy === '31050083') ||
 						userScores[i].verifiedAt === null
 					)
 				) {
@@ -4433,17 +4435,7 @@ module.exports = {
 					[Op.in]: matchIds
 				},
 				acronym: {
-					[Op.or]: [
-						{
-							[Op.like]: 'ETX%',
-						},
-						{
-							[Op.like]: 'o!mm%',
-						},
-						{
-							[Op.like]: 'ROMAI%',
-						}
-					]
+					[Op.in]: matchMakingAcronyms
 				},
 			},
 			group: ['matchId']
