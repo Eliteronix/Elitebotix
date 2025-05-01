@@ -1,6 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
-const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
+const { showUnknownInteractionError } = require('../config.json');
 const { logDatabaseQueries } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { Op } = require('sequelize');
@@ -173,11 +173,6 @@ module.exports = {
 					discordUser.twitchId = json.data[0].id;
 					await discordUser.save();
 
-					if (logBroadcastEval) {
-						// eslint-disable-next-line no-console
-						console.log('Broadcasting commands/twitch.js join twitch channel connect to shards...');
-					}
-
 					await DBElitebotixBanchoProcessQueue.create({
 						task: 'joinTwitchChannel',
 						additions: discordUser.twitchName,
@@ -239,11 +234,6 @@ module.exports = {
 				discordUser.twitchOsuMatchCommand = true;
 				await interaction.editReply('!mp is now enabled. Be sure to mod or vip `Elitebotix` in your twitch channel.');
 
-				if (logBroadcastEval) {
-					// eslint-disable-next-line no-console
-					console.log('Broadcasting commands/twitch.js join twitch channel togglemp to shards...');
-				}
-
 				await DBElitebotixBanchoProcessQueue.create({
 					task: 'joinTwitchChannel',
 					additions: discordUser.twitchName,
@@ -278,11 +268,6 @@ module.exports = {
 			} else {
 				discordUser.twitchOsuMapSync = true;
 				await interaction.editReply('Twitch-Mapsync is now enabled. Be sure to mod or vip `Elitebotix` in your twitch channel.');
-
-				if (logBroadcastEval) {
-					// eslint-disable-next-line no-console
-					console.log('Broadcasting commands/twitch.js join twitch channel togglemapsync to shards...');
-				}
 
 				await DBElitebotixBanchoProcessQueue.create({
 					task: 'joinTwitchChannel',
