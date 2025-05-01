@@ -121,6 +121,15 @@ client.bancho = bancho;
 //login with the Discord client using the Token from the .env file
 client.login(process.env.BOTTOKEN);
 
+client.startDate = new Date();
+client.duels = [];
+client.otherMatches = [];
+client.matchTracks = [];
+client.bingoMatches = [];
+client.hostCommands = [];
+client.update = 0;
+client.knownSuspiciousMatches = [];
+
 //Get manager messages
 process.webRequestsWaiting = [];
 process.on('message', message => {
@@ -195,15 +204,6 @@ client.on('ready', readyDiscord);
 
 //declare the function which will be used when ready
 function readyDiscord() {
-	client.startDate = new Date();
-	client.duels = [];
-	client.otherMatches = [];
-	client.matchTracks = [];
-	client.bingoMatches = [];
-	client.hostCommands = [];
-	client.update = 0;
-	client.knownSuspiciousMatches = [];
-
 	client.user.setPresence({
 		status: 'online',  //You can show online, idle....
 		activities: [{
