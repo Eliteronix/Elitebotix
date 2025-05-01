@@ -1,5 +1,4 @@
 const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../../dbObjects');
-const { logBroadcastEval } = require('../../config.json');
 const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
@@ -44,11 +43,6 @@ module.exports = {
 		}
 
 		if (enabledSomething) {
-			if (logBroadcastEval) {
-				// eslint-disable-next-line no-console
-				console.log('Broadcasting commands/admin/updateTwitchSettings.js to shards...');
-			}
-
 			await DBElitebotixBanchoProcessQueue.create({
 				task: 'joinTwitchChannel',
 				additions: discordUser.twitchName,
