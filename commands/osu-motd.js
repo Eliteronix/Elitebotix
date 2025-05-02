@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const Discord = require('discord.js');
 const osu = require('node-osu');
@@ -458,7 +458,7 @@ module.exports = {
 
 		if (interaction) {
 			try {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+				await interaction.deferReply();
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -509,11 +509,6 @@ module.exports = {
 			//Swap lower and higher star limits if they're the wrong way around
 			if ((interaction.options.getSubcommand() === 'custom-fixed-players' || interaction.options.getSubcommand() === 'custom-react-to-play') && lowerStarLimit > higherStarLimit) {
 				[lowerStarLimit, higherStarLimit] = [higherStarLimit, lowerStarLimit];
-			}
-
-			if (interaction.options.getSubcommand() === 'custom-fixed-players' || interaction.options.getSubcommand() === 'custom-react-to-play') {
-				//Defer the interaction
-				await interaction.deferReply();
 			}
 
 			if (mappool) {
@@ -701,13 +696,15 @@ module.exports = {
 					}
 				}
 
+				await interaction.editReply('Looking for NoMod maps...');
+
 				//Fill a Nomod map array with random tourney maps from the db
 				//More maps than needed to get a better distribution
 				let nomodMaps = [];
 				let backupBeatmapIds = [];
 				let i = 0;
 				while (nomodMaps.length < 30) {
-
+					console.log(`Nomod map ${nomodMaps.length} of 30`);
 					let beatmap = null;
 					while (!beatmap) {
 						i++;
@@ -724,58 +721,38 @@ module.exports = {
 							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
-							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 1');
-							const multiScores = await DBOsuMultiGameScores.findAll({
-								where: {
-									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId,
-									warmup: {
-										[Op.not]: true
-									}
-								}
-							});
 
-							let onlyMOTD = true;
-							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-									onlyMOTD = false;
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
 								}
-							}
-
-							if (!onlyMOTD) {
-								beatmap = {
-									id: dbBeatmap.beatmapId,
-									beatmapSetId: dbBeatmap.beatmapsetId,
-									title: dbBeatmap.title,
-									creator: dbBeatmap.mapper,
-									version: dbBeatmap.difficulty,
-									artist: dbBeatmap.artist,
-									rating: dbBeatmap.userRating,
-									bpm: dbBeatmap.bpm,
-									mode: dbBeatmap.mode,
-									approvalStatus: dbBeatmap.approvalStatus,
-									maxCombo: dbBeatmap.maxCombo,
-									objects: {
-										normal: dbBeatmap.circles,
-										slider: dbBeatmap.sliders,
-										spinner: dbBeatmap.spinners
-									},
-									difficulty: {
-										rating: dbBeatmap.starRating,
-										aim: dbBeatmap.aimRating,
-										speed: dbBeatmap.speedRating,
-										size: dbBeatmap.circleSize,
-										overall: dbBeatmap.overallDifficulty,
-										approach: dbBeatmap.approachRate,
-										drain: dbBeatmap.hpDrain
-									},
-									length: {
-										total: dbBeatmap.totalLength,
-										drain: dbBeatmap.drainLength
-									}
-								};
-							}
+							};
 						}
 					}
 
@@ -809,6 +786,8 @@ module.exports = {
 					}
 				}
 
+				await interaction.editReply('Looking for DoubleTime maps...');
+
 				//Fill a DoubleTime map array with 50 random tourney maps from the db
 				let doubleTimeMaps = [];
 
@@ -816,7 +795,7 @@ module.exports = {
 
 				i = 0;
 				while (doubleTimeMaps.length < 50) {
-
+					console.log(`DoubleTime map ${doubleTimeMaps.length} of 50`);
 					let beatmap = null;
 					while (!beatmap) {
 						i++;
@@ -834,58 +813,38 @@ module.exports = {
 							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
-							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 2');
-							const multiScores = await DBOsuMultiGameScores.findAll({
-								where: {
-									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId,
-									warmup: {
-										[Op.not]: true
-									}
-								}
-							});
 
-							let onlyMOTD = true;
-							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-									onlyMOTD = false;
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
 								}
-							}
-
-							if (!onlyMOTD) {
-								beatmap = {
-									id: dbBeatmap.beatmapId,
-									beatmapSetId: dbBeatmap.beatmapsetId,
-									title: dbBeatmap.title,
-									creator: dbBeatmap.mapper,
-									version: dbBeatmap.difficulty,
-									artist: dbBeatmap.artist,
-									rating: dbBeatmap.userRating,
-									bpm: dbBeatmap.bpm,
-									mode: dbBeatmap.mode,
-									approvalStatus: dbBeatmap.approvalStatus,
-									maxCombo: dbBeatmap.maxCombo,
-									objects: {
-										normal: dbBeatmap.circles,
-										slider: dbBeatmap.sliders,
-										spinner: dbBeatmap.spinners
-									},
-									difficulty: {
-										rating: dbBeatmap.starRating,
-										aim: dbBeatmap.aimRating,
-										speed: dbBeatmap.speedRating,
-										size: dbBeatmap.circleSize,
-										overall: dbBeatmap.overallDifficulty,
-										approach: dbBeatmap.approachRate,
-										drain: dbBeatmap.hpDrain
-									},
-									length: {
-										total: dbBeatmap.totalLength,
-										drain: dbBeatmap.drainLength
-									}
-								};
-							}
+							};
 						}
 					}
 
@@ -977,8 +936,33 @@ module.exports = {
 			await interaction.editReply({ embeds: [mappoolEmbed] });
 
 			//Start the knockout lobby
-			const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
-			knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true, scoreversion);
+			let settings = {
+				interaction: interaction.token,
+				mappool: mappoolInOrder.map(map => {
+					return {
+						id: map.id,
+						length: map.length,
+					}
+				}),
+				players: discordUsers.map(discordUser => {
+					return {
+						osuUserId: discordUser.osuUserId,
+						osuName: discordUser.osuName,
+					}
+				}),
+				users: users.map(user => {
+					return {
+						userId: user.id,
+					}
+				}),
+				scoreversion: scoreversion,
+			};
+
+			await DBElitebotixBanchoProcessQueue.create({
+				task: 'knockoutLobby',
+				additions: JSON.stringify(settings),
+				date: new Date(),
+			});
 		} else if (args[0].toLowerCase() === 'custom-react-to-play') {
 			//Return if its not triggered by a slash command
 			if (msg.id) {
@@ -1024,6 +1008,8 @@ module.exports = {
 					}
 				}
 
+				await interaction.editReply('Looking for NoMod maps...');
+
 				//Fill a Nomod map array with random tourney maps from the db
 				//More maps than needed to get a better distribution
 				let nomodMaps = [];
@@ -1047,58 +1033,38 @@ module.exports = {
 							&& (dbBeatmap.mods === 0 || dbBeatmap.mods === 1)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
-							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 3');
-							const multiScores = await DBOsuMultiGameScores.findAll({
-								where: {
-									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId,
-									warmup: {
-										[Op.not]: true
-									}
-								}
-							});
 
-							let onlyMOTD = true;
-							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-									onlyMOTD = false;
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
 								}
-							}
-
-							if (!onlyMOTD) {
-								beatmap = {
-									id: dbBeatmap.beatmapId,
-									beatmapSetId: dbBeatmap.beatmapsetId,
-									title: dbBeatmap.title,
-									creator: dbBeatmap.mapper,
-									version: dbBeatmap.difficulty,
-									artist: dbBeatmap.artist,
-									rating: dbBeatmap.userRating,
-									bpm: dbBeatmap.bpm,
-									mode: dbBeatmap.mode,
-									approvalStatus: dbBeatmap.approvalStatus,
-									maxCombo: dbBeatmap.maxCombo,
-									objects: {
-										normal: dbBeatmap.circles,
-										slider: dbBeatmap.sliders,
-										spinner: dbBeatmap.spinners
-									},
-									difficulty: {
-										rating: dbBeatmap.starRating,
-										aim: dbBeatmap.aimRating,
-										speed: dbBeatmap.speedRating,
-										size: dbBeatmap.circleSize,
-										overall: dbBeatmap.overallDifficulty,
-										approach: dbBeatmap.approachRate,
-										drain: dbBeatmap.hpDrain
-									},
-									length: {
-										total: dbBeatmap.totalLength,
-										drain: dbBeatmap.drainLength
-									}
-								};
-							}
+							};
 						}
 					}
 
@@ -1132,6 +1098,8 @@ module.exports = {
 					}
 				}
 
+				await interaction.editReply('Looking for DoubleTime maps...');
+
 				//Fill a DoubleTime map array with 50 random tourney maps from the db
 				let doubleTimeMaps = [];
 
@@ -1157,58 +1125,38 @@ module.exports = {
 							&& (dbBeatmap.mods === 64 || dbBeatmap.mods === 65)
 							&& !backupBeatmapIds.includes(dbBeatmap.beatmapId)) {
 							backupBeatmapIds.push(dbBeatmap.beatmapId);
-							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-motd.js DBOsuMultiGameScores 4');
-							const multiScores = await DBOsuMultiGameScores.findAll({
-								where: {
-									tourneyMatch: true,
-									beatmapId: dbBeatmap.beatmapId,
-									warmup: {
-										[Op.not]: true
-									}
-								}
-							});
 
-							let onlyMOTD = true;
-							for (let i = 0; i < multiScores.length && onlyMOTD; i++) {
-								if (multiScores[i].matchName && !multiScores[i].matchName.startsWith('MOTD')) {
-									onlyMOTD = false;
+							beatmap = {
+								id: dbBeatmap.beatmapId,
+								beatmapSetId: dbBeatmap.beatmapsetId,
+								title: dbBeatmap.title,
+								creator: dbBeatmap.mapper,
+								version: dbBeatmap.difficulty,
+								artist: dbBeatmap.artist,
+								rating: dbBeatmap.userRating,
+								bpm: dbBeatmap.bpm,
+								mode: dbBeatmap.mode,
+								approvalStatus: dbBeatmap.approvalStatus,
+								maxCombo: dbBeatmap.maxCombo,
+								objects: {
+									normal: dbBeatmap.circles,
+									slider: dbBeatmap.sliders,
+									spinner: dbBeatmap.spinners
+								},
+								difficulty: {
+									rating: dbBeatmap.starRating,
+									aim: dbBeatmap.aimRating,
+									speed: dbBeatmap.speedRating,
+									size: dbBeatmap.circleSize,
+									overall: dbBeatmap.overallDifficulty,
+									approach: dbBeatmap.approachRate,
+									drain: dbBeatmap.hpDrain
+								},
+								length: {
+									total: dbBeatmap.totalLength,
+									drain: dbBeatmap.drainLength
 								}
-							}
-
-							if (!onlyMOTD) {
-								beatmap = {
-									id: dbBeatmap.beatmapId,
-									beatmapSetId: dbBeatmap.beatmapsetId,
-									title: dbBeatmap.title,
-									creator: dbBeatmap.mapper,
-									version: dbBeatmap.difficulty,
-									artist: dbBeatmap.artist,
-									rating: dbBeatmap.userRating,
-									bpm: dbBeatmap.bpm,
-									mode: dbBeatmap.mode,
-									approvalStatus: dbBeatmap.approvalStatus,
-									maxCombo: dbBeatmap.maxCombo,
-									objects: {
-										normal: dbBeatmap.circles,
-										slider: dbBeatmap.sliders,
-										spinner: dbBeatmap.spinners
-									},
-									difficulty: {
-										rating: dbBeatmap.starRating,
-										aim: dbBeatmap.aimRating,
-										speed: dbBeatmap.speedRating,
-										size: dbBeatmap.circleSize,
-										overall: dbBeatmap.overallDifficulty,
-										approach: dbBeatmap.approachRate,
-										drain: dbBeatmap.hpDrain
-									},
-									length: {
-										total: dbBeatmap.totalLength,
-										drain: dbBeatmap.drainLength
-									}
-								};
-							}
+							};
 						}
 					}
 
@@ -1377,8 +1325,33 @@ module.exports = {
 				await interaction.editReply({ embeds: [mappoolEmbed] });
 
 				//Start the knockout lobby
-				const { knockoutLobby } = require('../MOTD/knockoutLobby.js');
-				knockoutLobby(additionalObjects[0], additionalObjects[1], 'Knockout', mappoolInOrder, 'custom', discordUsers, users, true, scoreversion);
+				let settings = {
+					interaction: interaction.token,
+					mappool: mappoolInOrder.map(map => {
+						return {
+							id: map.id,
+							length: map.length,
+						}
+					}),
+					players: discordUsers.map(discordUser => {
+						return {
+							osuUserId: discordUser.osuUserId,
+							osuName: discordUser.osuName,
+						}
+					}),
+					users: users.map(user => {
+						return {
+							userId: user.id,
+						}
+					}),
+					scoreversion: scoreversion,
+				};
+
+				await DBElitebotixBanchoProcessQueue.create({
+					task: 'knockoutLobby',
+					additions: JSON.stringify(settings),
+					date: new Date(),
+				});
 			});
 		} else {
 			msg.reply('Please specify what you want to do: `server`, `register`, `unregister`, `mute`, `unmute`, `custom-fixed-players`, `custom-react-to-play`');
