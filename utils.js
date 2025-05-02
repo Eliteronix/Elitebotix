@@ -794,7 +794,7 @@ module.exports = {
 
 		return userDisplayName;
 	},
-	executeNextProcessQueueTask: async function (client, bancho) {
+	executeNextProcessQueueTask: async function (client) {
 		let now = new Date();
 		module.exports.logDatabaseQueries(1, 'utils.js DBProcessQueue nextTask');
 		let nextTasks = await DBProcessQueue.findAll({
@@ -815,7 +815,7 @@ module.exports = {
 				nextTasks[i].beingExecuted = true;
 				await nextTasks[i].save();
 
-				executeFoundTask(client, bancho, nextTasks[i]);
+				executeFoundTask(client, nextTasks[i]);
 				break;
 			}
 		}
@@ -8341,12 +8341,12 @@ function applyOsuDuelStarratingCorrection(rating, score, weight) {
 	return newRating;
 }
 
-async function executeFoundTask(client, bancho, nextTask) {
+async function executeFoundTask(client, nextTask) {
 	try {
 		if (nextTask && !module.exports.wrongCluster(client, nextTask.id)) {
 			const task = require(`./processQueueTasks/${nextTask.task}.js`);
 
-			await task.execute(client, bancho, nextTask);
+			await task.execute(client, nextTask);
 		}
 	} catch (e) {
 		console.error('Error executing process queue task', e);

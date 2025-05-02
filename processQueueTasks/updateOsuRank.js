@@ -5,7 +5,7 @@ const { currentElitiriCup, currentElitiriCupEndOfRegs, logBroadcastEval } = requ
 const { Op } = require('sequelize');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('updateOsuRank', processQueueEntry.additions);
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)

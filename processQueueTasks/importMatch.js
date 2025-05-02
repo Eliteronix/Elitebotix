@@ -5,7 +5,7 @@ const { logBroadcastEval } = require('../config.json');
 const { Op } = require('sequelize');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('importMatch');
 		let args = processQueueEntry.additions.split(';');
 
@@ -58,10 +58,6 @@ module.exports = {
 
 					client.shard.broadcastEval(async (c, { message, matchID }) => {
 						// Remove match from client
-						while (c.otherMatches.indexOf(matchID) > -1) {
-							c.otherMatches.splice(c.otherMatches.indexOf(matchID), 1);
-						}
-
 						while (c.matchTracks.indexOf(matchID) > -1) {
 							c.matchTracks.splice(c.matchTracks.indexOf(matchID), 1);
 						}
@@ -79,7 +75,7 @@ module.exports = {
 							await channel.send(message);
 						}
 
-						if (c.update === 1 && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
+						if (c.update === 1 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
 							process.exit();
 						}

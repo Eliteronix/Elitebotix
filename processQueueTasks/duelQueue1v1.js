@@ -2,7 +2,7 @@ const { DBProcessQueue, DBDiscordUsers, DBElitebotixBanchoProcessQueue } = requi
 const { updateQueueChannels, logDatabaseQueries } = require('../utils');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('duelQueue1v1');
 		let args = processQueueEntry.additions.split(';');
 

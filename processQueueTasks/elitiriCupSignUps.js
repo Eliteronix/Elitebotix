@@ -5,7 +5,7 @@ const { currentElitiriCup, currentElitiriCupTopSheetId, currentElitiriCupMiddleS
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		return processQueueEntry.destroy();
 		// console.log('elitiriCupSignUps');
 		if (processQueueEntry.additions === 'Top Bracket') {

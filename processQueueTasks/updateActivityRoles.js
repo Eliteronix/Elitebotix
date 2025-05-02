@@ -3,7 +3,7 @@ const { DBActivityRoles } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('updateActivityRoles');
 
 		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');

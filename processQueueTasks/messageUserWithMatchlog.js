@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		let args = processQueueEntry.additions.split(';');
 
 		let user = await client.users.fetch(args[0]);

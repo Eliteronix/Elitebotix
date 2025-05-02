@@ -3,7 +3,7 @@ const { logDatabaseQueries } = require('../utils');
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('tourneyMatchNotification');
 		let args = processQueueEntry.additions.split(';');
 

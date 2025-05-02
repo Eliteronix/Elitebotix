@@ -1,7 +1,7 @@
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('nameSync');
 
 		if (logBroadcastEval) {

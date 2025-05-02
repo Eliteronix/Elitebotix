@@ -31,7 +31,6 @@ module.exports = {
 	async execute(interaction) {
 		let guildSizes = await interaction.client.shard.fetchClientValues('guilds.cache.size');
 		let startDates = await interaction.client.shard.fetchClientValues('startDate');
-		let other = await interaction.client.shard.fetchClientValues('otherMatches');
 		let matchtracks = await interaction.client.shard.fetchClientValues('matchTracks');
 		let bingoMatches = await interaction.client.shard.fetchClientValues('bingoMatches');
 		let hostCommands = await interaction.client.shard.fetchClientValues('hostCommands');
@@ -42,9 +41,9 @@ module.exports = {
 		// eslint-disable-next-line no-console
 		console.log('matchtracks', matchtracks);
 
-		const dividingLine = '---------|------------------|--------|-------|------------|-------|---------|--------\n';
+		const dividingLine = '---------|------------------|--------|------------|-------|---------|--------\n';
 
-		let output = `\`\`\`Cur.: ${interaction.client.shardId.toString().padStart(2, '0')} | Started          | Guilds | Other | Matchtrack | Bingo | HostCmd | Update\n`;
+		let output = `\`\`\`Cur.: ${interaction.client.shardId.toString().padStart(2, '0')} | Started          | Guilds | Matchtrack | Bingo | HostCmd | Update\n`;
 		for (let i = 0; i < guildSizes.length; i++) {
 			try {
 				if ((output + dividingLine).length > 1997) {
@@ -95,9 +94,9 @@ module.exports = {
 		// Restart relevant ones
 		await interaction.client.shard.broadcastEval(async (c, { condition }) => {
 			if (condition === 'all' ||
-				condition === 'free' && c.otherMatches.length === 0 && c.matchTracks === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0 ||
+				condition === 'free' && c.matchTracks === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0 ||
 				!isNaN(condition) && c.shardId === parseInt(condition) ||
-				condition === 'update' && c.otherMatches.length === 0 && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
+				condition === 'update' && c.matchTracks.length === 0 && c.bingoMatches.length === 0 && c.hostCommands.length === 0) {
 
 				setTimeout(() => {
 					process.exit();

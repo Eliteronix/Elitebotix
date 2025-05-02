@@ -110,20 +110,13 @@ const interactionCreate = require('./interactionCreate');
 //Get executeNextProcessQueueTask
 const { executeNextProcessQueueTask, refreshOsuRank, restartProcessQueueTask, cleanUpDuplicateEntries, checkForBirthdays } = require('./utils');
 
-const Banchojs = require('bancho.js');
 const { DBProcessQueue } = require('./dbObjects');
 const { Op } = require('sequelize');
-
-const bancho = new Banchojs.BanchoClient({ username: process.env.OSUNAME, password: process.env.OSUIRC, apiKey: process.env.OSUTOKENV1 });
-
-client.bancho = bancho;
 
 //login with the Discord client using the Token from the .env file
 client.login(process.env.BOTTOKEN);
 
 client.startDate = new Date();
-client.duels = [];
-client.otherMatches = [];
 client.matchTracks = [];
 client.bingoMatches = [];
 client.hostCommands = [];
@@ -239,7 +232,7 @@ function readyDiscord() {
 	})();
 
 	setTimeout(() => {
-		executeProcessQueue(client, bancho);
+		executeProcessQueue(client);
 
 		startJiraCardSync(client);
 	}, 60000);
@@ -288,7 +281,7 @@ function readyDiscord() {
 	}, { threshold: 5000 });
 }
 
-client.on('messageCreate', msg => gotMessage(msg, bancho));
+client.on('messageCreate', msg => gotMessage(msg));
 
 client.on('messageUpdate', messageUpdate);
 
@@ -307,7 +300,7 @@ client.on('guildBanRemove', guildBanRemove);
 client.on('userUpdate', userUpdate);
 
 client.on('messageReactionAdd', (reaction, user) => {
-	reactionAdded(reaction, user, [client, bancho]);
+	reactionAdded(reaction, user);
 });
 
 client.on('messageReactionRemove', reactionRemoved);
@@ -341,7 +334,7 @@ client.on('emojiUpdate', emojiUpdate);
 client.on('emojiDelete', emojiDelete);
 
 client.on('interactionCreate', interaction => {
-	interactionCreate(client, bancho, interaction);
+	interactionCreate(client, interaction);
 });
 
 client.on('error', console.error);
@@ -389,15 +382,15 @@ setTimeout(() => {
 // 	}
 // }, 6000 * 2);
 
-async function executeProcessQueue(client, bancho) {
+async function executeProcessQueue(client) {
 	try {
-		await executeNextProcessQueueTask(client, bancho);
+		await executeNextProcessQueueTask(client);
 	} catch (e) {
 		console.error('bot.js | executeNextProcessQueueTask' + e);
 	}
 
 	setTimeout(() => {
-		executeProcessQueue(client, bancho);
+		executeProcessQueue(client);
 	}, 650);
 }
 

@@ -5,7 +5,7 @@ const { PermissionsBitField } = require('discord.js');
 const { DBTickets } = require('./dbObjects');
 const { developers } = require('./config.json');
 
-module.exports = async function (msg, bancho) {
+module.exports = async function (msg) {
 	//check if the message wasn't sent by the bot itself or another bot
 	if (msg.author.bot) {
 		return;
@@ -93,7 +93,7 @@ module.exports = async function (msg, bancho) {
 
 	process.send(`command ${command.name}`);
 
-	command.execute(msg, args, null, [msg.client, bancho]);
+	command.execute(msg, args, null);
 };
 
 async function handleTicketStatus(msg) {

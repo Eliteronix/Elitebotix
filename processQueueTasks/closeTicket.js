@@ -4,7 +4,7 @@ const Discord = require('discord.js');
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('closeTicket');
 
 		logDatabaseQueries(2, 'processQueueTasks/closeTicket.js DBTickets');

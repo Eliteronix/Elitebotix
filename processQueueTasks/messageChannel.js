@@ -1,7 +1,7 @@
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		let args = processQueueEntry.additions.split(';');
 
 		if (logBroadcastEval) {

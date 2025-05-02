@@ -3,7 +3,7 @@ const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
 	// eslint-disable-next-line no-unused-vars
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('elitiriRoleAssignment');
 		if (process.env.SERVER !== 'Live') {
 			return processQueueEntry.destroy();

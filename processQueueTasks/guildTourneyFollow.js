@@ -3,7 +3,7 @@ const { logDatabaseQueries, getOsuPlayerName } = require('../utils');
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
-	async execute(client, bancho, processQueueEntry) {
+	async execute(client, processQueueEntry) {
 		// console.log('guildTourneyFollow', client.shardId);
 		let args = processQueueEntry.additions.split(';');
 
