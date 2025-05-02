@@ -704,7 +704,7 @@ module.exports = {
 				let backupBeatmapIds = [];
 				let i = 0;
 				while (nomodMaps.length < 30) {
-					console.log(`Nomod map ${nomodMaps.length} of 30`);
+
 					let beatmap = null;
 					while (!beatmap) {
 						i++;
@@ -795,7 +795,7 @@ module.exports = {
 
 				i = 0;
 				while (doubleTimeMaps.length < 50) {
-					console.log(`DoubleTime map ${doubleTimeMaps.length} of 50`);
+
 					let beatmap = null;
 					while (!beatmap) {
 						i++;
