@@ -1238,7 +1238,7 @@ module.exports = {
 				mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 			}
 
-			let embedMessage = await interaction.editReply({ embeds: [mappoolEmbed] });
+			let embedMessage = await interaction.editReply({ content: 'The match is being created with the following players and mappool', embeds: [mappoolEmbed] });
 			//Handle reactions
 			await embedMessage.react('✅');
 			let discordUsers = [];
@@ -1285,7 +1285,7 @@ module.exports = {
 						mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 					}
 
-					await interaction.editReply({ embeds: [mappoolEmbed] });
+					await interaction.editReply({ content: 'The match is being created with the following players and mappool', embeds: [mappoolEmbed] });
 				} else {
 					reaction.users.remove(user.id);
 					let hintMessage = await embedMessage.channel.send(`It seems like you don't have your account connected and verified to the bot <@${user.id}>.\nPlease do so by using </osu-link connect:${embedMessage.client.slashCommandData.find(command => command.name === 'osu-link').id}> and try again.`);
@@ -1322,7 +1322,7 @@ module.exports = {
 					mappoolEmbed.addFields([{ name: embedName, value: embedValue }]);
 				}
 
-				await interaction.editReply({ embeds: [mappoolEmbed] });
+				await interaction.editReply({ content: 'The match is being created with the following players and mappool', embeds: [mappoolEmbed] });
 
 				//Start the knockout lobby
 				let settings = {
