@@ -117,7 +117,7 @@ module.exports = {
 						.setRequired(false)
 				)
 		),
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		//TODO: Refactor this mess
 		if (interaction.options._hoistedOptions[0]) {
 			args = [interaction.options.getSubcommand(), interaction.options._hoistedOptions[0].value];
@@ -135,8 +135,6 @@ module.exports = {
 			timestamps.delete(interaction.user.id);
 			return;
 		}
-
-		const bancho = additionalObjects[1];
 
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -173,20 +171,20 @@ module.exports = {
 		//Check for people that already have their discord account linked to that osu! account
 		if (args[0] === 'connect') {
 			args.shift();
-			connect(args, interaction, additionalObjects, osuApi, bancho, discordUser);
+			connect(args, interaction, osuApi, discordUser);
 		} else if (args[0] === 'current') {
-			current(osuApi, interaction, additionalObjects, discordUser);
+			current(osuApi, interaction, discordUser);
 		} else if (args[0] === 'disconnect') {
-			disconnect(interaction, additionalObjects, discordUser);
+			disconnect(interaction, discordUser);
 		} else if (args[0] === 'verify') {
-			verify(args, interaction, additionalObjects, osuApi, bancho, discordUser);
+			verify(args, interaction, osuApi, discordUser);
 		} else {
-			connect(args, interaction, additionalObjects, osuApi, bancho, discordUser);
+			connect(args, interaction, osuApi, discordUser);
 		}
 	},
 };
 
-async function connect(args, interaction, additionalObjects, osuApi, bancho, discordUser) {
+async function connect(args, interaction, osuApi, discordUser) {
 	if (discordUser && discordUser.osuVerified) {
 		return await interaction.editReply(`You already connected and verified your connection of your discord account to the osu! account \`${discordUser.osuName}\`.\nIf you want to disconnect it please use </osu-link disconnect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 	}
@@ -255,14 +253,6 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 
 					discordUser.save();
 
-					try {
-						await bancho.connect();
-					} catch (error) {
-						if (!error.message === 'Already connected/connecting') {
-							throw (error);
-						}
-					}
-
 					await DBElitebotixBanchoProcessQueue.create({
 						task: 'messageUser',
 						additions: `${osuUser.id};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
@@ -301,14 +291,6 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 						DBDiscordUsers.create({ userId: interaction.user.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: additionalInfo.tournamentBadges.length, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 					}
 
-					try {
-						await bancho.connect();
-					} catch (error) {
-						if (!error.message === 'Already connected/connecting') {
-							throw (error);
-						}
-					}
-
 					await DBElitebotixBanchoProcessQueue.create({
 						task: 'messageUser',
 						additions: `${osuUser.id};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
@@ -328,7 +310,7 @@ async function connect(args, interaction, additionalObjects, osuApi, bancho, dis
 	}
 }
 
-async function current(osuApi, interaction, additionalObjects, discordUser) {
+async function current(osuApi, interaction, discordUser) {
 	if (discordUser && discordUser.osuUserId) {
 		logOsuAPICalls('commands/osu-link.js current');
 		osuApi.getUser({ u: discordUser.osuUserId })
@@ -362,7 +344,7 @@ async function current(osuApi, interaction, additionalObjects, discordUser) {
 	}
 }
 
-async function disconnect(interaction, additionalObjects, discordUser) {
+async function disconnect(interaction, discordUser) {
 	if (discordUser && discordUser.osuUserId) {
 		discordUser.osuUserId = null;
 		discordUser.osuVerificationCode = null;
@@ -385,7 +367,7 @@ async function disconnect(interaction, additionalObjects, discordUser) {
 	}
 }
 
-async function verify(args, interaction, additionalObjects, osuApi, bancho, discordUser) {
+async function verify(args, interaction, osuApi, discordUser) {
 	if (!args[1]) {
 		if (discordUser) {
 			if (discordUser.osuVerified) {
@@ -429,14 +411,6 @@ async function verify(args, interaction, additionalObjects, osuApi, bancho, disc
 							discordUser.osuBadges = additionalInfo.tournamentBadges.length;
 
 							discordUser.save();
-
-							try {
-								await bancho.connect();
-							} catch (error) {
-								if (!error.message === 'Already connected/connecting') {
-									throw (error);
-								}
-							}
 
 							await DBElitebotixBanchoProcessQueue.create({
 								task: 'messageUser',

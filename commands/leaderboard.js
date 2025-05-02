@@ -78,7 +78,7 @@ module.exports = {
 					{ name: 'mania', value: '--m' },
 				)
 		),
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
@@ -120,6 +120,6 @@ module.exports = {
 
 		process.send(`command ${command.name}`);
 
-		command.execute(msg, args, interaction, additionalObjects);
+		command.execute(msg, args, interaction);
 	},
 };

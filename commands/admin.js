@@ -74,8 +74,7 @@ module.exports = {
 			}
 		}
 	},
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		if (!developers.includes(interaction.user.id) && !(interaction.options.getString('command') === 'verifiedMatches' && peopleThatWantData.includes(interaction.user.id))) {
 			try {
 				return await interaction.reply({ content: 'Only developers may use this command.', flags: MessageFlags.Ephemeral });

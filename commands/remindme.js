@@ -130,8 +130,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let years = 0;
 		let months = 0;

@@ -149,7 +149,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		let settings = {};
 
 		settings.interaction = interaction.token;

@@ -12,8 +12,7 @@ module.exports = {
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
 	tags: 'elitiri',
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
 		//TODO: Update logdatabasequeries

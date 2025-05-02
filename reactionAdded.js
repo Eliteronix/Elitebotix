@@ -7,7 +7,7 @@ const Sequelize = require('sequelize');
 const { getMods, logDatabaseQueries, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
 const Op = Sequelize.Op;
 
-module.exports = async function (reaction, user, additionalObjects) {
+module.exports = async function (reaction, user) {
 	//Check if the reaction is partial or not
 	if (reaction.partial) {
 		// If the message this reaction belongs to was removed the fetching might result in an API error, which needs to be handled
@@ -211,7 +211,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 					process.send(`command ${command.name}`);
 
-					command.execute(message, [page, `--${mode}`], null, additionalObjects);
+					command.execute(message, [page, `--${mode}`], null);
 				} else {
 					message = {
 						client: reaction.message.client,
@@ -224,7 +224,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 					process.send(`command ${command.name}`);
 
-					command.execute(message, [page], null, additionalObjects);
+					command.execute(message, [page], null);
 				}
 			} else {
 				let guild = null;
@@ -248,7 +248,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, [page], interaction, additionalObjects);
+				command.execute(null, [page], interaction);
 			}
 
 			return await reaction.message.delete();
@@ -298,7 +298,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			} else if (firstAttachment.name.startsWith('osu-beatmap')) {
 				const beatmapId = firstAttachment.name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
@@ -333,7 +333,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			} else if (firstAttachment.name.startsWith('osu-game-')) {
 				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
@@ -370,7 +370,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 
@@ -426,7 +426,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			} else if (firstAttachment.name.startsWith('osu-game-')) {
 				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
@@ -474,7 +474,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 
@@ -520,7 +520,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, null, interaction, additionalObjects);
+					command.execute(null, null, interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -569,7 +569,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			} else if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-top')) {
 				//get the osuUserId used
 				const osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
@@ -611,7 +611,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 
@@ -649,7 +649,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(tempMessage, args, null, additionalObjects);
+					command.execute(tempMessage, args, null);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -699,7 +699,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			} else if (firstAttachment.name.startsWith('osu-game-')) {
 				//get the osuUserId used
 				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
@@ -740,7 +740,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, null, interaction, additionalObjects);
+					command.execute(null, null, interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -800,7 +800,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, null, interaction, additionalObjects);
+					command.execute(null, null, interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -852,7 +852,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 
@@ -894,7 +894,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, args, interaction, additionalObjects);
+					command.execute(null, args, interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -989,7 +989,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 
@@ -1054,7 +1054,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 
@@ -1119,7 +1119,7 @@ module.exports = async function (reaction, user, additionalObjects) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction, additionalObjects);
+				command.execute(null, null, interaction);
 			}
 		}
 	}

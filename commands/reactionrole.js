@@ -366,7 +366,7 @@ module.exports = {
 						.setRequired(true)
 				)
 		),
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
@@ -512,7 +512,7 @@ module.exports = {
 							args.shift();
 							reactionRolesHeader.reactionTitle = args.join(' ');
 							reactionRolesHeader.save().then(
-								editEmbed(msg, reactionRolesHeader, additionalObjects[0])
+								editEmbed(msg, reactionRolesHeader, interaction.client)
 							);
 
 							if (msg.id) {
@@ -541,7 +541,7 @@ module.exports = {
 							args.shift();
 							reactionRolesHeader.reactionDescription = args.join(' ');
 							reactionRolesHeader.save().then(
-								editEmbed(msg, reactionRolesHeader, additionalObjects[0])
+								editEmbed(msg, reactionRolesHeader, interaction.client)
 							);
 
 							if (msg.id) {
@@ -574,7 +574,7 @@ module.exports = {
 								args.shift();
 								reactionRolesHeader.reactionColor = embedColor;
 								reactionRolesHeader.save().then(
-									editEmbed(msg, reactionRolesHeader, additionalObjects[0])
+									editEmbed(msg, reactionRolesHeader, interaction.client)
 								);
 
 								if (msg.id) {
@@ -612,7 +612,7 @@ module.exports = {
 							args.shift();
 							reactionRolesHeader.reactionImage = embedImage;
 							reactionRolesHeader.save().then(
-								editEmbed(msg, reactionRolesHeader, additionalObjects[0])
+								editEmbed(msg, reactionRolesHeader, interaction.client)
 							);
 
 							if (msg.id) {
@@ -710,7 +710,7 @@ module.exports = {
 									}
 
 									//Edit embed
-									editEmbed(msg, reactionRolesHeader, additionalObjects[0]);
+									editEmbed(msg, reactionRolesHeader, interaction.client);
 								}
 							} else {
 								if (msg.id) {
@@ -755,7 +755,7 @@ module.exports = {
 
 							if (rowCount > 0) {
 								//Edit embed
-								editEmbed(msg, reactionRolesHeader, additionalObjects[0]);
+								editEmbed(msg, reactionRolesHeader, interaction.client);
 
 								if (interaction) {
 									await interaction.editReply({ content: 'The role has been removed', flags: MessageFlags.Ephemeral });
@@ -802,7 +802,7 @@ module.exports = {
 							if (args[4].toLowerCase() === 'emoji') {
 								reactionRolesEmoji.emoji = args[5];
 								reactionRolesEmoji.save()
-									.then(editEmbed(msg, reactionRolesHeader, additionalObjects[0]));
+									.then(editEmbed(msg, reactionRolesHeader, interaction.client));
 								if (interaction) {
 									await interaction.editReply({ content: 'The emoji has been changed', flags: MessageFlags.Ephemeral });
 								}
@@ -814,7 +814,7 @@ module.exports = {
 								args.shift();
 								reactionRolesEmoji.description = args.join(' ');
 								reactionRolesEmoji.save()
-									.then(editEmbed(msg, reactionRolesHeader, additionalObjects[0]));
+									.then(editEmbed(msg, reactionRolesHeader, interaction.client));
 								if (interaction) {
 									await interaction.editReply({ content: 'The description has been changed', flags: MessageFlags.Ephemeral });
 								}

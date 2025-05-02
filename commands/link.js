@@ -22,8 +22,7 @@ module.exports = {
 			'en-US': 'Sends a link to add the bot to a server',
 		})
 		.setDMPermission(true),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		try {
 			return await interaction.reply('Here is a [link](https://discord.com/oauth2/authorize?client_id=981205694340546571&scope=bot+applications.commands&permissions=285256792) to add the bot to your server');
 		} catch (error) {

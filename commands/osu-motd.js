@@ -449,7 +449,7 @@ module.exports = {
 						.setRequired(false)
 				)
 		),
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		//TODO: Remove message code and replace with interaction code
 		let lowerStarLimit = 0;
 		let higherStarLimit = 10;
@@ -1246,7 +1246,7 @@ module.exports = {
 			let discordUserIds = [];
 
 			const filter = (reaction, user) => {
-				return reaction.emoji.name === '✅' && !discordUserIds.includes(user.id) && user.id !== additionalObjects[0].user.id && discordUsers.length < 16;
+				return reaction.emoji.name === '✅' && !discordUserIds.includes(user.id) && user.id !== interaction.client.user.id && discordUsers.length < 16;
 			};
 
 			const collector = embedMessage.createReactionCollector({ filter, time: 120000, max: 16 });

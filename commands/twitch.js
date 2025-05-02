@@ -102,8 +102,7 @@ module.exports = {
 					'en-US': 'Toggle the twitch to osu! map sync',
 				})
 		),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {

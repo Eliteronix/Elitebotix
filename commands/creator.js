@@ -23,8 +23,7 @@ module.exports = {
 			'en-US': 'Sends an info card about the developers',
 		})
 		.setDMPermission(true),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -36,8 +35,8 @@ module.exports = {
 			return;
 		}
 
-		const eliteronixUser = await additionalObjects[0].users.fetch('138273136285057025');
-		const roddyUser = await additionalObjects[0].users.fetch('212511522407055360');
+		const eliteronixUser = await interaction.client.users.fetch('138273136285057025');
+		const roddyUser = await interaction.client.users.fetch('212511522407055360');
 
 		const canvas = Canvas.createCanvas(261, 128);
 		const ctx = canvas.getContext('2d');

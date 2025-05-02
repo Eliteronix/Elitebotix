@@ -215,8 +215,7 @@ module.exports = {
 						.setRequired(true)
 				)
 		),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction, additionalObjects) {
+	async execute(msg, args, interaction) {
 		try {
 			await interaction.deferReply();
 		} catch (error) {
