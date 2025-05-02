@@ -39,6 +39,7 @@ module.exports = {
 					'en-US': 'The acronym of the tournament',
 				})
 				.setRequired(true)
+				.setMaxLength(20)
 		),
 	async execute(msg, args, interaction) {
 		try {
