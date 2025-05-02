@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
-const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries, reconnectToBanchoAndChannels } = require('./utils');
+const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries } = require('./utils');
 
 require('dotenv').config();
 
@@ -143,22 +143,6 @@ process.on('message', message => {
 
 		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
-		}
-
-		//Connect for the first shard
-		if (!wrongCluster(client)) {
-
-			bancho.lastUserMaps = new Discord.Collection();
-
-			bancho.on('error', async (error) => {
-				if (error.message === 'Timeout reached') {
-					console.error('Timeout reached, reconnecting...');
-				} else {
-					console.error('Bancho error index.js:', error);
-				}
-
-				await reconnectToBanchoAndChannels(bancho);
-			});
 		}
 	} else if (message.type == 'totalShards') {
 		// eslint-disable-next-line no-console
