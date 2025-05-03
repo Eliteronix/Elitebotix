@@ -97,7 +97,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		msg.channel.messages.fetch({ limit: 100 })
 			.then(async (messages) => {
@@ -128,7 +128,7 @@ module.exports = {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(msg, newArgs, null);
+				command.execute(null, msg, newArgs);
 			});
 	},
 };

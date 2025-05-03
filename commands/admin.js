@@ -74,7 +74,7 @@ module.exports = {
 			}
 		}
 	},
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		if (!developers.includes(interaction.user.id) && !(interaction.options.getString('command') === 'verifiedMatches' && peopleThatWantData.includes(interaction.user.id))) {
 			try {
 				return await interaction.reply({ content: 'Only developers may use this command.', flags: MessageFlags.Ephemeral });

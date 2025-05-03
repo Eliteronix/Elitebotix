@@ -10,7 +10,7 @@ module.exports = {
 	cooldown: 5,
 	tags: 'debug',
 	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args) {
+	async execute(interaction, msg, args) {
 		if (developers.includes(msg.author.id)) {
 			const argString = args.join(' ');
 			let argArray = argString.split('<|>');

@@ -54,7 +54,7 @@ module.exports = {
 
 					process.send(`command ${command.name}`);
 
-					command.execute(messagesArray[messagesArray.length - 1], newArgs, null, [c, null]);
+					command.execute(null, messagesArray[messagesArray.length - 1], newArgs);
 
 					await pause(60000);
 

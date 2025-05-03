@@ -211,7 +211,7 @@ module.exports = async function (reaction, user) {
 
 					process.send(`command ${command.name}`);
 
-					command.execute(message, [page, `--${mode}`], null);
+					command.execute(null, message, [page, `--${mode}`]);
 				} else {
 					message = {
 						client: reaction.message.client,
@@ -224,7 +224,7 @@ module.exports = async function (reaction, user) {
 
 					process.send(`command ${command.name}`);
 
-					command.execute(message, [page], null);
+					command.execute(null, message, [page]);
 				}
 			} else {
 				let guild = null;
@@ -248,7 +248,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, [page], interaction);
+				command.execute(interaction, null, [page]);
 			}
 
 			return await reaction.message.delete();
@@ -298,7 +298,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			} else if (firstAttachment.name.startsWith('osu-beatmap')) {
 				const beatmapId = firstAttachment.name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
@@ -333,7 +333,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			} else if (firstAttachment.name.startsWith('osu-game-')) {
 				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
@@ -370,7 +370,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 
@@ -426,7 +426,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			} else if (firstAttachment.name.startsWith('osu-game-')) {
 				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
@@ -474,7 +474,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 
@@ -520,7 +520,7 @@ module.exports = async function (reaction, user) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, null, interaction);
+					command.execute(interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -569,7 +569,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			} else if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-top')) {
 				//get the osuUserId used
 				const osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
@@ -611,7 +611,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 
@@ -649,7 +649,7 @@ module.exports = async function (reaction, user) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(tempMessage, args, null);
+					command.execute(null, tempMessage, args);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -699,7 +699,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			} else if (firstAttachment.name.startsWith('osu-game-')) {
 				//get the osuUserId used
 				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
@@ -740,7 +740,7 @@ module.exports = async function (reaction, user) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, null, interaction);
+					command.execute(interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -800,7 +800,7 @@ module.exports = async function (reaction, user) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, null, interaction);
+					command.execute(interaction);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -852,7 +852,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 
@@ -894,7 +894,7 @@ module.exports = async function (reaction, user) {
 				try {
 					process.send(`command ${command.name}`);
 
-					command.execute(null, args, interaction);
+					command.execute(interaction, null, args);
 				} catch (error) {
 					console.error(error);
 					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
@@ -989,7 +989,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 
@@ -1054,7 +1054,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 
@@ -1119,7 +1119,7 @@ module.exports = async function (reaction, user) {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, null, interaction);
+				command.execute(interaction);
 			}
 		}
 	}

@@ -93,7 +93,7 @@ module.exports = {
 						)
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		if (msg) {
 			return msg.reply('Please use `/weather-set` instead.');

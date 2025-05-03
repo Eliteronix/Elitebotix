@@ -52,7 +52,7 @@ module.exports = {
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,
 	tags: 'debug',
-	async execute(msg, args) {
+	async execute(interaction, msg, args) {
 		//TODO: Update logdatabasequeries to use the new logger
 		//Get the user from the DBDiscordUsers
 		//TODO: Attributes

@@ -105,7 +105,7 @@ module.exports = async function (client, interaction) {
 		process.send(`command ${command.name}`);
 		// console.log(`${client.shardId} command ${command.name} ${interaction.options._subcommand}`);
 
-		command.execute(null, [], interaction);
+		command.execute(interaction, null, []);
 	} else if (interaction.isAutocomplete()) {
 		const command = interaction.client.commands.get(interaction.commandName);
 

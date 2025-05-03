@@ -25,7 +25,7 @@ module.exports = {
 			'en-US': 'Sends an info card about the settings of the bot for the server',
 		})
 		.setDMPermission(false),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {

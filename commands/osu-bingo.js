@@ -319,7 +319,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg) {
 		try {
 			await interaction.deferReply();
 		} catch (error) {

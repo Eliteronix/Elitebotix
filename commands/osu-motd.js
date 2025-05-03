@@ -449,7 +449,7 @@ module.exports = {
 						.setRequired(false)
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		let lowerStarLimit = 0;
 		let higherStarLimit = 10;

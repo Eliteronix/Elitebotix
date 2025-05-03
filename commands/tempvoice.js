@@ -85,7 +85,7 @@ module.exports = {
 					'en-US': 'Disable temporary textchannels along voices for the server',
 				})
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);

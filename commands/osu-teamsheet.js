@@ -289,7 +289,7 @@ module.exports = {
 			}
 		}
 	},
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply();
 		} catch (error) {
@@ -1461,7 +1461,7 @@ module.exports = {
 				}
 			};
 
-			module.exports.execute(null, null, newInteraction);
+			module.exports.execute(newInteraction);
 		} else {
 			await interaction.followUp({ content: content, files: files });
 		}

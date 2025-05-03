@@ -147,7 +147,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		if (interaction.commandName === 'osu-beatmap') {
 			try {
 				await interaction.deferReply();

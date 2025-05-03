@@ -6495,7 +6495,7 @@ module.exports = {
 
 											process.send(`command ${scoreCommand.name}`);
 
-											scoreCommand.execute(null, null, interaction);
+											scoreCommand.execute(interaction);
 											await new Promise(resolve => setTimeout(resolve, 5000));
 										}
 									}
@@ -6576,7 +6576,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								topCommand.execute(null, null, interaction);
+								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
 						}
@@ -6654,7 +6654,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								topCommand.execute(null, null, interaction);
+								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
 						}
@@ -6733,7 +6733,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								topCommand.execute(null, null, interaction);
+								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
 						}
@@ -6812,7 +6812,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								topCommand.execute(null, null, interaction);
+								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
 						}
@@ -6979,7 +6979,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								topCommand.execute(null, null, interaction);
+								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
 						}

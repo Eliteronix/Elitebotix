@@ -44,7 +44,7 @@ module.exports = {
 					, { name: 'osu! name and rank', value: 'osunameandrank' }
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			try {

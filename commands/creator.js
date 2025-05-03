@@ -23,7 +23,7 @@ module.exports = {
 			'en-US': 'Sends an info card about the developers',
 		})
 		.setDMPermission(true),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply();
 		} catch (error) {

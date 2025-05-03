@@ -23,7 +23,7 @@ module.exports = {
 			'en-US': 'Sends an info card about the server',
 		})
 		.setDMPermission(false),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {

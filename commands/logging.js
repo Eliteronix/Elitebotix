@@ -151,7 +151,7 @@ module.exports = {
 			}
 		}
 	},
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO:Follow ups are not ephemeral
 		if (interaction) {

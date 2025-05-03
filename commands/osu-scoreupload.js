@@ -113,7 +113,7 @@ module.exports = {
 						.setRequired(false)
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {
@@ -555,7 +555,7 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 				}
 			};
 
-			command.execute(null, null, interaction);
+			command.execute(interaction);
 		}, {
 			context: {
 				guildId: teamsheet.guildId,

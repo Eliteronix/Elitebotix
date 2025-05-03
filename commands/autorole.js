@@ -102,7 +102,7 @@ module.exports = {
 					'en-US': 'Show which autoroles are set up',
 				}),
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {

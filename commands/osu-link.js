@@ -117,7 +117,7 @@ module.exports = {
 						.setRequired(false)
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Refactor this mess
 		if (interaction.options._hoistedOptions[0]) {
 			args = [interaction.options.getSubcommand(), interaction.options._hoistedOptions[0].value];

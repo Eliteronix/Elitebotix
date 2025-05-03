@@ -45,7 +45,7 @@ module.exports = {
 
 					process.send(`command ${trackCommand.name}`);
 
-					trackCommand.execute({ id: 1, channel: channel, author: { id: 1 }, client: c }, [matchId, '--tracking']);
+					trackCommand.execute(null, { id: 1, channel: channel, author: { id: 1 }, client: c }, [matchId, '--tracking']);
 				}
 			}, {
 				context: {

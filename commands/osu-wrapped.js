@@ -78,8 +78,7 @@ module.exports = {
 			return option;
 		}
 		),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		//TODO: Check for use of acronym instead of match name
 		try {
 			await interaction.deferReply();

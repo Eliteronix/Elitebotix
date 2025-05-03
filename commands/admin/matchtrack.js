@@ -10,7 +10,7 @@ module.exports = {
 
 		process.send(`command ${command.name}`);
 
-		command.execute({ id: 1, channel: interaction.channel, author: { id: 1 }, client: interaction.client }, [matchId, '--tracking']);
+		command.execute(null, { id: 1, channel: interaction.channel, author: { id: 1 }, client: interaction.client }, [matchId, '--tracking']);
 
 		await interaction.editReply('Match tracking triggered.');
 	},

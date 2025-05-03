@@ -44,7 +44,7 @@ module.exports = {
 				})
 				.setRequired(true)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			try {
@@ -167,7 +167,7 @@ module.exports = {
 
 					process.send(`command ${matchScoreCommand.name}`);
 
-					await matchScoreCommand.execute(null, null, {
+					await matchScoreCommand.execute({
 						id: null,
 						options: {
 							getString: (string) => {

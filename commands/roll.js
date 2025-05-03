@@ -38,7 +38,7 @@ module.exports = {
 				.setRequired(false)
 				.setMinValue(2)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {

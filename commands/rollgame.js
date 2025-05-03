@@ -23,7 +23,7 @@ module.exports = {
 			'en-US': 'Play the rollgame against someone or the bot',
 		})
 		.setDMPermission(true),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
 		if (interaction) {

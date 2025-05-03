@@ -610,7 +610,7 @@ module.exports = {
 			}
 		}
 	},
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply();
 		} catch (error) {

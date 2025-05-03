@@ -86,7 +86,7 @@ module.exports = {
 						.setRequired(true)
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 		} catch (error) {

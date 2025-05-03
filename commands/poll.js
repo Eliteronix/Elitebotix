@@ -266,7 +266,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			await interaction.reply('The poll is being created');
 		} catch (error) {

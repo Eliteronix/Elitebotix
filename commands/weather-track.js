@@ -163,8 +163,7 @@ module.exports = {
 						.setRequired(true)
 				)
 		),
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);

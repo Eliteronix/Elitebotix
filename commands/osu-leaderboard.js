@@ -61,7 +61,7 @@ module.exports = {
 					{ name: 'mania', value: '--m' },
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
 		if (interaction) {

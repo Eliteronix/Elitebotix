@@ -22,7 +22,7 @@ module.exports = {
 			'en-US': 'Sends a link to add the bot to a server',
 		})
 		.setDMPermission(true),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		try {
 			return await interaction.reply('Here is a [link](https://discord.com/oauth2/authorize?client_id=981205694340546571&scope=bot+applications.commands&permissions=285256792) to add the bot to your server');
 		} catch (error) {

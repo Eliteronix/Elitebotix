@@ -524,8 +524,7 @@ module.exports = {
 			}
 		}
 	},
-	// eslint-disable-next-line no-unused-vars
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		if (interaction.options.getSubcommand() === 'enable') {
 			try {
 				await interaction.reply({ content: 'Processing...', flags: MessageFlags.Ephemeral });

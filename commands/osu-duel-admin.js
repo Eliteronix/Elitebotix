@@ -251,7 +251,7 @@ module.exports = {
 						.setDescription('Should only ranked maps be played?')
 				)
 		),
-	async execute(msg, args, interaction) {
+	async execute(interaction) {
 		if (interaction.options.getSubcommand() === 'createduel1v1' || interaction.options.getSubcommand() === 'createduel2v2' || interaction.options.getSubcommand() === 'createduel3v3') {
 			try {
 				await interaction.deferReply();
