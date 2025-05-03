@@ -13,7 +13,8 @@
 		"badges",
 		"slimcovers",
 		"avatars",
-		"historycardswithdetails"
+		"historycardswithdetails",
+		"historycards"
 	],
 	"watch_options": {
 		"followSymlinks": false
