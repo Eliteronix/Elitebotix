@@ -8,7 +8,13 @@ module.exports = {
 		});
 
 		if (user) {
-			await user.send(`Reminder: ${args[1]}`);
+			try {
+				await user.send(`Reminder: ${args[1]}`);
+			} catch (error) {
+				if (error.message !== 'Cannot send messages to this user') {
+					console.error(error);
+				}
+			}
 		}
 		processQueueEntry.destroy();
 	},
