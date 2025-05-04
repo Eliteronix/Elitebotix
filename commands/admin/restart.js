@@ -1,6 +1,4 @@
 const { showUnknownInteractionError, logBroadcastEval } = require('../../config.json');
-const { DBProcessQueue } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'restart',
@@ -97,7 +95,7 @@ module.exports = {
 
 				setTimeout(() => {
 					process.exit();
-				}, c.shardId * 3000);
+				}, c.shardId * 5000);
 			} else if (condition === 'update') {
 				c.update = 1;
 			}
