@@ -6495,6 +6495,7 @@ module.exports = {
 
 											process.send(`command ${scoreCommand.name}`);
 
+											console.log(`Sending leaderboard scores for ${osuUser.osuUserId}...`);
 											scoreCommand.execute(interaction);
 											await new Promise(resolve => setTimeout(resolve, 5000));
 										}
