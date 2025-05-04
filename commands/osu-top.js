@@ -226,7 +226,6 @@ module.exports = {
 		),
 	async execute(interaction) {
 		try {
-			console.log(interaction);
 			await interaction.deferReply();
 		} catch (error) {
 			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {

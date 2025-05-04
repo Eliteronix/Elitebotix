@@ -4200,7 +4200,7 @@ module.exports = {
 			// Parse the map.
 			let map = new rosu.Beatmap(bytes);
 
-			let mods = module.exports.getMods(modBits);
+			// let mods = module.exports.getMods(modBits);
 
 			if (mode && dbBeatmap.mode === 'Standard') {
 				if (mode === 1) {
@@ -4213,7 +4213,7 @@ module.exports = {
 					// TODO: Implement keys conversion
 					// map.convert(rosu.GameMode.Mania, "6K");
 				} else {
-					console.log(`Something went wrong and we got mode ${mode}`);
+					console.error(`Something went wrong and we got mode ${mode}`);
 				}
 			}
 
@@ -6495,7 +6495,6 @@ module.exports = {
 
 											process.send(`command ${scoreCommand.name}`);
 
-											console.log(`Sending leaderboard scores for ${osuUser.osuUserId}...`);
 											scoreCommand.execute(interaction);
 											await new Promise(resolve => setTimeout(resolve, 5000));
 										}
@@ -6577,7 +6576,6 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								console.log(`Sending osu! top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6656,7 +6654,6 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								console.log(`Sending taiko top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6736,7 +6733,6 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								console.log(`Sending catch top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6816,7 +6812,6 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								console.log(`Sending mania top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6984,7 +6979,6 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
-								console.log(`Sending tournament top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
