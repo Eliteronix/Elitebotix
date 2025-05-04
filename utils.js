@@ -5696,20 +5696,7 @@ module.exports = {
 				},
 			});
 
-			let multipleString = 'es';
-			let verb = 'are';
-			if (existingQueueTasks.length === 1) {
-				multipleString = '';
-				verb = 'is';
-			}
-
-			// Get all messages and delete
-			let messages = await textChannel.messages.fetch({ limit: 100 });
-
-			await textChannel.bulkDelete(messages);
-
-			// Send new message
-			let matches = [`There ${verb} currently ${existingQueueTasks.length} match${multipleString} running:\n`];
+			let matches = [];
 
 			for (let i = 0; i < existingQueueTasks.length; i++) {
 				let args = existingQueueTasks[i].additions.split(';');
@@ -5748,17 +5735,28 @@ module.exports = {
 					matchId = 'XXXXXXXXX';
 				}
 
-				let newEntry = `<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`;
-
-				if (`${matches.join('\n')}\n${newEntry}`.length > 2000) {
-					await textChannel.send(matches.join('\n'));
-					matches = [];
-				}
-
-				matches.push(newEntry);
+				matches.push(`<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`);
 			}
 
-			await textChannel.send(matches.join('\n'));
+			// Get all messages and delete those that arent in the list
+			let messages = await textChannel.messages.fetch({ limit: 100 });
+
+			let messagesToDelete = messages.filter(m => !matches.includes(m.content));
+
+			messagesToDelete.forEach(async (message) => {
+				await message.delete();
+			});
+
+			// Send new messages if there are any missing
+			if (matches.length > 0) {
+				let messagesToSend = matches.filter(m => !messages.map(m => m.content).includes(m));
+
+				for (let i = 0; i < messagesToSend.length; i++) {
+					await textChannel.send(messagesToSend[i]);
+				}
+			} else {
+				await textChannel.send('There are currently no matches in progress!');
+			}
 		}, { context: {} });
 	},
 	async createNewForumPostRecords(client) {
