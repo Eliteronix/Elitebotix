@@ -123,6 +123,10 @@ module.exports = {
 
 					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
 
+					if (!args[4] || args[4] !== players.join(',')) {
+						updateCurrentMatchesChannel(client);
+					}
+
 					let date = new Date();
 					date.setUTCSeconds(date.getUTCSeconds() + seconds);
 					processQueueEntry.date = date;
