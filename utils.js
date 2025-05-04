@@ -3865,7 +3865,14 @@ module.exports = {
 							if (discordUser.osuDuelRatingUpdates) {
 								const user = await input.client.users.cache.get(discordUser.userId);
 								if (user) {
-									await user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
+									try {
+										await user.send(`Your duel ratings have been updated.\`\`\`${message.join('\n')}\`\`\``);
+									} catch (err) {
+										if (err.message === 'Cannot send messages to this user') {
+											discordUser.osuDuelRatingUpdates = false;
+											await discordUser.save();
+										}
+									}
 								}
 							}
 
