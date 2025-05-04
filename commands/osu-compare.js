@@ -128,7 +128,7 @@ module.exports = {
 
 				process.send(`command ${command.name}`);
 
-				command.execute(null, msg, newArgs);
+				command.execute(interaction, msg, newArgs);
 			});
 	},
 };

@@ -6576,6 +6576,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
+								console.log(`Sending osu! top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6654,6 +6655,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
+								console.log(`Sending taiko top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6733,6 +6735,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
+								console.log(`Sending catch top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6812,6 +6815,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
+								console.log(`Sending mania top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
@@ -6979,6 +6983,7 @@ module.exports = {
 
 								process.send(`command ${topCommand.name}`);
 
+								console.log(`Sending tournament top plays for ${osuUser.osuUserId}...`);
 								topCommand.execute(interaction);
 								await new Promise(resolve => setTimeout(resolve, 5000));
 							}
