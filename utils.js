@@ -5735,13 +5735,16 @@ module.exports = {
 					matchId = 'XXXXXXXXX';
 				}
 
-				matches.push(`<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`);
+				matches.push({
+					content: `<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`,
+					start: `<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R>`,
+				});
 			}
 
-			// Get all messages and delete those that arent in the list
+			// Get all messages and delete those that arent in the matchMessageStarts array
 			let messages = await textChannel.messages.fetch({ limit: 100 });
 
-			let messagesToDelete = messages.filter(m => !matches.includes(m.content));
+			let messagesToDelete = messages.filter(message => !matches.map(match => match.start.toLowerCase()).includes(message.content.replace(/:R>.+/gm, ':R>').toLowerCase()));
 
 			messagesToDelete.forEach(async (message) => {
 				await message.delete();
@@ -5749,10 +5752,15 @@ module.exports = {
 
 			// Send new messages if there are any missing
 			if (matches.length > 0) {
-				let messagesToSend = matches.filter(m => !messages.map(m => m.content).includes(m));
-
-				for (let i = 0; i < messagesToSend.length; i++) {
-					await textChannel.send(messagesToSend[i]);
+				for (let i = 0; i < matches.length; i++) {
+					if (!messages.map(message => message.content.replace(/:R>.+/gm, ':R>').toLowerCase()).includes(matches[i].start.toLowerCase())) {
+						await textChannel.send(matches[i].content);
+					} else {
+						let message = messages.find(m => m.content.replace(/:R>.+/gm, ':R>').toLowerCase() === matches[i].start.toLowerCase());
+						if (message) {
+							await message.edit(matches[i].content);
+						}
+					}
 				}
 			} else {
 				await textChannel.send('There are currently no matches in progress!');
