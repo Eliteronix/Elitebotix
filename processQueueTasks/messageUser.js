@@ -13,7 +13,7 @@ module.exports = {
 				if (args[1]) {
 					let interaction = new Discord.InteractionWebhook(client, client.application.id, args[1]);
 
-					interaction.send(args[3]);
+					await interaction.send(args[3]);
 				}
 			} else {
 				console.error(error);
