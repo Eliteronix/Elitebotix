@@ -751,7 +751,7 @@ module.exports = {
 						continue;
 					}
 
-					let additionalInfo = await getAdditionalOsuInfo(osuUserId);
+					let additionalInfo = await getAdditionalOsuInfo(osuUserId, interaction.client);
 
 					if (additionalInfo.tournamentBan && additionalInfo.tournamentBan.tournamentBannedUntil > new Date()) {
 						csvData.push({
