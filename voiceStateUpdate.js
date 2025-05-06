@@ -418,7 +418,14 @@ module.exports = async function (oldMember, newMember) {
 							return console.error(e);
 						}
 					}
-					await createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side.`);
+					
+					try{
+						await createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side.`);
+					} catch (e){
+						if(e.message !== 'Unknown Channel'){
+							console.error(e);
+						}
+					}
 				}
 			}
 		}
