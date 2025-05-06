@@ -827,7 +827,7 @@ module.exports = {
 							await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
 							lastUpdate = new Date();
 						} catch (error) {
-							if (error.message !== 'Invalid Webhook Token') {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
 								return console.error(error);
 							}
 						}
