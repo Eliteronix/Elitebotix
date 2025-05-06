@@ -752,7 +752,7 @@ module.exports = {
 		} catch (error) {
 			if (error.message === 'Invalid Webhook Token') {
 				await interaction.channel.send({ content: ' ', files: files });
-			} else {
+			} else if (error.message !== 'Unknown Message') {
 				throw error;
 			}
 		}
