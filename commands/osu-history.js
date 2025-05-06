@@ -327,7 +327,7 @@ module.exports = {
 				try {
 					await interaction.editReply(`Processing ${i}/${multiScores.length} scores...`);
 				} catch (error) {
-					if (error.message !== 'Invalid Webhook Token') {
+					if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
 						return console.error(error);
 					}
 				}
@@ -1258,7 +1258,7 @@ module.exports = {
 		} catch (error) {
 			if (error.message === 'Invalid Webhook Token') {
 				return await interaction.channel.send({ content: content, files: files });
-			} else {
+			} else if(error.message !== 'Unknown Message'){
 				return console.error(error);
 			}
 		}
