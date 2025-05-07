@@ -539,7 +539,7 @@ module.exports = {
 				}
 			}
 
-			if (matchMakingAcronyms.includes(multiScores[i].acronym)) {
+			if (matchMakingAcronyms.find(acronym => multiScores[i].matchName.toLowerCase().includes(acronym.toLowerCase()))) {
 				continue;
 			}
 
@@ -1258,7 +1258,7 @@ module.exports = {
 		} catch (error) {
 			if (error.message === 'Invalid Webhook Token') {
 				return await interaction.channel.send({ content: content, files: files });
-			} else if(error.message !== 'Unknown Message'){
+			} else if (error.message !== 'Unknown Message') {
 				return console.error(error);
 			}
 		}
