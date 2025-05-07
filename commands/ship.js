@@ -64,25 +64,33 @@ module.exports = {
 			return;
 		}
 
-		let firstName = await getName(interaction, `<@${interaction.user.id}>`);
-		let secondName = await getName(interaction, interaction.options.getString('user'));
+		try {
+			let firstName = await getName(interaction, `<@${interaction.user.id}>`);
+			let secondName = await getName(interaction, interaction.options.getString('user'));
 
-		if (interaction.options.getString('user2')) {
-			firstName = await getName(interaction, interaction.options.getString('user'));
-			secondName = await getName(interaction, interaction.options.getString('user2'));
+			if (interaction.options.getString('user2')) {
+				firstName = await getName(interaction, interaction.options.getString('user'));
+				secondName = await getName(interaction, interaction.options.getString('user2'));
+			}
+
+			const compatibility = Math.floor(Math.random() * 100) + 1;
+	
+			let data = [];
+			data.push(`\`${firstName.replace(/`/g, '')}\` + \`${secondName.replace(/`/g, '')}\``);
+	
+			const shipname = `${firstName.substring(0, firstName.length / 2)}${secondName.substring(secondName.length / 2, secondName.length)}`;
+	
+			data.push(`Shipping name: \`${shipname.replace(/`/g, '')}\``);
+			data.push(`Compatibility: ${compatibility}%`);
+	
+			await interaction.editReply(data.join('\n'));
+		} catch (e) {
+			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
+				console.error('commands/ship.js | Get ship member', e);
+			}
+
+			await interaction.editReply('Error, please try again later.')
 		}
-
-		const compatibility = Math.floor(Math.random() * 100) + 1;
-
-		let data = [];
-		data.push(`\`${firstName.replace(/`/g, '')}\` + \`${secondName.replace(/`/g, '')}\``);
-
-		const shipname = `${firstName.substring(0, firstName.length / 2)}${secondName.substring(secondName.length / 2, secondName.length)}`;
-
-		data.push(`Shipping name: \`${shipname.replace(/`/g, '')}\``);
-		data.push(`Compatibility: ${compatibility}%`);
-
-		await interaction.editReply(data.join('\n'));
 	},
 };
 
@@ -98,19 +106,9 @@ async function getName(interaction, argument) {
 			//Get bot member
 			let member = null;
 
-			try {
-				member = await interaction.guild.members.fetch({ user: [id], time: 300000 })
-					.catch((err) => {
-						throw new Error(err);
-					});
+			member = await interaction.guild.members.fetch({ user: [id], time: 300000 });
 
-				member = member.first();
-			} catch (e) {
-				if (e.message !== 'Members didn\'t arrive in time.') {
-					console.error('commands/ship.js | Get ship member', e);
-					return;
-				}
-			}
+			member = member.first();
 
 			if (member && member.displayName) {
 				name = member.displayName;
