@@ -46,6 +46,7 @@ module.exports = {
 					return;
 				}
 
+				console.log(`processQueueTasks/nameSync.js | ${members.length} members fetched from ${guild.name} (${guild.id})`);
 				logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
 				let discordUsers = await DBDiscordUsers.findAll({
 					attributes: ['userId', 'osuUserId', 'osuName', 'osuRank', 'osuVerified'],
