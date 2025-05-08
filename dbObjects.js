@@ -1,10 +1,23 @@
 const Sequelize = require('sequelize');
 require('dotenv').config();
 
+const logging = {
+	logging: (sql, timing) => {
+		if (timing > 5000) { // Only log if execution time is greater than 1000ms
+			// eslint-disable-next-line no-console
+			console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
+		}
+	},
+	benchmark: true,
+	// logging: false,
+	// benchmark: false,
+};
+
 const guilds = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/guilds.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -13,13 +26,14 @@ const guilds = new Sequelize('database', 'username', 'password', {
 	},
 	pool: {
 		max: 7,
-	}
+	},
 });
 
 const discordUsers = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/discordUsers.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -34,7 +48,8 @@ const discordUsers = new Sequelize('database', 'username', 'password', {
 const serverActivity = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/serverActivity.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -49,7 +64,8 @@ const serverActivity = new Sequelize('database', 'username', 'password', {
 const processQueue = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/processQueue.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -64,7 +80,8 @@ const processQueue = new Sequelize('database', 'username', 'password', {
 const osuData = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/osuData.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -79,7 +96,8 @@ const osuData = new Sequelize('database', 'username', 'password', {
 const elitiriData = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/elitiriData.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -94,7 +112,8 @@ const elitiriData = new Sequelize('database', 'username', 'password', {
 const multiScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiScores.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -109,7 +128,8 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 const multiMatches = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiMatches.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -124,7 +144,8 @@ const multiMatches = new Sequelize('database', 'username', 'password', {
 const multiGames = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGames.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -139,7 +160,8 @@ const multiGames = new Sequelize('database', 'username', 'password', {
 const multiGameScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGameScores.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -154,7 +176,8 @@ const multiGameScores = new Sequelize('database', 'username', 'password', {
 const beatmaps = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/beatmaps.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -169,7 +192,8 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 const soloScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/soloScores.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
@@ -184,7 +208,8 @@ const soloScores = new Sequelize('database', 'username', 'password', {
 const elitebotixBanchoProcessQueue = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: false,
+	logging: logging.logging,
+	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXBANCHOROOTPATH}/databases/processQueue.sqlite`,
 	retry: {
 		max: 25, // Maximum retry 15 times
