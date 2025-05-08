@@ -1,10 +1,10 @@
-const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuBeatmaps, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries, logOsuAPICalls } = require('../utils');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
 	name: 'osu-motd',
@@ -942,18 +942,18 @@ module.exports = {
 					return {
 						id: map.id,
 						length: map.length,
-					}
+					};
 				}),
 				players: discordUsers.map(discordUser => {
 					return {
 						osuUserId: discordUser.osuUserId,
 						osuName: discordUser.osuName,
-					}
+					};
 				}),
 				users: users.map(user => {
 					return {
 						userId: user.id,
-					}
+					};
 				}),
 				scoreversion: scoreversion,
 			};
@@ -1331,18 +1331,18 @@ module.exports = {
 						return {
 							id: map.id,
 							length: map.length,
-						}
+						};
 					}),
 					players: discordUsers.map(discordUser => {
 						return {
 							osuUserId: discordUser.osuUserId,
 							osuName: discordUser.osuName,
-						}
+						};
 					}),
 					users: users.map(user => {
 						return {
 							userId: user.id,
-						}
+						};
 					}),
 					scoreversion: scoreversion,
 				};
