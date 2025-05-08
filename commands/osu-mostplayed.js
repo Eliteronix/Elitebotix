@@ -633,7 +633,13 @@ module.exports = {
 				}
 			}
 
-			await interaction.editReply({ files: files });
+			try {
+				await interaction.editReply({ files: files });
+			} catch (error) {
+				if (error.message !== 'Unknown Message') {
+					console.error(error);
+				}
+			}
 		}
 	}
 };
