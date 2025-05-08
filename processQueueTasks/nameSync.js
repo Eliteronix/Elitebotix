@@ -46,11 +46,23 @@ module.exports = {
 					return;
 				}
 
-				console.log(`processQueueTasks/nameSync.js | ${members.length} members fetched from ${guild.name} (${guild.id})`);
+				let attributes = ['userId', 'osuName'];
+
+				if (setting === 'osunameandrank') {
+					attributes.push('osuRank');
+				}
+
 				logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
 				let discordUsers = await DBDiscordUsers.findAll({
-					attributes: ['userId', 'osuUserId', 'osuName', 'osuRank', 'osuVerified'],
+					attributes: attributes,
 					where: {
+						osuName: {
+							[Op.ne]: null,
+						},
+						osuUserId: {
+							[Op.ne]: null,
+						},
+						osuVerified: true,
 						userId: {
 							[Op.in]: members.map(member => member.user.id),
 						},
@@ -61,7 +73,7 @@ module.exports = {
 					//Get the user
 					let discordUser = discordUsers.find(user => user.userId === members[i].user.id);
 
-					if (members[i].user.id !== guild.ownerId && discordUser && discordUser.osuUserId && discordUser.osuVerified) {
+					if (discordUser && members[i].user.id !== guild.ownerId) {
 						try {
 							//Get the users displayname
 							let userDisplayName = members[i].user.username;
