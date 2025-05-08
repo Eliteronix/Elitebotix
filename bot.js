@@ -241,7 +241,7 @@ function readyDiscord() {
 
 	const { logBroadcastEval } = require('./config.json');
 
-	blocked((time, stack) => {
+	blocked((time, stack, { type, resource }) => {
 		if (logBroadcastEval) {
 			// eslint-disable-next-line no-console
 			console.log('Broadcasting bot.js event loop blocked...');
@@ -277,7 +277,7 @@ function readyDiscord() {
 			if (!channel) return;
 
 			await channel.send(message);
-		}, { context: { message: `${header} Shard ${client.shardId} Blocked for ${time.toFixed()}ms\n\`\`\`${stack.join('\n')}\`\`\`` } });
+		}, { context: { message: `${header} Shard ${client.shardId} Blocked for ${time.toFixed()}ms\noperation: ${type}, resource: ${resource}\n\`\`\`${stack.join('\n')}\`\`\`` } });
 	}, { threshold: 5000 });
 }
 
