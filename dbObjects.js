@@ -2,15 +2,13 @@ const Sequelize = require('sequelize');
 require('dotenv').config();
 
 const logging = {
-	logging: (sql, timing) => {
-		if (timing > 5000) { // Only log if execution time is greater than 1000ms
-			// eslint-disable-next-line no-console
-			console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
-		}
-	},
-	benchmark: true,
-	// logging: false,
-	// benchmark: false,
+	// logging: (sql, timing) => {
+	// 	if (timing > 5000) { // Only log if execution time is greater than 1000ms
+	// 		// eslint-disable-next-line no-console
+	// 		console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
+	// 	}
+	// },
+	// benchmark: true,
 };
 
 const guilds = new Sequelize('database', 'username', 'password', {
