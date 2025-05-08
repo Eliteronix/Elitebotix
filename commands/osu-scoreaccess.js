@@ -229,7 +229,7 @@ module.exports = {
 					'en-US': 'List all players with access to the local scores for a pool',
 				})
 		),
-	// eslint-disable-next-line no-unused-vars
+	// TODO: logdatabaseQueries(4, 'commands/osu-scoreaccess.js DBDiscordUsers 1');
 	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
