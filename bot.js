@@ -123,6 +123,8 @@ client.hostCommands = [];
 client.update = 0;
 client.knownSuspiciousMatches = [];
 
+process.messages = [];
+
 //Get manager messages
 process.webRequestsWaiting = [];
 process.on('message', message => {
@@ -137,6 +139,8 @@ process.on('message', message => {
 		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
 		}
+
+		sendChildMessages();
 	} else if (message.type == 'totalShards') {
 		// eslint-disable-next-line no-console
 		// console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
@@ -381,6 +385,16 @@ setTimeout(() => {
 // 		nextMBThreshold += 500;
 // 	}
 // }, 6000 * 2);
+
+async function sendChildMessages() {
+	while (process.messages.length > 0) {
+		process.send(process.messages.shift());
+	}
+
+	setTimeout(() => {
+		sendChildMessages();
+	}, 500);
+}
 
 async function executeProcessQueue(client) {
 	try {
