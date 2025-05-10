@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 require('dotenv').config();
 
 const logging = {
-	logging: (sql, timing) => {
+	logging: async (sql, timing) => {
 		try {
 			if (process.shardId) {
 				let operation = 'Unknown';
