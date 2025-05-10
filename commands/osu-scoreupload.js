@@ -1,7 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError, logBroadcastEval } = require('../config.json');
 const { DBOsuSoloScores, DBDiscordUsers, DBOsuTeamSheets, DBOsuMappools, DBOsuBeatmaps } = require('../dbObjects');
-const { getMods, logDatabaseQueries, getOsuBeatmap, getModBits, getIDFromPotentialOsuLink } = require('../utils.js');
+const { getMods, getOsuBeatmap, getModBits, getIDFromPotentialOsuLink } = require('../utils.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -125,7 +125,6 @@ module.exports = {
 			return;
 		}
 
-		logDatabaseQueries(4, 'commands/osu-scoreupload.js DBDiscordUsers 1');
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId', 'osuVerified', 'userId', 'osuName'],
 			where: {
@@ -262,7 +261,6 @@ module.exports = {
 			}
 
 			// Create the scores in the database
-			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores findAll');
 			let uploaderScores = await DBOsuSoloScores.findAll({
 				attributes: ['replayHash'],
 				where: {
@@ -284,7 +282,6 @@ module.exports = {
 			const newScores = scoreData;
 
 			// Add the new scores to the database
-			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
 			await DBOsuSoloScores.bulkCreate(newScores);
 
 			await interaction.editReply(`Successfully uploaded ${newScores.length} new score(s)!`);
@@ -340,7 +337,6 @@ module.exports = {
 			// Create new guesstimate
 			let newScores = [guesstimate];
 
-			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuSoloScores create');
 			await DBOsuSoloScores.bulkCreate(newScores);
 
 			await interaction.followUp({ content: `Successfully uploaded ${newScores.length} new guesstimate!`, flags: MessageFlags.Ephemeral });
@@ -408,7 +404,6 @@ function getNextString(file) {
 
 async function updateTeamSheets(interaction, discordUser, newScores) {
 	// Update teamsheets
-	logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuTeamsheets update');
 	let teamsheets = await DBOsuTeamSheets.findAll({
 		attributes: [
 			'id',
@@ -431,7 +426,6 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 		},
 	});
 
-	logDatabaseQueries(4, 'commands/osu-scoreupload.js DBOsuBeatmaps');
 	let newScoreMaps = await DBOsuBeatmaps.findAll({
 		attributes: ['beatmapId'],
 		where: {
@@ -444,7 +438,6 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 	for (let i = 0; i < teamsheets.length; i++) {
 		const teamsheet = teamsheets[i];
 
-		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
 		let mappool = await DBOsuMappools.count({
 			where: {
 				creatorId: teamsheet.poolCreatorId,
@@ -490,8 +483,6 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 			}
 			const { DBOsuTeamSheets, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
-			const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
-
 			DBOsuTeamSheets.destroy({
 				where: {
 					messageId: messageId,
@@ -501,7 +492,6 @@ async function updateTeamSheets(interaction, discordUser, newScores) {
 			// Create the new message
 			const command = require((`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-teamsheet.js`));
 
-			logDatabaseQueries(4, 'commands/osu-scoreupload.js DBDiscordUsers 2');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['userId'],
 				where: {

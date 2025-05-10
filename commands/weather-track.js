@@ -1,7 +1,7 @@
 const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { populateMsgFromInteraction } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -215,8 +215,7 @@ module.exports = {
 		}
 		let timePeriod = '';
 		if (args[0].toLowerCase() === 'list') {
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue list');
+			//TODO: add attributes
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'periodic-weather' }
 			});
@@ -239,8 +238,7 @@ module.exports = {
 			return await interaction.editReply(trackingListString || 'No weather tracking tasks found in this channel.');
 		} else if (args[0].toLowerCase() === 'remove') {
 			args.shift();
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue remove');
+			//TODO: add attributes
 			const trackingList = await DBProcessQueue.findAll({
 				where: { task: 'periodic-weather' }
 			});
@@ -309,8 +307,7 @@ module.exports = {
 				date.setUTCDate(date.getUTCDate() + 1);
 			}
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue duplicate');
+			//TODO: add attributes
 			const duplicate = await DBProcessQueue.findOne({
 				where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}` }
 			});
@@ -323,8 +320,7 @@ module.exports = {
 			}
 
 			if (timePeriod === 'hourly') {
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue dailyDuplicate');
+				//TODO: add attributes
 				const dailyDuplicate = await DBProcessQueue.findOne({
 					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};daily;${degreeType};${args.join(' ')}` }
 				});
@@ -339,8 +335,7 @@ module.exports = {
 					return await interaction.editReply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
 				}
 			} else {
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue hourlyDuplicate');
+				//TODO: add attributes
 				const hourlyDuplicate = await DBProcessQueue.findOne({
 					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};hourly;${degreeType};${args.join(' ')}` }
 				});
@@ -356,7 +351,6 @@ module.exports = {
 				}
 			}
 
-			logDatabaseQueries(4, 'commands/weather-track.js DBProcessQueue create');
 			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`, date: date });
 
 			if (msg.id) {

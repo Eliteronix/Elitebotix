@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
-const { logDatabaseQueries, getUserDuelStarRating, updateQueueChannels } = require('../utils');
+const { getUserDuelStarRating, updateQueueChannels } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -330,7 +330,6 @@ module.exports = {
 				let discordUser = null;
 
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/osu-duel-admin.js DBDiscordUsers');
 				discordUser = await DBDiscordUsers.findOne({
 					where: {
 						userId: allUsers[i],
@@ -371,7 +370,6 @@ module.exports = {
 
 			//Remove the users from the queue
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-duel-admin.js DBProcessQueue');
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				where: {
 					task: 'duelQueue1v1',

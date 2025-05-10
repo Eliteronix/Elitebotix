@@ -1,5 +1,5 @@
 const { DBGuilds, DBDiscordUsers, DBServerUserActivity, DBProcessQueue, DBActivityRoles, DBOsuBeatmaps, DBBirthdayGuilds, DBOsuTourneyFollows, DBDuelRatingHistory, DBOsuForumPosts, DBOsuTrackingUsers, DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('./dbObjects');
-const { leaderboardEntriesPerPage, traceDatabaseQueries, logBroadcastEval, traceOsuAPICalls, matchMakingAcronyms } = require('./config.json');
+const { leaderboardEntriesPerPage, logBroadcastEval, traceOsuAPICalls, matchMakingAcronyms } = require('./config.json');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -19,7 +19,6 @@ module.exports = {
 			//Set prefix to standard prefix
 			guildPrefix = 'e!';
 		} else {
-			module.exports.logDatabaseQueries(3, 'utils.js DBGuilds getGuildPrefix');
 			const guild = await DBGuilds.findOne({
 				attributes: ['customPrefixUsed', 'customPrefix'],
 				where: {
@@ -494,7 +493,6 @@ module.exports = {
 		return outputUser;
 	},
 	updateOsuDetailsforUser: async function (client, user, mode) {
-		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
 		DBDiscordUsers.findOne({
 			attributes: [
@@ -627,7 +625,6 @@ module.exports = {
 		let server = 'bancho';
 		let mode = 0;
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuUserServerMode');
 		//Check user settings
 		const discordUser = await DBDiscordUsers.findOne({
 			attributes: [
@@ -709,7 +706,6 @@ module.exports = {
 				const now = new Date();
 				now.setSeconds(now.getSeconds() - 15);
 
-				module.exports.logDatabaseQueries(3, 'utils.js DBServerUserActivity');
 				const serverUserActivity = await DBServerUserActivity.findOne({
 					attributes: [
 						'id',
@@ -725,37 +721,30 @@ module.exports = {
 					serverUserActivity.points = serverUserActivity.points + 1;
 					await serverUserActivity.save();
 
-					module.exports.logDatabaseQueries(3, 'utils.js DBActivityRoles old updateServerUserActivity activityRoles');
 					const activityRoles = await DBActivityRoles.count({
 						where: { guildId: msg.guildId }
 					});
 					if (activityRoles) {
-						module.exports.logDatabaseQueries(3, 'utils.js old updateServerUserActivity DBProcessQueue');
 						const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 						if (existingTask === 0) {
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 5);
-							module.exports.logDatabaseQueries(3, 'utils.js old updateServerUserActivity DBProcessQueue create');
 							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
 						}
 					}
 				}
 
 				if (!serverUserActivity) {
-					module.exports.logDatabaseQueries(3, 'utils.js DBServerUserActivity new ServerUserActivity create');
 					await DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
 
-					module.exports.logDatabaseQueries(3, 'utils.js new updateServerUserActivity DBActivityRoles');
 					const activityRoles = await DBActivityRoles.count({
 						where: { guildId: msg.guildId }
 					});
 					if (activityRoles) {
-						module.exports.logDatabaseQueries(3, 'utils.js new updateServerUserActivity DBProcessQueue');
 						const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
 						if (existingTask === 0) {
 							let date = new Date();
 							date.setUTCMinutes(date.getUTCMinutes() + 5);
-							module.exports.logDatabaseQueries(3, 'utils.js new updateServerUserActivity DBProcessQueue create');
 							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
 						}
 					}
@@ -796,7 +785,6 @@ module.exports = {
 	},
 	executeNextProcessQueueTask: async function (client) {
 		let now = new Date();
-		module.exports.logDatabaseQueries(1, 'utils.js DBProcessQueue nextTask');
 		let nextTasks = await DBProcessQueue.findAll({
 			where: {
 				beingExecuted: false,
@@ -825,7 +813,6 @@ module.exports = {
 			return;
 		}
 
-		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue existing count');
 		let existingTasksCount = await DBProcessQueue.count({ where: { task: 'updateOsuRank' } });
 
 		if (existingTasksCount > 10) {
@@ -841,7 +828,6 @@ module.exports = {
 		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
 
 		// Update queue length
-		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers 3');
 		let osuUpdateQueueLength = await DBDiscordUsers.count({
 			where: {
 				[Op.or]: [
@@ -942,7 +928,6 @@ module.exports = {
 
 		process.send(`osuUpdateQueue ${osuUpdateQueueLength}`);
 
-		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId'],
 			where: {
@@ -994,18 +979,15 @@ module.exports = {
 		});
 
 		if (discordUser) {
-			module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue');
 			const existingTask = await DBProcessQueue.count({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (existingTask === 0) {
 				let now = new Date();
-				module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
 			}
 		}
 
 		await new Promise(resolve => setTimeout(resolve, 25000));
 
-		module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBDiscordUsers 2');
 		discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId'],
 			where: {
@@ -1062,11 +1044,9 @@ module.exports = {
 		});
 
 		if (discordUser) {
-			module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue');
 			const existingTask = await DBProcessQueue.count({ where: { guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId } });
 			if (existingTask === 0) {
 				let now = new Date();
-				module.exports.logDatabaseQueries(2, 'utils.js refreshOsuRank DBProcessQueue create');
 				DBProcessQueue.create({ guildId: 'None', task: 'updateOsuRank', priority: 3, additions: discordUser.osuUserId, date: now });
 			}
 		}
@@ -1314,7 +1294,6 @@ module.exports = {
 				console.error(err);
 			});
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers updateOsuDetailsforUser');
 		//get discordUser from db to update pp and rank
 		await DBDiscordUsers.findOne({
 			attributes: ['id', 'osuBadges', 'osuName', 'osuUserId', 'tournamentBannedReason', 'tournamentBannedUntil'],
@@ -1385,7 +1364,6 @@ module.exports = {
 		});
 	},
 	async restartProcessQueueTask() {
-		module.exports.logDatabaseQueries(5, 'utils.js DBProcessQueue restartProcessQueueTask');
 		const tasksInWork = await DBProcessQueue.findAll({
 			attributes: ['id', 'beingExecuted'],
 			where: {
@@ -1672,7 +1650,6 @@ module.exports = {
 		let weeksAfter = new Date(match.raw_start);
 		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
-		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGameScores existing Scores');
 		let existingScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'id',
@@ -1710,7 +1687,6 @@ module.exports = {
 		let sameTournamentGames = null;
 
 		if (!matchMakingAcronyms.includes(acronym)) {
-			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames warmup detection same tourney');
 			sameTournamentGames = await DBOsuMultiGames.findAll({
 				attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
 				where: {
@@ -2023,7 +1999,6 @@ module.exports = {
 			let created = false;
 			while (!created) {
 				try {
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores create');
 					await DBOsuMultiGameScores.bulkCreate(newScores)
 						.then(async (scores) => {
 							// Update warmup flags if needed
@@ -2062,7 +2037,6 @@ module.exports = {
 			}
 		}
 
-		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Get existing games');
 		let existingGames = await DBOsuMultiGames.findAll({
 			attributes: [
 				'id',
@@ -2105,7 +2079,6 @@ module.exports = {
 				existingGame.warmupDecidedByAmount = games[i].warmupDecidedByAmount;
 				existingGame.teamType = games[i].teamType;
 				existingGame.scores = games[i].scores;
-				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Update existing game');
 				await existingGame.save();
 			} else {
 				newGames.push(games[i]);
@@ -2113,11 +2086,9 @@ module.exports = {
 		}
 
 		if (newGames.length) {
-			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiGames Create new games');
 			await DBOsuMultiGames.bulkCreate(newGames);
 		}
 
-		module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Get existing match');
 		let existingMatch = await DBOsuMultiMatches.findOne({
 			attributes: [
 				'id',
@@ -2138,10 +2109,8 @@ module.exports = {
 			existingMatch.tourneyMatch = tourneyMatch;
 			existingMatch.matchStartDate = match.raw_start;
 			existingMatch.matchEndDate = match.raw_end;
-			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Update existing match');
 			await existingMatch.save();
 		} else {
-			module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuMultiMatches Create new match');
 			await DBOsuMultiMatches.create({
 				matchId: match.id,
 				matchName: match.name,
@@ -2157,7 +2126,6 @@ module.exports = {
 			let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
 
 			if (NMBeatmaps.length) {
-				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps NM tourney flags new score');
 				await DBOsuBeatmaps.update({
 					noModMap: true,
 				}, {
@@ -2176,7 +2144,6 @@ module.exports = {
 			let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
 
 			if (HDBeatmaps.length) {
-				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps HD tourney flags new score');
 				await DBOsuBeatmaps.update({
 					hiddenMap: true,
 				}, {
@@ -2195,7 +2162,6 @@ module.exports = {
 			let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
 
 			if (HRBeatmaps.length) {
-				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps HR tourney flags new score');
 				await DBOsuBeatmaps.update({
 					hardRockMap: true,
 				}, {
@@ -2214,7 +2180,6 @@ module.exports = {
 			let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
 
 			if (DTBeatmaps.length) {
-				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps DT tourney flags new score');
 				await DBOsuBeatmaps.update({
 					doubleTimeMap: true,
 				}, {
@@ -2233,7 +2198,6 @@ module.exports = {
 			let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
 
 			if (FMBeatmaps.length) {
-				module.exports.logDatabaseQueries(2, 'saveOsuMultiScores.js DBOsuBeatmaps FM tourney flags new score');
 				await DBOsuBeatmaps.update({
 					freeModMap: true,
 				}, {
@@ -2252,7 +2216,6 @@ module.exports = {
 
 		if (tourneyMatch) {
 			if (playersToUpdate.length) {
-				module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers lastDuelRatingUpdate null');
 				await DBDiscordUsers.update({
 					lastDuelRatingUpdate: null,
 				}, {
@@ -2274,7 +2237,6 @@ module.exports = {
 
 			if (newMatchPlayers.length) {
 				//Get all follows for the players in the match
-				module.exports.logDatabaseQueries(4, 'utils.js DBOsuTourneyFollows saveOsuMultiScores');
 				let follows = await DBOsuTourneyFollows.findAll({
 					attributes: ['userId', 'osuUserId'],
 					where: {
@@ -2300,7 +2262,6 @@ module.exports = {
 				//Create a notification for each user
 				let now = new Date();
 				for (let i = 0; i < usersToNotify.length; i++) {
-					module.exports.logDatabaseQueries(4, 'utils.js DBProcessQueue saveOsuMultiScores tourneyFollow');
 					await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')};${match.name}`, date: now });
 				}
 			}
@@ -2308,7 +2269,6 @@ module.exports = {
 			//Manage osu-track follows for guilds
 			if (newMatchPlayers.length) {
 				//Get all follows for the players in the match
-				module.exports.logDatabaseQueries(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					attributes: ['guildId', 'osuUserId', 'acronym', 'channelId', 'matchActivityAutoTrack'],
 					where: {
@@ -2341,7 +2301,6 @@ module.exports = {
 					}
 				}
 
-				module.exports.logDatabaseQueries(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores existingMatchPlayerTrackers');
 				let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
 					attributes: ['channelId'],
 					where: {
@@ -2379,7 +2338,6 @@ module.exports = {
 				//Create a notification for each channel
 				let now = new Date();
 				for (let i = 0; i < channelsToNotify.length; i++) {
-					module.exports.logDatabaseQueries(4, 'utils.js DBProcessQueue saveOsuMultiScores guildTourneyFollow');
 					await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 				}
 			}
@@ -2387,7 +2345,6 @@ module.exports = {
 			//Manage osu-track follows for guilds for acronyms
 			if (newMatchPlayers.length && existingMatchPlayers.length === 0) {
 				//Get all follows for the players in the match
-				module.exports.logDatabaseQueries(4, 'utils.js DBOsuGuildTrackers saveOsuMultiScores no existing match players');
 				let guildTrackers = await DBOsuGuildTrackers.findAll({
 					attributes: ['guildId', 'channelId', 'matchActivityAutoTrack'],
 					where: {
@@ -2413,7 +2370,6 @@ module.exports = {
 				//Create a notification for each channel
 				let now = new Date();
 				for (let i = 0; i < channelsToNotify.length; i++) {
-					module.exports.logDatabaseQueries(4, 'utils.js DBProcessQueue saveOsuMultiScores guildTourneyAcronymFollow');
 					await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 				}
 			}
@@ -2535,7 +2491,6 @@ module.exports = {
 		//Repeat up to 3 times if errors appear
 		for (let i = 0; i < 3; i++) {
 			if (!dbBeatmap) {
-				module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap');
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
 						beatmapId: beatmapId, mods: modBits
@@ -2742,7 +2697,6 @@ module.exports = {
 								let doubleTimeMap = false;
 								let freeModMap = false;
 
-								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiGameScores getOsuBeatmap');
 								let tourneyScores = await DBOsuMultiGameScores.findAll({
 									attributes: ['gameRawMods', 'rawMods', 'freeMod', 'matchId'],
 									where: {
@@ -2754,7 +2708,6 @@ module.exports = {
 									}
 								});
 
-								module.exports.logDatabaseQueries(1, 'utils.js DBOsuMultiMatches getOsuBeatmap');
 								let tourneyMatches = await DBOsuMultiMatches.findAll({
 									attributes: ['matchId'],
 									where: {
@@ -2796,7 +2749,6 @@ module.exports = {
 									}
 								}
 
-								module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap create');
 								dbBeatmap = await DBOsuBeatmaps.create({
 									title: beatmaps[0].title,
 									artist: beatmaps[0].artist,
@@ -2842,7 +2794,6 @@ module.exports = {
 								dbBeatmap.changed('updatedAt', true);
 								await dbBeatmap.save();
 							} else if (error.message === 'Not found') { // Map has to be added new
-								module.exports.logDatabaseQueries(1, 'utils.js DBOsuBeatmaps getOsuBeatmap create not found');
 								dbBeatmap = await DBOsuBeatmaps.create({
 									beatmapId: beatmapId,
 									approvalStatus: 'Not found',
@@ -2867,33 +2818,6 @@ module.exports = {
 		}
 
 		return dbBeatmap;
-	},
-	async logDatabaseQueries(level, output) {
-		process.send('traceDatabaseQueries: ' + output);
-		//Level 5: Log rarely used queries
-		//Level 4: Log queries used in commands
-		//Level 3: Log queries used in (all) messages
-		//Level 2: Log constant periodic queries
-		//Level 1: Log all queries
-		if (traceDatabaseQueries <= level) {
-			// eslint-disable-next-line no-console
-			console.log(`[${process.shardId}] traceDatabaseQueries: `, new Date(), output);
-		}
-
-		// const os = require('os');
-
-		// let startTotal = os.freemem() / 1000000;
-
-		// for (let i = 0; i < 10; i++) {
-		// 	await new Promise(resolve => setTimeout(resolve, 1000));
-
-		// 	//if 2500MiB descrease, log it
-		// 	if (startTotal - 2500 > (os.freemem() / 1000000)) {
-		// 		// eslint-disable-next-line no-console
-		// 		console.log('traceDatabaseQueries: Memory usage increased by 2500MB', new Date(), (os.totalmem() - os.freemem()) / 1000000, 'MiB in use right now', output);
-		// 		break;
-		// 	}
-		// }
 	},
 	logOsuAPICalls(output) {
 		process.send('osu!API');
@@ -2952,7 +2876,6 @@ module.exports = {
 		}
 
 		//get birthday dates from DBBirthdayGuilds for all users in the database that have a birthday set
-		module.exports.logDatabaseQueries(2, 'utils.js DBBirthdayGuilds checkForBirthdays');
 		let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
 			attributes: ['id', 'userId', 'guildId', 'birthdayTime'],
 			where: {
@@ -2965,7 +2888,6 @@ module.exports = {
 		// iterate through all users and check if the current date is the same as the birthday date 
 		for (let i = 0; i < birthdayAnnouncements.length; i++) {
 			//Check if the birthday announcement is enabled on the guild
-			module.exports.logDatabaseQueries(2, 'utils.js DBGuilds checkForBirthdays');
 			let dbGuild = await DBGuilds.findOne({
 				attributes: ['birthdayEnabled', 'birthdayMessageChannel'],
 				where: {
@@ -2986,9 +2908,7 @@ module.exports = {
 					if (birthdayMessageChannel) {
 						if (birthdayMessageChannel.type !== 0) {
 							const { DBGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-							const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-							logDatabaseQueries(4, 'utils.js DBGuilds checkForBirthdays broadcastEval');
 							let dbGuild = await DBGuilds.findOne({
 								attributes: ['id', 'birthdayEnabled', 'birthdayMessageChannel'],
 								where: {
@@ -3120,7 +3040,6 @@ module.exports = {
 
 		let savedStats = null;
 		if (completeMonth || completeWeek) {
-			module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDuelRatingHistory');
 			savedStats = await DBDuelRatingHistory.findOne({
 				attributes: [
 					'osuDuelStarRating',
@@ -3163,7 +3082,6 @@ module.exports = {
 			return duelRatings;
 		}
 
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDiscordUsers savedStats');
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: [
 				'lastDuelRatingUpdate',
@@ -3209,7 +3127,6 @@ module.exports = {
 		const lastHalfYear = new Date();
 		lastHalfYear.setUTCMonth(lastHalfYear.getUTCMonth() - 6);
 
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuMultiGameScores pastHalfYearScoreCount');
 		const pastHalfYearScoreCount = await DBOsuMultiGameScores.count({
 			where: {
 				osuUserId: input.osuUserId,
@@ -3236,7 +3153,6 @@ module.exports = {
 		let modPools = ['NM', 'HD', 'HR', 'DT', 'FM'];
 
 		//Get the tournament data either limited by the date
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores getUserDuelStarRating');
 		let userScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'gameId',
@@ -3279,7 +3195,6 @@ module.exports = {
 			]
 		});
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches getUserDuelStarRating');
 		let userMatches = await DBOsuMultiMatches.findAll({
 			attributes: [
 				'matchId',
@@ -3382,7 +3297,6 @@ module.exports = {
 				}
 			}
 
-			module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBOsuBeatmaps beatmaps');
 			let beatmaps = await DBOsuBeatmaps.findAll({
 				attributes: [
 					'id',
@@ -3652,7 +3566,6 @@ module.exports = {
 		newEndDate.setUTCSeconds(0);
 		newEndDate.setUTCMilliseconds(-1);
 
-		module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDuelRatingHistory lastMonthStats');
 		let lastMonthStats = await DBDuelRatingHistory.findOne({
 			attributes: [
 				'osuDuelProvisional',
@@ -3757,7 +3670,6 @@ module.exports = {
 
 			if (completeMonth || completeWeek) {
 				//Create the stats if they don't exist
-				module.exports.logDatabaseQueries(4, 'utils.js getUserDuelStarRating DBDuelRatingHistory create');
 				await DBDuelRatingHistory.create({
 					osuUserId: input.osuUserId,
 					year: endDate.getUTCFullYear(),
@@ -3780,7 +3692,6 @@ module.exports = {
 			}
 
 			//Log the values in the discords if they changed and the user is connected to the bot
-			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getUserDuelStarRating');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: [
 					'id',
@@ -3809,7 +3720,6 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getUserDuelStarRating create');
 				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
 			}
 
@@ -3876,7 +3786,6 @@ module.exports = {
 								}
 							}
 
-							module.exports.logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers getUserDuelStarRating');
 							let guildTrackers = await DBOsuGuildTrackers.findAll({
 								attributes: ['guildId', 'channelId'],
 								where: {
@@ -3996,7 +3905,6 @@ module.exports = {
 		duelRatings.freeMod = null;
 		duelRatings.provisional = true;
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getUserDuelRatings backup');
 		discordUser = await DBDiscordUsers.findOne({
 			attributes: [
 				'id',
@@ -4015,7 +3923,6 @@ module.exports = {
 		});
 
 		if (!discordUser) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getUserDuelRatings backup create');
 			discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
 		}
 
@@ -4344,7 +4251,6 @@ module.exports = {
 				if (dbBeatmap) {
 					let pp = await module.exports.getOsuPP(outputScore.beatmapId, inputScore.mode, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo), client);
 
-					module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores pp update');
 					try {
 						await DBOsuMultiGameScores.update({ pp: pp }, { where: { id: inputScore.id } });
 					} catch (e) {
@@ -4368,7 +4274,6 @@ module.exports = {
 	async cleanUpDuplicateEntries(client, manually) {
 		const Sequelize = require('sequelize');
 		// Automatically add missing players to the database
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries existingUsers');
 		let existingUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId']
 		});
@@ -4378,7 +4283,6 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries missingUsers');
 		let missingUsers = await DBOsuMultiGameScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
@@ -4398,7 +4302,6 @@ module.exports = {
 		let iterator = 0;
 		while (iterator < 50 && missingUsers.length) {
 			let randomIndex = Math.floor(Math.random() * missingUsers.length);
-			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries missingUsers create');
 			await DBDiscordUsers.create({
 				osuUserId: missingUsers[randomIndex]
 			});
@@ -4418,7 +4321,6 @@ module.exports = {
 		}
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, 'Getting most played maps and matches');
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries mostplayed');
 		let mostplayed = await DBOsuMultiGames.findAll({
 			attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 			where: {
@@ -4435,7 +4337,6 @@ module.exports = {
 		let matchIds = [...new Set(mostplayed.map(item => item.matchId))];
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Getting most played matchIds for matchMaking for ${matchIds.length} matches`);
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries mostplayed');
 		let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -4475,7 +4376,6 @@ module.exports = {
 		popular = popular.map(map => map.beatmapId);
 
 		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not popular');
 		let update = await DBOsuBeatmaps.update({
 			popular: false
 		}, {
@@ -4493,7 +4393,6 @@ module.exports = {
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Marked ${update[0]} beatmaps as not popular again`);
 
 		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries popular');
 		update = await DBOsuBeatmaps.update({
 			popular: true
 		}, {
@@ -4515,7 +4414,6 @@ module.exports = {
 		usedOften = usedOften.map(map => map.beatmapId);
 
 		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries not usedOften');
 		update = await DBOsuBeatmaps.update({
 			usedOften: false
 		}, {
@@ -4533,7 +4431,6 @@ module.exports = {
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Marked ${update[0]} beatmaps as not used often again`);
 
 		// Update beatmap data
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries usedOften');
 		update = await DBOsuBeatmaps.update({
 			usedOften: true
 		}, {
@@ -4557,7 +4454,6 @@ module.exports = {
 		// Remove duplicate discorduser entries
 		let deleted = 0;
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 1');
 		let duplicates = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'amount']],
 			where: {
@@ -4575,7 +4471,6 @@ module.exports = {
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
 		for (let i = 0; i < duplicates.length; i++) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries osuUserId 2');
 			let results = await DBDiscordUsers.findAll({
 				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
 				where: {
@@ -4599,7 +4494,6 @@ module.exports = {
 
 		deleted = 0;
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 1');
 		duplicates = await DBDiscordUsers.findAll({
 			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userId')), 'amount']],
 			where: {
@@ -4614,7 +4508,6 @@ module.exports = {
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
 		for (let i = 0; i < duplicates.length; i++) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers cleanUpDuplicateEntries userId 2');
 			let results = await DBDiscordUsers.findAll({
 				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
 				where: {
@@ -4643,7 +4536,6 @@ module.exports = {
 		let dateLimit = new Date();
 		dateLimit.setMonth(dateLimit.getMonth() - 6);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBDuelRatingHistory cleanUpDuplicateEntries oldData');
 		deleted = await DBDuelRatingHistory.destroy({
 			where: {
 				updatedAt: {
@@ -4671,7 +4563,6 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 100) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates');
 			let result = await beatmaps.query(
 				'SELECT id, beatmapId, mods, updatedAt FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
@@ -4699,7 +4590,6 @@ module.exports = {
 				try {
 					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate beatmaps`);
 
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries duplicates delete');
 					await DBOsuBeatmaps.destroy({
 						where: {
 							id: {
@@ -4735,7 +4625,6 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 100) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates');
 			let result = await multiMatches.query(
 				'SELECT id, matchId, updatedAt FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
 			);
@@ -4763,7 +4652,6 @@ module.exports = {
 				try {
 					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate matches`);
 
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries duplicates delete');
 					await DBOsuMultiMatches.destroy({
 						where: {
 							id: {
@@ -4800,7 +4688,6 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 100) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates');
 			let result = await multiGames.query(
 				'SELECT id, matchId, gameId, updatedAt FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
 			);
@@ -4828,7 +4715,6 @@ module.exports = {
 				try {
 					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate games`);
 
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries duplicates delete');
 					await DBOsuMultiGames.destroy({
 						where: {
 							id: {
@@ -4864,7 +4750,6 @@ module.exports = {
 		});
 
 		while (duplicates && iterations < 100) {
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates');
 			let result = await multiGameScores.query(
 				'SELECT id, matchId, gameId, osuUserId, updatedAt FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
@@ -4892,7 +4777,6 @@ module.exports = {
 				try {
 					await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleting ${deleteIds.length} duplicate scores`);
 
-					module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries duplicates delete');
 					await DBOsuMultiGameScores.destroy({
 						where: {
 							id: {
@@ -4912,7 +4796,6 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Cleaned up ${deleted} duplicate scores`);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuBeatmaps cleanUpDuplicateEntries wrong mode scores');
 		let beatmapsOtherModes = await DBOsuBeatmaps.findAll({
 			attributes: ['beatmapId', 'mode'],
 			where: {
@@ -4927,7 +4810,6 @@ module.exports = {
 
 		taikoMaps = taikoMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update taiko');
 		let updated = await DBOsuMultiGames.update({
 			mode: 1,
 		}, {
@@ -4943,7 +4825,6 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Taiko games that were in the wrong mode`);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update taiko');
 		updated = await DBOsuMultiGameScores.update({
 			mode: 1,
 			pp: null,
@@ -4964,7 +4845,6 @@ module.exports = {
 
 		catchMaps = catchMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update catcch');
 		updated = await DBOsuMultiGames.update({
 			mode: 2,
 		}, {
@@ -4980,7 +4860,6 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Catch the Beat games that were in the wrong mode`);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update catcch');
 		updated = await DBOsuMultiGameScores.update({
 			mode: 2,
 			pp: null,
@@ -5001,7 +4880,6 @@ module.exports = {
 
 		maniaMaps = maniaMaps.map(beatmap => beatmap.beatmapId);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries update mania');
 		updated = await DBOsuMultiGames.update({
 			mode: 3,
 		}, {
@@ -5017,7 +4895,6 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Updated ${updated[0]} Mania games that were in the wrong mode`);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries update mania');
 		updated = await DBOsuMultiGameScores.update({
 			mode: 3,
 			pp: null,
@@ -5038,7 +4915,6 @@ module.exports = {
 		let weeksAgo = new Date();
 		weeksAgo.setDate(weeksAgo.getDate() - 58);
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset unverified');
 		updated = await DBOsuMultiMatches.update({
 			verifiedBy: null,
 		}, {
@@ -5054,7 +4930,6 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Reset ${updated[0]} unverified scores that were checked by Elitebotix`);
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiMatches cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		let matchesWithoutEndDate = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -5063,7 +4938,6 @@ module.exports = {
 			},
 		});
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGames cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		updated = await DBOsuMultiGames.update({
 			warmup: null,
 		}, {
@@ -5079,7 +4953,6 @@ module.exports = {
 
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Reset ${updated[0]} games without matchEndDates warmup flag`);
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBOsuMultiGameScores cleanUpDuplicateEntries reset warmup for scores without matchEndDate');
 		updated = await DBOsuMultiGameScores.update({
 			warmup: null,
 		}, {
@@ -5114,7 +4987,6 @@ module.exports = {
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleted} mappacks older than 4 weeks`);
 
 		// Get all gameIds
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores cleanUpRedundantEntries gameIds');
 		let gameIds = await DBOsuMultiGameScores.findAll({
 			attributes: ['gameId'],
 			group: ['gameId']
@@ -5123,7 +4995,6 @@ module.exports = {
 		gameIds = [...new Set(gameIds.map(score => score.gameId))];
 
 		// Delete all games that don't occur in the list
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpRedundantEntries delete');
 		deleted = await DBOsuMultiGames.destroy({
 			where: {
 				gameId: {
@@ -5135,7 +5006,6 @@ module.exports = {
 		await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `Deleted ${deleted} games that don't have scores`);
 
 		// Get all matchIds
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiGames cleanUpRedundantEntries matchIds');
 		matchIds = await DBOsuMultiGames.findAll({
 			attributes: ['matchId'],
 			group: ['matchId']
@@ -5144,7 +5014,6 @@ module.exports = {
 		matchIds = [...new Set(matchIds.map(game => game.matchId))];
 
 		// Delete all matches that don't occur in the list
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuMultiMatches cleanUpRedundantEntries delete');
 		deleted = await DBOsuMultiMatches.destroy({
 			where: {
 				matchId: {
@@ -5180,7 +5049,6 @@ module.exports = {
 		return true;
 	},
 	async getDerankStats(discordUser) {
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStats osuPP');
 		let ppDiscordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuPP', 'osuRank'],
 			where: {
@@ -5204,7 +5072,6 @@ module.exports = {
 
 		ppDiscordUsers.sort((a, b) => parseFloat(b.osuPP) - parseFloat(a.osuPP));
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBDiscordUsers getDerankStats osuDuelStarRating');
 		let duelDiscordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuDuelStarRating'],
 			where: {
@@ -5427,7 +5294,6 @@ module.exports = {
 	async getOsuPlayerName(osuUserId) {
 		let playerName = osuUserId;
 
-		module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName');
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuName'],
 			where: {
@@ -5451,7 +5317,6 @@ module.exports = {
 				if (osuUser) {
 					playerName = osuUser.name;
 
-					module.exports.logDatabaseQueries(4, 'utils.js DBDiscordUsers getOsuPlayerName create');
 					await DBDiscordUsers.create({ osuUserId: osuUserId, osuName: osuUser.name });
 				}
 			} catch (err) {
@@ -5582,9 +5447,8 @@ module.exports = {
 				let textChannel = await c.channels.cache.get(textChannelId);
 				if (textChannel && textChannel.guildId) {
 					const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-					const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+					const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-					logDatabaseQueries(4, 'utils.js DBProcessQueue existingQueueTasks');
 					let existingQueueTasks = await DBProcessQueue.findAll({
 						attributes: ['id', 'additions', 'createdAt'],
 						where: {
@@ -5628,7 +5492,6 @@ module.exports = {
 						if (existingQueueTasks[i].createdAt < oneDayAgo) {
 							existingQueueTasks[i].destroy();
 
-							logDatabaseQueries(2, 'utils.js DBDiscordUsers updateQueueChannels');
 							let discordUser = await DBDiscordUsers.findOne({
 								attributes: 'userId',
 								where: {
@@ -5686,9 +5549,8 @@ module.exports = {
 			}
 
 			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-			const { getOsuPlayerName, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
-			logDatabaseQueries(4, 'utils.js DBProcessQueue updateCurrentMatchesChannel existingQueueTasks');
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				attributes: ['additions', 'createdAt'],
 				where: {
@@ -5784,7 +5646,6 @@ module.exports = {
 				}
 
 				for (let i = 0; i < uniqueTopics.length; i++) {
-					module.exports.logDatabaseQueries(2, 'utils.js DBOsuForumPosts existingForumPost');
 					let existingForumPost = await DBOsuForumPosts.count({
 						where: {
 							forumPost: uniqueTopics[i]
@@ -5883,7 +5744,6 @@ module.exports = {
 								notes = 'The matches are played in Scorev1';
 							}
 
-							module.exports.logDatabaseQueries(2, 'utils.js DBOsuForumPosts create');
 							await DBOsuForumPosts.create({
 								forumPost: uniqueTopics[i],
 								discord: discord,
@@ -6106,7 +5966,6 @@ module.exports = {
 			where.mods = 0;
 		}
 
-		module.exports.logDatabaseQueries(4, 'utils.js getValidTournamentBeatmap');
 		beatmaps = await DBOsuBeatmaps.findAll({
 			attributes: beatmapAttributes,
 			where: where,
@@ -6252,7 +6111,6 @@ module.exports = {
 	async processOsuTrack(client) {
 		let now = new Date();
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuTrackingUsers processOsuTrack');
 		let osuTracker = await DBOsuTrackingUsers.findOne({
 			attributes: ['id', 'osuUserId', 'nextCheck', 'updatedAt', 'minutesBetweenChecks'],
 			where: {
@@ -6265,7 +6123,6 @@ module.exports = {
 			],
 		});
 
-		module.exports.logDatabaseQueries(2, 'utils.js DBOsuTrackingUsers processOsuTrack count');
 		let osuTrackQueueLength = await DBOsuTrackingUsers.count({
 			where: {
 				nextCheck: {
@@ -6292,7 +6149,7 @@ module.exports = {
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-					const { getOsuPlayerName, multiToBanchoScore, logDatabaseQueries, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+					const { getOsuPlayerName, multiToBanchoScore, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -6303,7 +6160,6 @@ module.exports = {
 
 					let recentActivity = false;
 
-					logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers processOsuTrack');
 					let guildTrackers = await DBOsuGuildTrackers.findAll({
 						attributes: [
 							'id',
@@ -6834,7 +6690,6 @@ module.exports = {
 							if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
 								// console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 								//Get all scores from tournaments
-								logDatabaseQueries(2, 'utils.js DBOsuMultiGameScores processOsuTrack tournamentTopPlays');
 								let multiScores = await DBOsuMultiGameScores.findAll({
 									attributes: [
 										'id',
@@ -6868,7 +6723,6 @@ module.exports = {
 									}
 								});
 
-								logDatabaseQueries(2, 'utils.js DBOsuMultiMatches processOsuTrack tournamentTopPlays match data');
 								let multiMatches = await DBOsuMultiMatches.findAll({
 									attributes: [
 										'matchId',
@@ -7133,7 +6987,6 @@ module.exports = {
 
 			recentActivities = await recentActivities;
 
-			module.exports.logDatabaseQueries(2, 'utils.js DBOsuGuildTrackers processOsuTrack updateActivity');
 			let guildTrackers = await DBOsuGuildTrackers.count({
 				where: {
 					osuUserId: osuUser.osuUserId,

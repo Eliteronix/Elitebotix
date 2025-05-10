@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -56,8 +55,7 @@ module.exports = {
 
 		const user = await interaction.client.users.fetch(interaction.client.user.id);
 
-		logDatabaseQueries(4, 'commands/settings.js DBGuilds');
-		//TODO: add attributes and logdatabasequeries
+		//TODO: add attributes
 		const guild = await DBGuilds.findOne({
 			where: { guildId: interaction.guildId },
 		});
@@ -86,9 +84,8 @@ module.exports = {
 			goodbyeMessage = 'Disabled';
 		}
 
-		logDatabaseQueries(4, 'commands/settings.js DBAutoRoles');
 		//get all autoRoles for the guild
-		//TODO: add attributes and logdatabasequeries
+		//TODO: add attributes
 		const autoRolesList = await DBAutoRoles.findAll({ where: { guildId: interaction.guildId } });
 		//iterate for every autorole in the array
 		for (let i = 0; i < autoRolesList.length; i++) {

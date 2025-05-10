@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
-const { logDatabaseQueries } = require('../../utils');
 const { showUnknownInteractionError } = require('../../config.json');
 const fs = require('node:fs');
 
@@ -35,7 +34,6 @@ module.exports = {
 		let newIdLimit = 0;
 		while (notDone) {
 			try {
-				logDatabaseQueries(4, `commands/db.js ${dbTableName}`);
 				dbListPromise = eval(`const { ${dbTableName} } = require('../../dbObjects'); const { Op } = require('sequelize'); ${dbTableName}.findAll({ where: { id: {[Op.gt]: ${newIdLimit}} }, limit: 10000 })`);
 			} catch (error) {
 				console.error(error);

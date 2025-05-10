@@ -1,5 +1,5 @@
 const { DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageFlags } = require('discord.js');
@@ -224,7 +224,6 @@ module.exports = {
 			return await interaction.editReply({ content: 'You didn\'t specify when I should remind you.', flags: MessageFlags.Ephemeral });
 		}
 
-		logDatabaseQueries(4, 'commands/remindme.js DBProcessQueue create');
 		DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${args.join(' ')}`, date: date });
 
 		if (msg.id) {

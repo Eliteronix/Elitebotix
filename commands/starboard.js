@@ -1,5 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, ChannelType, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -135,7 +135,6 @@ module.exports = {
 			}
 		}
 		const guildPrefix = await getGuildPrefix(msg);
-		logDatabaseQueries(4, 'commands/starboard.js DBGuilds');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'starBoardEnabled', 'starBoardChannel', 'starBoardMinimum'],
 			where: {
@@ -164,7 +163,6 @@ module.exports = {
 					return await interaction.editReply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 				}
 			} else {
-				logDatabaseQueries(4, 'commands/starboard.js DBGuilds create 1');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.channel.id });
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of 3 stars.`);
@@ -211,7 +209,6 @@ module.exports = {
 				}
 				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of ${guild.starBoardMinimum} stars.`);
 			} else {
-				logDatabaseQueries(4, 'commands/starboard.js DBGuilds create 2');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: 3, starBoardChannel: msg.mentions.channels.first().id });
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.mentions.channels.first().id}> with a minimum requirement of 3 stars.`);
@@ -237,7 +234,6 @@ module.exports = {
 				}
 				return await interaction.editReply(`The starboard has been enabled on this server for channel <#${guild.starBoardChannel}> with a minimum requirement of ${parseInt(args[1])} stars.`);
 			} else {
-				logDatabaseQueries(4, 'commands/starboard.js DBGuilds create 3');
 				DBGuilds.create({ guildId: msg.guildId, guildName: msg.guild.name, starBoardEnabled: true, starBoardMinimum: parseInt(args[1]), starBoardChannel: msg.channel.id });
 				if (msg.id) {
 					return msg.reply(`The starboard has been enabled on this server for channel <#${msg.channel.id}> with a minimum requirement of ${parseInt(args[1])} stars.`);

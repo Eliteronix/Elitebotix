@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -144,7 +144,6 @@ module.exports = {
 		});
 
 		//get discordUser from db
-		logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 1');
 		const discordUser = await DBDiscordUsers.findOne({
 			attributes: [
 				'id',
@@ -203,7 +202,6 @@ async function connect(args, interaction, osuApi, discordUser) {
 		osuApi.getUser({ u: getIDFromPotentialOsuLink(args[0]) })
 			.then(async (osuUser) => {
 				//get discordUser from db
-				logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 2');
 				const existingVerifiedDiscordUser = await DBDiscordUsers.findOne({
 					attributes: ['userId'],
 					where: {
@@ -229,7 +227,6 @@ async function connect(args, interaction, osuApi, discordUser) {
 					}
 
 					//Remove duplicate discord user if existing and not the same record
-					logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 3');
 					let existingDiscordUser = await DBDiscordUsers.findOne({
 						attributes: ['id'],
 						where: {
@@ -269,7 +266,6 @@ async function connect(args, interaction, osuApi, discordUser) {
 
 					let additionalInfo = await getAdditionalOsuInfo(osuUser.id, interaction.client);
 
-					logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers 4');
 					let existingDiscordUser = await DBDiscordUsers.findOne({
 						attributes: ['id', 'userId', 'osuVerificationCode', 'osuName', 'osuBadges', 'osuPP', 'osuRank'],
 						where: {
@@ -287,7 +283,6 @@ async function connect(args, interaction, osuApi, discordUser) {
 						existingDiscordUser.osuRank = osuUser.pp.rank;
 						existingDiscordUser.save();
 					} else {
-						logDatabaseQueries(4, 'commands/osu-link.js DBDiscordUsers create');
 						DBDiscordUsers.create({ userId: interaction.user.id, osuUserId: osuUser.id, osuVerificationCode: verificationCode, osuName: osuUser.name, osuBadges: additionalInfo.tournamentBadges.length, osuPP: osuUser.pp.raw, osuRank: osuUser.pp.rank });
 					}
 

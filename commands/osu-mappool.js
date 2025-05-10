@@ -1,7 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools, DBOsuPoolAccess } = require('../dbObjects');
-const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, logDatabaseQueries, getMapOsrFile } = require('../utils.js');
+const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, getMapOsrFile } = require('../utils.js');
 const { Op } = require('sequelize');
 const Canvas = require('@napi-rs/canvas');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -503,7 +503,6 @@ module.exports = {
 		let cachedUser = discordUsers[interaction.user.id];
 
 		if (!cachedUser) {
-			logDatabaseQueries(4, 'commands/osu-mappool.js (autocomplete) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -558,7 +557,6 @@ module.exports = {
 			}
 		}, 1000);
 
-		logDatabaseQueries(4, 'commands/osu-mappool.js (autocomplete) DBOsuMappools');
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
 			where: {
@@ -623,7 +621,6 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'create') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js (create) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -641,7 +638,6 @@ module.exports = {
 
 			let mappoolName = interaction.options.getString('name');
 
-			logDatabaseQueries(4, 'commands/osu-mappool.js (create) DBOsuMappools');
 			let existingMappool = await DBOsuMappools.count({
 				where: {
 					creatorId: discordUser.osuUserId,
@@ -703,7 +699,6 @@ module.exports = {
 				}
 			}
 
-			logDatabaseQueries(4, 'commands/osu-mappool.js (create) DBOsuBeatmaps');
 			let beatmaps = await DBOsuBeatmaps.findAll({
 				attributes: [
 					'beatmapId',
@@ -783,7 +778,6 @@ module.exports = {
 
 			await interaction.editReply({ content: `Successfully created mappool \`${interaction.options.getString('name').replace(/`/g, '')}\`\n${content}`, files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'remove') {
-			logDatabaseQueries(1, 'commands/osu-mappool.js (remove) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -831,7 +825,6 @@ module.exports = {
 				await interaction.followUp(`Removed \`${poolAccesses}\` pool accesses.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'view') {
-			logDatabaseQueries(1, 'commands/osu-mappool.js (view) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -849,7 +842,6 @@ module.exports = {
 
 			let mappoolName = interaction.options.getString('name');
 
-			logDatabaseQueries(4, 'commands/osu-mappool.js (view) DBOsuMappools');
 			let mappool = await DBOsuMappools.findAll({
 				attributes: ['number', 'modPool', 'freeMod', 'tieBreaker', 'modPoolNumber', 'beatmapId'],
 				where: {
@@ -908,7 +900,6 @@ module.exports = {
 
 			await interaction.followUp({ content: finalContent.join('\n'), files: [mappoolImage] });
 		} else if (interaction.options.getSubcommand() === 'mappack') {
-			logDatabaseQueries(1, 'commands/osu-mappool.js (mappack) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -926,7 +917,6 @@ module.exports = {
 
 			let mappoolName = interaction.options.getString('name');
 
-			logDatabaseQueries(4, 'commands/osu-mappool.js (view) DBOsuMappools');
 			let mappool = await DBOsuMappools.findAll({
 				attributes: ['number', 'modPool', 'freeMod', 'tieBreaker', 'modPoolNumber', 'beatmapId'],
 				where: {
@@ -974,7 +964,6 @@ module.exports = {
 
 			await interaction.editReply({ content: `Mappack for \`${mappoolName.replace(/`/g, '')}\` available [here](http://www.eliteronix.de/mappack/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_').replace(/\/+/gm, '_')}).` });
 		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -1175,7 +1164,6 @@ module.exports = {
 					continue;
 				}
 
-				logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBOsuBeatmaps 1');
 				let beatmaps = await DBOsuBeatmaps.findAll({
 					attributes: [
 						'beatmapId',
@@ -1245,7 +1233,6 @@ module.exports = {
 					};
 				});
 
-				logDatabaseQueries(4, 'commands/osu-mappool.js (createfromsheet) DBOsuMappools 2');
 				let existingMappool = await DBOsuMappools.count({
 					where: {
 						creatorId: discordUser.osuUserId,
@@ -1349,7 +1336,6 @@ async function createMappoolImage(mappool, client) {
 
 	let tourneyMaps = [];
 
-	logDatabaseQueries(4, 'commands/osu-mappool.js (createMappoolImage) DBOsuBeatmaps');
 	let dbBeatmaps = await DBOsuBeatmaps.findAll({
 		attributes: [
 			'beatmapId',

@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuTourneyFollows } = require('../dbObjects');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { getOsuPlayerName, logDatabaseQueries, logOsuAPICalls } = require('../utils');
+const { getOsuPlayerName, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -175,7 +175,6 @@ module.exports = {
 			await osuApi.getUser({ u: username, m: 0 })
 				.then(async (osuUser) => {
 					//TODO: Attributes
-					logDatabaseQueries(4, 'commands/osu-follow.js DBOsuTourneyFollows follow');
 					let existingFollow = await DBOsuTourneyFollows.findOne({
 						where: {
 							userId: interaction.user.id,
@@ -188,7 +187,6 @@ module.exports = {
 					}
 
 					//TODO: Attributes
-					logDatabaseQueries(4, 'commands/osu-follow.js DBDiscordUsers follow');
 					let disabledFollows = await DBDiscordUsers.findOne({
 						where: {
 							osuUserId: osuUser.id,
@@ -200,7 +198,6 @@ module.exports = {
 						return await interaction.editReply('This user doesn\'t allow others to follow them.');
 					}
 
-					logDatabaseQueries(4, 'commands/osu-follow.js DBOsuTourneyFollows follow create');
 					await DBOsuTourneyFollows.create({
 						userId: interaction.user.id,
 						osuUserId: osuUser.id
@@ -229,7 +226,6 @@ module.exports = {
 			await osuApi.getUser({ u: username, m: 0 })
 				.then(async (osuUser) => {
 					//TODO: Attributes
-					logDatabaseQueries(4, 'commands/osu-follow.js DBOsuTourneyFollows unfollow');
 					let existingFollow = await DBOsuTourneyFollows.findOne({
 						where: {
 							userId: interaction.user.id,
@@ -254,7 +250,6 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'followlist') {
 			//Get all follows for the user
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-follow.js DBOsuTourneyFollows followlist');
 			let follows = await DBOsuTourneyFollows.findAll({
 				where: {
 					userId: interaction.user.id
@@ -274,7 +269,6 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'followers') {
 			//Check if the user has a connected osu! account
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-follow.js DBDiscordUsers followers 1');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id
@@ -286,7 +280,6 @@ module.exports = {
 			}
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-follow.js DBOsuTourneyFollows followers');
 			let followers = await DBOsuTourneyFollows.findAll({
 				where: {
 					osuUserId: discordUser.osuUserId
@@ -312,7 +305,6 @@ module.exports = {
 				}
 
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/osu-follow.js DBDiscordUsers followers 2');
 				let followerUser = await DBDiscordUsers.findOne({
 					where: {
 						userId: followers[i].userId
@@ -337,7 +329,6 @@ module.exports = {
 			let allowFollowing = interaction.options.getBoolean('allow');
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-follow.js DBDiscordUsers allow');
 			let discordUser = await DBDiscordUsers.findOne({
 				where: {
 					userId: interaction.user.id,
@@ -353,7 +344,6 @@ module.exports = {
 			}
 
 			if (!allowFollowing) {
-				logDatabaseQueries(4, 'commands/osu-follow.js DBDiscordUsers allow destroy');
 				await DBOsuTourneyFollows.destroy({
 					where: {
 						osuUserId: discordUser.osuUserId

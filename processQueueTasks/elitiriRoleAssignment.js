@@ -25,7 +25,6 @@ module.exports = {
 				}
 
 				const { DBElitiriCupSignUp, DBDiscordUsers, DBElitiriCupStaff } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				const { currentElitiriCup } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\config.json`);
 
 				//Fetch all members
@@ -41,7 +40,6 @@ module.exports = {
 					}
 				}
 
-				logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupSignUp');
 				const registeredPlayers = await DBElitiriCupSignUp.findAll({
 					attributes: ['userId', 'rankAchieved', 'bracketName'],
 					where: {
@@ -52,7 +50,6 @@ module.exports = {
 					}
 				});
 
-				logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBDiscordUsers');
 				const discordUsers = await DBDiscordUsers.findAll({
 					attributes: ['userId', 'osuUserId'],
 					where: {
@@ -66,7 +63,6 @@ module.exports = {
 					}
 				});
 
-				logDatabaseQueries(2, 'processQueueTasks/elitiriRoleAssignment.js DBElitiriCupStaff');
 				const staffSignups = await DBElitiriCupStaff.findAll({
 					attributes: ['osuUserId', 'tournamentName', 'host', 'streamer', 'commentator', 'referee', 'replayer'],
 					where: {

@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, logDatabaseQueries, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
+const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, matchMakingAcronyms } = require('../config.json');
@@ -349,8 +349,7 @@ module.exports = {
 				//Get profiles by arguments
 				for (let i = 0; i < args.length; i++) {
 					if (args[i].startsWith('<@') && args[i].endsWith('>')) {
-						//TODO: add attributes and logdatabasequeries
-						logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers 1');
+						//TODO: add attributes
 						const discordUser = await DBDiscordUsers.findOne({
 							where: { userId: args[i].replace('<@', '').replace('>', '').replace('!', '') },
 						});
@@ -410,7 +409,6 @@ module.exports = {
 			let mostplayed = null;
 
 			if (interaction.options.getBoolean('dontfiltermm')) {
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 1');
 				mostplayed = await DBOsuMultiGames.findAll({
 					attributes: ['beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 					where: {
@@ -426,7 +424,6 @@ module.exports = {
 
 				mostplayed = mostplayed.map(item => item.dataValues);
 			} else {
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 2');
 				let mostplayedGrouped = await DBOsuMultiGames.findAll({
 					attributes: ['matchId', 'beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 					where: {
@@ -442,7 +439,6 @@ module.exports = {
 
 				let matchIds = [...new Set(mostplayedGrouped.map(item => item.matchId))];
 
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiMatches 2');
 				let matchMakingMatchData = await DBOsuMultiMatches.findAll({
 					attributes: ['matchId'],
 					where: {
@@ -458,7 +454,6 @@ module.exports = {
 
 				let matchMakingMatchIds = [...new Set(matchMakingMatchData.map(item => item.matchId))];
 
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGames 3');
 				mostplayed = await DBOsuMultiGames.findAll({
 					attributes: ['beatmapId', [Sequelize.fn('SUM', Sequelize.col('scores')), 'playcount']],
 					where: {
@@ -687,8 +682,7 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 				//Create as an attachment
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-mostplayed-${user.id}.png` });
 
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/osu-mostplayed.js DBDiscordUsers Bancho linkedUser');
+				//TODO: add attributes
 				const linkedUser = await DBDiscordUsers.findOne({
 					where: { osuUserId: user.id }
 				});
@@ -873,7 +867,6 @@ async function drawMostPlayed(input, server, mode, limit, client) {
 			}
 		}
 	} else if (server === 'tournaments') {
-		logDatabaseQueries(4, 'commands/osu-mostplayed.js DBOsuMultiGameScores 3');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: ['beatmapId', 'mode'],
 			where: {

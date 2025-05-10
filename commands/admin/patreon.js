@@ -1,11 +1,9 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'patreon',
 	usage: '<userId>',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/patreon.js DBDiscordUsers');
 		const discordUser = await DBDiscordUsers.findOne({
 			attributes: ['id', 'patreon'],
 			where: {

@@ -1,5 +1,5 @@
 const { DBServerUserActivity } = require('../dbObjects');
-const { createLeaderboard, humanReadable, populateMsgFromInteraction, logDatabaseQueries } = require('../utils.js');
+const { createLeaderboard, humanReadable, populateMsgFromInteraction } = require('../utils.js');
 const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -78,7 +78,6 @@ module.exports = {
 
 			members = members.map(member => member);
 
-			logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
 			discordUsers = await DBServerUserActivity.findAll({
 				attributes: ['userId', 'points'],
 				where: {

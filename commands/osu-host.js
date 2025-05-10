@@ -1,6 +1,6 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { getOsuPlayerName, logDatabaseQueries, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getAdditionalOsuInfo } = require('../utils');
+const { getOsuPlayerName, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getAdditionalOsuInfo } = require('../utils');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores, DBProcessQueue } = require('../dbObjects');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -282,7 +282,6 @@ module.exports = {
 					}
 
 					//Get all scores from tournaments
-					logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiGameScores');
 					let multiScores = await DBOsuMultiGameScores.findAll({
 						attributes: [
 							'id',
@@ -318,7 +317,6 @@ module.exports = {
 
 					let matchIds = [...new Set(multiScores.map(score => score.matchId))];
 
-					logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiMatches');
 					let multiMatches = await DBOsuMultiMatches.findAll({
 						attributes: [
 							'matchId',
@@ -676,7 +674,6 @@ module.exports = {
 						newScoresPP += parseFloat(scores[i].pp) * Math.pow(0.95, (i));
 					}
 
-					logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 1');
 					let discordUsers = await DBDiscordUsers.findAll({
 						attributes: ['osuPP', 'osuRank'],
 					});
@@ -734,7 +731,6 @@ module.exports = {
 						lastUpdate = new Date();
 					}
 
-					logDatabaseQueries(4, 'commands/osu-host.js DBDiscordUsers 2');
 					let discordUser = await DBDiscordUsers.findOne({
 						where: {
 							osuUserId: osuUserId,
@@ -811,7 +807,6 @@ async function getTournamentTopPlayData(osuUserId, mode, client) {
 	};
 
 	//Get all scores from tournaments
-	logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiGameScores 1');
 	let multiScores = await DBOsuMultiGameScores.findAll({
 		attributes: [
 			'id',
@@ -840,7 +835,6 @@ async function getTournamentTopPlayData(osuUserId, mode, client) {
 
 	let matchIds = [...new Set(multiScores.map(score => score.matchId))];
 
-	logDatabaseQueries(4, 'commands/osu-host.js DBOsuMultiMatches 1');
 	let multiMatches = await DBOsuMultiMatches.findAll({
 		attributes: [
 			'matchId',
@@ -896,7 +890,6 @@ async function getTournamentTopPlayData(osuUserId, mode, client) {
 		}
 	}
 
-	logDatabaseQueries(4, 'commands/osu-host.js DBOsuBeatmaps 1');
 	let dbBeatmaps = await DBOsuBeatmaps.findAll({
 		attributes: [
 			'beatmapId',

@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
+const { getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const ChartJsImage = require('chartjs-to-image');
@@ -94,7 +94,6 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
-			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -113,7 +112,6 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
-			logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -156,7 +154,6 @@ module.exports = {
 		}
 
 		// Gather all the data
-		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores 1');
 		let multiMatchIds = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -178,7 +175,6 @@ module.exports = {
 			return await interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches.`);
 		}
 
-		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 2');
 		let multiMatches = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'acronym', 'matchStartDate'],
 			where: {
@@ -191,7 +187,6 @@ module.exports = {
 			},
 		});
 
-		logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores 2');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				[Sequelize.fn('min', Sequelize.col('id')), 'id'],
@@ -587,7 +582,6 @@ module.exports = {
 
 		let players = [...new Set(multiScores.map(score => score.osuUserId))];
 
-		logDatabaseQueries(4, 'commands/osu-history.js DBDiscordUsers osuNames');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', 'osuName'],
 			where: {
@@ -612,7 +606,6 @@ module.exports = {
 				let tourneyScores = [];
 
 				if (acronyms.length > 0) {
-					logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiMatches 3');
 					tourneyMatches = await DBOsuMultiMatches.findAll({
 						attributes: ['matchId', 'matchName', 'matchStartDate'],
 						where: {
@@ -625,7 +618,6 @@ module.exports = {
 						order: [['matchStartDate', 'DESC']],
 					});
 
-					logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGames 3');
 					tourneyScores = await DBOsuMultiGames.findAll({
 						attributes: ['matchId', 'teamType', 'beatmapId'],
 						where: {
@@ -793,7 +785,6 @@ module.exports = {
 			date.setUTCDate(date.getUTCDate() - 1);
 			date.setUTCHours(23, 59, 59, 999);
 
-			logDatabaseQueries(4, 'commands/osu-history.js DBDuelRatingHistory 1');
 			let existingDuelRatings = await DBDuelRatingHistory.findAll({
 				attributes: ['osuDuelStarRating', 'year', 'month', 'date'],
 				where: {
@@ -802,7 +793,6 @@ module.exports = {
 			});
 
 			// Create rank history graph
-			logDatabaseQueries(4, 'commands/osu-history.js DBOsuMultiGameScores duelRatingDevelopment');
 			let oldestScore = await DBOsuMultiGameScores.findOne({
 				attributes: ['gameEndDate'],
 				where: {

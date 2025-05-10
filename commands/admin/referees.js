@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../../dbObjects');
-const { logDatabaseQueries, logOsuAPICalls, getOsuPlayerName, humanReadable } = require('../../utils');
+const { logOsuAPICalls, getOsuPlayerName, humanReadable } = require('../../utils');
 const { Op } = require('sequelize');
 const Sequelize = require('sequelize');
 const osu = require('node-osu');
@@ -12,7 +12,6 @@ module.exports = {
 		let username = interaction.options.getString('argument');
 
 		//Get the user from the database if possible
-		logDatabaseQueries(4, 'commands/admin/referees.js DBDiscordUsers 1');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				[Op.or]: {
@@ -53,7 +52,6 @@ module.exports = {
 			}
 		}
 
-		logDatabaseQueries(4, 'commands/admin/referees.js DBOsuMultiGameScores');
 		const playedMatches = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -67,7 +65,6 @@ module.exports = {
 			return await interaction.editReply(`No matches found for \`${osuUser.osuName}\`.`);
 		}
 
-		logDatabaseQueries(4, 'commands/admin/referees.js DBOsuMultiMatches');
 		let referees = await DBOsuMultiMatches.findAll({
 			attributes: ['referee', [Sequelize.fn('COUNT', Sequelize.col('referee')), 'amount']],
 			where: {
@@ -85,7 +82,6 @@ module.exports = {
 
 		let additionalInfo = '';
 
-		logDatabaseQueries(4, 'commands/admin/referees.js DBOsuMultiMatches count matches with missing referee info');
 		const refereesToBeDetermined = await DBOsuMultiMatches.count({
 			where: {
 				tourneyMatch: true,
@@ -97,7 +93,6 @@ module.exports = {
 		});
 
 		if (refereesToBeDetermined > 0) {
-			logDatabaseQueries(4, 'commands/admin/referees.js DBOsuMultiMatches oldest match with missing referee info');
 			const oldestMissingMatch = await DBOsuMultiMatches.findOne({
 				attributes: [
 					'matchStartDate',
@@ -114,7 +109,6 @@ module.exports = {
 				],
 			});
 
-			logDatabaseQueries(4, 'commands/admin/referees.js DBOsuMultiMatches youngest match with missing referee info');
 			const youngestMissingMatch = await DBOsuMultiMatches.findOne({
 				attributes: [
 					'matchStartDate',

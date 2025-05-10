@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuMultiMatches } = require('../../dbObjects');
-const { logDatabaseQueries, logOsuAPICalls } = require('../../utils');
+const { logOsuAPICalls } = require('../../utils');
 const { Op } = require('sequelize');
 const { daysHidingQualifiers } = require('../../config.json');
 const Discord = require('discord.js');
@@ -13,7 +13,6 @@ module.exports = {
 		let username = interaction.options.getString('argument');
 
 		//Get the user from the database if possible
-		logDatabaseQueries(4, 'commands/admin/reffedMatches.js DBDiscordUsers 1');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				[Op.or]: {
@@ -55,7 +54,6 @@ module.exports = {
 		}
 
 
-		logDatabaseQueries(4, 'commands/admin/reffedMatches.js DBOsuMultiMatches');
 		const reffedScores = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {

@@ -4,7 +4,7 @@ const cooldowns = new Discord.Collection();
 const { developers } = require('./config.json');
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { getMods, logDatabaseQueries, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
+const { getMods, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
@@ -30,7 +30,6 @@ module.exports = async function (reaction, user) {
 	process.send(`discorduser ${user.id}}`);
 
 	if (reaction._emoji.name === '⭐') {
-		logDatabaseQueries(2, 'reactionAdded.js DBGuilds Starboard');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'starBoardEnabled', 'starBoardMinimum', 'starBoardChannel'],
 			where: {
@@ -39,7 +38,6 @@ module.exports = async function (reaction, user) {
 		});
 
 		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count && guild.starBoardChannel !== reaction.message.channel.id) {
-			logDatabaseQueries(2, 'reactionAdded.js DBStarBoardMessages Starboardmessage');
 			const starBoardedMessage = await DBStarBoardMessages.findOne({
 				attributes: ['id', 'starBoardMessageId', 'starBoardChannelId', 'starBoardMessageStarsQuantityMax'],
 				where: {
@@ -158,7 +156,6 @@ module.exports = async function (reaction, user) {
 				}
 
 				const starBoardMessage = await channel.send({ content: `${reaction.count} ⭐ in <#${reaction.message.channel.id}>`, embeds: [starBoardMessageEmbed] });
-				logDatabaseQueries(2, 'reactionAdded.js DBStarBoardMessages CreateStarBoardMessage');
 				DBStarBoardMessages.create({ originalChannelId: reaction.message.channel.id, originalMessageId: reaction.message.id, starBoardChannelId: starBoardMessage.channel.id, starBoardMessageId: starBoardMessage.id, starBoardedMessagestarBoardMessageStarsQuantityMax: 1 });
 			}
 		}
@@ -1129,7 +1126,6 @@ module.exports = async function (reaction, user) {
 	}
 
 	//Get the header message from the db
-	logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader');
 	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
 		attributes: ['id'],
 		where: {
@@ -1139,7 +1135,6 @@ module.exports = async function (reaction, user) {
 	});
 
 	if (dbReactionRolesHeader) {
-		logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles 1');
 		//Get the reactionRole from the db by all the string (works for general emojis)
 		const dbReactionRole = await DBReactionRoles.findOne({
 			attributes: ['roleId'],
@@ -1186,7 +1181,6 @@ module.exports = async function (reaction, user) {
 					}
 				}
 			} else {
-				logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles destroy');
 				DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRole.roleId } });
 				editEmbed(reaction.message, dbReactionRolesHeader);
 			}
@@ -1194,7 +1188,6 @@ module.exports = async function (reaction, user) {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
 			let emoji = '<%:' + reaction._emoji.name + ':';
 
-			logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles 2');
 			//Get the reactionRole from the db by all the string (works for general emojis)
 			const dbReactionRoleBackup = await DBReactionRoles.findOne({
 				attributes: ['roleId'],
@@ -1243,7 +1236,6 @@ module.exports = async function (reaction, user) {
 						}
 					}
 				} else {
-					logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles destroy 2');
 					DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRoleBackup.roleId } });
 					editEmbed(reaction.message, dbReactionRolesHeader);
 				}
@@ -1267,7 +1259,6 @@ async function editEmbed(msg, reactionRolesHeader) {
 		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
 	}
 
-	logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles 3');
 	//Get roles from db
 	const reactionRoles = await DBReactionRoles.findAll({
 		attributes: ['emoji', 'roleId', 'description'],
@@ -1294,7 +1285,6 @@ async function editEmbed(msg, reactionRolesHeader) {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
 		await msg.channel.send('Couldn\'t find an embed with this EmbedId');
-		logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader destroy');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});

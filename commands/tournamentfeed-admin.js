@@ -2,7 +2,7 @@ const { DBOsuForumPosts, DBDiscordUsers } = require('../dbObjects');
 const Discord = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('discord.js');
-const { getIDFromPotentialOsuLink, logDatabaseQueries } = require('../utils');
+const { getIDFromPotentialOsuLink } = require('../utils');
 
 module.exports = {
 	name: 'tournamentfeed-admin',
@@ -325,8 +325,7 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 1');
+			//TODO: add attributes
 			let forumPosts = await DBOsuForumPosts.findAll({
 				where: {
 					pinged: false,
@@ -408,8 +407,7 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'ping') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 2');
+			//TODO: add attributes
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
 					forumPost: `https://osu.ppy.sh/community/forums/topics/${id}`
@@ -482,8 +480,7 @@ module.exports = {
 				sentMessage.crosspost();
 			}
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBDiscordUsers');
+			//TODO: add attributes
 			let pingUsers = await DBDiscordUsers.findAll({
 				where: {
 					tournamentPings: true
@@ -642,8 +639,7 @@ module.exports = {
 			let outdated = interaction.options.getBoolean('outdated');
 			let notournament = interaction.options.getBoolean('notournament');
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 3');
+			//TODO: add attributes
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
 					forumPost: `https://osu.ppy.sh/community/forums/topics/${id}`
@@ -755,8 +751,7 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'delete') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(2, 'commands/tournamentfeed-admin.js DBOsuForumPosts 4');
+			//TODO: add attributes
 			let forumPost = await DBOsuForumPosts.findOne({
 				where: {
 					forumPost: `https://osu.ppy.sh/community/forums/topics/${id}`

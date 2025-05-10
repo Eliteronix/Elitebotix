@@ -1,9 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (invite) {
-	logDatabaseQueries(2, 'inviteDelete.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		attributes: ['id', 'loggingChannel'],

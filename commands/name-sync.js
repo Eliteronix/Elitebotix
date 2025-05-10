@@ -1,4 +1,4 @@
-const { populateMsgFromInteraction, getGuildPrefix, logDatabaseQueries } = require('../utils');
+const { populateMsgFromInteraction, getGuildPrefix } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
@@ -64,7 +64,6 @@ module.exports = {
 		}
 
 		if (args[0].toLowerCase() === 'disable') {
-			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue disable');
 			let task = await DBProcessQueue.findOne({
 				attributes: ['id'],
 				where: {
@@ -86,7 +85,6 @@ module.exports = {
 				return interaction.followUp({ content: 'Name Sync is already disabled.', flags: MessageFlags.Ephemeral });
 			}
 		} else if (args[0].toLowerCase() === 'osuname') {
-			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osuname');
 			let task = await DBProcessQueue.findOne({
 				attributes: ['id', 'additions', 'date', 'beingExecuted'],
 				where: {
@@ -113,7 +111,6 @@ module.exports = {
 			}
 
 			let date = new Date();
-			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osuname create');
 			await DBProcessQueue.create({
 				guildId: msg.guild.id,
 				task: 'nameSync',
@@ -127,7 +124,6 @@ module.exports = {
 			}
 			return interaction.followUp({ content: 'Name Sync is now set to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
 		} else if (args[0].toLowerCase() === 'osunameandrank') {
-			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osunameandrank');
 			let task = await DBProcessQueue.findOne({
 				attributes: ['id', 'additions', 'date', 'beingExecuted'],
 				where: {
@@ -154,7 +150,6 @@ module.exports = {
 			}
 
 			let date = new Date();
-			logDatabaseQueries(4, 'commands/name-sync.js DBProcessQueue osunameandrank create');
 			await DBProcessQueue.create({
 				guildId: msg.guild.id,
 				task: 'nameSync',

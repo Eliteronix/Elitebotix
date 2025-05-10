@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { Op } = require('sequelize');
-const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, logDatabaseQueries, pause, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, humanReadable, getOsuPlayerName, createLeaderboard, getOsuBeatmap, pause, logOsuAPICalls } = require('../utils');
 const { SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const osu = require('node-osu');
 const matchIdsGettingProcessed = [];
@@ -221,7 +221,6 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list');
 			let acronyms = await DBOsuMultiMatches.findAll({
 				attributes: [
 					'acronym',
@@ -254,7 +253,6 @@ module.exports = {
 
 			let first20Acronyms = acronyms.slice(0, 20);
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list unverifiedScores');
 			let unverifiedScores = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId', 'matchName', 'acronym', 'verificationComment'],
 				where: {
@@ -288,7 +286,6 @@ module.exports = {
 				description: 'The following scores have not been verified yet.',
 			};
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches list unverifiedMatchesLeft');
 			let unverifiedMatchesLeft = await DBOsuMultiMatches.count({
 				where: {
 					matchEndDate: {
@@ -342,7 +339,6 @@ module.exports = {
 			let valid = interaction.options.getBoolean('valid');
 			let comment = interaction.options.getString('comment');
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBDiscordUsers update discordUser');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -368,7 +364,6 @@ module.exports = {
 				try {
 					let matchId = getIDFromPotentialOsuLink(matchIds[matchIndex]);
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches update match');
 					let match = await DBOsuMultiMatches.findOne({
 						attributes: ['matchId', 'matchName', 'matchStartDate'],
 						where: {
@@ -376,7 +371,6 @@ module.exports = {
 						},
 					});
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores update scores');
 					let scores = await DBOsuMultiGameScores.findAll({
 						attributes: ['osuUserId', 'tourneyMatch'],
 						where: {
@@ -415,7 +409,6 @@ module.exports = {
 						tourneyMatchChangedString = 'ini\n[Changed]``````';
 					}
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches update');
 					await DBOsuMultiMatches.update({
 						tourneyMatch: valid,
 						verifiedAt: new Date(),
@@ -440,7 +433,6 @@ module.exports = {
 						},
 					});
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGames update');
 					let gamesUpdated = await DBOsuMultiGames.update({
 						tourneyMatch: valid,
 					}, {
@@ -452,7 +444,6 @@ module.exports = {
 						},
 					});
 
-					logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores update');
 					await DBOsuMultiGameScores.update({
 						tourneyMatch: valid,
 					}, {
@@ -465,7 +456,6 @@ module.exports = {
 					});
 
 					if (tourneyMatchChanged) {
-						logDatabaseQueries(4, 'commands/matchverify.js DBDuelRatingHistory update ratingHistories');
 						let ratingHistories = await DBDuelRatingHistory.findAll({
 							attributes: ['id', 'date', 'month', 'year'],
 							where: {
@@ -488,7 +478,6 @@ module.exports = {
 							}
 						}
 
-						logDatabaseQueries(4, 'commands/matchverify.js DBDiscordUsers update update');
 						await DBDiscordUsers.update({
 							lastDuelRatingUpdate: null,
 						}, {
@@ -534,7 +523,6 @@ module.exports = {
 			let matchId = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 			let acronym = interaction.options.getString('acronym');
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores check');
 			let scores = await DBOsuMultiGameScores.findAll({
 				attributes: ['matchId', 'beatmapId', 'osuUserId', 'gameId'],
 				where: {
@@ -549,7 +537,6 @@ module.exports = {
 				return await interaction.editReply(`No scores found for https://osu.ppy.sh/mp/${matchId}`);
 			}
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches check');
 			let match = await DBOsuMultiMatches.findOne({
 				attributes: ['matchName', 'acronym', 'matchStartDate'],
 				where: {
@@ -586,7 +573,6 @@ module.exports = {
 			let weeksAfterMatch = new Date(match.matchStartDate);
 			weeksAfterMatch.setDate(weeksAfterMatch.getDate() + 21);
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches check relatedMatches');
 			let relatedMatches = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId'],
 				where: {
@@ -597,7 +583,6 @@ module.exports = {
 				},
 			});
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores check relatedScores');
 			let relatedScores = await DBOsuMultiGameScores.findAll({
 				attributes: ['matchId', 'beatmapId', 'osuUserId'],
 				where: {
@@ -683,7 +668,6 @@ module.exports = {
 
 			await interaction.followUp({ embeds: [embed] });
 		} else if (interaction.options.getSubcommand() === 'leaderboard') {
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches leaderboard');
 			let counts = await DBOsuMultiMatches.findAll({
 				attributes: ['verifiedBy', 'matchId'],
 				where: {
@@ -743,7 +727,6 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'tournament') {
 			let acronym = interaction.options.getString('acronym', true);
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches tournament');
 			let userScores = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
 				where: {
@@ -791,7 +774,6 @@ module.exports = {
 				return await interaction.editReply(`Could not find user \`${player.replace(/`/g, '')}\`.`);
 			}
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiGameScores tournament');
 			let userScores = await DBOsuMultiGameScores.findAll({
 				attributes: ['matchId'],
 				where: {
@@ -808,7 +790,6 @@ module.exports = {
 				return await interaction.editReply(`No scores found for the player \`${player.replace(/`/g, '')}\`.`);
 			}
 
-			logDatabaseQueries(4, 'commands/matchverify.js DBOsuMultiMatches tournament');
 			let matches = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId', 'matchStartDate', 'matchName', 'verificationComment'],
 				where: {

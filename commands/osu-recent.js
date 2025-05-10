@@ -1,6 +1,6 @@
 ﻿const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -201,7 +201,6 @@ module.exports = {
 			usernames.push(interaction.options.getString('username5'));
 		}
 
-		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers commandUser');
 		const commandUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
 			where: {
@@ -246,7 +245,6 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-recent.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -334,7 +332,6 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 
 				const scoreCard = await scoreCardAttachment(input);
 
-				logDatabaseQueries(4, 'commands/osu-recent.js DBDiscordUsers Bancho linkedUser');
 				const linkedUser = await DBDiscordUsers.findOne({
 					attributes: ['userId'],
 					where: {

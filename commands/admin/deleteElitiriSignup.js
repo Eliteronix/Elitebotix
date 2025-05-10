@@ -1,11 +1,9 @@
 const { DBElitiriCupSignUp } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'deleteElitiriSignup',
 	usage: '<id>',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/deleteElitiriSignup.js DBElitiriCupSignUp');
 		let DBElitiriSignup = await DBElitiriCupSignUp.findOne({
 			attributes: ['id'],
 			where: {

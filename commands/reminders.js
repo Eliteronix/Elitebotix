@@ -1,6 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
-const { populateMsgFromInteraction, logDatabaseQueries } = require('../utils');
+const { populateMsgFromInteraction } = require('../utils');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const Discord = require('discord.js');
@@ -43,9 +43,8 @@ module.exports = {
 			msg = await populateMsgFromInteraction(interaction);
 		}
 
-		logDatabaseQueries(4, 'commands/reminders.js DBProcessQueue');
 		//Get all the reminders by the user
-		//TODO: add attributes and logdatabasequeries
+		//TODO: add attributes
 		const reminders = await DBProcessQueue.findAll({
 			where: {
 				task: 'remind',

@@ -1,13 +1,11 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBBirthdayGuilds } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (member) {
 	if (member.id === member.client.user.id) {
 		return;
 	}
 
-	logDatabaseQueries(2, 'guildMemberRemove.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		attributes: ['id', 'sendGoodbyeMessage', 'goodbyeMessageChannel', 'goodbyeMessageText', 'loggingChannel', 'loggingMemberRemove'],
@@ -66,7 +64,6 @@ module.exports = async function (member) {
 
 			await channel.send({ embeds: [changeEmbed] });
 		}
-		logDatabaseQueries(2, 'guildMemberAdd.js DBBirthdayGuilds destroy');
 		// destroy the guild dataset in the db
 		await DBBirthdayGuilds.destroy({
 			where: {

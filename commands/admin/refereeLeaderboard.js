@@ -1,12 +1,11 @@
 const { DBOsuMultiMatches } = require('../../dbObjects');
-const { logDatabaseQueries, getOsuPlayerName, humanReadable } = require('../../utils');
+const { getOsuPlayerName, humanReadable } = require('../../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'refereeLeaderboard',
 	usage: 'None',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiMatches count matches with missing referee info');
 		const refereesToBeDetermined = await DBOsuMultiMatches.count({
 			where: {
 				tourneyMatch: true,
@@ -17,7 +16,6 @@ module.exports = {
 		let additionalInfo = '';
 
 		if (refereesToBeDetermined > 0) {
-			logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiMatches oldest match with missing referee info');
 			const oldestMissingMatch = await DBOsuMultiMatches.findOne({
 				attributes: [
 					'matchStartDate',
@@ -31,7 +29,6 @@ module.exports = {
 				],
 			});
 
-			logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiMatches youngest match with missing referee info');
 			const youngestMissingMatch = await DBOsuMultiMatches.findOne({
 				attributes: [
 					'matchStartDate',
@@ -48,7 +45,6 @@ module.exports = {
 			additionalInfo = `There are ${humanReadable(refereesToBeDetermined)} matches from <t:${Date.parse(oldestMissingMatch.matchStartDate) / 1000}:f> till <t:${Date.parse(youngestMissingMatch.matchStartDate) / 1000}:f> that are still missing referee info.\n`;
 		}
 
-		logDatabaseQueries(4, 'commands/admin/refereeLeaderboard.js DBOsuMultiMatches find all referees per match');
 		const refereesPerMatch = await DBOsuMultiMatches.findAll({
 			attributes: [
 				'referee',

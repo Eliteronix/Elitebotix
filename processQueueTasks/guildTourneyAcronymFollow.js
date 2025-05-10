@@ -1,5 +1,4 @@
 const { DBOsuGuildTrackers } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
 const { logBroadcastEval } = require('../config.json');
 
 module.exports = {
@@ -53,7 +52,6 @@ module.exports = {
 			processQueueEntry.destroy();
 		} catch (err) {
 			if (err.message === 'Missing Access') {
-				logDatabaseQueries(2, 'processQueueTasks/guildTourneyAcronymFollow.js DBOsuGuildTrackers');
 				await DBOsuGuildTrackers.destroy({
 					where: {
 						channelId: args[1]

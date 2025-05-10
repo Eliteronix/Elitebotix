@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores,
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, logDatabaseQueries, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -276,7 +276,6 @@ module.exports = {
 			usernames.push(interaction.options.getString('username5'));
 		}
 
-		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers commandUser');
 		const commandUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
 			where: {
@@ -321,7 +320,6 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -409,7 +407,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (tracking) {
 					await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 2');
 					const linkedUser = await DBDiscordUsers.findOne({
 						attributes: ['userId'],
 						where: {
@@ -436,7 +433,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (err.message === 'Not found') {
 					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else if (err.message === 'Missing Permissions') {
-					logDatabaseQueries(4, 'commands/osu-top.js DBOsuGuildTrackers destroy 1');
 					DBOsuGuildTrackers.destroy({
 						where: {
 							channelId: interaction.channel.id
@@ -620,7 +616,6 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (tracking) {
 					await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
 				} else {
-					logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 3');
 					const linkedUser = await DBDiscordUsers.findOne({
 						attributes: ['userId'],
 						where: {
@@ -1156,7 +1151,6 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 
 	//Write the tournament pp
 	if (server === 'tournaments' || server === 'mixed') {
-		logDatabaseQueries(4, 'commands/osu-top.js DBDiscordUsers 4');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuPP', 'taikoPP', 'catchPP', 'maniaPP', 'osuRank'],
 		});
@@ -1224,7 +1218,6 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 	}
 
 	//Get all scores from tournaments
-	logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiGameScores');
 	let multiScores = await DBOsuMultiGameScores.findAll({
 		attributes: [
 			'id',
@@ -1251,7 +1244,6 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 		where: where
 	});
 
-	logDatabaseQueries(4, 'commands/osu-top.js DBOsuMultiMatches 2');
 	let multiMatches = await DBOsuMultiMatches.findAll({
 		attributes: [
 			'matchId',
@@ -1311,7 +1303,6 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 	let unrankedPlayCounter = 1;
 	let rankedPlayCounter = 1;
 
-	logDatabaseQueries(4, 'commands/osu-top.js DBOsuBeatmaps 1');
 	let dbBeatmaps = await DBOsuBeatmaps.findAll({
 		attributes: [
 			'id',

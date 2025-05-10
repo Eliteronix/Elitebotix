@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, logDatabaseQueries, getModBits, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, updateOsuDetailsforUser, getModBits, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -724,8 +724,7 @@ module.exports = {
 						.then(async (user) => {
 							updateOsuDetailsforUser(interaction.client, user, 0);
 
-							//TODO: add attributes and logdatabasequeries
-							logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 1');
+							//TODO: add attributes
 							const dbDiscordUser = await DBDiscordUsers.findOne({
 								where: {
 									userId: {
@@ -812,14 +811,12 @@ module.exports = {
 
 			date.setUTCMinutes(date.getUTCMinutes() - 15);
 
-			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue create');
 			DBProcessQueue.create({ guildId: interaction.guildId, task: 'tourneyMatchNotification', priority: 10, additions: `${interaction.user.id};${channel.id};${dbMaps.join(',')};${dbPlayers.join('|')};${useNoFail};${matchname};${mappoolReadable};${scoreMode};${freemodMessage};${teamsize}`, date: date });
 			return await interaction.editReply(`The match has been scheduled. The players will be informed as soon as it happens. To look at your scheduled matches please use </osu-referee scheduled:${interaction.client.slashCommandData.find(command => command.name === 'osu-referee').id}>`);
 		} else if (interaction.options.getSubcommand() === 'scheduled') {
 			let scheduledMatches = [];
 			//Get all scheduled matches that still need to notify
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 1');
+			//TODO: add attributes
 			const tourneyMatchNotifications = await DBProcessQueue.findAll({
 				where: {
 					guildId: interaction.guildId,
@@ -833,8 +830,7 @@ module.exports = {
 				let players = additions[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
-					//TODO: add attributes and logdatabasequeries
-					logDatabaseQueries(2, 'processQueueTasks/tourneyMatchReferee.js DBDiscordUsers 2');
+					//TODO: add attributes
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
 					});
@@ -876,8 +872,7 @@ module.exports = {
 			}
 		} else if (interaction.options.getSubcommand() === 'remove') {
 			const internalId = interaction.options._hoistedOptions[0].value;
-			//TODO: add attributes and logdatabasequeries
-			logDatabaseQueries(4, 'commands/osu-referee.js DBProcessQueue 3');
+			//TODO: add attributes
 			const processQueueTask = await DBProcessQueue.findOne({
 				where: {
 					id: internalId,
@@ -890,8 +885,7 @@ module.exports = {
 				let players = additions[3].replaceAll('|', ',').split(',');
 				let dbPlayers = [];
 				for (let j = 0; j < players.length; j++) {
-					//TODO: add attributes and logdatabasequeries
-					logDatabaseQueries(4, 'commands/osu-referee.js DBDiscordUsers 4');
+					//TODO: add attributes
 					const dbDiscordUser = await DBDiscordUsers.findOne({
 						where: { id: players[j] }
 					});

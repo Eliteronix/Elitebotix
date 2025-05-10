@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, matchMakingAcronyms } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar, logOsuAPICalls } = require('../utils');
+const { getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fs = require('fs');
@@ -96,7 +96,6 @@ module.exports = {
 		let discordUser = null;
 
 		if (username === null) {
-			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 1');
 			discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -115,7 +114,6 @@ module.exports = {
 
 		//Get the user from the database if possible
 		if (discordUser === null) {
-			logDatabaseQueries(4, 'commands/osu-wrapped.js DBDiscordUsers 2');
 			discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -164,7 +162,6 @@ module.exports = {
 			year = interaction.options.getInteger('year');
 		}
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores matches played');
 		let multiMatchesPlayed = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId'],
 			where: {
@@ -186,7 +183,6 @@ module.exports = {
 			return await interaction.editReply(`\`${osuUser.osuName}\` didn't play any tournament matches in ${year}.`);
 		}
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGameScores all scores');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'score',
@@ -248,7 +244,6 @@ module.exports = {
 		// Get games
 		let gameIds = [...new Set(multiScores.map(score => score.gameId))];
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiGames Get warmup games');
 		let multiGames = await DBOsuMultiGames.findAll({
 			attributes: ['gameId', 'warmup', 'gameStartDate', 'teamType'],
 			where: {
@@ -281,7 +276,6 @@ module.exports = {
 		// Get the match data
 		let matchIds = [...new Set(multiScores.map(score => score.matchId))];
 
-		logDatabaseQueries(4, 'commands/osu-wrapped.js DBOsuMultiMatches');
 		let multiMatches = await DBOsuMultiMatches.findAll({
 			attributes: [
 				'matchId',

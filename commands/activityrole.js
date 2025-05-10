@@ -1,5 +1,4 @@
 const { DBActivityRoles, DBProcessQueue } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 
@@ -165,7 +164,6 @@ module.exports = {
 			let percentage = interaction.options.getInteger('percentage');
 			let points = interaction.options.getInteger('points');
 
-			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add');
 			const activityRole = await DBActivityRoles.count({
 				attributes: ['roleId'],
 				where: {
@@ -182,19 +180,15 @@ module.exports = {
 				return await interaction.editReply('Please declare conditions using the at least one of the optional arguments.');
 			}
 
-			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles add create');
 			await DBActivityRoles.create({ guildId: interaction.guildId, roleId: role.id, percentageCutoff: percentage, pointsCutoff: points, rankCutoff: rank });
 
-			logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add');
 			const existingTask = await DBProcessQueue.count({ where: { guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 } });
 			if (existingTask === 0) {
-				logDatabaseQueries(4, 'commands/activityrole.js DBProcessQueue add create');
 				await DBProcessQueue.create({ guildId: interaction.guildId, task: 'updateActivityRoles', priority: 5 });
 			}
 
 			return await interaction.editReply(`${role.name} has been added as an activityrole. The roles will get updated periodically and will not happen right after a user reached a new milestone.`);
 		} else if (interaction.options.getSubcommand() === 'remove') {
-			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles remove');
 			const rowCount = await DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
 
 			//Send feedback message accordingly
@@ -209,7 +203,6 @@ module.exports = {
 				return await interaction.editReply(`${role.name} was no activityrole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
-			logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list');
 			const activityRolesList = await DBActivityRoles.findAll({
 				attributes: ['roleId', 'rankCutoff', 'percentageCutoff', 'pointsCutoff'],
 				where: {
@@ -250,7 +243,6 @@ module.exports = {
 				if (activityRole) {
 					activityRolesString = `${activityRolesString}\n${activityRole.name} -> ${conditions}`;
 				} else {
-					logDatabaseQueries(4, 'commands/activityrole.js DBActivityRoles list destroy');
 					DBActivityRoles.destroy({ where: { guildId: interaction.guildId, roleId: activityRolesList[i].roleId } });
 					activityRolesList.shift();
 				}

@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, logDatabaseQueries, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { Op } = require('sequelize');
@@ -228,7 +228,6 @@ module.exports = {
 		}
 
 		if (usernames.length === 0) {//Get profile by author if no argument
-			logDatabaseQueries(4, 'commands/osu-skills.js DiscordUsers 1');
 			let commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -250,7 +249,6 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers 2');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -301,7 +299,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			let acc = [];
 			let bpm = [];
 
-			logDatabaseQueries(4, 'commands/osu-skills.js DBOsuBeatmaps');
 			let dbBeatmaps = await DBOsuBeatmaps.findAll({
 				attributes: [
 					'id',
@@ -422,7 +419,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			ctx.font = 'bold 15px comfortaa, arial';
 			ctx.fillText('Duel Rating', 90, 195);
 
-			logDatabaseQueries(4, 'commands/osu-skills.js DBDiscordUsers duelrating');
 			const discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuDuelStarRating', 'osuDuelProvisional', 'osuDuelOutdated'],
 				where: {
@@ -588,7 +584,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 			let content = 'Top play stats';
 
 			(async () => {
-				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiGameScores');
 				let userScores = await DBOsuMultiGameScores.findAll({
 					attributes: [
 						'score',
@@ -625,7 +620,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				// Get all gameIds from the userScores
 				let gameIds = [...new Set(userScores.map(score => score.gameId))];
 
-				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiGames');
 				const userWarmupGames = await DBOsuMultiGames.findAll({
 					attributes: [
 						'gameId',
@@ -652,7 +646,6 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				// Get all match data
 				let matchIds = [...new Set(userScores.map(score => score.matchId))];
 
-				logDatabaseQueries(4, 'commands/osu-skills.js DBOsuMultiMatches');
 				const matches = await DBOsuMultiMatches.findAll({
 					attributes: [
 						'matchId',

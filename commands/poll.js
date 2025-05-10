@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
-const { fitTextOnLeftCanvas, logDatabaseQueries } = require('../utils');
+const { fitTextOnLeftCanvas } = require('../utils');
 const { DBProcessQueue } = require('../dbObjects');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -444,7 +444,6 @@ module.exports = {
 			}
 		}
 
-		logDatabaseQueries(4, 'commands/poll.js DBProcessQueue');
 		DBProcessQueue.create({ guildId: interaction.guildId, task: 'closePoll', priority: 5, additions: `${pollMessage.channel.id};${pollMessage.id};${title};${options.join(';')}`, date: date });
 	},
 };

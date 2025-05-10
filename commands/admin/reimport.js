@@ -1,5 +1,5 @@
 const { DBOsuMultiMatches, DBOsuMultiGameScores, DBOsuMultiGames } = require('../../dbObjects');
-const { getIDFromPotentialOsuLink, saveOsuMultiScores, pause, logDatabaseQueries } = require('../../utils');
+const { getIDFromPotentialOsuLink, saveOsuMultiScores, pause } = require('../../utils');
 const osu = require('node-osu');
 
 module.exports = {
@@ -18,13 +18,10 @@ module.exports = {
 		for (let i = 0; i < matchIds.length; i++) {
 			await osuApi.getMatch({ mp: getIDFromPotentialOsuLink(matchIds[i]) })
 				.then(async (match) => {
-					logDatabaseQueries(4, 'commands/admin/reimport.js DBOsuMultiMatches');
 					await DBOsuMultiMatches.destroy({ where: { matchId: match.id } });
 
-					logDatabaseQueries(4, 'commands/admin/reimport.js DBOsuMultiGames');
 					await DBOsuMultiGames.destroy({ where: { matchId: match.id } });
 
-					logDatabaseQueries(4, 'commands/admin/reimport.js DBOsuMultiGameScores');
 					await DBOsuMultiGameScores.destroy({ where: { matchId: match.id } });
 
 					await saveOsuMultiScores(match, interaction.client);

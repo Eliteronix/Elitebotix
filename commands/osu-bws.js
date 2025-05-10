@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { humanReadable, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
+const { humanReadable, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getAdditionalOsuInfo, logOsuAPICalls } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const Parser = require('expr-eval').Parser;
 
@@ -252,7 +252,6 @@ module.exports = {
 		}
 
 		if (usernames.length === 0) {//Get profile by author if no argument
-			logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 1');
 			const commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -275,7 +274,6 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-bws.js DBDiscordUsers 2');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {

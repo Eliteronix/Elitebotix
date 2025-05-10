@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
-const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack, logDatabaseQueries } = require('./utils');
+const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
 
 require('dotenv').config();
 
@@ -448,7 +448,6 @@ async function resetImportMatches() {
 	try {
 		const tasksToReset = ['importMatch'];
 
-		logDatabaseQueries(2, 'bot.js DBProcessQueue');
 		const task = await DBProcessQueue.findOne({
 			attributes: ['id', 'task', 'beingExecuted', 'updatedAt'],
 			where: {

@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, logDatabaseQueries, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const ChartJsImage = require('chartjs-to-image');
@@ -630,7 +630,6 @@ module.exports = {
 
 			team1 = [];
 
-			logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers0');
 			const user = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -677,7 +676,6 @@ module.exports = {
 		for (let i = 0; i < team1.length; i++) {
 			if (team1[i]) {
 				if (team1[i].startsWith('<@') && team1[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers1');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -719,7 +717,6 @@ module.exports = {
 		for (let i = 0; i < team2.length; i++) {
 			if (team2[i]) {
 				if (team2[i].startsWith('<@') && team2[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-matchup.js DBDiscordUsers2');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -771,7 +768,6 @@ module.exports = {
 
 		//Loop throught team one and get all their multi scores
 		for (let i = 0; i < team1.length; i++) {
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiGameScores 1User${i + 1}`);
 			let userScores = await DBOsuMultiGameScores.findAll({
 				attributes: [
 					'beatmapId',
@@ -804,7 +800,6 @@ module.exports = {
 			let matchIds = [...new Set(userScores.map(s => s.matchId))];
 
 			//Get the match data for the scores
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiMatches 1User${i + 1}`);
 			let matches = await DBOsuMultiMatches.findAll({
 				attributes: [
 					'matchId',
@@ -876,7 +871,6 @@ module.exports = {
 
 		//Loop throught team two and get all their multi scores
 		for (let i = 0; i < team2.length; i++) {
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiGameScores 2User${i + 1}`);
 			let userScores = await DBOsuMultiGameScores.findAll({
 				attributes: [
 					'beatmapId',
@@ -912,7 +906,6 @@ module.exports = {
 			let matchIds = [...new Set(userScores.map(s => s.matchId))];
 
 			//Get the match data for the scores
-			logDatabaseQueries(4, `commands/osu-matchup.js DBOsuMultiMatches 1User${i + 1}`);
 			let matches = await DBOsuMultiMatches.findAll({
 				attributes: [
 					'matchId',
@@ -972,7 +965,6 @@ module.exports = {
 		beatmaps = beatmaps.filter(b => b.team2Players.length >= teamsize);
 
 		// Fetch all beatmaps from the database
-		logDatabaseQueries(4, 'commands/osu-matchup.js DBOsuBeatmaps');
 		let dbBeatmaps = await DBOsuBeatmaps.findAll({
 			attributes: [
 				'id',

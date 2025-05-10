@@ -1,5 +1,4 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 const { Op } = require('sequelize');
 const ChartJsImage = require('chartjs-to-image');
 const { AttachmentBuilder } = require('discord.js');
@@ -10,7 +9,6 @@ module.exports = {
 	async execute(interaction) {
 		const args = interaction.options.getString('argument').split(' ');
 
-		logDatabaseQueries(4, 'commands/admin/medianRating.js DBDiscordUsers medianRating');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuDuelStarRating', 'osuRank'],
 			where: {

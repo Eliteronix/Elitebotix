@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, logDatabaseQueries, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar, logOsuAPICalls } = require('../utils');
+const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -197,7 +197,6 @@ module.exports = {
 			usernames.push(interaction.options.getString('username5'));
 		}
 
-		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers commandUser');
 		const commandUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
 			where: {
@@ -241,7 +240,6 @@ module.exports = {
 			//Get profiles by arguments
 			for (let i = 0; i < usernames.length; i++) {
 				if (usernames[i].startsWith('<@') && usernames[i].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 1');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -328,7 +326,6 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 					}
 				}
 
-				logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 2');
 				const linkedUser = await DBDiscordUsers.findOne({
 					attributes: ['userId'],
 					where: {
@@ -351,7 +348,6 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				await sentMessage.react('🥇');
 				await sentMessage.react('📈');
 
-				logDatabaseQueries(4, 'commands/osu-profile.js DBOsuMultiGameScores');
 				let userScore = await DBOsuMultiGameScores.findOne({
 					attributes: ['id'],
 					where: {
@@ -563,7 +559,6 @@ async function drawTitle(input, server, mode) {
 	ctx.textAlign = 'center';
 	ctx.fillText(title, canvas.width / 2, 35);
 
-	logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 3');
 	const discordUser = await DBDiscordUsers.findOne({
 		attributes: ['userId', 'patreon'],
 		where: {
@@ -607,7 +602,6 @@ async function drawRank(input, interaction) {
 	ctx.fillText(`PP: ${pp}`, canvas.width / 2, 83 + yOffset);
 
 	try {
-		logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers 4');
 		const discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuDuelStarRating'],
 			where: {
@@ -616,7 +610,6 @@ async function drawRank(input, interaction) {
 		});
 
 		if (!discordUser) {
-			logDatabaseQueries(4, 'commands/osu-profile.js DBDiscordUsers create');
 			await DBDiscordUsers.create({ osuName: user.name, osuUserId: user.id });
 		}
 

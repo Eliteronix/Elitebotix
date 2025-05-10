@@ -317,6 +317,7 @@ manager.spawn()
 	.then(shards => {
 		shards.forEach(shard => {
 			shard.on('message', message => {
+				console.log('index.js | shard message', message);
 				if (message === 'osu!API') {
 					amountOfApiRequestsInTheLast24Hours.inc();
 					setTimeout(() => {
@@ -537,6 +538,6 @@ async function processOsuWebRequests(client) {
 	}, 50);
 }
 
-process.on("unhandledRejection", (reason, promise) => {
-	console.error("Unhandled rejection, index.js:", reason);
+process.on('unhandledRejection', (reason, promise) => {
+	console.error('Unhandled rejection, index.js:', reason, promise);
 });

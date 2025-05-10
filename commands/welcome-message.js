@@ -1,6 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -98,7 +97,6 @@ module.exports = {
 			return;
 		}
 
-		logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'sendWelcomeMessage', 'welcomeMessageChannel', 'welcomeMessageText'],
 			where: {
@@ -108,7 +106,6 @@ module.exports = {
 
 		if (interaction.options.getSubcommand() === 'current') {
 			if (!guild) {
-				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds current create');
 				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendWelcomeMessage: false });
 				return await interaction.editReply('There is currently no welcome message set.');
 			}
@@ -121,7 +118,6 @@ module.exports = {
 
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
-				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds disable create');
 				await DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, sendWelcomeMessage: false });
 				return await interaction.editReply('There is currently no welcome message set.');
 			}
@@ -142,7 +138,6 @@ module.exports = {
 				guild.welcomeMessageText = message;
 				await guild.save();
 			} else {
-				logDatabaseQueries(4, 'commands/welcome-message.js DBGuilds set create');
 				await DBGuilds.create({
 					guildId: interaction.guildId,
 					guildName: interaction.guild.name,

@@ -1,9 +1,7 @@
 const Discord = require('discord.js');
 const { DBGuilds, DBAutoRoles } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (member) {
-	logDatabaseQueries(2, 'guildMemberAdd.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		attributes: ['id', 'sendWelcomeMessage', 'welcomeMessageChannel', 'welcomeMessageText', 'loggingChannel', 'loggingMemberAdd'],
@@ -64,7 +62,6 @@ module.exports = async function (member) {
 		}
 	}
 
-	logDatabaseQueries(2, 'guildMemberAdd.js DBAutoRoles');
 	//get all autoroles for the guild
 	const autoRolesList = await DBAutoRoles.findAll({
 		attributes: ['roleId'],
@@ -96,7 +93,6 @@ module.exports = async function (member) {
 				}
 			}
 		} else {
-			logDatabaseQueries(2, 'guildMemberAdd.js DBAutoRoles destroy');
 			DBAutoRoles.destroy({ where: { guildId: member.guild.id, roleId: autoRolesList[i].roleId } });
 			autoRolesList.shift();
 		}

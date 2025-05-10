@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBElitiriCupSignUp, DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, logDatabaseQueries, populateMsgFromInteraction } = require('../utils');
+const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { currentElitiriCup, currentElitiriCupEndOfRegs } = require('../config.json');
 const Discord = require('discord.js');
 const { MessageFlags } = require('discord.js');
@@ -14,7 +14,6 @@ module.exports = {
 	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
-		//TODO: Update logdatabasequeries
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -77,7 +76,6 @@ module.exports = {
 			}
 			//get elitiriSignUp from db
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 1');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { userId: msg.author.id, tournamentName: currentElitiriCup },
 			});
@@ -88,7 +86,6 @@ module.exports = {
 
 			//get discordUser from db
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBDiscordUsers');
 			const discordUser = await DBDiscordUsers.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -169,7 +166,6 @@ module.exports = {
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 2');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { userId: msg.author.id },
 			});
@@ -185,7 +181,6 @@ module.exports = {
 			const guildPrefix = await getGuildPrefix(msg);
 			//get elitiriSignUp from db
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBElitiriCupSignUp 3');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: {
 					userId: msg.author.id,
@@ -244,7 +239,6 @@ async function sendMessage(msg, interaction, content) {
 
 async function createProcessQueueTask(bracketName) {
 	//TODO: Attributes
-	logDatabaseQueries(4, 'commands/osu-elitiri-cup.js DBProcessQueue');
 	const task = await DBProcessQueue.findOne({
 		where: { task: 'elitiriCupSignUps', beingExecuted: false, additions: bracketName }
 	});

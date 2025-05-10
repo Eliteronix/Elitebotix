@@ -1,5 +1,4 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -8,7 +7,6 @@ module.exports = {
 	async execute(interaction) {
 		const args = interaction.options.getString('argument').split(' ');
 
-		logDatabaseQueries(4, 'commands/admin/averageRating.js DBDiscordUsers averageRating');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuDuelStarRating', 'osuRank'],
 			where: {

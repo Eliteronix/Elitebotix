@@ -1,11 +1,9 @@
 const Discord = require('discord.js');
 const { PermissionFlagsBits } = require('discord.js');
 const { DBGuilds, DBTemporaryVoices } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
 	if (oldMember.serverMute !== null && oldMember.serverMute !== newMember.serverMute) {
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 1');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'loggingChannel', 'loggingServerMute'],
 			where: {
@@ -61,7 +59,6 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.serverDeaf !== newMember.serverDeaf) {
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 2');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'loggingChannel', 'loggingServerDeaf'],
 			where: {
@@ -117,7 +114,6 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldMember.channelId !== newMember.channelId) {
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 3');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'loggingChannel', 'loggingJoinVoice'],
 			where: {
@@ -227,7 +223,6 @@ module.exports = async function (oldMember, newMember) {
 	let dbTemporaryVoicesNew;
 
 	if (newUserChannel) {
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 1');
 		dbTemporaryVoicesNew = await DBTemporaryVoices.findOne({
 			attributes: ['textChannelId', 'creatorId', 'channelId'],
 			where: {
@@ -237,7 +232,6 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (newUserChannel && newUserChannel.name.startsWith('➕') && !dbTemporaryVoicesNew && newUserChannel !== oldUserChannel) {
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBGuilds 4');
 		const dbGuild = await DBGuilds.findOne({
 			attributes: ['temporaryVoices', 'addTemporaryText'],
 			where: {
@@ -282,10 +276,8 @@ module.exports = async function (oldMember, newMember) {
 
 					await createdText.setParent(createdCategoryId);
 
-					logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices create 1');
 					DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, textChannelId: createdText.id, creatorId: newMember.id });
 				} else {
-					logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices create 2');
 					DBTemporaryVoices.create({ guildId: createdChannel.guild.id, channelId: createdChannel.id, creatorId: newMember.id });
 				}
 
@@ -418,11 +410,11 @@ module.exports = async function (oldMember, newMember) {
 							return console.error(e);
 						}
 					}
-					
-					try{
+
+					try {
 						await createdText.send(`<@${newMemberId}>, you are now admin for this text channel. The channel will be deleted as soon as everyone left the corresponding voice channel.\n\nNote that bots also don't have permissions to read messages in this channel except if they have admin rights. This is the case if they don't appear in the user list on the right side.`);
-					} catch (e){
-						if(e.message !== 'Unknown Channel'){
+					} catch (e) {
+						if (e.message !== 'Unknown Channel') {
 							console.error(e);
 						}
 					}
@@ -454,7 +446,6 @@ module.exports = async function (oldMember, newMember) {
 	}
 
 	if (oldUserChannel && newUserChannel !== oldUserChannel) {
-		logDatabaseQueries(4, 'voiceStateUpdate.js DBTemporaryVoices 2');
 		const dbTemporaryVoices = await DBTemporaryVoices.findOne({
 			attributes: ['id', 'channelId', 'textChannelId', 'creatorId'],
 			where: {

@@ -1,6 +1,5 @@
 const { DBGuilds, DBBirthdayGuilds } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
-const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
@@ -108,7 +107,6 @@ module.exports = {
 			return;
 		}
 
-		logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds');
 		let guild = await DBGuilds.findOne({
 			attributes: ['id', 'birthdayEnabled', 'birthdayMessageChannel'],
 			where: {
@@ -118,7 +116,6 @@ module.exports = {
 
 		if (interaction.options.getSubcommand() === 'enable') {
 			if (!guild) {
-				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds enable create');
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
 					guildName: interaction.guild.name,
@@ -134,7 +131,6 @@ module.exports = {
 			return await interaction.editReply({ content: 'Birthday announcements have been enabled.', flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'disable') {
 			if (!guild) {
-				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds disable create');
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
 					guildName: interaction.guild.name,
@@ -149,7 +145,6 @@ module.exports = {
 			guild.save();
 			return await interaction.editReply({ content: 'Birthday announcements have been disabled.', flags: MessageFlags.Ephemeral });
 		} else if (interaction.options.getSubcommand() === 'list') {
-			logDatabaseQueries(2, 'birthday-admin.js DBBirthdayGuilds list');
 			let birthdayAnnouncements = await DBBirthdayGuilds.findAll({
 				attributes: ['userId', 'birthdayTime'],
 				where: {
@@ -176,7 +171,6 @@ module.exports = {
 			}
 
 			if (!guild) {
-				logDatabaseQueries(4, 'commands/birthday-admin.js DBGuilds channel create');
 				guild = await DBGuilds.create({
 					guildId: interaction.guild.id,
 					guildName: interaction.guild.name,

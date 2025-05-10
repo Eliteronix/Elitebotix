@@ -1,5 +1,4 @@
 const { DBOsuMultiMatches } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -10,7 +9,6 @@ module.exports = {
 
 		const referee = args.shift();
 
-		logDatabaseQueries(4, 'commands/admin/setReferee.js DBOsuMultiMatches');
 		let count = await DBOsuMultiMatches.update({
 			referee: referee,
 		}, {

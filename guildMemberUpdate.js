@@ -1,10 +1,8 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (oldMember, newMember) {
 	if (oldMember.nickname !== newMember.nickname) {
-		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Nickname');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'loggingChannel', 'loggingNicknames'],
 			where: {
@@ -60,7 +58,6 @@ module.exports = async function (oldMember, newMember) {
 		}
 	}
 	if (!sameRoles) {
-		logDatabaseQueries(2, 'guildMemberUpdate.js DBGuilds Roles');
 		const guild = await DBGuilds.findOne({
 			attributes: ['id', 'loggingChannel', 'loggingUserroles'],
 			where: { guildId: newMember.guild.id }

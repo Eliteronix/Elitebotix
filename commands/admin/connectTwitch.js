@@ -1,5 +1,4 @@
 const { DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'connectTwitch',
@@ -9,7 +8,6 @@ module.exports = {
 
 		let discordId = args[0];
 
-		logDatabaseQueries(4, 'commands/admin/connectTwitch.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['id', 'twitchName', 'twitchId', 'twitchVerified'],
 			where: {

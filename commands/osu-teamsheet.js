@@ -1,7 +1,7 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuTeamSheets, DBOsuPoolAccess, DBOsuMultiGameScores } = require('../dbObjects');
-const { pause, getAvatar, logDatabaseQueries, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
+const { pause, getAvatar, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('@napi-rs/canvas');
 const osu = require('node-osu');
@@ -186,7 +186,6 @@ module.exports = {
 		let cachedUser = discordUsers[interaction.user.id];
 
 		if (!cachedUser) {
-			logDatabaseQueries(4, 'commands/osu-teamsheet.js (autocomplete) DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuVerified'],
 				where: {
@@ -237,7 +236,6 @@ module.exports = {
 			}
 		}, 1000);
 
-		logDatabaseQueries(4, 'commands/osu-teamsheet.js (autocomplete) DBOsuMappools');
 		const mappools = await DBOsuMappools.findAll({
 			attributes: ['name'],
 			where: {
@@ -301,7 +299,6 @@ module.exports = {
 			return;
 		}
 
-		logDatabaseQueries(4, 'commands/osu-teamsheet.js (execute) DBDiscordUsers commandUser');
 		let commandUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId', 'osuVerified'],
 			where: {
@@ -345,7 +342,6 @@ module.exports = {
 		for (let i = 0; i < rawPlayers.length; i++) {
 			let username = rawPlayers[i].trim();
 
-			logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBDiscordUsers findOne');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -378,7 +374,6 @@ module.exports = {
 				});
 
 			if (osuUser) {
-				logDatabaseQueries(4, 'commands/osu-teamsheet.js DBDiscordUsers (osuUser)');
 				let discordUser = await DBDiscordUsers.findOne({
 					attributes: ['osuUserId', 'osuName'],
 					where: {
@@ -404,7 +399,6 @@ module.exports = {
 
 		let mappoolName = interaction.options.getString('mappool');
 
-		logDatabaseQueries(4, 'commands/osu-teamsheet.js DBOsuMappools');
 		let mappool = await DBOsuMappools.findAll({
 			attributes: ['beatmapId', 'modPool', 'tieBreaker', 'freeMod', 'modPoolNumber', 'spreadsheetId'],
 			where: {
@@ -561,7 +555,6 @@ module.exports = {
 			}
 		}
 
-		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuSoloScores');
 		let localScores = await DBOsuSoloScores.findAll({
 			attributes: [
 				'score',
@@ -585,7 +578,6 @@ module.exports = {
 			},
 		});
 
-		logDatabaseQueries(4, 'commands/admin/tournamentSheet.js DBOsuMultiGameScores');
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
 				'osuUserId',

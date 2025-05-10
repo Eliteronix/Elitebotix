@@ -12,7 +12,6 @@ module.exports = {
 		client.shard.broadcastEval(async (c, { guildId, processQueueEntryId, setting }) => {
 			try {
 				const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				const { Op } = require('sequelize');
 
 				let guild;
@@ -20,7 +19,6 @@ module.exports = {
 					guild = await c.guilds.cache.get(guildId);
 				} catch (e) {
 					if (e.message === 'Missing Access') {
-						logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBProcessQueue destroy');
 						await DBProcessQueue.destroy({ where: { id: processQueueEntryId } });
 						return;
 					} else {
@@ -52,7 +50,6 @@ module.exports = {
 					attributes.push('osuRank');
 				}
 
-				logDatabaseQueries(2, 'processQueueTasks/nameSync.js DBDiscordUsers');
 				let discordUsers = await DBDiscordUsers.findAll({
 					attributes: attributes,
 					where: {

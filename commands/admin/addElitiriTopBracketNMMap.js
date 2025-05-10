@@ -1,4 +1,4 @@
-const { logDatabaseQueries, logOsuAPICalls } = require('../../utils');
+const { logOsuAPICalls } = require('../../utils');
 const osu = require('node-osu');
 const { DBElitiriCupSubmissions } = require('../../dbObjects');
 const { currentElitiriCup } = require('../../config.json');
@@ -18,7 +18,6 @@ module.exports = {
 		logOsuAPICalls('admin/addElitiriTopBracketNMMap.js');
 		osuApi.getBeatmaps({ b: interaction.options.getString('argument') })
 			.then(async (beatmaps) => {
-				logDatabaseQueries(4, 'commands/admin/addElitiriTopBracketNMMap.js DBElitiriCupSubmissions');
 				DBElitiriCupSubmissions.create({
 					osuUserId: '-1',
 					osuName: 'ECW 2021 Submission',

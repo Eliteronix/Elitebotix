@@ -1,5 +1,5 @@
 const { DBDiscordUsers, DBOsuBeatmaps, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
-const { populateMsgFromInteraction, getOsuBeatmap, pause, logDatabaseQueries, logOsuAPICalls } = require('../utils');
+const { populateMsgFromInteraction, getOsuBeatmap, pause, logOsuAPICalls } = require('../utils');
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
@@ -611,8 +611,7 @@ module.exports = {
 			let playersNotConnected = [];
 
 			for (let i = 0; i < players.length; i++) {
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 5');
+				//TODO: add attributes
 				let discordUser = await DBDiscordUsers.findOne({
 					where: {
 						userId: {
@@ -710,8 +709,7 @@ module.exports = {
 						i++;
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
-						//TODO: add attributes and logdatabasequeries
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 1');
+						//TODO: add attributes
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
 						});
@@ -802,8 +800,7 @@ module.exports = {
 
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
-						//TODO: add attributes and logdatabasequeries
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 2');
+						//TODO: add attributes
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
 						});
@@ -1022,8 +1019,7 @@ module.exports = {
 						i++;
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
-						//TODO: add attributes and logdatabasequeries
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 3');
+						//TODO: add attributes
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
 						});
@@ -1114,8 +1110,7 @@ module.exports = {
 
 						const index = Math.floor(Math.random() * amountOfMapsInDB);
 
-						//TODO: add attributes and logdatabasequeries
-						logDatabaseQueries(4, 'commands/osu-motd.js DBOsuBeatmaps 4');
+						//TODO: add attributes
 						const dbBeatmap = await DBOsuBeatmaps.findOne({
 							where: { id: index }
 						});
@@ -1252,8 +1247,7 @@ module.exports = {
 			const collector = embedMessage.createReactionCollector({ filter, time: 120000, max: 16 });
 
 			collector.on('collect', async (reaction, user) => {
-				//TODO: add attributes and logdatabasequeries
-				logDatabaseQueries(4, 'commands/osu-motd.js DBDiscordUsers 6');
+				//TODO: add attributes
 				const dbDiscordUser = await DBDiscordUsers.findOne({
 					where: { userId: user.id }
 				});

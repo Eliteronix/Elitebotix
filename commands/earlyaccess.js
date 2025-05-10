@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores } = require('../dbObjects');
 const { developers, salesmen, showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
-const { logDatabaseQueries, getOsuBeatmap, getIDFromPotentialOsuLink } = require('../utils');
+const { getOsuBeatmap, getIDFromPotentialOsuLink } = require('../utils');
 const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
@@ -78,7 +78,6 @@ module.exports = {
 			return;
 		}
 
-		logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			where: {
 				userId: interaction.user.id,
@@ -111,7 +110,6 @@ module.exports = {
 			}
 
 			//Get all the scores for the map
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores tournamentDifficulty');
 			let scores = await DBOsuMultiGameScores.findAll({
 				attributes: ['osuUserId', 'score', 'rawMods', 'gameRawMods', 'warmup', 'gameStartDate'],
 				where: {
@@ -147,7 +145,6 @@ module.exports = {
 				});
 			}
 
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBDuelRatingHistory tournamentDifficulty');
 			let allDuelRatingHistories = await DBDuelRatingHistory.findAll({
 				attributes: [
 					'osuUserId',

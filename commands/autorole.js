@@ -1,5 +1,4 @@
 const { DBAutoRoles } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 
@@ -117,7 +116,6 @@ module.exports = {
 		let role = interaction.options.getRole('role');
 
 		if (interaction.options.getSubcommand() === 'add') {
-			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add');
 			const autoRole = await DBAutoRoles.count({
 				where: { guildId: interaction.guildId, roleId: role.id },
 			});
@@ -126,7 +124,6 @@ module.exports = {
 				return await interaction.editReply(`${role.name} is already an autorole.`);
 			}
 
-			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles add create');
 			await DBAutoRoles.create({ guildId: interaction.guildId, roleId: role.id });
 
 			await interaction.editReply(`${role.name} has been added as an autorole.`);
@@ -155,13 +152,12 @@ module.exports = {
 					await autoRole.roles.add(role);
 				} catch (error) {
 					if (!errorSent) {
-						await interaction.followUp(`Error assigning role to users. Make sure the bot has at least one role above the role it is trying to assign to other users.`);
+						await interaction.followUp('Error assigning role to users. Make sure the bot has at least one role above the role it is trying to assign to other users.');
 						errorSent = true;
 					}
 				}
 			});
 		} else if (interaction.options.getSubcommand() === 'remove') {
-			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles remove');
 			const rowCount = await DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: role.id } });
 
 			if (rowCount > 0) {
@@ -170,7 +166,6 @@ module.exports = {
 				return await interaction.editReply(`${role.name} was no autorole.`);
 			}
 		} else if (interaction.options.getSubcommand() === 'list') {
-			logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list');
 			const autoRolesList = await DBAutoRoles.findAll({
 				attributes: ['roleId'],
 				where: {
@@ -186,7 +181,6 @@ module.exports = {
 				if (autoRole) {
 					autoRolesList[i] = autoRole.name;
 				} else {
-					logDatabaseQueries(4, 'commands/autorole.js DBAutoRoles list destroy');
 					DBAutoRoles.destroy({ where: { guildId: interaction.guildId, roleId: autoRolesList[i].roleId } });
 					autoRolesList.shift();
 				}

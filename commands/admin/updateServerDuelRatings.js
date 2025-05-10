@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { getUserDuelStarRating, logDatabaseQueries } = require('../../utils');
+const { getUserDuelStarRating } = require('../../utils');
 
 module.exports = {
 	name: 'updateServerDuelRatings',
@@ -21,7 +21,6 @@ module.exports = {
 					sentMessage.edit(`${i} out of ${members.length} done`);
 				}
 
-				logDatabaseQueries(4, 'commands/admin/updateServerDuelRatings.js DBDiscordUsers');
 				const discordUser = await DBDiscordUsers.findOne({
 					attributes: ['osuUserId'],
 					where: {

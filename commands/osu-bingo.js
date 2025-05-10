@@ -1,4 +1,4 @@
-const { populateMsgFromInteraction, getOsuUserServerMode, pause, logDatabaseQueries, getMods, humanReadable, getMapListCover, logOsuAPICalls } = require('../utils');
+const { populateMsgFromInteraction, getOsuUserServerMode, pause, getMods, humanReadable, getMapListCover, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
@@ -478,7 +478,6 @@ module.exports = {
 
 		let everyUser = [];
 		for (let i = 0; i < allUsers.length; i++) {
-			logDatabaseQueries(4, 'commands/osu-bingo.js DBDiscordUsers');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'userId'],
 				where: {
@@ -591,7 +590,6 @@ module.exports = {
 		// Get the map pool
 		let mappool = [];
 
-		logDatabaseQueries(4, 'commands/osu-bingo.js DBOsuBeatmaps');
 		let beatmaps = await DBOsuBeatmaps.findAll({
 			attributes: [
 				'beatmapId',

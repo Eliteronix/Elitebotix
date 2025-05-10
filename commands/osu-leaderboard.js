@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { humanReadable, createLeaderboard, populateMsgFromInteraction, logDatabaseQueries, getOsuUserServerMode, getGameModeName } = require('../utils');
+const { humanReadable, createLeaderboard, populateMsgFromInteraction, getOsuUserServerMode, getGameModeName } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
@@ -91,7 +91,6 @@ module.exports = {
 
 			members = members.map(member => member.id);
 
-			logDatabaseQueries(4, 'commands/osu-leaderboard.js DBDiscordUsers');
 			discordUsers = await DBDiscordUsers.findAll({
 				attributes: [
 					'userId',

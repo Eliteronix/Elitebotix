@@ -1,4 +1,4 @@
-const { updateServerUserActivity, logDatabaseQueries } = require('./utils');
+const { updateServerUserActivity } = require('./utils');
 const Discord = require('discord.js');
 const { DBTickets } = require('./dbObjects');
 
@@ -16,7 +16,6 @@ module.exports = async function (msg) {
 };
 
 async function handleTicketStatus(msg) {
-	logDatabaseQueries(3, 'gotMessage.js DBTickets');
 	const ticket = await DBTickets.findOne({
 		attributes: ['id', 'statusId', 'statusName', 'creatorId', 'additionalParties'],
 		where: {

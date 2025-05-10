@@ -1,11 +1,9 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'removeOsuUserConnection',
 	usage: '<osuUserId>',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/removeOsuUserConnection.js DBDiscordUsers');
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: [
 				'id',

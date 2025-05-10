@@ -1,6 +1,5 @@
 const { DBGuilds } = require('../dbObjects');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { logDatabaseQueries } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -36,8 +35,7 @@ module.exports = {
 			timestamps.delete(interaction.user.id);
 			return;
 		}
-		//TODO: add attributes and logdatabasequeries
-		logDatabaseQueries(4, 'commands/toggletickets.js DBGuilds');
+		//TODO: add attributes
 		//get guild from db
 		const guild = await DBGuilds.findOne({
 			where: { guildId: interaction.guildId },
@@ -61,7 +59,6 @@ module.exports = {
 			}
 		} else {
 			//Create guild in db if it wasn't there yet and disable it by default
-			logDatabaseQueries(4, 'commands/toggletickets.js DBGuilds create');
 			DBGuilds.create({ guildId: interaction.guildId, guildName: interaction.guild.name, ticketsEnabled: true });
 			await interaction.editReply('Tickets have been enabled');
 		}

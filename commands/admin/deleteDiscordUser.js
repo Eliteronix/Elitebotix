@@ -1,11 +1,9 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'deleteDiscordUser',
 	usage: '<userId>',
 	async execute(interaction) {
-		logDatabaseQueries(4, 'commands/admin/deleteDiscordUser.js DBDiscordUsers');
 		let deleted = await DBDiscordUsers.destroy({
 			where: {
 				userId: interaction.options.getString('argument')

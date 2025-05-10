@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
-const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, logDatabaseQueries, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -269,7 +269,6 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	let tournamentOccurences = '';
 
-	logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiGameScores');
 	const mapGames = await DBOsuMultiGames.findAll({
 		attributes: ['matchId', 'gameId', 'scores'],
 		where: {
@@ -350,7 +349,6 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	let matches = [];
 	if (tournament) {
-		logDatabaseQueries(4, 'commands/osu-beatmap.js DBOsuMultiGameScores');
 		const mapScores = await DBOsuMultiGameScores.findAll({
 			attributes: ['matchId', 'gameId', 'score', 'gameRawMods', 'rawMods', 'freeMod'],
 			where: {

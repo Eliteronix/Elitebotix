@@ -1,6 +1,6 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { logDatabaseQueries, getIDFromPotentialOsuLink, getOsuPlayerName, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuPlayerName, logOsuAPICalls } = require('../utils');
 const { DBDiscordUsers, DBOsuPoolAccess } = require('../dbObjects');
 const { Op } = require('sequelize');
 const osu = require('node-osu');
@@ -229,7 +229,6 @@ module.exports = {
 					'en-US': 'List all players with access to the local scores for a pool',
 				})
 		),
-	// TODO: logdatabaseQueries(4, 'commands/osu-scoreaccess.js DBDiscordUsers 1');
 	async execute(interaction) {
 		try {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -243,7 +242,6 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'grantspreadsheetaccess') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js DBDiscordUsers 1');
 			let commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -261,7 +259,6 @@ module.exports = {
 
 			const captain = interaction.options.getString('captain');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBDiscordUsers 2');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -317,7 +314,6 @@ module.exports = {
 
 			let sheetId = interaction.options.getString('spreadsheet').replace('https://docs.google.com/spreadsheets/d/', '').replace(/\/.*/g, '');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBOsuPoolAccess 1');
 			let existingPoolAccess = await DBOsuPoolAccess.count({
 				where: {
 					accessGiverId: commandUser.osuUserId,
@@ -330,7 +326,6 @@ module.exports = {
 				return await interaction.editReply('You already granted access to this spreadsheet to this user.');
 			}
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBOsuPoolAccess 2');
 			await DBOsuPoolAccess.create({
 				accessGiverId: commandUser.osuUserId,
 				spreadsheetId: sheetId,
@@ -339,7 +334,6 @@ module.exports = {
 
 			return await interaction.editReply(`Successfully granted access for the spreadsheet's scores to ${discordUser.osuName}.`);
 		} else if (interaction.options.getSubcommand() === 'revokespreadsheetaccess') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js DBDiscordUsers 3');
 			let commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -357,7 +351,6 @@ module.exports = {
 
 			const captain = interaction.options.getString('captain');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBDiscordUsers 4');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -413,7 +406,6 @@ module.exports = {
 
 			let sheetId = interaction.options.getString('spreadsheet').replace('https://docs.google.com/spreadsheets/d/', '').replace(/\/.*/g, '');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBOsuPoolAccess 2');
 			let existingPoolAccess = await DBOsuPoolAccess.findOne({
 				attributes: ['id'],
 				where: {
@@ -430,7 +422,6 @@ module.exports = {
 
 			return await interaction.editReply('You didn\'t grant access to this spreadsheet to this user.');
 		} else if (interaction.options.getSubcommand() === 'grantpoolaccess') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js DBDiscordUsers 5');
 			let commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -448,7 +439,6 @@ module.exports = {
 
 			const captain = interaction.options.getString('captain');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBDiscordUsers 6');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -504,7 +494,6 @@ module.exports = {
 
 			let poolname = interaction.options.getString('poolname');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBOsuPoolAccess 3');
 			let existingPoolAccess = await DBOsuPoolAccess.count({
 				where: {
 					accessGiverId: commandUser.osuUserId,
@@ -527,7 +516,6 @@ module.exports = {
 
 			return await interaction.editReply(`Successfully granted access to the pool \`${poolname.replace(/`/g, '')}\` to ${discordUser.osuName}.`);
 		} else if (interaction.options.getSubcommand() === 'revokepoolaccess') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js DBDiscordUsers 7');
 			let commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -545,7 +533,6 @@ module.exports = {
 
 			const captain = interaction.options.getString('captain');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBDiscordUsers 8');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -601,7 +588,6 @@ module.exports = {
 
 			let poolname = interaction.options.getString('poolname');
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBOsuPoolAccess 4');
 			let existingPoolAccess = await DBOsuPoolAccess.findOne({
 				attributes: ['id'],
 				where: {
@@ -619,7 +605,6 @@ module.exports = {
 
 			return await interaction.editReply('You did not grant access to this pool to this user.');
 		} else if (interaction.options.getSubcommand() === 'listaccess') {
-			logDatabaseQueries(4, 'commands/osu-mappool.js DBDiscordUsers 9');
 			let commandUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -635,7 +620,6 @@ module.exports = {
 				return await interaction.editReply(`Please connect and verify your account first by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 			}
 
-			logDatabaseQueries(4, 'commands/osu-scoreaccess.js DBOsuPoolAccess 5');
 			let poolAccess = await DBOsuPoolAccess.findAll({
 				attributes: ['accessTakerId', 'spreadsheetId', 'mappoolName'],
 				where: {

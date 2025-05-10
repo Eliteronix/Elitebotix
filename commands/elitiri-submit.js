@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions } = require('../dbObjects.js');
-const { getGuildPrefix, pause, getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction, logOsuAPICalls } = require('../utils.js');
+const { getGuildPrefix, pause, getIDFromPotentialOsuLink, populateMsgFromInteraction, logOsuAPICalls } = require('../utils.js');
 const { currentElitiriCup, currentElitiriCupStartOfSubmissions, currentElitiriCupEndOfSubmissions } = require('../config.json');
 const { MessageFlags } = require('discord.js');
 
@@ -15,7 +15,6 @@ module.exports = {
 	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
-		//TODO: Update logdatabasequeries
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -38,7 +37,6 @@ module.exports = {
 			}
 		}
 		//TODO: Attributes
-		logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
 		});
@@ -52,7 +50,6 @@ module.exports = {
 
 		if (args[0].toLowerCase() === 'list') {
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 1');
 			const submissions = await DBElitiriCupSubmissions.findAll({
 				where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId }
 			});
@@ -201,7 +198,6 @@ module.exports = {
 				getBeatmap(interaction);
 
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 2');
 				const existingMap = await DBElitiriCupSubmissions.findOne({
 					where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId, beatmapId: beatmaps[0].id }
 				});
@@ -389,7 +385,6 @@ module.exports = {
 				}
 
 				if (viabilityEmbed.title.startsWith('You have submitted the beatmap for the tournament')) {
-					logDatabaseQueries(4, 'commands/elitiri-submit.js DBElitiriCupSubmissions 3');
 					//TODO: Attributes
 					const submittedModMap = await DBElitiriCupSubmissions.findOne({
 						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUp.osuUserId, modPool: args[0].toUpperCase() }

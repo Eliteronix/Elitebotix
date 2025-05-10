@@ -15,10 +15,9 @@ module.exports = {
 
 			if (channel) {
 				const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-				const { getGuildPrefix, pause, logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+				const { getGuildPrefix, pause } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 				let command = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\weather.js`);
 
-				logDatabaseQueries(2, 'processQueueTasks/periodic-weather.js DBProcessQueue');
 				let processQueueEntry = await DBProcessQueue.findOne({
 					attributes: ['id', 'additions', 'date', 'beingExecuted'],
 					where: {

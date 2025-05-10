@@ -9,7 +9,6 @@
 	"salesmen": [
 		"458196977939906562"
 	],
-	"traceDatabaseQueries": 6,
 	"traceOsuAPICalls": false,
 	"showUnknownInteractionError": false,
 	"logBroadcastEval": false,

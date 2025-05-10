@@ -1,6 +1,6 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
-const { logDatabaseQueries, getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
+const { getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
@@ -703,7 +703,6 @@ module.exports = {
 					let starRating = 4;
 					let discordUser = null;
 
-					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers');
 					discordUser = await DBDiscordUsers.findOne({
 						attributes: [
 							'osuUserId',
@@ -804,7 +803,6 @@ module.exports = {
 				}
 
 				//Remove the users from the queue
-				logDatabaseQueries(4, 'commands/osu-duel.js DBProcessQueue existingQueueTasks');
 				let existingQueueTasks = await DBProcessQueue.findAll({
 					attributes: ['id', 'additions'],
 					where: {
@@ -885,7 +883,6 @@ module.exports = {
 				if (username) {
 					//Get the user by the argument given
 					if (username.startsWith('<@') && username.endsWith('>')) {
-						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating');
 						const discordUser = await DBDiscordUsers.findOne({
 							attributes: ['osuUserId', 'osuName'],
 							where: {
@@ -1307,7 +1304,6 @@ module.exports = {
 				}
 
 				//Draw the Player derank rank
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating 2');
 				let discordUser = await DBDiscordUsers.findOne({
 					attributes: ['osuPP', 'osuDuelStarRating', 'osuUserId', 'osuName'],
 					where: {
@@ -1410,7 +1406,6 @@ module.exports = {
 
 						members = members.map(member => member.id);
 
-						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard');
 						discordUsers = await DBDiscordUsers.findAll({
 							attributes: [
 								'userId',
@@ -1446,7 +1441,6 @@ module.exports = {
 						}
 					}
 				} else {
-					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-leaderboard 2');
 					discordUsers = await DBDiscordUsers.findAll({
 						attributes: [
 							'userId',
@@ -1689,7 +1683,6 @@ module.exports = {
 				if (interaction.options._hoistedOptions[0]) {
 					//Get the user by the argument given
 					if (interaction.options._hoistedOptions[0].value.startsWith('<@') && interaction.options._hoistedOptions[0].value.endsWith('>')) {
-						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers data');
 						const discordUser = await DBDiscordUsers.findOne({
 							attributes: ['osuUserId', 'osuName'],
 							where: {
@@ -2078,7 +2071,6 @@ module.exports = {
 
 						members = members.map(member => member.id);
 
-						logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread');
 						discordUsers = discordUsers = await DBDiscordUsers.findAll({
 							attributes: ['userId', 'osuUserId', 'osuName', 'osuVerified', 'osuDuelStarRating'],
 							where: {
@@ -2103,7 +2095,6 @@ module.exports = {
 						}
 					}
 				} else {
-					logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-spread 2');
 					discordUsers = await DBDiscordUsers.findAll({
 						attributes: ['userId', 'osuUserId', 'osuName', 'osuVerified', 'osuDuelStarRating'],
 						where: {
@@ -2240,7 +2231,6 @@ module.exports = {
 					enable = true;
 				}
 
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers rating-updates');
 				let discordUser = await DBDiscordUsers.findOne({
 					attributes: ['id', 'osuUserId', 'osuDuelRatingUpdates'],
 					where: {
@@ -2292,7 +2282,6 @@ module.exports = {
 					return await interaction.editReply(`You don't have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 				}
 
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 1');
 				let existingQueueTasks = await DBProcessQueue.findAll({
 					attributes: ['additions'],
 					where: {
@@ -2326,7 +2315,6 @@ module.exports = {
 				}
 
 				//Check again in case the cooldown had passed and it was triggered again
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 2');
 				existingQueueTasks = await DBProcessQueue.findAll({
 					attributes: ['additions'],
 					where: {
@@ -2347,7 +2335,6 @@ module.exports = {
 					}
 				}
 
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1 create');
 				await DBProcessQueue.create({
 					guildId: 'none',
 					task: 'duelQueue1v1',
@@ -2384,7 +2371,6 @@ module.exports = {
 					return await interaction.editReply(`You don't have your osu! account connected and verified.\nPlease connect your account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
 				}
 
-				logDatabaseQueries(4, 'commands/osu-duel.js DBDiscordUsers queue1v1-leave');
 				let existingQueueTasks = await DBProcessQueue.findAll({
 					attributes: ['id', 'additions'],
 					where: {

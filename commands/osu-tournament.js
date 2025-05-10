@@ -1,6 +1,5 @@
 const Discord = require('discord.js');
 const { DBOsuMultiMatches } = require('../dbObjects');
-const { logDatabaseQueries } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
 
@@ -59,7 +58,6 @@ module.exports = {
 			return await interaction.editReply(`The acronym \`${acronym.replace(/`/g, '')}\` can't be used for this command.`);
 		}
 
-		logDatabaseQueries(4, 'commands/osu-tournament.js DBOsuMultiMatches');
 		let tournamentScores = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {

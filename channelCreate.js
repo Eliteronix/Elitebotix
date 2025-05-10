@@ -1,13 +1,11 @@
 const Discord = require('discord.js');
 const { DBGuilds } = require('./dbObjects');
-const { logDatabaseQueries } = require('./utils');
 
 module.exports = async function (channel) {
 	if (channel.type === Discord.ChannelType.DM) {
 		return;
 	}
 
-	logDatabaseQueries(2, 'channelCreate.js DBGuilds');
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
 		attributes: ['id', 'loggingChannel'],

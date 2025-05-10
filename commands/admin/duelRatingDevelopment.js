@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGameScores } = require('../../dbObjects');
 const osu = require('node-osu');
 const { Op } = require('sequelize');
-const { getUserDuelStarRating, logDatabaseQueries, logOsuAPICalls } = require('../../utils');
+const { getUserDuelStarRating, logOsuAPICalls } = require('../../utils');
 const ChartJsImage = require('chartjs-to-image');
 const Discord = require('discord.js');
 const { MessageFlags } = require('discord.js');
@@ -15,7 +15,6 @@ module.exports = {
 		let username = null;
 		if (interaction.options.getString('argument')) {
 			username = interaction.options.getString('argument');
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 1');
 			discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -30,7 +29,6 @@ module.exports = {
 				}
 			});
 		} else {
-			logDatabaseQueries(4, 'commands/earlyaccess.js DBDiscordUsers duelRatingDevelopment 2');
 			discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId', 'osuName'],
 				where: {
@@ -78,7 +76,6 @@ module.exports = {
 
 		let processingMessage = await interaction.editReply('Processing...');
 
-		logDatabaseQueries(4, 'commands/earlyaccess.js DBOsuMultiGameScores duelRatingDevelopment');
 		let oldestScore = await DBOsuMultiGameScores.findOne({
 			attributes: ['gameId', 'gameEndDate'],
 			where: {

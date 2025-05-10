@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { logDatabaseQueries, humanReadable, logOsuAPICalls } = require('../utils');
+const { humanReadable, logOsuAPICalls } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op, Sequelize } = require('sequelize');
 
@@ -72,7 +72,6 @@ module.exports = {
 		let username = interaction.options.getString('username');
 
 		if (username === null) {
-			logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 1');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -93,7 +92,6 @@ module.exports = {
 				}
 			}
 		} else if (username.startsWith('<@')) {
-			logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 2');
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
 				where: {
@@ -136,7 +134,6 @@ module.exports = {
 		let lastWeek = new Date();
 		lastWeek.setDate(lastWeek.getDate() - 7);
 
-		logDatabaseQueries(4, 'commands/osu-decay.js DBDiscordUsers 3');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['osuUserId', 'osuRank', 'oldOsuRank', 'osuPP', 'lastOsuPPChange'],
 			where: {

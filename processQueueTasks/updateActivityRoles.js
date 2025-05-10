@@ -1,4 +1,3 @@
-const { logDatabaseQueries } = require('../utils');
 const { DBActivityRoles } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
 
@@ -6,7 +5,6 @@ module.exports = {
 	async execute(client, processQueueEntry) {
 		// console.log('updateActivityRoles');
 
-		logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBActivityRoles');
 		const activityRoles = await DBActivityRoles.findAll({
 			attributes: ['roleId', 'pointsCutoff', 'rankCutoff', 'percentageCutoff'],
 			where: {
@@ -26,7 +24,6 @@ module.exports = {
 
 		client.shard.broadcastEval(async (c, { guildId, activityRoles }) => {
 			try {
-				const { logDatabaseQueries } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 				let guild;
 
@@ -73,7 +70,6 @@ module.exports = {
 				for (let i = 0; i < members.length; i++) {
 					const { DBServerUserActivity } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
-					logDatabaseQueries(2, 'processQueueTasks/updateActivityRoles.js DBServerUserActivity');
 					const serverUserActivity = await DBServerUserActivity.findOne({
 						attributes: ['userId', 'points'],
 						where: {

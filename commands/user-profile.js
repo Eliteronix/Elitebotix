@@ -1,5 +1,5 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { logDatabaseQueries, getOsuPlayerName } = require('../utils');
+const { getOsuPlayerName } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { developers } = require('../config.json');
 const Discord = require('discord.js');
@@ -146,7 +146,6 @@ module.exports = {
 };
 
 async function sendUserEmbed(interaction, user) {
-	logDatabaseQueries(4, 'commands/user-profile.js DBDiscordUsers');
 	const discordUser = await DBDiscordUsers.findOne({
 		attributes: ['patreon', 'osuUserId', 'osuVerified', 'twitchName', 'twitchVerified'],
 		where: {

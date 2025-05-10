@@ -3,7 +3,6 @@ const { DBReactionRolesHeader, DBReactionRoles, DBGuilds, DBStarBoardMessages } 
 
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { logDatabaseQueries } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
@@ -23,7 +22,6 @@ module.exports = async function (reaction, user) {
 		return;
 	}
 
-	logDatabaseQueries(2, 'reactionRemoved.js DBReactionRolesHeader');
 	//Get the header message from the db
 	const dbReactionRolesHeader = await DBReactionRolesHeader.findOne({
 		attributes: ['id'],
@@ -34,7 +32,6 @@ module.exports = async function (reaction, user) {
 	});
 
 	if (dbReactionRolesHeader) {
-		logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 1');
 		//Get the reactionRole from the db by all the string (works for general emojis)
 		const dbReactionRole = await DBReactionRoles.findOne({
 			attributes: ['roleId'],
@@ -80,7 +77,6 @@ module.exports = async function (reaction, user) {
 					}
 				}
 			} else {
-				logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles destroy');
 				DBReactionRoles.destroy({
 					where: {
 						dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRole.roleId
@@ -92,7 +88,6 @@ module.exports = async function (reaction, user) {
 			//Put the emoji name into the correct format for comparing it in case it's an guild emoji
 			let emoji = '<%:' + reaction._emoji.name + ':';
 
-			logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 2');
 			//Get the reactionRole from the db by all the string (works for general emojis)
 			const dbReactionRoleBackup = await DBReactionRoles.findOne({
 				attributes: ['roleId'],
@@ -140,7 +135,6 @@ module.exports = async function (reaction, user) {
 						}
 					}
 				} else {
-					logDatabaseQueries(2, 'reactionAdded.js DBReactionRoles destroy 2');
 					DBReactionRoles.destroy({ where: { dbReactionRolesHeaderId: dbReactionRolesHeader.id, roleId: dbReactionRoleBackup.roleId } });
 					editEmbed(reaction.message, dbReactionRolesHeader);
 				}
@@ -150,7 +144,6 @@ module.exports = async function (reaction, user) {
 		}
 	}
 	if (reaction._emoji.name === '⭐') {
-		logDatabaseQueries(2, 'reactionRemoved.js DBGuilds Starboard');
 		const guild = await DBGuilds.findOne({
 			attributes: ['starBoardEnabled', 'starBoardMinimum', 'starBoardChannel'],
 			where: {
@@ -159,7 +152,6 @@ module.exports = async function (reaction, user) {
 		});
 
 		if (guild && guild.starBoardEnabled && parseInt(guild.starBoardMinimum) <= reaction.count && guild.starBoardChannel !== reaction.message.channel.id) {
-			logDatabaseQueries(2, 'reactionRemoved.js DBStarBoardMessages Starboardmessage');
 			const starBoardedMessage = await DBStarBoardMessages.findOne({
 				attributes: ['id', 'starBoardChannelId', 'starBoardMessageId', 'starBoardMessageStarsQuantityMax'],
 				where: {
@@ -229,7 +221,6 @@ async function editEmbed(msg, reactionRolesHeader) {
 		reactionRoleEmbed.setDescription(reactionRolesHeader.reactionDescription);
 	}
 
-	logDatabaseQueries(2, 'reactionRemoved.js DBReactionRoles 3');
 	//Get roles from db
 	const reactionRoles = await DBReactionRoles.findAll({
 		attributes: ['emoji', 'description', 'roleId'],
@@ -256,7 +247,6 @@ async function editEmbed(msg, reactionRolesHeader) {
 		embedChannel = msg.guild.channels.cache.get(embedChannelId);
 	} catch (e) {
 		await msg.channel.send('Couldn\'t find an embed with this EmbedId');
-		logDatabaseQueries(2, 'reactionAdded.js DBReactionRolesHeader destroy');
 		DBReactionRolesHeader.destroy({
 			where: { guildId: msg.guildId, id: reactionRolesHeader.id },
 		});

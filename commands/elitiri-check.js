@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBElitiriCupSignUp } = require('../dbObjects.js');
-const { getIDFromPotentialOsuLink, logDatabaseQueries, populateMsgFromInteraction, logOsuAPICalls } = require('../utils.js');
+const { getIDFromPotentialOsuLink, populateMsgFromInteraction, logOsuAPICalls } = require('../utils.js');
 const { currentElitiriCup } = require('../config.json');
 const { MessageFlags } = require('discord.js');
 
@@ -15,7 +15,6 @@ module.exports = {
 	async execute(interaction, msg, args) {
 		//TODO: Remove message code and replace with interaction code
 		//TODO: deferReply
-		//TODO: Update logdatabasequeries
 		if (interaction) {
 			msg = await populateMsgFromInteraction(interaction);
 
@@ -40,7 +39,6 @@ module.exports = {
 			}
 		}
 		//TODO: Attributes
-		logDatabaseQueries(4, 'commands/elitiri-check.js DBElitiriCupSignUp');
 		const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 			where: { tournamentName: currentElitiriCup, userId: msg.author.id }
 		});

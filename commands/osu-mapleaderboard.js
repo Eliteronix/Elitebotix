@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, logDatabaseQueries, getBeatmapCover, getAvatar, logOsuAPICalls } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, getBeatmapCover, getAvatar, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
@@ -204,7 +204,6 @@ module.exports = {
 		let scoresArray = [];
 		let userScore = null;
 
-		logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBDiscordUsers');
 		const user = await DBDiscordUsers.findOne({
 			attributes: ['userId', 'osuUserId'],
 			where: {
@@ -259,7 +258,6 @@ module.exports = {
 				}
 			}
 		} else if (server === 'tournaments') {
-			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiGameScores');
 			let multiScores = await DBOsuMultiGameScores.findAll({
 				attributes: [
 					'id',
@@ -303,7 +301,6 @@ module.exports = {
 
 			let matchIds = [...new Set(multiScores.map(score => score.matchId))];
 
-			logDatabaseQueries(4, 'commands/osu-mapleaderboard.js DBOsuMultiMatches');
 			let multiMatches = await DBOsuMultiMatches.findAll({
 				attributes: [
 					'matchId',

@@ -1,5 +1,4 @@
 const { DBDiscordUsers } = require('../../dbObjects');
-const { logDatabaseQueries } = require('../../utils');
 
 module.exports = {
 	name: 'connectOsuUser',
@@ -9,7 +8,6 @@ module.exports = {
 
 		let discordId = args[0];
 
-		logDatabaseQueries(4, 'commands/admin/connectOsuUser.js DBDiscordUsers discordId');
 		let discordUsers = await DBDiscordUsers.findAll({
 			attributes: ['id', 'osuUserId'],
 			where: {
@@ -19,7 +17,6 @@ module.exports = {
 
 		let osuUserId = args[1];
 
-		logDatabaseQueries(4, 'commands/admin/connectOsuUser.js DBDiscordUsers osuUserId');
 		let osuUsers = await DBDiscordUsers.findAll({
 			attributes: ['id', 'userId'],
 			where: {

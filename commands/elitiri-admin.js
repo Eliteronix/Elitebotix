@@ -1,5 +1,5 @@
 const { DBElitiriCupSignUp, DBElitiriCupSubmissions, DBDiscordUsers, DBElitiriCupStaff, DBProcessQueue, DBElitiriCupLobbies } = require('../dbObjects.js');
-const { pause, logDatabaseQueries } = require('../utils.js');
+const { pause } = require('../utils.js');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { currentElitiriCup, currentElitiriCupHostSheetId, currentElitiriCupRefSheetId } = require('../config.json');
 
@@ -53,7 +53,6 @@ module.exports = {
 	cooldown: 5,
 	tags: 'debug',
 	async execute(interaction, msg, args) {
-		//TODO: Update logdatabasequeries to use the new logger
 		//Get the user from the DBDiscordUsers
 		//TODO: Attributes
 		const discordUser = await DBDiscordUsers.findOne({
@@ -71,25 +70,21 @@ module.exports = {
 
 		if (args[0] === 'sr') {
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 1');
 			const topElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: currentElitiriCup, bracketName: 'Top Bracket' }
 			});
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 2');
 			const middleElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: currentElitiriCup, bracketName: 'Middle Bracket' }
 			});
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 3');
 			const lowerElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: currentElitiriCup, bracketName: 'Lower Bracket' }
 			});
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 4');
 			const beginnerElitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: currentElitiriCup, bracketName: 'Beginner Bracket' }
 			});
@@ -170,7 +165,6 @@ module.exports = {
 			}
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 5');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: {
 					tournamentName: currentElitiriCup,
@@ -197,7 +191,6 @@ module.exports = {
 			} else if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					//TODO: Attributes
-					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 1');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -267,7 +260,6 @@ module.exports = {
 			}
 
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 6');
 			let elitiriSignUps = await DBElitiriCupSignUp.findAll({
 				where: { tournamentName: currentElitiriCup }
 			});
@@ -275,7 +267,6 @@ module.exports = {
 			if (targetGroup === 'Players with missing submissions') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					//TODO: Attributes
-					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 2');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -315,7 +306,6 @@ module.exports = {
 			} else if (targetGroup === 'A specific player') {
 				for (let i = 0; i < elitiriSignUps.length; i++) {
 					//TODO: Attributes
-					logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 3');
 					let submissions = await DBElitiriCupSubmissions.findAll({
 						where: { tournamentName: currentElitiriCup, osuUserId: elitiriSignUps[i].osuUserId }
 					});
@@ -514,7 +504,6 @@ module.exports = {
 			msg.reply('Done.');
 		} else if (args[0] === 'placement') {
 			//TODO: Attributes
-			logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSignUp 7');
 			const elitiriSignUp = await DBElitiriCupSignUp.findOne({
 				where: { osuUserId: args[1], tournamentName: currentElitiriCup }
 			});
@@ -536,7 +525,6 @@ module.exports = {
 				}
 
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupStaff');
 				const staffMember = await DBElitiriCupStaff.findOne({
 					where: { osuUserId: args[1], tournamentName: tournamentName }
 				});
@@ -921,28 +909,24 @@ module.exports = {
 			let rowOffset;
 			if (args[1] === 'top') {
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 4');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: currentElitiriCup, bracketName: 'Top Bracket' }
 				});
 				rowOffset = 78;
 			} else if (args[1] === 'middle') {
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 5');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: currentElitiriCup, bracketName: 'Middle Bracket' }
 				});
 				rowOffset = 53;
 			} else if (args[1] === 'lower') {
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 6');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: currentElitiriCup, bracketName: 'Lower Bracket' }
 				});
 				rowOffset = 28;
 			} else if (args[1] === 'beginner') {
 				//TODO: Attributes
-				logDatabaseQueries(4, 'commands/elitiri-admin.js DBElitiriCupSubmissions 7');
 				allMaps = await DBElitiriCupSubmissions.findAll({
 					where: { tournamentName: currentElitiriCup, bracketName: 'Beginner Bracket' }
 				});
@@ -1567,7 +1551,6 @@ function removeAllMapDuplicates(map) {
 
 async function createElitiriRoleAssignmentTask() {
 	//TODO: Attributes
-	logDatabaseQueries(2, 'processQueueTasks/elitiriCupSignUps.js DBProcessQueue 2');
 	const task = await DBProcessQueue.findOne({
 		where: { task: 'elitiriRoleAssignment' }
 	});

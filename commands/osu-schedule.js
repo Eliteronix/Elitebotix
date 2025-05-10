@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuMultiGameScores } = require('../dbObjects');
-const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logDatabaseQueries, logOsuAPICalls } = require('../utils');
+const { getOsuUserServerMode, getIDFromPotentialOsuLink, getMessageUserDisplayname, populateMsgFromInteraction, logOsuAPICalls } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
@@ -350,7 +350,6 @@ module.exports = {
 		for (let i = 0; i < teams.length; i++) {
 			for (let j = 0; j < teams[i].length; j++) {
 				if (teams[i][j].startsWith('<@') && teams[i][j].endsWith('>')) {
-					logDatabaseQueries(4, 'commands/osu-schedule.js DBDiscordUsers');
 					const discordUser = await DBDiscordUsers.findOne({
 						attributes: ['osuUserId'],
 						where: {
@@ -456,7 +455,6 @@ module.exports = {
 		for (let i = 0; i < users.length; i++) {
 			let data = [];
 
-			logDatabaseQueries(4, 'commands/osu-schedule.js DBOsuMultiGameScores');
 			const allScores = await DBOsuMultiGameScores.findAll({
 				attributes: ['gameStartDate'],
 				where: {
