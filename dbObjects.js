@@ -3,8 +3,8 @@ require('dotenv').config();
 
 const logging = {
 	logging: (sql, timing) => {
-		if (process.shardId) {
-			async () => {
+		try {
+			if (process.shardId) {
 				let operation = 'Unknown';
 				let table = 'Unknown';
 
@@ -27,7 +27,10 @@ const logging = {
 				}
 
 				process.send(`[${process.shardId}] Database access: ${operation} ${table} | ${timing}ms`);
-			};
+			}
+		} catch (e) {
+			// eslint-disable-next-line no-console
+			console.log('Error in logging database access:', e);
 		}
 
 		if (timing > 50000) { // Only log if execution time is greater than 1000ms
