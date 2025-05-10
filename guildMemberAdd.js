@@ -30,7 +30,7 @@ module.exports = async function (member) {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 					return await owner.send(`I could not send a welcome message for a new user into the channel \`${guildWelcomeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
-					return console.error('guildMemberAdd.js | welcome message' + e);
+					return console.error('guildMemberAdd.js | welcome message', e);
 				}
 			}
 		}
