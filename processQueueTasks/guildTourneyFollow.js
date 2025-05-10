@@ -1,6 +1,6 @@
 const { DBOsuGuildTrackers } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
-const { getOsuPlayerName } = require('../utils/getOsuPlayerName.js');
+const { getOsuPlayerName } = require('../utils');
 
 module.exports = {
 	async execute(client, processQueueEntry) {
