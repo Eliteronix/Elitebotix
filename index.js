@@ -317,7 +317,6 @@ manager.spawn()
 	.then(shards => {
 		shards.forEach(shard => {
 			shard.on('message', message => {
-				console.log('index.js | shard message', message);
 				if (message === 'osu!API') {
 					amountOfApiRequestsInTheLast24Hours.inc();
 					setTimeout(() => {
