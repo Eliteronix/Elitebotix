@@ -10,9 +10,6 @@ const mapsRetriedTooOften = [];
 const fs = require('fs');
 
 module.exports = {
-	logDatabaseQueries: function () {
-		// Temporary function until all shards restarted
-	},
 	getGuildPrefix: async function (msg) {
 		//Define prefix command
 		let guildPrefix;
