@@ -28,10 +28,10 @@ const logging = {
 		// 	process.messages.push(`[${process.shardId}] Database access: ${operation} ${table} | ${timing}ms`);
 		// }
 
-		if (timing > 50000) { // Only log if execution time is greater than 1000ms
-			// eslint-disable-next-line no-console
-			console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
-		}
+		// if (timing > 50000) { // Only log if execution time is greater than 1000ms
+		// 	// eslint-disable-next-line no-console
+		// 	console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
+		// }
 	},
 	benchmark: true,
 };
