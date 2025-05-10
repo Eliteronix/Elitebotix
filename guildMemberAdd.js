@@ -26,7 +26,7 @@ module.exports = async function (member) {
 				//send the welcome message text into the channel
 				await guildWelcomeMessageChannel.send(guildWelcomeMessageText);
 			} catch (e) {
-				if (e.message === 'Missing Access') {
+				if (e.message === 'Missing Access' || e.message === 'Missing Permissions') {
 					const owner = await member.client.users.cache.find(user => user.id === member.guild.ownerId);
 					return await owner.send(`I could not send a welcome message for a new user into the channel \`${guildWelcomeMessageChannel.name}\` on \`${member.guild.name}\` due to missing permissions.`);
 				} else {
