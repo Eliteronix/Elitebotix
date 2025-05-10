@@ -394,7 +394,7 @@ async function sendChildMessages() {
 
 	setTimeout(() => {
 		sendChildMessages();
-	}, 500);
+	}, 1000);
 }
 
 async function executeProcessQueue(client) {
