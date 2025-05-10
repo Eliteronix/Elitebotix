@@ -388,6 +388,7 @@ setTimeout(() => {
 
 async function sendChildMessages() {
 	while (process.messages.length > 0) {
+		console.log('Sending message to child process', process.messages[0]);
 		process.send(process.messages.shift());
 	}
 
