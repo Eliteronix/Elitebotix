@@ -5619,7 +5619,7 @@ module.exports = {
 						await textChannel.send(matches[i].content);
 					} else {
 						let message = messages.find(m => m.content.replace(/:R>.+/gm, ':R>').toLowerCase() === matches[i].start.toLowerCase());
-						if (message) {
+						if (message && message.content !== matches[i].content) {
 							await message.edit(matches[i].content);
 						}
 					}
