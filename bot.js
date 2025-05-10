@@ -139,8 +139,6 @@ process.on('message', message => {
 		if (!wrongCluster(client)) {
 			restartProcessQueueTask();
 		}
-
-		sendChildMessages();
 	} else if (message.type == 'totalShards') {
 		// eslint-disable-next-line no-console
 		// console.log(`[${client.shardId}] The total amount of shards is: ${message.data.totalShards}`);
@@ -385,17 +383,6 @@ setTimeout(() => {
 // 		nextMBThreshold += 500;
 // 	}
 // }, 6000 * 2);
-
-async function sendChildMessages() {
-	// while (process.messages.length > 0) {
-	// 	console.log('Sending message to child process', process.messages[0]);
-	// 	process.send(process.messages.shift());
-	// }
-
-	// setTimeout(() => {
-	// 	sendChildMessages();
-	// }, 1000);
-}
 
 async function executeProcessQueue(client) {
 	try {
