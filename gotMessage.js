@@ -1,9 +1,6 @@
-const { getGuildPrefix, updateServerUserActivity, logDatabaseQueries } = require('./utils');
-const fs = require('fs');
+const { updateServerUserActivity, logDatabaseQueries } = require('./utils');
 const Discord = require('discord.js');
-const { PermissionsBitField } = require('discord.js');
 const { DBTickets } = require('./dbObjects');
-const { developers } = require('./config.json');
 
 module.exports = async function (msg) {
 	//check if the message wasn't sent by the bot itself or another bot
