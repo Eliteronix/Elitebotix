@@ -4,28 +4,30 @@ require('dotenv').config();
 const logging = {
 	logging: (sql, timing) => {
 		if (process.shardId) {
-			let operation = 'Unknown';
-			let table = 'Unknown';
+			async () => {
+				let operation = 'Unknown';
+				let table = 'Unknown';
 
-			if (sql.startsWith('Executed (default): SELECT')) {
-				operation = 'SELECT';
-				table = sql.replace(/.+FROM `/gm, '').replace(/`.+/gm, '');
-			} else if (sql.startsWith('Executed (default): UPDATE')) {
-				operation = 'UPDATE';
-				table = sql.replace(/.+UPDATE `/gm, '').replace(/`.+/gm, '');
-			} else if (sql.startsWith('Executed (default): INSERT')) {
-				operation = 'INSERT';
-				table = sql.replace(/.+INSERT INTO `/gm, '').replace(/`.+/gm, '');
-			} else if (sql.startsWith('Executed (default): DELETE')) {
-				operation = 'DELETE';
-				table = sql.replace(/.+DELETE FROM `/gm, '').replace(/`.+/gm, '');
-			} else {
-				//This shouldnt happen but if it does, we want to know about it
-				// eslint-disable-next-line no-console
-				console.log(sql);
-			}
+				if (sql.startsWith('Executed (default): SELECT')) {
+					operation = 'SELECT';
+					table = sql.replace(/.+FROM `/gm, '').replace(/`.+/gm, '');
+				} else if (sql.startsWith('Executed (default): UPDATE')) {
+					operation = 'UPDATE';
+					table = sql.replace(/.+UPDATE `/gm, '').replace(/`.+/gm, '');
+				} else if (sql.startsWith('Executed (default): INSERT')) {
+					operation = 'INSERT';
+					table = sql.replace(/.+INSERT INTO `/gm, '').replace(/`.+/gm, '');
+				} else if (sql.startsWith('Executed (default): DELETE')) {
+					operation = 'DELETE';
+					table = sql.replace(/.+DELETE FROM `/gm, '').replace(/`.+/gm, '');
+				} else {
+					//This shouldnt happen but if it does, we want to know about it
+					// eslint-disable-next-line no-console
+					console.log(sql);
+				}
 
-			process.send(`[${process.shardId}] Database access: ${operation} ${table} | ${timing}ms`);
+				process.send(`[${process.shardId}] Database access: ${operation} ${table} | ${timing}ms`);
+			};
 		}
 
 		if (timing > 50000) { // Only log if execution time is greater than 1000ms
