@@ -53,7 +53,9 @@ module.exports = {
 					console.error(error);
 				}
 				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
+				if (timestamps) {
+					timestamps.delete(interaction.user.id);
+				}
 				return;
 			}
 
