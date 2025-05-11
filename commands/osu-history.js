@@ -643,7 +643,7 @@ module.exports = {
 						try {
 							await interaction.editReply(`Processing ${i}/${tourneysPlayed.length} tournaments...`);
 						} catch (error) {
-							if (error.message !== 'Invalid Webhook Token') {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
 								return console.error(error);
 							}
 						}
