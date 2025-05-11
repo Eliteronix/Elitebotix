@@ -728,7 +728,9 @@ module.exports = {
 								await interaction.editReply(`Processing Duel Rating for ${discordUser.osuName}...`);
 								starRating = await getUserDuelStarRating({ osuUserId: discordUser.osuUserId, client: interaction.client });
 							} catch (e) {
-								if (e !== 'No standard plays') {
+								if (e.message === 'Unknown Message') {
+									return;
+								} else if (e !== 'No standard plays') {
 									console.error(e);
 								}
 							}
@@ -752,7 +754,17 @@ module.exports = {
 				let lowerBound = averageStarRating - 0.125;
 				let upperBound = averageStarRating + 0.125;
 
-				let sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`.replace('with <@> ', ''));
+				let sentMessage = null;
+
+				try {
+					sentMessage = await interaction.editReply(`<@${commandUser.userId}> wants to play a match with <@${teammates.join('>, <@')}> against <@${opponents.join('>, <@')}>. (SR: ${Math.round(averageStarRating * 100) / 100}*)\nReact with ✅ to accept.\nReact with ❌ to decline.`.replace('with <@> ', ''));
+				} catch (error) {
+					if (error.mesage !== 'Unknown Message') {
+						console.error(error);
+					}
+
+					return;
+				}
 
 				let pingMessage = await interaction.channel.send(`<@${teammates.join('>, <@')}>, <@${opponents.join('>, <@')}>`.replace('<@>, ', ''));
 				await sentMessage.react('✅');
