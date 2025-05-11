@@ -1040,7 +1040,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 			} else if (err.message === 'No standard plays') {
 				await interaction.followUp(`Could not find any standard plays for user \`${username.replace(/`/g, '')}\`.`);
-			} else {
+			} else if (err.message !== 'Unknown Message') {
 				console.error(err);
 			}
 		});
