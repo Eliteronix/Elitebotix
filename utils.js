@@ -5577,6 +5577,12 @@ module.exports = {
 
 				let matchName = args[3];
 
+				if (!matchName) {
+					existingQueueTasks.splice(i, 1);
+					i--;
+					continue;
+				}
+
 				let players = '';
 
 				if (args[4]) {
