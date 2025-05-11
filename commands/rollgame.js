@@ -99,7 +99,15 @@ module.exports = {
 
 		mCollector.on('end', async () => {
 			rCollector.stop();
-			await sentMessage.reactions.removeAll();
+			try {
+				await sentMessage.reactions.removeAll();
+			} catch (e) {
+				if (e.message !== 'Unknown Message') {
+					console.error(e);
+				} else {
+					return;
+				}
+			}
 			let playersRolled = 0;
 			if (players.length === 1) {
 				const roll = rollMax(100);
