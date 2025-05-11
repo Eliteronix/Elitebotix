@@ -482,6 +482,14 @@ setInterval(() => {
 
 	uniqueDiscordUsers.set(uniqueDiscordUsersList.length);
 	uniqueOsuUsers.set(uniqueOsuUsersList.length);
+
+	const lastImport = JSON.parse(fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8'));
+
+	if (lastImport && lastImport.matchStart) {
+		let time = Date.now() - lastImport.matchStart;
+
+		timeBehindMatchCreation.set(Math.floor(time / 1000));
+	}
 }, 5000);
 
 processOsuWebRequests(client);
