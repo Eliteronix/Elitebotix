@@ -1016,7 +1016,11 @@ module.exports = {
 		let hideQualifiers = new Date();
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 		for (let i = 0; i < gamesPlayed.length; i++) {
+			console.log(`Game ${i + 1}/${gamesPlayed.length} (${gamesPlayed[i]})`);
+
 			let team1GameScores = team1Scores.filter(s => s.gameId === gamesPlayed[i]);
+
+			console.log(team1GameScores.length);
 
 			if (team1GameScores.length < teamsize) {
 				gamesPlayed.splice(i, 1);
@@ -1025,6 +1029,8 @@ module.exports = {
 			}
 
 			let team2GameScores = team2Scores.filter(s => s.gameId === gamesPlayed[i]);
+
+			console.log(team2GameScores.length);
 
 			if (team2GameScores.length < teamsize) {
 				gamesPlayed.splice(i, 1);
