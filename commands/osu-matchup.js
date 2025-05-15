@@ -1012,6 +1012,12 @@ module.exports = {
 		let team1Scores = beatmaps.flatMap(b => b.team1Scores);
 		let team2Scores = beatmaps.flatMap(b => b.team2Scores);
 
+		let team1match117267618Scores = team1Scores.filter(s => s.matchId === 117267618);
+		console.log('team1 matchId 117267618 scores', team1match117267618Scores.length);
+
+		let team2match117267618Scores = team2Scores.filter(s => s.matchId === 117267618);
+		console.log('team2 matchId 117267618 scores', team2match117267618Scores.length);
+
 		//Get a list of all games played by both teams
 		let gamesPlayed = [...new Set(team1Scores.map(s => s.gameId).concat(team2Scores.map(s => s.gameId)))];
 
