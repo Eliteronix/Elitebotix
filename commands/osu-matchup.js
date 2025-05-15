@@ -797,6 +797,9 @@ module.exports = {
 				order: [['gameId', 'DESC']],
 			});
 
+			let match117267618Scores = userScores.filter(s => s.matchId === 117267618);
+			console.log('matchId 117267618 scores', match117267618Scores.length);
+
 			let matchIds = [...new Set(userScores.map(s => s.matchId))];
 
 			//Get the match data for the scores
@@ -902,6 +905,9 @@ module.exports = {
 				},
 				order: [['gameId', 'DESC']],
 			});
+
+			let match117267618Scores = userScores.filter(s => s.matchId === 117267618);
+			console.log('matchId 117267618 scores', match117267618Scores.length);
 
 			let matchIds = [...new Set(userScores.map(s => s.matchId))];
 
