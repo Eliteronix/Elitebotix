@@ -862,6 +862,8 @@ module.exports = {
 					if (!beatmap.team1Players.includes(scoresTeam1[i][j].osuUserId)) {
 						beatmap.team1Scores.push(scoresTeam1[i][j]);
 						beatmap.team1Players.push(scoresTeam1[i][j].osuUserId);
+					} else {
+						beatmap.team1Scores.push(scoresTeam1[i][j]);
 					}
 				}
 			}
@@ -957,6 +959,8 @@ module.exports = {
 					if (!beatmap.team2Players.includes(scoresTeam2[i][j].osuUserId)) {
 						beatmap.team2Scores.push(scoresTeam2[i][j]);
 						beatmap.team2Players.push(scoresTeam2[i][j].osuUserId);
+					} else {
+						beatmap.team2Scores.push(scoresTeam2[i][j]);
 					}
 				}
 			}
@@ -1104,6 +1108,31 @@ module.exports = {
 			//Sort the scores for each team
 			beatmaps[i].team1Scores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
 			beatmaps[i].team2Scores.sort((a, b) => parseInt(b.score) - parseInt(a.score));
+
+			//Maps may have multiple scores for the same player, so we need to get the best score for each player
+			//The best score is the first one in the sorted array so we can just remove the second one by each player
+			//We also dont need to keep the scores in the array
+			let players1 = [];
+
+			for (let j = 0; j < beatmaps[i].team1Scores.length; j++) {
+				if (!players1.includes(beatmaps[i].team1Scores[j].osuUserId)) {
+					players1.push(beatmaps[i].team1Scores[j].osuUserId);
+				} else {
+					beatmaps[i].team1Scores.splice(j, 1);
+					j--;
+				}
+			}
+
+			let players2 = [];
+
+			for (let j = 0; j < beatmaps[i].team2Scores.length; j++) {
+				if (!players2.includes(beatmaps[i].team2Scores[j].osuUserId)) {
+					players2.push(beatmaps[i].team2Scores[j].osuUserId);
+				} else {
+					beatmaps[i].team2Scores.splice(j, 1);
+					j--;
+				}
+			}
 
 			//Add the best scores together
 			let team1Score = 0;
