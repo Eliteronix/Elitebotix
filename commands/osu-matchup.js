@@ -797,9 +797,6 @@ module.exports = {
 				order: [['gameId', 'DESC']],
 			});
 
-			let match117267618Scores = userScores.filter(s => s.matchId === 117267618);
-			console.log('matchId 117267618 scores', match117267618Scores.length);
-
 			let matchIds = [...new Set(userScores.map(s => s.matchId))];
 
 			//Get the match data for the scores
@@ -906,9 +903,6 @@ module.exports = {
 				order: [['gameId', 'DESC']],
 			});
 
-			let match117267618Scores = userScores.filter(s => s.matchId === 117267618);
-			console.log('matchId 117267618 scores', match117267618Scores.length);
-
 			let matchIds = [...new Set(userScores.map(s => s.matchId))];
 
 			//Get the match data for the scores
@@ -1012,12 +1006,6 @@ module.exports = {
 		let team1Scores = beatmaps.flatMap(b => b.team1Scores);
 		let team2Scores = beatmaps.flatMap(b => b.team2Scores);
 
-		let team1match117267618Scores = team1Scores.filter(s => s.matchId === 117267618);
-		console.log('team1 matchId 117267618 scores', team1match117267618Scores.length);
-
-		let team2match117267618Scores = team2Scores.filter(s => s.matchId === 117267618);
-		console.log('team2 matchId 117267618 scores', team2match117267618Scores.length);
-
 		//Get a list of all games played by both teams
 		let gamesPlayed = [...new Set(team1Scores.map(s => s.gameId).concat(team2Scores.map(s => s.gameId)))];
 
@@ -1028,11 +1016,7 @@ module.exports = {
 		let hideQualifiers = new Date();
 		hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 		for (let i = 0; i < gamesPlayed.length; i++) {
-			console.log(`Game ${i + 1}/${gamesPlayed.length} (${gamesPlayed[i]})`);
-
 			let team1GameScores = team1Scores.filter(s => s.gameId === gamesPlayed[i]);
-
-			console.log(team1GameScores.length);
 
 			if (team1GameScores.length < teamsize) {
 				gamesPlayed.splice(i, 1);
@@ -1041,8 +1025,6 @@ module.exports = {
 			}
 
 			let team2GameScores = team2Scores.filter(s => s.gameId === gamesPlayed[i]);
-
-			console.log(team2GameScores.length);
 
 			if (team2GameScores.length < teamsize) {
 				gamesPlayed.splice(i, 1);
