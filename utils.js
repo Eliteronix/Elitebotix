@@ -4033,20 +4033,31 @@ module.exports = {
 			// Parse the map.
 			let map = new rosu.Beatmap(bytes);
 
-			// let mods = module.exports.getMods(modBits);
-
 			if (mode && dbBeatmap.mode === 'Standard') {
 				if (mode === 1) {
 					map.convert(rosu.GameMode.Taiko);
 				} else if (mode === 2) {
 					map.convert(rosu.GameMode.Catch);
 				} else if (mode === 3) {
-					map.convert(rosu.GameMode.Mania);
+					let mods = module.exports.getMods(modBits);
 
-					// TODO: Implement keys conversion
-					// map.convert(rosu.GameMode.Mania, "6K");
+					let keyMod = mods.find(m => m.match(/\dK/));
+
+					if (keyMod) {
+						map.convert(rosu.GameMode.Mania, keyMod);
+					} else {
+						map.convert(rosu.GameMode.Mania);
+					}
 				} else {
 					console.error(`Something went wrong and we got mode ${mode}`);
+				}
+			} else if (dbBeatmap.mode === 'Mania') {
+				let mods = module.exports.getMods(modBits);
+
+				let keyMod = mods.find(m => m.match(/\dK/));
+
+				if (keyMod) {
+					map.convert(rosu.GameMode.Mania, keyMod);
 				}
 			}
 
