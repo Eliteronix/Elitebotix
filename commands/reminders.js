@@ -1,9 +1,7 @@
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
-const Discord = require('discord.js');
 
 module.exports = {
 	name: 'reminders',
@@ -27,20 +25,16 @@ module.exports = {
 		})
 		.setDMPermission(true),
 	// eslint-disable-next-line no-unused-vars
-	async execute(interaction, msg) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			try {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+	async execute(interaction) {
+		try {
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-			msg = await populateMsgFromInteraction(interaction);
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
 
 		//Get all the reminders by the user
@@ -49,7 +43,7 @@ module.exports = {
 			where: {
 				task: 'remind',
 				additions: {
-					[Op.like]: `${msg.author.id}%`,
+					[Op.like]: `${interaction.user.id}%`,
 				}
 			},
 			order: [
@@ -58,9 +52,6 @@ module.exports = {
 		});
 
 		if (reminders.length === 0) {
-			if (msg.id) {
-				return msg.reply('There are no reminders set for you');
-			}
 			return await interaction.editReply({ content: 'There are no reminders set for you', flags: MessageFlags.Ephemeral });
 		}
 
@@ -79,17 +70,7 @@ module.exports = {
 		for (let i = 0; i < setReminders.length; i++) {
 			message += `[${i + 1}] \`${setReminders[i]}\`  -  will be sent on <t:${reminderTime[i]}:F>\n`;
 		}
-		if (msg.id) {
-			//Try DM'ing the user
-			return await msg.author.send(message, { split: true })
-				.then(async () => {
-					if (msg.channel.type === Discord.ChannelType.DM) return;
-					msg.reply('You have received a DM with your pending reminders.');
-				})
-				.catch(() => {
-					return msg.reply('it seems like I can\'t DM you! Do you have DMs disabled?');
-				});
-		}
+
 		return await interaction.editReply({ content: message, flags: MessageFlags.Ephemeral });
 	}
 };
