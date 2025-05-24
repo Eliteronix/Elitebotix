@@ -44,8 +44,8 @@ module.exports = {
 		}
 
 		//Get all the reminders by the user
-		//TODO: add attributes
 		const reminders = await DBProcessQueue.findAll({
+			attributes: ['date', 'additions'],
 			where: {
 				task: 'remind',
 				additions: {
