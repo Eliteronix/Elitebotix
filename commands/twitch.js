@@ -114,8 +114,8 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'connect') {
-			//TODO: add attributes
 			const discordUser = await DBDiscordUsers.findOne({
+				attributes: ['id', 'twitchName', 'twitchId', 'twitchVerified', 'osuUserId', 'osuVerified'],
 				where: {
 					userId: interaction.user.id
 				}
@@ -131,8 +131,8 @@ module.exports = {
 				return await interaction.editReply('Your twitch account is already connected and verified to this discord account.');
 			}
 
-			//TODO: add attributes
 			let existingLinkedAccount = await DBDiscordUsers.findOne({
+				attributes: ['id'],
 				where: {
 					twitchName: twitchName.toLowerCase(),
 					twitchVerified: true,
@@ -184,8 +184,8 @@ module.exports = {
 				await interaction.editReply('There was an error connecting your twitch account. Please try again later.');
 			}
 		} else if (interaction.options.getSubcommand() === 'disconnect') {
-			//TODO: add attributes
 			const discordUser = await DBDiscordUsers.findOne({
+				attributes: ['id', 'twitchName', 'twitchId', 'twitchVerified'],
 				where: {
 					userId: interaction.user.id
 				}
@@ -202,8 +202,8 @@ module.exports = {
 
 			await interaction.editReply('Your twitch account has been disconnected.');
 		} else if (interaction.options.getSubcommand() === 'togglemp') {
-			//TODO: add attributes
 			const discordUser = await DBDiscordUsers.findOne({
+				attributes: ['id', 'twitchName', 'twitchOsuMatchCommand', 'osuUserId', 'twitchVerified'],
 				where: {
 					userId: interaction.user.id
 				}
@@ -236,8 +236,8 @@ module.exports = {
 			}
 			discordUser.save();
 		} else if (interaction.options.getSubcommand() === 'togglemapsync') {
-			//TODO: add attributes
 			const discordUser = await DBDiscordUsers.findOne({
+				attributes: ['id', 'twitchName', 'twitchOsuMapSync', 'osuUserId', 'twitchVerified'],
 				where: {
 					userId: interaction.user.id
 				}
