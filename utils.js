@@ -99,7 +99,6 @@ module.exports = {
 		return path;
 	},
 	getBeatmapApprovalStatusImage: function (beatmap) {
-
 		let beatmapStatusIcon;
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved') {
 			beatmapStatusIcon = './other/ApprovalStatus-UpwardsChevron.png';
@@ -113,7 +112,6 @@ module.exports = {
 
 		return beatmapStatusIcon;
 	},
-
 	getMods: function (input) {
 		let mods = [];
 		let modsBits = input;
