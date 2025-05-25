@@ -493,8 +493,20 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				}
 			});
 	} else if (server === 'tournaments') {
-		logOsuAPICalls('commands/osu-score.js getUser tournaments');
-		const osuUser = await osuApi.getUser({ u: username, m: mode });
+		let osuUser = null;
+
+		try {
+			logOsuAPICalls('commands/osu-score.js getUser tournaments');
+			osuUser = await osuApi.getUser({ u: username, m: mode });
+		} catch (err) {
+			if (err.message === 'Not found') {
+				await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+				return;
+			} else {
+				console.error(err);
+				return await interaction.followUp(`An error occurred while trying to get user \`${username.replace(/`/g, '')}\`.`);
+			}
+		}
 
 		const beatmapScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
