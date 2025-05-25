@@ -810,7 +810,13 @@ module.exports = {
 					if (decliner) {
 						return await interaction.editReply(`<@${decliner}> declined.`);
 					} else {
-						return await interaction.editReply('Someone didn\'t respond in time.');
+						try {
+							return await interaction.editReply('Someone didn\'t respond in time.');
+						} catch (error) {
+							if (error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 					}
 				}
 
