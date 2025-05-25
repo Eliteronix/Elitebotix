@@ -483,12 +483,26 @@ setInterval(() => {
 	uniqueDiscordUsers.set(uniqueDiscordUsersList.length);
 	uniqueOsuUsers.set(uniqueOsuUsersList.length);
 
-	const lastImport = JSON.parse(fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8'));
+	try {
+		const lastImport = JSON.parse(fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8'));
 
-	if (lastImport && lastImport.matchStart) {
-		let time = Date.now() - lastImport.matchStart;
+		if (lastImport && lastImport.matchStart) {
+			let time = Date.now() - lastImport.matchStart;
 
-		timeBehindMatchCreation.set(Math.floor(time / 1000));
+			timeBehindMatchCreation.set(Math.floor(time / 1000));
+		}
+	} catch (error) {
+		if (error.message === 'Unexpected end of JSON input') {
+			let fileContent = fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8');
+
+			if (fileContent.length === 0) {
+				console.error('index.js | lastImport.json is empty');
+			} else {
+				console.error('index.js | lastImport.json is corrupted', error);
+			}
+		} else {
+			console.error('index.js | lastImport.json', error);
+		}
 	}
 }, 5000);
 
