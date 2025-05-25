@@ -141,7 +141,13 @@ module.exports = {
 				discordUser.osuDuelStarRating = duelRating.total;
 			} catch (e) {
 				if (e.message === 'No standard plays') {
-					return await interaction.editReply(`\`${username.replace(/`/g, '')}\` has no standard plays.`);
+					try {
+						return await interaction.editReply(`\`${username.replace(/`/g, '')}\` has no standard plays.`);
+					} catch (error) {
+						if (error.message !== 'Unknown Message') {
+							console.error(error);
+						}
+					}
 				} else {
 					console.error(e);
 				}
