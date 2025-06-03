@@ -171,7 +171,14 @@ module.exports = async function (reaction, user) {
 
 	if (!reaction.message.attachments.size) {
 		// Refetch the message to get the attachments
-		reaction.message = await reaction.message.fetch({ force: true });
+		try {
+			reaction.message = await reaction.message.fetch({ force: true });
+		} catch (error) {
+			if (error.message !== 'Unknown Message') {
+				console.error(error);
+			}
+			return;
+		}
 	}
 
 	let firstAttachment = reaction.message.attachments.first();
