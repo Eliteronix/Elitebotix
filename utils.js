@@ -1237,26 +1237,30 @@ module.exports = {
 		}).then(async (response) => {
 			let json = await response.json();
 
-			let tournamentBans = json.account_history.filter((entry) => entry.type === 'tournament_ban');
+			if (json.account_history) {
+				let tournamentBans = json.account_history.filter((entry) => entry.type === 'tournament_ban');
 
-			if (tournamentBans.length) {
-				tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
+				if (tournamentBans.length) {
+					tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
 
-				if (tournamentBans[0].permanent) {
-					tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
-					tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
-					tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
-					tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
-					tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
-					tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
-					tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
-				} else {
-					tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
+					if (tournamentBans[0].permanent) {
+						tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
+						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
+						tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
+						tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
+						tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
+						tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
+						tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
+					} else {
+						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
+					}
+
+					tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
+
+					additionalInfo.tournamentBan = tournamentBans[0];
 				}
-
-				tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
-
-				additionalInfo.tournamentBan = tournamentBans[0];
+			} else {
+				console.log('Account history not found', osuUserId, json.account_history);
 			}
 
 			additionalInfo.badges = json.badges;
