@@ -416,7 +416,16 @@ module.exports = {
 												embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 											}
 
-											lastMessage = await msg.channel.send({ embeds: [embed] });
+											try {
+												lastMessage = await msg.channel.send({ embeds: [embed] });
+											} catch (error) {
+												if(error.message === 'Missing Permissions') {
+													stop = true;
+													break;
+												} else {
+													console.error(error);
+												}
+											}
 										} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
 											let attachment = await getResultImage(json.events[i], json.users, client);
 											let currentScore = '';
