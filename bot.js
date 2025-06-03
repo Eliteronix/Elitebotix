@@ -175,7 +175,9 @@ process.on('uncaughtException', (error, origin) => {
 });
 
 process.on('unhandledRejection', (reason) => {
-	console.error('Unhandled rejection, bot.js:', reason);
+	if(reason.message !== 'Channel closed'){
+		console.error('Unhandled rejection, bot.js: ', reason.message, ' | ', reason);
+	}
 });
 
 //declare what the discord client should do when it's ready
