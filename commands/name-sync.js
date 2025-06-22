@@ -38,9 +38,9 @@ module.exports = {
 					'en-US': 'The setting for the name sync',
 				})
 				.setRequired(true)
-				.addChoices({ name: 'disable', value: 'disable' }
-					, { name: 'osu! name', value: 'osuname' }
-					, { name: 'osu! name and rank', value: 'osunameandrank' }
+				.addChoices({ name: 'disable', value: 'disable' },
+					{ name: 'osu! name', value: 'osuname' },
+					{ name: 'osu! name and rank', value: 'osunameandrank' }
 				)
 		),
 	async execute(interaction) {
