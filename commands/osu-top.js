@@ -931,7 +931,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			});
 		} else if (sorting == 'sr') {
 			beatmaps.sort((a, b) => {
-				return parseFloat(b.difficultyRating) - parseFloat(a.difficultyRating);
+				return parseFloat(b.starRating) - parseFloat(a.starRating);
 			});
 		}
 	}
