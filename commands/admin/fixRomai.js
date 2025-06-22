@@ -4,8 +4,6 @@ module.exports = {
 	name: 'fixRomai',
 	usage: 'None',
 	async execute(interaction) {
-		await interaction.deferReply();
-
 		let unverifiedRomaiMatches = await DBOsuMultiMatches.findAll({
 			where: {
 				verifiedBy: 31050083,
