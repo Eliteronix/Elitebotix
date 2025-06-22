@@ -174,8 +174,8 @@ module.exports = {
 			logOsuAPICalls('commands/osu-follow.js follow');
 			await osuApi.getUser({ u: username, m: 0 })
 				.then(async (osuUser) => {
-					//TODO: Attributes
 					let existingFollow = await DBOsuTourneyFollows.findOne({
+						attributes: ['id'],
 						where: {
 							userId: interaction.user.id,
 							osuUserId: osuUser.id
@@ -186,8 +186,8 @@ module.exports = {
 						return await interaction.editReply(`You are already following ${osuUser.name}`);
 					}
 
-					//TODO: Attributes
 					let disabledFollows = await DBDiscordUsers.findOne({
+						attributes: ['id'],
 						where: {
 							osuUserId: osuUser.id,
 							disableFollows: true
@@ -225,8 +225,8 @@ module.exports = {
 			logOsuAPICalls('commands/osu-follow.js unfollow');
 			await osuApi.getUser({ u: username, m: 0 })
 				.then(async (osuUser) => {
-					//TODO: Attributes
 					let existingFollow = await DBOsuTourneyFollows.findOne({
+						attributes: ['id'],
 						where: {
 							userId: interaction.user.id,
 							osuUserId: osuUser.id
@@ -249,8 +249,8 @@ module.exports = {
 				});
 		} else if (interaction.options.getSubcommand() === 'followlist') {
 			//Get all follows for the user
-			//TODO: Attributes
 			let follows = await DBOsuTourneyFollows.findAll({
+				attributes: ['osuUserId'],
 				where: {
 					userId: interaction.user.id
 				}
@@ -268,8 +268,8 @@ module.exports = {
 			return await interaction.editReply(`You are following: \`${followList.join('`, `')}\``);
 		} else if (interaction.options.getSubcommand() === 'followers') {
 			//Check if the user has a connected osu! account
-			//TODO: Attributes
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['osuUserId'],
 				where: {
 					userId: interaction.user.id
 				}
@@ -279,8 +279,8 @@ module.exports = {
 				return await interaction.editReply(`You have not connected your osu! account. Use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your account`);
 			}
 
-			//TODO: Attributes
 			let followers = await DBOsuTourneyFollows.findAll({
+				attributes: ['userId'],
 				where: {
 					osuUserId: discordUser.osuUserId
 				}
@@ -304,8 +304,8 @@ module.exports = {
 					follower = `${discordName.username}#${discordName.discriminator}`;
 				}
 
-				//TODO: Attributes
 				let followerUser = await DBDiscordUsers.findOne({
+					attributes: ['osuName'],
 					where: {
 						userId: followers[i].userId
 					}
@@ -328,8 +328,8 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'allowfollowing') {
 			let allowFollowing = interaction.options.getBoolean('allow');
 
-			//TODO: Attributes
 			let discordUser = await DBDiscordUsers.findOne({
+				attributes: ['id', 'osuUserId', 'disableFollows'],
 				where: {
 					userId: interaction.user.id,
 					osuUserId: {
