@@ -1,4 +1,3 @@
-const { populateMsgFromInteraction, getGuildPrefix } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
 const { showUnknownInteractionError } = require('../config.json');
@@ -44,59 +43,45 @@ module.exports = {
 					, { name: 'osu! name and rank', value: 'osunameandrank' }
 				)
 		),
-	async execute(interaction, msg, args) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			try {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+	async execute(interaction) {
+		try {
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-
-			msg = await populateMsgFromInteraction(interaction);
-
-			args = [interaction.options._hoistedOptions[0].value];
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
 
-		if (args[0].toLowerCase() === 'disable') {
+		let setting = interaction.options.getString('setting');
+
+		if (setting === 'disable') {
 			let task = await DBProcessQueue.findOne({
 				attributes: ['id'],
 				where: {
-					guildId: msg.guild.id,
+					guildId: interaction.guild.id,
 					task: 'nameSync'
 				},
 			});
 
 			if (task) {
 				task.destroy();
-				if (msg.id) {
-					return msg.reply('Name Sync Disabled.');
-				}
 				return interaction.followUp({ content: 'Name Sync Disabled.', flags: MessageFlags.Ephemeral });
 			} else {
-				if (msg.id) {
-					return msg.reply('Name Sync is already disabled.');
-				}
 				return interaction.followUp({ content: 'Name Sync is already disabled.', flags: MessageFlags.Ephemeral });
 			}
-		} else if (args[0].toLowerCase() === 'osuname') {
+		} else if (setting === 'osuname') {
 			let task = await DBProcessQueue.findOne({
 				attributes: ['id', 'additions', 'date', 'beingExecuted'],
 				where: {
-					guildId: msg.guild.id,
+					guildId: interaction.guild.id,
 					task: 'nameSync'
 				},
 			});
 
 			if (task && task.additions === 'osuname') {
-				if (msg.id) {
-					return msg.reply('Name Sync is already set to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.');
-				}
 				return interaction.followUp({ content: 'Name Sync is already set to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
 			} else if (task) {
 				let date = new Date();
@@ -104,38 +89,30 @@ module.exports = {
 				task.additions = 'osuname';
 				task.beingExecuted = false;
 				task.save();
-				if (msg.id) {
-					return msg.reply('Name Sync has been changed to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.');
-				}
+
 				return interaction.followUp({ content: 'Name Sync has been changed to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
 			}
 
 			let date = new Date();
 			await DBProcessQueue.create({
-				guildId: msg.guild.id,
+				guildId: interaction.guild.id,
 				task: 'nameSync',
 				additions: 'osuname',
 				date: date,
 				priority: 5
 			});
 
-			if (msg.id) {
-				return msg.reply('Name Sync is now set to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.');
-			}
 			return interaction.followUp({ content: 'Name Sync is now set to osu! name.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
-		} else if (args[0].toLowerCase() === 'osunameandrank') {
+		} else if (setting === 'osunameandrank') {
 			let task = await DBProcessQueue.findOne({
 				attributes: ['id', 'additions', 'date', 'beingExecuted'],
 				where: {
-					guildId: msg.guild.id,
+					guildId: interaction.guild.id,
 					task: 'nameSync'
 				},
 			});
 
 			if (task && task.additions === 'osunameandrank') {
-				if (msg.id) {
-					return msg.reply('Name Sync is already set to osu! name and rank.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.');
-				}
 				return interaction.followUp({ content: 'Name Sync is already set to osu! name and rank.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
 			} else if (task) {
 				let date = new Date();
@@ -143,31 +120,20 @@ module.exports = {
 				task.additions = 'osunameandrank';
 				task.beingExecuted = false;
 				task.save();
-				if (msg.id) {
-					return msg.reply('Name Sync has been changed to osu! name and rank.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.');
-				}
+
 				return interaction.followUp({ content: 'Name Sync has been changed to osu! name and rank.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
 			}
 
 			let date = new Date();
 			await DBProcessQueue.create({
-				guildId: msg.guild.id,
+				guildId: interaction.guild.id,
 				task: 'nameSync',
 				additions: 'osunameandrank',
 				date: date,
 				priority: 5
 			});
 
-			if (msg.id) {
-				return msg.reply('Name Sync is now set to osu! name and rank.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.');
-			}
 			return interaction.followUp({ content: 'Name Sync is now set to osu! name and rank.\nBe sure to have the bot role above all other roles or else the bot won\'t be able to edit the nicknames.', flags: MessageFlags.Ephemeral });
-		} else {
-			let guildPrefix = await getGuildPrefix(msg);
-			if (msg.id) {
-				return msg.reply(`Please specify what the names should be synced to.\nCorrect usage: ${guildPrefix}${this.name} ${this.usage}`);
-			}
-			return interaction.followUp({ content: `Please specify what the names should be synced to.\nCorrect usage: ${guildPrefix}${this.name} ${this.usage}`, flags: MessageFlags.Ephemeral });
 		}
 	},
 };
