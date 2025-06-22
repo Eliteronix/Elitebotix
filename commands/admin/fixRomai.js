@@ -8,6 +8,7 @@ module.exports = {
 			verifiedBy: null,
 			verifiedAt: null,
 			verificationComment: null,
+			tourneyMatch: true,
 		}, {
 			where: {
 				verifiedBy: 31050083,
