@@ -1110,6 +1110,7 @@ module.exports = {
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
 
+		console.log(`Loading Image in utils.js | createLeaderboard: ${backgroundFile}`);
 		const background = await Canvas.loadImage(`./other/${backgroundFile}`);
 
 		for (let i = 0; i < canvas.height / background.height; i++) {
@@ -7179,6 +7180,7 @@ module.exports = {
 		}
 
 		try {
+			console.log(`Loading Image in utils.js | getMapListCover: ${path}`);
 			return await Canvas.loadImage(path);
 		} catch (err) {
 			return null;
@@ -7238,6 +7240,7 @@ module.exports = {
 			console.error(err);
 		}
 
+		console.log(`Loading Image in utils.js | getBeatmapCover: ${path}`);
 		return await Canvas.loadImage(path);
 	},
 	async getBeatmapSlimcover(beatmapsetId, beatmapId, client) {
@@ -7294,6 +7297,7 @@ module.exports = {
 			console.error(err);
 		}
 
+		console.log(`Loading Image in utils.js | getBeatmapSlimcover: ${path}`);
 		return await Canvas.loadImage(path);
 	},
 	async getAvatar(osuUserId, client) {
@@ -7347,6 +7351,7 @@ module.exports = {
 		let loadedImage;
 
 		try {
+			console.log(`Loading Image in utils.js | getAvatar: ${path}`);
 			loadedImage = await Canvas.loadImage(path);
 		} catch (err) {
 			loadedImage = await Canvas.loadImage('./other/defaultAvatar.png');
@@ -7388,6 +7393,7 @@ module.exports = {
 			console.error(err);
 		}
 
+		console.log(`Loading Image in utils.js | getBadgeImage: ${path}`);
 		return await Canvas.loadImage(path);
 	},
 	async awaitWebRequestPermission(request, client) {
@@ -8047,8 +8053,10 @@ module.exports = {
 		let userAvatar = null;
 
 		if (input.server === 'ripple') {
+			console.log(`Loading Image in utils.js | scoreCardAttachment: https://a.ripple.moe/${input.user.id}`);
 			userAvatar = await Canvas.loadImage(`https://a.ripple.moe/${input.user.id}`);
 		} else if (input.server === 'gatari') {
+			console.log(`Loading Image in utils.js | scoreCardAttachment: https://a.gatari.pw/${input.user.id}`);
 			userAvatar = await Canvas.loadImage(`https://a.gatari.pw/${input.user.id}`);
 		} else {
 			userAvatar = await module.exports.getAvatar(input.user.id, input.client);

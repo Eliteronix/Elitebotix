@@ -873,8 +873,10 @@ async function drawAvatar(input, server, client) {
 	let avatar = null;
 
 	if (server === 'ripple') {
+		console.log(`Loading Image in osu-profile.js | https://a.ripple.moe/${user.id}`);
 		avatar = await Canvas.loadImage(`https://a.ripple.moe/${user.id}`);
 	} else if (server === 'gatari') {
+		console.log(`Loading Image in osu-profile.js | https://a.gatari.pw/${user.id}`);
 		avatar = await Canvas.loadImage(`https://a.gatari.pw/${user.id}`);
 	} else {
 		avatar = await getAvatar(user.id, client);

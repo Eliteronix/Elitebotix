@@ -207,6 +207,7 @@ module.exports = {
 						ctx.clip();
 
 						//Draw a shape onto the main canvas in the top left
+						console.log(`Loading Image in weather.js | ${weather.current.imageUrl}`);
 						const weatherPic = await Canvas.loadImage(weather.current.imageUrl);
 						ctx.drawImage(weatherPic, 25, 25, 100, 100);
 
