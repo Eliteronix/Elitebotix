@@ -1110,7 +1110,6 @@ module.exports = {
 		//Get context and load the image
 		const ctx = canvas.getContext('2d');
 
-		console.log(`Loading Image in utils.js | createLeaderboard: ${backgroundFile}`);
 		const background = await Canvas.loadImage(`./other/${backgroundFile}`);
 
 		for (let i = 0; i < canvas.height / background.height; i++) {
