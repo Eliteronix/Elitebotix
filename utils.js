@@ -7180,7 +7180,6 @@ module.exports = {
 		}
 
 		try {
-			console.log(`Loading Image in utils.js | getMapListCover: ${path}`);
 			return await Canvas.loadImage(path);
 		} catch (err) {
 			return null;
@@ -7240,7 +7239,6 @@ module.exports = {
 			console.error(err);
 		}
 
-		console.log(`Loading Image in utils.js | getBeatmapCover: ${path}`);
 		return await Canvas.loadImage(path);
 	},
 	async getBeatmapSlimcover(beatmapsetId, beatmapId, client) {
@@ -7297,7 +7295,6 @@ module.exports = {
 			console.error(err);
 		}
 
-		console.log(`Loading Image in utils.js | getBeatmapSlimcover: ${path}`);
 		return await Canvas.loadImage(path);
 	},
 	async getAvatar(osuUserId, client) {
@@ -7351,7 +7348,6 @@ module.exports = {
 		let loadedImage;
 
 		try {
-			console.log(`Loading Image in utils.js | getAvatar: ${path}`);
 			loadedImage = await Canvas.loadImage(path);
 		} catch (err) {
 			loadedImage = await Canvas.loadImage('./other/defaultAvatar.png');
@@ -7393,7 +7389,6 @@ module.exports = {
 			console.error(err);
 		}
 
-		console.log(`Loading Image in utils.js | getBadgeImage: ${path}`);
 		return await Canvas.loadImage(path);
 	},
 	async awaitWebRequestPermission(request, client) {
