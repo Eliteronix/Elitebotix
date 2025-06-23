@@ -41,6 +41,7 @@ module.exports = {
 					'en-US': 'The id or link of the beatmap to display',
 				})
 				.setRequired(true)
+				.setMaxLength(15)
 		)
 		.addStringOption(option =>
 			option.setName('mods')
@@ -101,6 +102,7 @@ module.exports = {
 					'en-US': 'The id or link of the beatmap to display',
 				})
 				.setRequired(false)
+				.setMaxLength(15)
 		)
 		.addStringOption(option =>
 			option.setName('id3')
@@ -116,6 +118,7 @@ module.exports = {
 					'en-US': 'The id or link of the beatmap to display',
 				})
 				.setRequired(false)
+				.setMaxLength(15)
 		)
 		.addStringOption(option =>
 			option.setName('id4')
@@ -131,6 +134,7 @@ module.exports = {
 					'en-US': 'The id or link of the beatmap to display',
 				})
 				.setRequired(false)
+				.setMaxLength(15)
 		)
 		.addStringOption(option =>
 			option.setName('id5')
@@ -146,6 +150,7 @@ module.exports = {
 					'en-US': 'The id or link of the beatmap to display',
 				})
 				.setRequired(false)
+				.setMaxLength(15)
 		),
 	async execute(interaction) {
 		if (interaction.commandName === 'osu-beatmap') {
