@@ -402,8 +402,8 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
 	}
 
-	if (tournamentOccurences.length > 2000) {
-		tournamentOccurences = tournamentOccurences.substring(0, 1897) + '...';
+	if (tournamentOccurences.length > 1950) {
+		tournamentOccurences = tournamentOccurences.substring(0, 1947) + '...';
 	}
 
 	if (tournament) {
