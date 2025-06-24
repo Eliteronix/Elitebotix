@@ -398,12 +398,22 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	//TODO: Number is wrong
 	tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 
-	if (tournaments.length === 0) {
-		tournamentOccurences = 'The map was never played in any tournaments.';
+	let addDots = false;
+
+	while (tournamentOccurences.length > 1945) {
+		addDots = true;
+
+		tournaments.pop();
+
+		tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
 	}
 
-	if (tournamentOccurences.length > 1950) {
-		tournamentOccurences = tournamentOccurences.substring(0, 1947) + '...';
+	if (addDots) {
+		tournamentOccurences = tournamentOccurences + '...';
+	}
+
+	if (tournaments.length === 0) {
+		tournamentOccurences = 'The map was never played in any tournaments.';
 	}
 
 	if (tournament) {
