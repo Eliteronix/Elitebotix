@@ -1803,7 +1803,7 @@ module.exports = {
 
 		let sentMessage = await interaction.editReply({ content: content, files: files });
 
-		if (team1.length === 1 && team2.length === 1) {
+		if (team1.length === 1 && team2.length === 1 && (interaction.context === 1 || interaction.guild)) {
 			await sentMessage.react('🔵');
 			await sentMessage.react('🔴');
 		}
