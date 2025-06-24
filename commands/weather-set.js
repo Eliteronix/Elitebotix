@@ -9,6 +9,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'weather-set',
 	description: 'Allows you to set the default degree type/location for the weather command',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 10,

@@ -7,6 +7,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'reminders-edit',
 	description: 'Edit your reminders',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,

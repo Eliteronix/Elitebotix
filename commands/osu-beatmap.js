@@ -9,6 +9,8 @@ const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms }
 module.exports = {
 	name: 'osu-beatmap',
 	description: 'Sends an info card about the specified beatmap',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

@@ -7,6 +7,8 @@ const { Op } = require('sequelize');
 module.exports = {
 	name: 'twitch',
 	description: 'Allowes you to manage the twitch commands',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

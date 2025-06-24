@@ -6,6 +6,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'time',
 	description: 'Sends current time of the given location',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.EmbedLinks, PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send messages and link embeds',
 	cooldown: 5,

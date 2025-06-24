@@ -175,7 +175,7 @@ process.on('uncaughtException', (error, origin) => {
 });
 
 process.on('unhandledRejection', (reason) => {
-	if(reason.message !== 'Channel closed'){
+	if (reason.message !== 'Channel closed') {
 		console.error('Unhandled rejection, bot.js: ', reason.message, ' | ', reason);
 	}
 });
@@ -209,7 +209,11 @@ function readyDiscord() {
 		const command = require(`./commands/${file}`);
 
 		if (command.tags !== 'debug' && command.data || command.name === 'admin') {
-			commands.push(command.data.toJSON());
+			let commandJson = command.data.toJSON();
+			commandJson.integration_types = command.integration_types;
+			commandJson.contexts = command.contexts;
+
+			commands.push(commandJson);
 		}
 	}
 

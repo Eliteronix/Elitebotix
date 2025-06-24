@@ -7,6 +7,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'osu-link',
 	description: 'Allows you to link your Discord Account to your osu! Account',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 15,

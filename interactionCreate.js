@@ -28,7 +28,7 @@ module.exports = async function (client, interaction) {
 			|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(interaction.commandName));
 
 		//Check permissions of the bot
-		if (interaction.guildId) {
+		if (interaction.guild) {
 			let member = interaction.guild.members.cache.get(client.user.id);
 
 			while (!member) {

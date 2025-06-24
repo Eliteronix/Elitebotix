@@ -11,6 +11,8 @@ const { showUnknownInteractionError, daysHidingQualifiers } = require('../config
 module.exports = {
 	name: 'osu-matchup',
 	description: 'Sends an info card about the matchups between the specified players',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AddReactions, PermissionsBitField.Flags.UseExternalEmojis],
 	botPermissionsTranslated: 'Send Messages, Attach Files and Add Reactions (including external emojis)',
 	cooldown: 5,

@@ -12,6 +12,8 @@ const ChartJsImage = require('chartjs-to-image');
 module.exports = {
 	name: 'osu-profile',
 	description: 'Sends an info card about the specified player',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,

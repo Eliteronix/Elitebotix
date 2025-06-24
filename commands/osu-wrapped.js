@@ -12,6 +12,8 @@ const Sequelize = require('sequelize');
 module.exports = {
 	name: 'osu-wrapped',
 	description: 'Sums up the year in osu! for a user',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 15,

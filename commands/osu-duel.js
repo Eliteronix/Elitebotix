@@ -14,6 +14,8 @@ const fs = require('fs');
 module.exports = {
 	name: 'osu-duel',
 	description: 'Lets you play a match which is being reffed by the bot',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.AttachFiles, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AddReactions, PermissionsBitField.Flags.UseExternalEmojis],
 	botPermissionsTranslated: 'Send Messages, Attach Files and Add Reactions (including external emojis)',
 	cooldown: 15,
@@ -562,6 +564,11 @@ module.exports = {
 				interaction.options._subcommand === 'match7v7' ||
 				interaction.options._subcommand === 'match8v8' ||
 				interaction.options._subcommand === 'match') {
+
+				if (!interaction.guild) {
+					return await interaction.reply({ content: 'Creating matches with this command can only be done in a server with the bot.', flags: MessageFlags.Ephemeral });
+				}
+
 				try {
 					await interaction.deferReply();
 				} catch (error) {

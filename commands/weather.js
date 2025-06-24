@@ -10,6 +10,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'weather',
 	description: 'Sends info about the weather of the given location',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 5,
@@ -205,11 +207,6 @@ module.exports = {
 						ctx.arc(75, 75, 50, 0, Math.PI * 2, true);
 						ctx.closePath();
 						ctx.clip();
-
-						//Draw a shape onto the main canvas in the top left
-						console.log(`Loading Image in weather.js | ${weather.current.imageUrl}`);
-						//const weatherPic = await Canvas.loadImage(weather.current.imageUrl);
-						//ctx.drawImage(weatherPic, 25, 25, 100, 100);
 
 						//Create as an attachment
 						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `elitebotix-weather-${weather.location.name}.png` });

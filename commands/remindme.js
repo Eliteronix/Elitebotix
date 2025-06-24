@@ -7,6 +7,8 @@ const { MessageFlags } = require('discord.js');
 module.exports = {
 	name: 'remindme',
 	description: 'Sends a reminder at the specified time',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	//botPermissions: 'MANAGE_ROLES',
 	//botPermissionsTranslated: 'Manage Roles',
 	cooldown: 5,

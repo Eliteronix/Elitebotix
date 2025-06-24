@@ -8,6 +8,8 @@ const { Op, Sequelize } = require('sequelize');
 module.exports = {
 	name: 'osu-decay',
 	description: 'Calculates how long it would take for a player to decay from their current rank',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,

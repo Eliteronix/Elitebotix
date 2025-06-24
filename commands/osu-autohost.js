@@ -6,6 +6,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'osu-autohost',
 	description: 'Hosts an automated lobby ingame',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages],
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 60,
@@ -149,7 +151,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(interaction, msg, args) {
+	async execute(interaction, msg) {
 		let settings = {};
 
 		settings.interaction = interaction.token;
@@ -167,8 +169,6 @@ module.exports = {
 		}
 
 		msg = await populateMsgFromInteraction(interaction);
-
-		args = [];
 
 		for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
 			if (interaction.options._hoistedOptions[i].name === 'password') {

@@ -4,6 +4,8 @@ const { showUnknownInteractionError } = require('../config.json');
 module.exports = {
 	name: 'ship',
 	description: 'Lets you check how compatible two users are.',
+	integration_types: [0, 1], // 0 for guild, 1 for user
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: PermissionsBitField.Flags.SendMessages,
 	botPermissionsTranslated: 'Send Messages',
 	cooldown: 5,
@@ -74,22 +76,22 @@ module.exports = {
 			}
 
 			const compatibility = Math.floor(Math.random() * 100) + 1;
-	
+
 			let data = [];
 			data.push(`\`${firstName.replace(/`/g, '')}\` + \`${secondName.replace(/`/g, '')}\``);
-	
+
 			const shipname = `${firstName.substring(0, firstName.length / 2)}${secondName.substring(secondName.length / 2, secondName.length)}`;
-	
+
 			data.push(`Shipping name: \`${shipname.replace(/`/g, '')}\``);
 			data.push(`Compatibility: ${compatibility}%`);
-	
+
 			await interaction.editReply(data.join('\n'));
 		} catch (e) {
 			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
 				console.error('commands/ship.js | Get ship member', e);
 			}
 
-			await interaction.editReply('Error, please try again later.')
+			await interaction.editReply('Error, please try again later.');
 		}
 	},
 };
