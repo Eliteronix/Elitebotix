@@ -184,7 +184,7 @@ module.exports = {
 					let sentMessage = await changelogChannel.send({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${c.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
 					sentMessage.crosspost();
 				}
-			}, { context: { args: canvasHeight, title, changes } });
+			}, { context: { canvasHeight: canvasHeight, title: title, changes: changes } });
 
 			await interaction.reply({
 				content: `The following message has been posted:\n\n**Elitebotix has been updated** - Please report any bugs by using </feedback:${interaction.client.slashCommandData.find(command => command.name === 'feedback').id}>.`,
