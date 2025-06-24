@@ -409,7 +409,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	}
 
 	if (addDots) {
-		tournamentOccurences = tournamentOccurences + '...';
+		tournamentOccurences = tournamentOccurences + ', ...';
 	}
 
 	if (tournaments.length === 0) {
