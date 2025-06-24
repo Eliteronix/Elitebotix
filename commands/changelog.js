@@ -143,6 +143,8 @@ module.exports = {
 				if (changelogChannel) {
 					const canvasWidth = 1000;
 
+					changes = changes.split('\\n');
+
 					//Create Canvas
 					const Canvas = require('@napi-rs/canvas');
 					const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
@@ -175,7 +177,9 @@ module.exports = {
 
 					ctx.font = 'bold 25px comfortaa, arial';
 					ctx.textAlign = 'left';
-					ctx.fillText(changes, 100, 150);
+					for (let i = 0; i < changes.length; i++) {
+						ctx.fillText(changes[i], 100, 150 + (i * 30));
+					}
 
 					//Create as an attachment
 					const Discord = require('discord.js');
@@ -184,7 +188,7 @@ module.exports = {
 					let sentMessage = await changelogChannel.send({ content: `**Elitebotix has been updated** - Please report any bugs by using </feedback:${c.slashCommandData.find(command => command.name === 'feedback').id}>.`, files: [attachment] });
 					sentMessage.crosspost();
 				}
-			}, { context: { canvasHeight: canvasHeight, title: title, changes: changes } });
+			}, { context: { canvasHeight: canvasHeight, title: title, changes: interaction.options.getString('changes') } });
 
 			await interaction.reply({
 				content: `The following message has been posted:\n\n**Elitebotix has been updated** - Please report any bugs by using </feedback:${interaction.client.slashCommandData.find(command => command.name === 'feedback').id}>.`,
