@@ -208,8 +208,8 @@ module.exports = {
 
 						//Draw a shape onto the main canvas in the top left
 						console.log(`Loading Image in weather.js | ${weather.current.imageUrl}`);
-						const weatherPic = await Canvas.loadImage(weather.current.imageUrl);
-						ctx.drawImage(weatherPic, 25, 25, 100, 100);
+						//const weatherPic = await Canvas.loadImage(weather.current.imageUrl);
+						//ctx.drawImage(weatherPic, 25, 25, 100, 100);
 
 						//Create as an attachment
 						const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `elitebotix-weather-${weather.location.name}.png` });
