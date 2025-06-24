@@ -1388,16 +1388,18 @@ module.exports = {
 						sentMessage = await interaction.channel.send({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings] });
 					}
 
-					await sentMessage.react('👤');
-					await sentMessage.react('🥇');
-					await sentMessage.react('📈');
-					if (userDuelStarRating.noMod !== null
-						|| userDuelStarRating.hidden !== null
-						|| userDuelStarRating.hardRock !== null
-						|| userDuelStarRating.doubleTime !== null
-						|| userDuelStarRating.freeMod !== null) {
-						await sentMessage.react('🆚');
-						await sentMessage.react('📊');
+					if (interaction.context === 1 || interaction.guild) {
+						await sentMessage.react('👤');
+						await sentMessage.react('🥇');
+						await sentMessage.react('📈');
+						if (userDuelStarRating.noMod !== null
+							|| userDuelStarRating.hidden !== null
+							|| userDuelStarRating.hardRock !== null
+							|| userDuelStarRating.doubleTime !== null
+							|| userDuelStarRating.freeMod !== null) {
+							await sentMessage.react('🆚');
+							await sentMessage.react('📊');
+						}
 					}
 				} catch (error) {
 					if (error.message !== 'Unknown Message' && error.message !== 'Missing Permissions') {
