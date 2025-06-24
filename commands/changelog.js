@@ -77,7 +77,7 @@ module.exports = {
 
 		const canvasHeight = interaction.options.getNumber('height');
 		const title = interaction.options.getString('title');
-		const changes = interaction.options.getString('changes');
+		let changes = interaction.options.getString('changes');
 
 		if (!canvasHeight || !title || !changes) {
 			return await interaction.reply({
@@ -85,6 +85,8 @@ module.exports = {
 				flags: MessageFlags.Ephemeral,
 			});
 		}
+
+		changes = changes.split('\\n');
 
 		const canvasWidth = 1000;
 
@@ -120,7 +122,9 @@ module.exports = {
 
 		ctx.font = 'bold 25px comfortaa, arial';
 		ctx.textAlign = 'left';
-		ctx.fillText(changes, 100, 150);
+		for (let i = 0; i < changes.length; i++) {
+			ctx.fillText(changes[i], 100, 150 + (i * 30));
+		}
 
 
 		//Create as an attachment
