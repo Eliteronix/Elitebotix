@@ -964,7 +964,7 @@ module.exports = {
 
 			fs.writeFileSync(`./mappacks/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_').replace(/\/+/gm, '_')}.zip`, content);
 
-			await interaction.editReply({ content: `Mappack for \`${mappoolName.replace(/`/g, '')}\` available [here](http://www.eliteronix.de/mappack/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_').replace(/\/+/gm, '_')}).` });
+			await interaction.editReply({ content: `Mappack for \`${mappoolName.replace(/`/g, '')}\` available [here](https://www.eliteronix.de/mappack/${discordUser.osuUserId}-${mappoolName.replace(/`/g, '').replace(/ +/gm, '_').replace(/\/+/gm, '_')}).` });
 		} else if (interaction.options.getSubcommand() === 'createfromsheet') {
 			let discordUser = await DBDiscordUsers.findOne({
 				attributes: ['osuUserId'],
