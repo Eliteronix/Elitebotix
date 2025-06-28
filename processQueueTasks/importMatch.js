@@ -90,7 +90,7 @@ module.exports = {
 				//Match has not been completed yet / 6 hours didn't pass
 				await saveOsuMultiScores(match, client);
 
-				let playedRounds = DBOsuMultiMatches.count({
+				let playedRounds = await DBOsuMultiMatches.count({
 					where: {
 						matchId: matchId,
 					}
@@ -118,11 +118,6 @@ module.exports = {
 								players.push(match.games[i].scores[j].userId);
 							}
 						}
-					}
-
-					if (players.length === 0) {
-						console.log(`No players found for match ${matchId} (${match.name})`);
-						console.log(playedRounds);
 					}
 
 					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
