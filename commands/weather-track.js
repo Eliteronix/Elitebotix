@@ -1,8 +1,8 @@
 const { DBProcessQueue } = require('../dbObjects');
 const weather = require('weather-js');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { populateMsgFromInteraction } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'weather-track',
@@ -107,8 +107,8 @@ module.exports = {
 						})
 						.setRequired(true)
 						.addChoices(
-							{ name: 'Celcius', value: 'c' },
-							{ name: 'Fahrenheit', value: 'f' },
+							{ name: 'Celcius', value: 'C' },
+							{ name: 'Fahrenheit', value: 'F' },
 						)
 				)
 		)
@@ -142,8 +142,8 @@ module.exports = {
 						})
 						.setRequired(true)
 						.addChoices(
-							{ name: 'Celcius', value: 'c' },
-							{ name: 'Fahrenheit', value: 'f' },
+							{ name: 'Celcius', value: 'C' },
+							{ name: 'Fahrenheit', value: 'F' },
 						)
 				)
 				.addStringOption(option =>
@@ -163,200 +163,134 @@ module.exports = {
 						.setRequired(true)
 				)
 		),
-	async execute(interaction, msg, args) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			try {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+	async execute(interaction) {
+		try {
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-
-			if (interaction.options.getSubcommand() === 'list') {
-				args = ['list'];
-			} else if (interaction.options.getSubcommand() === 'add') {
-				let location = null;
-				let frequency = null;
-				let unit = null;
-
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'location') {
-						location = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'frequency') {
-						frequency = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'unit') {
-						unit = interaction.options._hoistedOptions[i].value;
-					}
-				}
-
-				args = [frequency, unit, location];
-
-			} else if (interaction.options.getSubcommand() === 'remove') {
-				let location = null;
-				let unit = null;
-
-				for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-					if (interaction.options._hoistedOptions[i].name === 'location') {
-						location = interaction.options._hoistedOptions[i].value;
-					} else if (interaction.options._hoistedOptions[i].name === 'unit') {
-						unit = interaction.options._hoistedOptions[i].value;
-					}
-				}
-
-				args = ['remove', unit, location];
-			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
-		let timePeriod = '';
-		if (args[0].toLowerCase() === 'list') {
-			//TODO: add attributes
+
+		if (interaction.options.getSubcommand() === 'list') {
 			const trackingList = await DBProcessQueue.findAll({
-				where: { task: 'periodic-weather' }
+				attributes: ['additions'],
+				where: {
+					task: 'periodic-weather',
+					additions: {
+						[Op.like]: `${interaction.channel.id};%`
+					}
+				}
 			});
 
 			let trackingListString = '';
 
 			for (let i = 0; i < trackingList.length; i++) {
-				if (!trackingList[i].additions.startsWith(msg.channel.id)) {
-					trackingList.splice(i, 1);
-					i--;
-				} else {
-					const args = trackingList[i].additions.split(';');
-					trackingListString += `\n\`${args[3]}\` - ${args[1]} in °${args[2]}`;
-				}
+				const args = trackingList[i].additions.split(';');
+				trackingListString += `\n\`${args[3]}\` - ${args[1]} in °${args[2]}`;
 			}
 
-			if (msg.id) {
-				return msg.reply(trackingListString || 'No weather tracking tasks found in this channel.');
-			}
 			return await interaction.editReply(trackingListString || 'No weather tracking tasks found in this channel.');
-		} else if (args[0].toLowerCase() === 'remove') {
-			args.shift();
-			//TODO: add attributes
+		} else if (interaction.options.getSubcommand() === 'remove') {
 			const trackingList = await DBProcessQueue.findAll({
-				where: { task: 'periodic-weather' }
+				attributes: ['id', 'additions'],
+				where: {
+					task: 'periodic-weather'
+				}
 			});
 
-			let degreeType = '';
-
-			if (args[0].toLowerCase() === 'c') {
-				degreeType = 'C';
-			} else if (args[0].toLowerCase() === 'f') {
-				degreeType = 'F';
-			} else {
-				return msg.reply('Please specify if it is a tracker in `C` or in `F` as the second argument.');
-			}
-			args.shift();
+			let degreeType = interaction.options.getString('unit');
+			let location = interaction.options.getString('location');
 
 			for (let i = 0; i < trackingList.length; i++) {
-				if (trackingList[i].additions.startsWith(msg.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.endsWith(`;${args.join(' ')}`)) {
+				if (trackingList[i].additions.startsWith(interaction.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.endsWith(`;${location}`)) {
 					trackingList[i].destroy();
-					if (msg.id) {
-						return msg.reply('The specified tracker has been removed.');
-					}
 					return await interaction.editReply('The specified tracker has been removed.');
 				}
 			}
-			if (msg.id) {
-				return msg.reply('Couldn\'t find a weather tracker to remove.');
-			}
+
 			return await interaction.editReply('Couldn\'t find a weather tracker to remove.');
-		} else if (args[0].toLowerCase() === 'hourly') {
-			timePeriod = 'hourly';
-			args.shift();
-		} else if (args[0].toLowerCase() === 'daily') {
-			timePeriod = 'daily';
-			args.shift();
-		} else {
-			return msg.reply('The first argument should declare if it is `hourly` or `daily`.');
-		}
+		} else if (interaction.options.getSubcommand() === 'add') {
+			let degreeType = interaction.options.getString('unit') || 'C';
+			let timePeriod = interaction.options.getString('frequency');
+			let location = interaction.options.getString('location');
 
-		let degreeType = 'C';
-		if (args[0].toLowerCase() === 'f' || args[0].toLowerCase() === 'fahrenheit') {
-			degreeType = 'F';
-			args.shift();
-		} else if (args[0].toLowerCase() === 'c' || args[0].toLowerCase() === 'celcius') {
-			args.shift();
-		}
+			weather.find({ search: location, degreeType: degreeType }, async function (err, result) {
+				if (err) console.error(err);
 
-		weather.find({ search: args.join(' '), degreeType: degreeType }, async function (err, result) {
-			if (err) console.error(err);
-
-			if (!result[0]) {
-				if (msg.id) {
-					return msg.reply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
+				if (!result[0]) {
+					return await interaction.editReply(`Could not find location \`${location.replace(/`/g, '')}\``);
 				}
-				return await interaction.editReply(`Could not find location \`${args.join(' ').replace(/`/g, '')}\``);
-			}
 
-			let date = new Date();
+				let date = new Date();
 
-			date.setUTCMinutes(0);
-			date.setUTCSeconds(0);
-			date.setUTCMilliseconds(0);
-			date.setUTCHours(date.getUTCHours() + 1);
+				date.setUTCMinutes(0);
+				date.setUTCSeconds(0);
+				date.setUTCMilliseconds(0);
+				date.setUTCHours(date.getUTCHours() + 1);
 
-			if (timePeriod === 'daily') {
-				date.setUTCHours(0);
-				date.setUTCDate(date.getUTCDate() + 1);
-			}
+				if (timePeriod === 'daily') {
+					date.setUTCHours(0);
+					date.setUTCDate(date.getUTCDate() + 1);
+				}
 
-			//TODO: add attributes
-			const duplicate = await DBProcessQueue.findOne({
-				where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}` }
+				const duplicate = await DBProcessQueue.findOne({
+					attributes: ['id'],
+					where: {
+						guildId: 'None',
+						task: 'periodic-weather',
+						priority: 9,
+						additions: `${interaction.channel.id};${timePeriod};${degreeType};${location}`
+					}
+				});
+
+				if (duplicate) {
+					return await interaction.editReply(`The weather for ${location} is already being provided ${timePeriod} in this channel.`);
+				}
+
+				if (timePeriod === 'hourly') {
+					const dailyDuplicate = await DBProcessQueue.findOne({
+						attributes: ['id', 'additions'],
+						where: {
+							guildId: 'None',
+							task: 'periodic-weather',
+							priority: 9,
+							additions: `${interaction.channel.id};daily;${degreeType};${location}`
+						}
+					});
+
+					if (dailyDuplicate) {
+						dailyDuplicate.additions = `${interaction.channel.id};${timePeriod};${degreeType};${location}`;
+						dailyDuplicate.save();
+
+						return await interaction.editReply(`The weather for ${location} will now be provided hourly instead of daily.`);
+					}
+				} else {
+					const hourlyDuplicate = await DBProcessQueue.findOne({
+						attributes: ['id', 'additions'],
+						where: {
+							guildId: 'None',
+							task: 'periodic-weather',
+							priority: 9,
+							additions: `${interaction.channel.id};hourly;${degreeType};${location}`
+						}
+					});
+
+					if (hourlyDuplicate) {
+						hourlyDuplicate.additions = `${interaction.channel.id};${timePeriod};${degreeType};${location}`;
+						hourlyDuplicate.save();
+
+						return await interaction.editReply(`The weather for ${location} will now be provided daily instead of hourly.`);
+					}
+				}
+
+				DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${interaction.channel.id};${timePeriod};${degreeType};${location}`, date: date });
+
+				return await interaction.editReply(`The weather for ${location} will be provided ${timePeriod} in this channel.`);
 			});
-
-			if (duplicate) {
-				if (msg.id) {
-					return msg.reply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
-				}
-				return await interaction.editReply(`The weather for ${args.join(' ')} is already being provided ${timePeriod} in this channel.`);
-			}
-
-			if (timePeriod === 'hourly') {
-				//TODO: add attributes
-				const dailyDuplicate = await DBProcessQueue.findOne({
-					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};daily;${degreeType};${args.join(' ')}` }
-				});
-
-				if (dailyDuplicate) {
-					dailyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
-					dailyDuplicate.save();
-
-					if (msg.id) {
-						return msg.reply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
-					}
-					return await interaction.editReply(`The weather for ${args.join(' ')} will now be provided hourly instead of daily.`);
-				}
-			} else {
-				//TODO: add attributes
-				const hourlyDuplicate = await DBProcessQueue.findOne({
-					where: { guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};hourly;${degreeType};${args.join(' ')}` }
-				});
-
-				if (hourlyDuplicate) {
-					hourlyDuplicate.additions = `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`;
-					hourlyDuplicate.save();
-
-					if (msg.id) {
-						return msg.reply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
-					}
-					return await interaction.editReply(`The weather for ${args.join(' ')} will now be provided daily instead of hourly.`);
-				}
-			}
-
-			DBProcessQueue.create({ guildId: 'None', task: 'periodic-weather', priority: 9, additions: `${msg.channel.id};${timePeriod};${degreeType};${args.join(' ')}`, date: date });
-
-			if (msg.id) {
-				return msg.reply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
-			}
-			return await interaction.editReply(`The weather for ${args.join(' ')} will be provided ${timePeriod} in this channel.`);
-		});
+		}
 	},
 };
