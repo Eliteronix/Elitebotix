@@ -120,6 +120,11 @@ module.exports = {
 						}
 					}
 
+					if (players.length === 0) {
+						console.log(`No players found for match ${matchId} (${match.name})`);
+						console.log(playedRounds);
+					}
+
 					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
 
 					if (!args[4] || args[4] !== players.join(',')) {
