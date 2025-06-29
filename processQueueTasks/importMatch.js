@@ -1,6 +1,6 @@
 const { saveOsuMultiScores, updateCurrentMatchesChannel, logOsuAPICalls } = require('../utils');
 const osu = require('node-osu');
-const { DBProcessQueue, DBOsuMultiMatches } = require('../dbObjects');
+const { DBProcessQueue, DBOsuMultiGames } = require('../dbObjects');
 const { logBroadcastEval } = require('../config.json');
 const { Op } = require('sequelize');
 
@@ -90,7 +90,7 @@ module.exports = {
 				//Match has not been completed yet / 6 hours didn't pass
 				await saveOsuMultiScores(match, client);
 
-				let playedRounds = await DBOsuMultiMatches.count({
+				let playedRounds = await DBOsuMultiGames.count({
 					where: {
 						matchId: matchId,
 					}
@@ -118,11 +118,6 @@ module.exports = {
 								players.push(match.games[i].scores[j].userId);
 							}
 						}
-					}
-
-					if (players.length === 0) {
-						console.log(`Importing match ${matchId} with ${players.length} players, ${match.games.length} games, ${playedRounds} played rounds, ${tourneyMatch ? 'tourney match' : 'normal match'}`);
-						console.log(playedRounds);
 					}
 
 					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
