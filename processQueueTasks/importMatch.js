@@ -120,8 +120,10 @@ module.exports = {
 						}
 					}
 
-					console.log(`Importing match ${matchId} with ${players.length} players, ${match.games.length} games, ${playedRounds} played rounds, ${tourneyMatch ? 'tourney match' : 'normal match'}`);
-					console.log(playedRounds);
+					if (players.length === 0) {
+						console.log(`Importing match ${matchId} with ${players.length} players, ${match.games.length} games, ${playedRounds} played rounds, ${tourneyMatch ? 'tourney match' : 'normal match'}`);
+						console.log(playedRounds);
+					}
 
 					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
 
