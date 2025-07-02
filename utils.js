@@ -8047,10 +8047,8 @@ module.exports = {
 		let userAvatar = null;
 
 		if (input.server === 'ripple') {
-			console.log(`Loading Image in utils.js | scoreCardAttachment: https://a.ripple.moe/${input.user.id}`);
 			userAvatar = await Canvas.loadImage(`https://a.ripple.moe/${input.user.id}`);
 		} else if (input.server === 'gatari') {
-			console.log(`Loading Image in utils.js | scoreCardAttachment: https://a.gatari.pw/${input.user.id}`);
 			userAvatar = await Canvas.loadImage(`https://a.gatari.pw/${input.user.id}`);
 		} else {
 			userAvatar = await module.exports.getAvatar(input.user.id, input.client);
