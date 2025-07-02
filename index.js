@@ -498,7 +498,7 @@ setInterval(() => {
 			if (fileContent.length === 0) {
 				console.error('index.js | lastImport.json is empty');
 			} else {
-				console.error('index.js | lastImport.json is corrupted', error);
+				console.error('index.js | lastImport.json is corrupted', error.message, error);
 			}
 		} else {
 			console.error('index.js | lastImport.json', error);
