@@ -190,9 +190,12 @@ module.exports = {
 
 		if (guild) {
 			if (args[0].toLowerCase() === 'add') {
-				//TODO: add attributes
 				const ticket = await DBTickets.findOne({
-					where: { guildId: msg.guildId, channelId: msg.channel.id }
+					attributes: ['id', 'creatorId', 'additionalParties'],
+					where: {
+						guildId: msg.guildId,
+						channelId: msg.channel.id
+					}
 				});
 
 				if (ticket) {
