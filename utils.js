@@ -5526,7 +5526,7 @@ module.exports = {
 						let playerName = await getOsuPlayerName(players[j]);
 
 						if (playerName) {
-							players[j] = playerName;
+							players[j] = `[${playerName}](<https://osu.ppy.sh/users/${players[j]}>)`;
 						}
 					}
 
@@ -5538,8 +5538,8 @@ module.exports = {
 				}
 
 				matches.push({
-					content: `<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R> - \`${matchName.replace(/`/g, '')}\`${players}`,
-					start: `<https://osu.ppy.sh/mp/${matchId}> - <t:${matchCreation / 1000}:R>`,
+					content: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R> - ${players}`,
+					start: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R>`,
 				});
 			}
 
@@ -5556,7 +5556,7 @@ module.exports = {
 			if (matches.length > 0) {
 				for (let i = 0; i < matches.length; i++) {
 					if (!messages.map(message => message.content.replace(/:R>.+/gm, ':R>').toLowerCase()).includes(matches[i].start.toLowerCase())) {
-						await textChannel.send(matches[i].content);
+						await textChannel.send({ content: matches[i].content, allowedMentions: { 'users': [] } });
 					} else {
 						let message = messages.find(m => m.content.replace(/:R>.+/gm, ':R>').toLowerCase() === matches[i].start.toLowerCase());
 						if (message && message.content !== matches[i].content) {
