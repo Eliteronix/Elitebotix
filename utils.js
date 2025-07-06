@@ -5530,6 +5530,10 @@ module.exports = {
 						}
 					}
 
+					if (players.length === 0) {
+						players.push('No rounds played yet');
+					}
+
 					players = ` - ${players.join(', ')}`;
 				}
 
