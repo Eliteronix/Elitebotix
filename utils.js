@@ -5527,6 +5527,8 @@ module.exports = {
 
 						if (playerName) {
 							players[j] = `[${playerName}](<https://osu.ppy.sh/users/${players[j]}>)`;
+						} else {
+							players[j] = `[${players[j]}](<https://osu.ppy.sh/users/${players[j]}>)`;
 						}
 					}
 
