@@ -5530,10 +5530,6 @@ module.exports = {
 						}
 					}
 
-					if (players.length === 0) {
-						players.push('No rounds played yet');
-					}
-
 					players = ` - ${players.join(', ')}`;
 				}
 
@@ -5542,7 +5538,7 @@ module.exports = {
 				}
 
 				matches.push({
-					content: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R> - ${players}`,
+					content: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R>${players}`,
 					start: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R>`,
 				});
 			}
