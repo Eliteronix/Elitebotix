@@ -5551,7 +5551,13 @@ module.exports = {
 			let messagesToDelete = messages.filter(message => !matches.map(match => match.start.toLowerCase()).includes(message.content.replace(/:R>.+/gm, ':R>').toLowerCase()));
 
 			messagesToDelete.forEach(async (message) => {
-				await message.delete();
+				try {
+					await message.delete();
+				} catch (error) {
+					if (error.message !== 'Unknown Message') {
+						console.error('Error deleting message in updateCurrentMatchesChannel utils.js', error);
+					}
+				}
 			});
 
 			// Send new messages if there are any missing
@@ -5562,7 +5568,13 @@ module.exports = {
 					} else {
 						let message = messages.find(m => m.content.replace(/:R>.+/gm, ':R>').toLowerCase() === matches[i].start.toLowerCase());
 						if (message && message.content !== matches[i].content) {
-							await message.edit(matches[i].content);
+							try {
+								await message.edit(matches[i].content);
+							} catch (error) {
+								if (error.message !== 'Unknown Message') {
+									console.error('Error editing message in updateCurrentMatchesChannel utils.js', error);
+								}
+							}
 						}
 					}
 				}
