@@ -5532,7 +5532,7 @@ module.exports = {
 						}
 					}
 
-					players = ` - ${players.join(', ')}`;
+					players = ` - Players: ${players.join(', ')}`;
 				}
 
 				if (matchName.toLowerCase().includes('qualifiers')) {
