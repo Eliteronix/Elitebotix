@@ -347,26 +347,28 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 					sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 				}
 
-				await sentMessage.react('🥇');
-				await sentMessage.react('📈');
+				if (interaction.context === 1 || interaction.guild) {
+					await sentMessage.react('🥇');
+					await sentMessage.react('📈');
 
-				let userScore = await DBOsuMultiGameScores.findOne({
-					attributes: ['id'],
-					where: {
-						osuUserId: user.id,
-						score: {
-							[Op.gte]: 10000
-						},
-						warmup: {
-							[Op.not]: true
+					let userScore = await DBOsuMultiGameScores.findOne({
+						attributes: ['id'],
+						where: {
+							osuUserId: user.id,
+							score: {
+								[Op.gte]: 10000
+							},
+							warmup: {
+								[Op.not]: true
+							}
 						}
-					}
-				});
+					});
 
-				if (userScore) {
-					await sentMessage.react('<:master:951396806653255700>');
-					await sentMessage.react('🆚');
-					await sentMessage.react('📊');
+					if (userScore) {
+						await sentMessage.react('<:master:951396806653255700>');
+						await sentMessage.react('🆚');
+						await sentMessage.react('📊');
+					}
 				}
 			})
 			.catch(err => {
@@ -875,10 +877,8 @@ async function drawAvatar(input, server, client) {
 	let avatar = null;
 
 	if (server === 'ripple') {
-		console.log(`Loading Image in osu-profile.js | https://a.ripple.moe/${user.id}`);
 		avatar = await Canvas.loadImage(`https://a.ripple.moe/${user.id}`);
 	} else if (server === 'gatari') {
-		console.log(`Loading Image in osu-profile.js | https://a.gatari.pw/${user.id}`);
 		avatar = await Canvas.loadImage(`https://a.gatari.pw/${user.id}`);
 	} else {
 		avatar = await getAvatar(user.id, client);
