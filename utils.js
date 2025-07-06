@@ -5538,8 +5538,8 @@ module.exports = {
 				}
 
 				matches.push({
-					content: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R>${players}`,
-					start: `[${matchName}](<https://osu.ppy.sh/mp/${matchId}>) - <t:${matchCreation / 1000}:R>`,
+					content: `<t:${matchCreation / 1000}:R> - [${matchName}](<https://osu.ppy.sh/mp/${matchId}>)${players}`,
+					start: `<t:${matchCreation / 1000}:R> - [${matchName}](<https://osu.ppy.sh/mp/${matchId}>)`,
 				});
 			}
 
