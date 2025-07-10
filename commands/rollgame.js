@@ -102,9 +102,9 @@ module.exports = {
 			try {
 				await sentMessage.reactions.removeAll();
 			} catch (e) {
-				if (e.message !== 'Unknown Message') {
+				if (e.message !== 'Unknown Message' && e.message !== 'Missing Permissions') {
 					console.error(e);
-				} else {
+				} else if (e.message !== 'Missing Permissions') {
 					return;
 				}
 			}
@@ -166,7 +166,15 @@ module.exports = {
 
 			meCollector.on('end', async () => {
 				reCollector.stop();
-				await sentMessage.reactions.removeAll();
+				try {
+					await sentMessage.reactions.removeAll();
+				} catch (e) {
+					if (e.message !== 'Unknown Message' && e.message !== 'Missing Permissions') {
+						console.error(e);
+					} else if (e.message !== 'Missing Permissions') {
+						return;
+					}
+				}
 
 				//Roll for the players that didn't roll
 				for (let i = 0; i < players.length; i++) {
