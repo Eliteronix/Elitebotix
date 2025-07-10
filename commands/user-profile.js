@@ -179,7 +179,7 @@ async function sendUserEmbed(interaction, user) {
 		)
 		.setTimestamp();
 
-	if (interaction.guildId) {
+	if (interaction.guild) {
 		const member = await interaction.member.guild.members.cache.get(user.id);
 
 		//Get the member roles and push the IDs and rawPosition related to the id into an array
