@@ -5,14 +5,14 @@ module.exports = async function (guild) {
 
 	try {
 		const systemChannel = await guild.channels.cache.get(guild.systemChannelId);
-		if (systemChannel && systemChannel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has('SEND_MESSAGES')) {
+		if (systemChannel && systemChannel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has(Discord.PermissionsBitField.Flags.SendMessages)) {
 			await systemChannel.send(message);
 		} else {
-			const generalChannel = await guild.channels.cache.find(channel => channel.name === 'general' && channel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has('SEND_MESSAGES'));
+			const generalChannel = await guild.channels.cache.find(channel => channel.name === 'general' && channel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has(Discord.PermissionsBitField.Flags.SendMessages));
 			if (generalChannel) {
 				await generalChannel.send(message);
 			} else {
-				const otherChannel = guild.channels.cache.find(channel => channel.type === Discord.ChannelType.GuildText && channel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has('SEND_MESSAGES'));
+				const otherChannel = guild.channels.cache.find(channel => channel.type === Discord.ChannelType.GuildText && channel.permissionsFor(guild.members.cache.find(member => member.id === guild.client.user.id)).has(Discord.PermissionsBitField.Flags.SendMessages));
 				if (otherChannel) {
 					await otherChannel.send(message);
 				}
