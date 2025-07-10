@@ -341,10 +341,17 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 
 				//Send attachment
 				let sentMessage = null;
-				if (noLinkedAccount) {
-					sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-				} else {
-					sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+				try {
+					if (noLinkedAccount) {
+						sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
+					} else {
+						sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+					}
+				} catch (e) {
+					if (e.message !== 'Unknown Message') {
+						console.error(e);
+					}
+					return;
 				}
 
 				if (interaction.context === 1 || interaction.guild) {
