@@ -1028,12 +1028,15 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				}
 
 				let sentMessage = await interaction.followUp({ content: content, files: files });
-				await sentMessage.react('👤');
-				await sentMessage.react('🥇');
-				if (userScores.length) {
-					await sentMessage.react('<:master:951396806653255700>');
-					await sentMessage.react('🆚');
-					await sentMessage.react('📊');
+
+				if (interaction.context === 1 || interaction.guild) {
+					await sentMessage.react('👤');
+					await sentMessage.react('🥇');
+					if (userScores.length) {
+						await sentMessage.react('<:master:951396806653255700>');
+						await sentMessage.react('🆚');
+						await sentMessage.react('📊');
+					}
 				}
 			})();
 		})
