@@ -1801,11 +1801,17 @@ module.exports = {
 			files.push(matchesPlayed);
 		}
 
-		let sentMessage = await interaction.editReply({ content: content, files: files });
+		try {
+			let sentMessage = await interaction.editReply({ content: content, files: files });
 
-		if (team1.length === 1 && team2.length === 1 && (interaction.context === 1 || interaction.guild)) {
-			await sentMessage.react('🔵');
-			await sentMessage.react('🔴');
+			if (team1.length === 1 && team2.length === 1 && (interaction.context === 1 || interaction.guild)) {
+				await sentMessage.react('🔵');
+				await sentMessage.react('🔴');
+			}
+		} catch (error) {
+			if (error.message !== 'Unknown Message') {
+				console.error(error);
+			}
 		}
 	},
 };
