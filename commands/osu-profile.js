@@ -365,9 +365,15 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 					});
 
 					if (userScore) {
-						await sentMessage.react('<:master:951396806653255700>');
-						await sentMessage.react('🆚');
-						await sentMessage.react('📊');
+						try {
+							await sentMessage.react('<:master:951396806653255700>');
+							await sentMessage.react('🆚');
+							await sentMessage.react('📊');
+						} catch (e) {
+							if (e.message !== 'Unknown Message') {
+								console.error(e);
+							}
+						}
 					}
 				}
 			})
