@@ -5548,7 +5548,7 @@ module.exports = {
 			// Get all messages and delete those that arent in the matchMessageStarts array
 			let messages = await textChannel.messages.fetch({ limit: 100 });
 
-			let messagesToDelete = messages.filter(message => !matches.map(match => match.start.toLowerCase()).includes(message.content.replace(/:R>.+/gm, ':R>').toLowerCase()));
+			let messagesToDelete = messages.filter(message => !matches.map(match => match.start.toLowerCase()).includes(message.content.replace(/>\).+/gm, '>)').toLowerCase()));
 
 			messagesToDelete.forEach(async (message) => {
 				try {
@@ -5563,10 +5563,10 @@ module.exports = {
 			// Send new messages if there are any missing
 			if (matches.length > 0) {
 				for (let i = 0; i < matches.length; i++) {
-					if (!messages.map(message => message.content.replace(/:R>.+/gm, ':R>').toLowerCase()).includes(matches[i].start.toLowerCase())) {
+					if (!messages.map(message => message.content.replace(/>\).+/gm, '>)').toLowerCase()).includes(matches[i].start.toLowerCase())) {
 						await textChannel.send({ content: matches[i].content, allowedMentions: { 'users': [] } });
 					} else {
-						let message = messages.find(m => m.content.replace(/:R>.+/gm, ':R>').toLowerCase() === matches[i].start.toLowerCase());
+						let message = messages.find(m => m.content.replace(/>\).+/gm, '>)').toLowerCase() === matches[i].start.toLowerCase());
 						if (message && message.content !== matches[i].content) {
 							try {
 								await message.edit(matches[i].content);
