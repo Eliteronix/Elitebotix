@@ -1264,7 +1264,11 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 			i--;
 		}
 
-		multiScores[i].matchName = multiMatches.find(match => match.matchId === multiScores[i].matchId).matchName;
+		try {
+			multiScores[i].matchName = multiMatches.find(match => match.matchId === multiScores[i].matchId).matchName;
+		} catch (err) {
+			multiScores[i].matchName = 'Unknown Match';
+		}
 	}
 
 	//Translate the scores to bancho scores
