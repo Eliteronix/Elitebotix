@@ -1,5 +1,4 @@
 const { DBProcessQueue } = require('../dbObjects');
-const { getGuildPrefix, populateMsgFromInteraction } = require('../utils');
 const { showUnknownInteractionError } = require('../config.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageFlags } = require('discord.js');
@@ -56,6 +55,7 @@ module.exports = {
 					'en-US': 'The years until the reminder',
 				})
 				.setRequired(false)
+				.setMinValue(0) // Ensure years cannot be negative
 		)
 		.addIntegerOption(option =>
 			option.setName('months')
@@ -71,6 +71,7 @@ module.exports = {
 					'en-US': 'The months until the reminder',
 				})
 				.setRequired(false)
+				.setMinValue(0) // Ensure months cannot be negative
 		)
 		.addIntegerOption(option =>
 			option.setName('weeks')
@@ -86,6 +87,7 @@ module.exports = {
 					'en-US': 'The weeks until the reminder',
 				})
 				.setRequired(false)
+				.setMinValue(0) // Ensure weeks cannot be negative
 		)
 		.addIntegerOption(option =>
 			option.setName('days')
@@ -101,6 +103,7 @@ module.exports = {
 					'en-US': 'The days until the reminder',
 				})
 				.setRequired(false)
+				.setMinValue(0) // Ensure days cannot be negative
 		)
 		.addIntegerOption(option =>
 			option.setName('hours')
@@ -116,6 +119,7 @@ module.exports = {
 					'en-US': 'The hours until the reminder',
 				})
 				.setRequired(false)
+				.setMinValue(0) // Ensure hours cannot be negative
 		)
 		.addIntegerOption(option =>
 			option.setName('minutes')
@@ -131,76 +135,27 @@ module.exports = {
 					'en-US': 'The minutes until the reminder',
 				})
 				.setRequired(false)
+				.setMinValue(0) // Ensure minutes cannot be negative
 		),
-	async execute(interaction, msg, args) {
-		//TODO: Remove message code and replace with interaction code
-		let years = 0;
-		let months = 0;
-		let weeks = 0;
-		let days = 0;
-		let hours = 0;
-		let minutes = 0;
-
-		if (interaction) {
-			try {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+	async execute(interaction) {
+		try {
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-			msg = await populateMsgFromInteraction(interaction);
-
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'years') {
-					years = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'months') {
-					months = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'weeks') {
-					weeks = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'days') {
-					days = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'hours') {
-					hours = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'minutes') {
-					minutes = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'message') {
-					args = [interaction.options._hoistedOptions[i].value];
-				}
-			}
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
 
-		for (let i = 0; i < args.length; i++) {
-			let splice = true;
-			if (args[i].endsWith('y') && !isNaN(args[i].replace('y', ''))) {
-				years += parseInt(args[i].replace('y', ''));
-			} else if (args[i].endsWith('mo') && !isNaN(args[i].replace('mo', ''))) {
-				months += parseInt(args[i].replace('mo', ''));
-			} else if (args[i].endsWith('w') && !isNaN(args[i].replace('w', ''))) {
-				weeks += parseInt(args[i].replace('w', ''));
-			} else if (args[i].endsWith('d') && !isNaN(args[i].replace('d', ''))) {
-				days += parseInt(args[i].replace('d', ''));
-			} else if (args[i].endsWith('h') && !isNaN(args[i].replace('h', ''))) {
-				hours += parseInt(args[i].replace('h', ''));
-			} else if (args[i].endsWith('m') && !isNaN(args[i].replace('m', ''))) {
-				minutes += parseInt(args[i].replace('m', ''));
-			} else {
-				splice = false;
-			}
-
-			if (splice) {
-				args.splice(i, 1);
-				i--;
-			}
-		}
-
-		if (args.length === 0) {
-			const guildPrefix = await getGuildPrefix(msg);
-			return msg.reply(`You didn't provide a message.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
-		}
+		let years = interaction.options.getInteger('years') || 0;
+		let months = interaction.options.getInteger('months') || 0;
+		let weeks = interaction.options.getInteger('weeks') || 0;
+		let days = interaction.options.getInteger('days') || 0;
+		let hours = interaction.options.getInteger('hours') || 0;
+		let minutes = interaction.options.getInteger('minutes') || 0;
+		let message = interaction.options.getString('message');
 
 		let now = new Date();
 		let date = new Date();
@@ -210,27 +165,11 @@ module.exports = {
 		date.setUTCHours(date.getUTCHours() + hours);
 		date.setUTCMinutes(date.getUTCMinutes() + minutes);
 
-		if (years < 0 || months < 0 || weeks < 0 || days < 0 || hours < 0 || minutes < 0) {
-			const guildPrefix = await getGuildPrefix(msg);
-			if (msg.id) {
-				return msg.reply(`You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
-			}
-			return await interaction.editReply({ content: `You aren't allowed to use negative values for the time.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``, flags: MessageFlags.Ephemeral });
-		}
-
 		if (now.getTime() === date.getTime()) {
-			const guildPrefix = await getGuildPrefix(msg);
-			if (msg.id) {
-				return msg.reply(`You didn't specify when I should remind you.\n\`Usage: ${guildPrefix}${this.name} ${this.usage}\``);
-			}
 			return await interaction.editReply({ content: 'You didn\'t specify when I should remind you.', flags: MessageFlags.Ephemeral });
 		}
 
-		DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${args.join(' ')}`, date: date });
-
-		if (msg.id) {
-			return msg.reply('Reminder has been set. Be sure to have DMs enabled for the bot.');
-		}
+		await DBProcessQueue.create({ guildId: 'None', task: 'remind', priority: 10, additions: `${interaction.user.id};${message}`, date: date });
 
 		return await interaction.editReply({ content: 'Reminder has been set. Be sure to have DMs enabled for the bot.', flags: MessageFlags.Ephemeral });
 	},
