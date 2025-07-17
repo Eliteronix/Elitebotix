@@ -7712,7 +7712,11 @@ module.exports = {
 
 		//Draw inner circle
 		ctx.beginPath();
-		ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, Math.PI * -0.5, (2 * Math.PI) * accuracy + Math.PI * -0.5);
+		if (accuracy === 1) {
+			ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, 0, 2 * Math.PI); //Prevent napi canvas from optimizing the arc away when its a full circle with values not using 0, Math.PI*2
+		} else {
+			ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, Math.PI * -0.5, (2 * Math.PI) * accuracy + Math.PI * -0.5);
+		}
 		ctx.strokeStyle = gradient;
 		ctx.lineWidth = 23;
 		ctx.stroke();
