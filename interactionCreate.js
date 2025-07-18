@@ -117,7 +117,7 @@ module.exports = async function (client, interaction) {
 		try {
 			await command.autocomplete(interaction);
 		} catch (error) {
-			console.error('interactionCreate.js | autocomplete' + error);
+			console.error('interactionCreate.js | autocomplete', error);
 		}
 	}
 };
