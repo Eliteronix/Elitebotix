@@ -5427,7 +5427,7 @@ module.exports = {
 							existingQueueTasks[i].destroy();
 
 							let discordUser = await DBDiscordUsers.findOne({
-								attributes: 'userId',
+								attributes: ['userId'],
 								where: {
 									osuUserId: currentUser
 								}
