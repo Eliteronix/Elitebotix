@@ -722,6 +722,90 @@ module.exports = {
 					//Stop the interval
 					clearInterval(interval);
 
+					// Check for the tiebreaker
+					// 1. Check for the team with the most claimed maps
+					let teamScores = {};
+
+					if (team1.length > 0) {
+						teamScores['Team Red'] = 0;
+					}
+
+					if (team2.length > 0) {
+						teamScores['Team Blue'] = 0;
+					}
+
+					if (team3.length > 0) {
+						teamScores['Team Green'] = 0;
+					}
+
+					if (team4.length > 0) {
+						teamScores['Team Yellow'] = 0;
+					}
+
+					if (team5.length > 0) {
+						teamScores['Team Pink'] = 0;
+					}
+
+					for (let i = 0; i < mappool.length; i++) {
+						if (mappool[i].team) {
+							teamScores[mappool[i].team]++;
+						}
+					}
+
+					let maxScore = 0;
+
+					// Find the highest score
+					for (const team in teamScores) {
+						if (teamScores[team] > maxScore) {
+							maxScore = teamScores[team];
+						}
+					}
+
+					let winningTeams = [];
+
+					// Find all teams with the highest score
+					for (const team in teamScores) {
+						if (teamScores[team] === maxScore) {
+							winningTeams.push(team);
+						}
+					}
+
+					if (winningTeams.length === 1) {
+						await message.channel.send(`**${winningTeams[0]} has won through most claimed maps! (TieBreaker)**\n\n Match finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`);
+
+						if (message.client.bingoMatches.includes(randomString)) {
+							message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
+						}
+
+						return;
+					}
+
+					teamScores = {};
+
+					// 2. Check for the team with the highest score total
+					for (let i = 0; i < winningTeams.length; i++) {
+						teamScores[winningTeams[i]] = 0;
+					}
+
+					for (let i = 0; i < mappool.length; i++) {
+						if (mappool[i].team) {
+							teamScores[mappool[i].team] += mappool[i].score;
+						}
+					}
+
+					maxScore = 0;
+					let winningTeam = null;
+
+					// Find the highest score
+					for (const team in teamScores) {
+						if (teamScores[team] > maxScore) {
+							maxScore = teamScores[team];
+							winningTeam = team;
+						}
+					}
+
+					await message.channel.send(`**${winningTeam} has won through most claimed maps and highest cumulative score! (Double TieBreaker)**\n\n Match finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`);
+
 					if (message.client.bingoMatches.includes(randomString)) {
 						message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
 					}
@@ -885,6 +969,8 @@ async function refreshMessage(message, mappool, lastRefresh) {
 				ctx.stroke();
 			}
 		}
+	} else {
+		reply = reply + `\nAutomatic TieBreaker after 30 minutes of no scores.(<t:${Math.floor(lastRefresh.lastScore.getTime() / 1000 + 1800)}:R>)`;
 	}
 
 	// Save the image locally
@@ -1003,7 +1089,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 										winningTeam = checkWin(mappool);
 										if (winningTeam) {
 											// End the game
-											await message.channel.send(`${winningTeam} has won the game!`);
+											await message.channel.send(`${winningTeam} has won the game!\n\nMatch finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`);
 											break;
 										}
 									}
