@@ -58,6 +58,8 @@ module.exports = {
 					'en-US': 'The lower star rating limit',
 				})
 				.setRequired(false)
+				.setMinValue(3)
+				.setMaxValue(10)
 		)
 		.addNumberOption(option =>
 			option.setName('higherstarrating')
@@ -73,6 +75,8 @@ module.exports = {
 					'en-US': 'The higher star rating limit',
 				})
 				.setRequired(false)
+				.setMinValue(3)
+				.setMaxValue(10)
 		)
 		.addNumberOption(option =>
 			option.setName('lowerdrain')
@@ -88,6 +92,7 @@ module.exports = {
 					'en-US': 'The lower drain time limit in seconds',
 				})
 				.setRequired(false)
+				.setMinValue(0)
 		)
 		.addNumberOption(option =>
 			option.setName('higherdrain')
@@ -103,6 +108,7 @@ module.exports = {
 					'en-US': 'The higher drain time limit in seconds',
 				})
 				.setRequired(false)
+				.setMinValue(0)
 		)
 		.addStringOption(option =>
 			option.setName('requirement')
@@ -123,6 +129,38 @@ module.exports = {
 					{ name: 'A', value: 'A' },
 					{ name: 'Pass (Default)', value: 'Pass' },
 				)
+		)
+		.addIntegerOption(option =>
+			option.setName('graceperiod')
+				.setNameLocalizations({
+					'de': 'gnadenzeit',
+					'en-GB': 'graceperiod',
+					'en-US': 'graceperiod',
+				})
+				.setDescription('The grace period in minutes')
+				.setDescriptionLocalizations({
+					'de': 'Die Gnadenzeit in Minuten',
+					'en-GB': 'The grace period in minutes',
+					'en-US': 'The grace period in minutes',
+				})
+				.setRequired(false)
+				.setMinValue(0)
+		)
+		.addIntegerOption(option =>
+			option.setName('maximumgametime')
+				.setNameLocalizations({
+					'de': 'maximalspielzeit',
+					'en-GB': 'maximumgametime',
+					'en-US': 'maximumgametime',
+				})
+				.setDescription('The maximum game time in minutes')
+				.setDescriptionLocalizations({
+					'de': 'Die maximale Spielzeit in Minuten',
+					'en-GB': 'The maximum game time in minutes',
+					'en-US': 'The maximum game time in minutes',
+				})
+				.setRequired(false)
+				.setMinValue(0)
 		)
 		.addUserOption(option =>
 			option.setName('player1team3')
@@ -417,44 +455,24 @@ module.exports = {
 
 		if (interaction.options.getNumber('lowerstarrating')) {
 			lowerstarrating = interaction.options.getNumber('lowerstarrating');
-
-			if (lowerstarrating < 3) {
-				return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
-			} else if (lowerstarrating > 10) {
-				return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
-			}
 		}
 
 		let higherstarrating = 7;
 
 		if (interaction.options.getNumber('higherstarrating')) {
 			higherstarrating = interaction.options.getNumber('higherstarrating');
-
-			if (higherstarrating < 3) {
-				return await interaction.editReply('You can\'t play a match with a star rating lower than 3');
-			} else if (higherstarrating > 10) {
-				return await interaction.editReply('You can\'t play a match with a star rating higher than 10');
-			}
 		}
 
 		let lowerDrainTime = 30;
 
 		if (interaction.options.getNumber('lowerdraintime')) {
 			lowerDrainTime = interaction.options.getNumber('lowerdraintime');
-
-			if (lowerDrainTime < 0) {
-				lowerDrainTime = 0;
-			}
 		}
 
 		let higherDrainTime = 300;
 
 		if (interaction.options.getNumber('higherdraintime')) {
 			higherDrainTime = interaction.options.getNumber('higherdraintime');
-
-			if (higherDrainTime < 0) {
-				higherDrainTime = 0;
-			}
 		}
 
 		let requirement = 'Pass';
@@ -463,6 +481,18 @@ module.exports = {
 			requirement = interaction.options.getString('requirement');
 		}
 
+		let gracePeriod = 0;
+
+		if (interaction.options.getInteger('graceperiod')) {
+			gracePeriod = interaction.options.getInteger('graceperiod');
+		}
+
+		let gameStart = new Date();
+		let maximumGameTime = null;
+
+		if (interaction.options.getInteger('maximumgametime')) {
+			maximumGameTime = interaction.options.getInteger('maximumgametime');
+		}
 
 		//Cross check that commandUser.userId, teammates and opponents are all unique
 		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
@@ -689,7 +719,7 @@ module.exports = {
 			fs.writeFileSync(`./currentbingo/${everyUser[i].osuUserId}.json`, buffer);
 		}
 
-		await refreshMessage(message, mappool, lastRefresh);
+		await refreshMessage(message, mappool, lastRefresh, gracePeriod, maximumGameTime, gameStart);
 
 		let matchStart = new Date();
 
@@ -701,9 +731,9 @@ module.exports = {
 		// Refresh the message every 30 seconds
 		let interval = setInterval(async () => {
 			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString, interval);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart);
 
-				let winningTeam = await checkWin(mappool);
+				let winningTeam = await checkWin(mappool, gracePeriod, gameStart);
 				if (winningTeam) {
 					refreshCollector.stop();
 					message.reactions.removeAll().catch(() => { });
@@ -714,7 +744,8 @@ module.exports = {
 					if (message.client.bingoMatches.includes(randomString)) {
 						message.client.bingoMatches.splice(message.client.bingoMatches.indexOf(randomString), 1);
 					}
-				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime()) {
+				} else if (lastRefresh.lastScore.getTime() + 1800000 < new Date().getTime() || (maximumGameTime && gameStart.getTime() + maximumGameTime * 60000 < new Date().getTime())) {
+					// If the last score was more than 30 minutes ago or the maximum game time has been reached
 					// Stop the interval if the match has been going on for more than 30 minutes without scores
 					refreshCollector.stop();
 					message.reactions.removeAll().catch(() => { });
@@ -815,7 +846,7 @@ module.exports = {
 
 		refreshCollector.on('collect', async (reaction, user) => {
 			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh, randomString, interval);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart);
 			}
 
 			// Remove the reaction unless its the bot
@@ -823,7 +854,7 @@ module.exports = {
 				reaction.users.remove(user.id);
 			}
 
-			let winningTeam = await checkWin(mappool);
+			let winningTeam = await checkWin(mappool, gracePeriod, gameStart);
 			if (winningTeam) {
 				refreshCollector.stop();
 				message.reactions.removeAll().catch(() => { });
@@ -832,9 +863,13 @@ module.exports = {
 	},
 };
 
-async function refreshMessage(message, mappool, lastRefresh) {
+async function refreshMessage(message, mappool, lastRefresh, gracePeriod, maximumGameTime, gameStart) {
 	lastRefresh.date = new Date();
 	let reply = `\n\nLast updated: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:R>`;
+
+	if (gameStart.getTime() + gracePeriod * 60000 > new Date().getTime()) {
+		reply = reply + `\nGrace period ends <t:${Math.floor((gameStart.getTime() + gracePeriod * 60000) / 1000)}:R>`;
+	}
 
 	const canvasWidth = 1430;
 	const canvasHeight = 1430;
@@ -900,7 +935,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 		}
 	}
 
-	let winningTeam = await checkWin(mappool);
+	let winningTeam = await checkWin(mappool, gracePeriod, gameStart);
 	if (winningTeam) {
 		reply = `**${winningTeam} has won!**\n\n Match finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`;
 		// Draw the diagonals
@@ -970,7 +1005,16 @@ async function refreshMessage(message, mappool, lastRefresh) {
 			}
 		}
 	} else {
-		reply = reply + `\nAutomatic TieBreaker after 30 minutes of no scores.(<t:${Math.floor(lastRefresh.lastScore.getTime() / 1000 + 1800)}:R>)`;
+		// If no maximum game time is set, we will automatically tie after 30 minutes of no scores
+		// Or if it is set, we will automatically tie after the maximum game time has passed or 30 minutes of no scores
+		if (!maximumGameTime) {
+			reply = reply + `\nAutomatic TieBreaker after 30 minutes of no scores.(<t:${Math.floor(lastRefresh.lastScore.getTime() / 1000 + 1800)}:R>)`;
+		} else if (lastRefresh.lastScore.getTime() + 1800000 < gameStart.getTime() + maximumGameTime * 60000) {
+			reply = reply + `\nAutomatic TieBreaker after 30 minutes of no scores.(<t:${Math.floor(lastRefresh.lastScore.getTime() / 1000 + 1800)}:R>)`;
+			reply = reply + `\nOtherwise automatic TieBreaker after maximum game time of ${maximumGameTime} minutes. (<t:${Math.floor(gameStart.getTime() / 1000 + maximumGameTime * 60)}:R>)`;
+		} else {
+			reply = reply + `\nAutomatic TieBreaker after maximum game time of ${maximumGameTime} minutes. (<t:${Math.floor(gameStart.getTime() / 1000 + maximumGameTime * 60)}:R>)`;
+		}
 	}
 
 	// Save the image locally
@@ -995,8 +1039,7 @@ async function refreshMessage(message, mappool, lastRefresh) {
 	}
 }
 
-async function refreshStandings(message, mappool, everyUser, matchStart, requirement, team1, team2, team3, team4, team5, lastRefresh) {
-
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart) {
 	lastRefresh.date = new Date();
 
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -1006,7 +1049,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 	});
 
-	let winningTeam = checkWin(mappool);
+	let winningTeam = checkWin(mappool, gracePeriod, gameStart);
 
 	for (let i = 0; i < everyUser.length && !winningTeam; i++) {
 		logOsuAPICalls('commands/osu-bingo.js');
@@ -1086,7 +1129,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 											lastRefresh.lastScore = new Date();
 										}
 
-										winningTeam = checkWin(mappool);
+										winningTeam = checkWin(mappool, gracePeriod, gameStart);
 										if (winningTeam) {
 											// End the game
 											await message.channel.send(`${winningTeam} has won the game!\n\nMatch finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`);
@@ -1108,12 +1151,17 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 		await pause(1000);
 	}
 
-	await refreshMessage(message, mappool, lastRefresh);
+	await refreshMessage(message, mappool, lastRefresh, gracePeriod, maximumGameTime, gameStart);
 
 	lastRefresh.date = new Date();
 }
 
-function checkWin(mappool) {
+function checkWin(mappool, gracePeriod, gameStart) {
+	// Return if the game is still in the grace period
+	if (gameStart.getTime() + gracePeriod * 60000 > new Date().getTime()) {
+		return false;
+	}
+
 	// Check if a team has a line
 	// Check the diagonals
 	if (mappool[0].team &&
