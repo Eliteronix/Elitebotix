@@ -427,8 +427,11 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 					} else {
 						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
-					await sentMessage.react('👤');
-					await sentMessage.react('📈');
+
+					if(interaction.context === 1 || interaction.guild){
+						await sentMessage.react('👤');
+						await sentMessage.react('📈');
+					}
 				}
 			})
 			.catch(async (err) => {
