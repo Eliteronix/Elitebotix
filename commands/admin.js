@@ -58,7 +58,7 @@ module.exports = {
 					console.error(error);
 				}
 			}
-		} else if (focusedOption.name === 'argument') {
+		} else if (focusedOption.name === 'argument' && interaction.options.getString('command')) {
 			const command = interaction.options.getString('command').split(' | ')[0];
 
 			const commandModule = require(`./admin/${command}.js`);
