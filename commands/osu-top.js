@@ -436,7 +436,13 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					try {
+						await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+					} catch(e) {
+						if(e.message === 'Cannot read properties of undefined (reading \'replace\')'){
+							console.log(interaction, e);
+						}
+					}
 				} else if (err.message === 'Missing Permissions') {
 					DBOsuGuildTrackers.destroy({
 						where: {
