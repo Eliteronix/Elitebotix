@@ -267,7 +267,7 @@ manager.on('shardCreate', shard => {
 		shard.send({ type: 'shardId', data: { shardId: shard.id } })
 			.catch(error => {
 				if (error.message !== 'Channel closed') {
-					console.error('index.js | shardId' + error);
+					console.error('index.js | shardId', error);
 				}
 			});
 
@@ -276,7 +276,7 @@ manager.on('shardCreate', shard => {
 			shard.send({ type: 'totalShards', data: { totalShards: manager.shards.size } })
 				.catch(error => {
 					if (error.message !== 'Channel closed') {
-						console.error('index.js | totalShards' + error);
+						console.error('index.js | totalShards', error);
 					}
 				});
 		});
@@ -528,7 +528,7 @@ async function processOsuWebRequests(client) {
 			shard.send({ type: 'osuWebRequest', data: osuWebRequest.string })
 				.catch(error => {
 					if (error.message !== 'Channel closed') {
-						console.error('index.js | processOsuWebRequests osuWebRequest string' + error);
+						console.error('index.js | processOsuWebRequests osuWebRequest string', error);
 					}
 				});
 		});
@@ -537,7 +537,7 @@ async function processOsuWebRequests(client) {
 			shard.send({ type: 'osuWebRequest', data: osuWebRequest.link })
 				.catch(error => {
 					if (error.message !== 'Channel closed') {
-						console.error('index.js | processOsuWebRequests osuWebRequest link' + error);
+						console.error('index.js | processOsuWebRequests osuWebRequest link', error);
 					}
 				});
 		});
