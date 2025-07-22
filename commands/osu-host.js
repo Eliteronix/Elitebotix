@@ -601,9 +601,9 @@ module.exports = {
 
 						scores = new Discord.AttachmentBuilder(Buffer.from(scores.join('\n\n'), 'utf-8'), { name: `osu-duel-scores-and-weights-${osuUserId}.txt` });
 
-						await interaction.user.send({ content: `Duel Scores and Weights for ${osuName} (\`${osuUserId}\`)`, files: [scores] });
+						await interaction.channel.send({ content: `Duel Scores and Weights for ${osuName} (\`${osuUserId}\`)`, files: [scores] });
 					} catch (e) {
-						await interaction.user.send(`Error getting duel scores and weights for ${osuName} (\`${osuUserId}\`): ${e.message}`);
+						await interaction.channel.send(`Error getting duel scores and weights for ${osuName} (\`${osuUserId}\`): ${e.message}`);
 					}
 				}
 
