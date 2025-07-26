@@ -407,7 +407,13 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 
 				//If created by osu-tracking
 				if (tracking) {
-					await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
+					try {
+						await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
+					} catch (err) {
+						if (err.message !== 'Missing Access') {
+							console.error(err);
+						}
+					}
 				} else {
 					const linkedUser = await DBDiscordUsers.findOne({
 						attributes: ['userId'],
@@ -428,7 +434,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
 					}
 
-					if(interaction.context === 1 || interaction.guild){
+					if (interaction.context === 1 || interaction.guild) {
 						await sentMessage.react('👤');
 						await sentMessage.react('📈');
 					}
@@ -438,8 +444,8 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				if (err.message === 'Not found') {
 					try {
 						await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
-					} catch(e) {
-						if(e.message === 'Cannot read properties of undefined (reading \'replace\')'){
+					} catch (e) {
+						if (e.message === 'Cannot read properties of undefined (reading \'replace\')') {
 							console.log(interaction, e);
 						}
 					}
