@@ -35,22 +35,12 @@ module.exports = {
 			return await interaction.editReply('WAL option must be either "enable" or "disable".');
 		}
 
-		let dbTable = null;
-
-		try {
-			// Dynamically import the model based on the table name
-			dbTable = require(`../../models/${dbTableName}`);
-		} catch (error) {
-			console.error(error);
-			return await interaction.editReply(`Table ${dbTableName} not found`);
-		}
-
 		try {
 			if (wal === 'enable') {
-				await dbTable.sequelize.query('PRAGMA journal_mode = WAL;');
+				eval(`const { ${dbTableName} } = require('../../dbObjects');  ${dbTableName}.sequelize.query('PRAGMA journal_mode = WAL;');`);
 				return await interaction.editReply(`WAL mode enabled for table ${dbTableName}`);
 			} else if (wal === 'disable') {
-				await dbTable.sequelize.query('PRAGMA journal_mode = DELETE;');
+				eval(`const { ${dbTableName} } = require('../../dbObjects');  ${dbTableName}.sequelize.query('PRAGMA journal_mode = DELETE;');`);
 				return await interaction.editReply(`WAL mode disabled for table ${dbTableName}`);
 			}
 		} catch (error) {
