@@ -1637,7 +1637,7 @@ module.exports = {
 				where: {
 					acronym: acronym,
 					matchId: {
-						[Op.in]: sameTournamentGames.map(m => m.matchId)
+						[Op.in]: [...new Set(sameTournamentGames.map(m => m.matchId))]
 					},
 					matchStartDate: {
 						[Op.gte]: weeksPrior
@@ -1649,7 +1649,7 @@ module.exports = {
 			});
 
 			console.log(`Found ${sameTournamentGameMatches.length} matches in the same tournament with acronym ${acronym} in ${new Date() - beforeQuery}ms`);
-			console.log(sameTournamentGames.map(m => m.matchId));
+			console.log([...new Set(sameTournamentGames.map(m => m.matchId))]);
 
 			for (let i = 0; i < sameTournamentGames.length; i++) {
 				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
