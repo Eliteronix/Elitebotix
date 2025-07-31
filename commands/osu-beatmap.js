@@ -427,6 +427,11 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	} else {
 		try {
 			const sentMessage = await interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
+
+			if (interaction.context !== 1 && !interaction.guild) {
+				return;
+			}
+
 			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 				await sentMessage.react('<:COMPARE:827974793365159997>');
 			}
