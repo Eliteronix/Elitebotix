@@ -1653,13 +1653,9 @@ module.exports = {
 			for (let i = 0; i < sameTournamentGames.length; i++) {
 				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
 
-				console.log(`Checking if game ${sameTournamentGames[i].gameId} from match ${sameTournamentGames[i].matchId} is still in the tournament... (${new Date() - timing}ms)`);
-
 				if (!match) {
 					sameTournamentGames.splice(i, 1);
 					i--;
-
-					console.log(`Removing game. (${new Date() - timing}ms)`);
 				}
 			}
 
