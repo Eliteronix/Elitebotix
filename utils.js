@@ -1630,6 +1630,8 @@ module.exports = {
 			weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
 			weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
 
+			let beforeQuery = new Date();
+
 			let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
 				attributes: ['matchId'],
 				where: {
@@ -1645,6 +1647,9 @@ module.exports = {
 					},
 				}
 			});
+
+			console.log(`Found ${sameTournamentGameMatches.length} matches in the same tournament with acronym ${acronym} in ${new Date() - beforeQuery}ms`);
+			console.log(sameTournamentGames.map(m => m.matchId));
 
 			for (let i = 0; i < sameTournamentGames.length; i++) {
 				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
