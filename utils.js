@@ -1646,8 +1646,6 @@ module.exports = {
 				}
 			});
 
-			let timing = new Date();
-
 			for (let i = 0; i < sameTournamentGames.length; i++) {
 				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
 
@@ -1656,8 +1654,6 @@ module.exports = {
 					i--;
 				}
 			}
-
-			console.log(`Found ${sameTournamentGames.length} games in the same tournament with acronym ${acronym}. (${new Date() - timing}ms)`);
 		}
 
 		let games = [];
