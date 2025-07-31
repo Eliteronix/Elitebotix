@@ -14,13 +14,21 @@
 	"logBroadcastEval": false,
 	"matchMakingAcronyms": [
 		"ETX",
+		"etx",
 		"ETX Teams",
+		"etx teams",
 		"o!mm Ranked",
+		"o!mm ranked",
 		"o!mm Private",
+		"o!mm private",
 		"o!mm Team Ranked",
+		"o!mm team ranked",
 		"o!mm Team Private",
+		"o!mm team private",
 		"MOTD",
-		"ROMAI"
+		"motd",
+		"ROMAI",
+		"romai"
 	],
 	"currentElitiriCup": "Elitiri Winter Cup 2022",
 	"currentElitiriCupHostSheetId": "1TlQQK4vSXxkAwxNQNfhSG0W1y85CRYNWZggwIuCgwDo",
