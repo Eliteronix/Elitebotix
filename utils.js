@@ -1659,7 +1659,7 @@ module.exports = {
 					sameTournamentGames.splice(i, 1);
 					i--;
 
-					console.log(`Game ${sameTournamentGames[i].gameId} from match ${sameTournamentGames[i].matchId} is not in the tournament anymore, removing it. (${new Date() - timing}ms)`);
+					console.log(`Removing game. (${new Date() - timing}ms)`);
 				}
 			}
 
