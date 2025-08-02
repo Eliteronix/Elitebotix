@@ -676,6 +676,23 @@ module.exports = {
 
 		beatmaps = null;
 
+		let lastUpdate = new Date();
+
+		for (let i = 0; i < 5; i++) {
+			for (let j = 0; j < 5; j++) {
+				if (lastUpdate.getTime() + 10000 < new Date().getTime()) {
+					lastUpdate = new Date();
+					await interaction.editReply(`Grabbing map covers... (${i * 5 + j + 1}/25)`);
+				}
+
+				try {
+					await getMapListCover(mappool[i * 5 + j].beatmapsetId, mappool[i * 5 + j].beatmapId, interaction.client);
+				} catch (e) {
+					//Nothing
+				}
+			}
+		}
+
 		let lastRefresh = { date: new Date(), lastScore: new Date() };
 
 		let reply = `The bingo match has started! - Are you streaming? [You can set up your browsersource here](<https://www.eliteronix.de/bingo>).\n\nPlay the maps without \`NF\`, \`HT\`, \`Score v2\`, \`Relax\` and \`Autopilot\` to claim a map.\nThe minimum requirement to claim a map is: \`${requirement}\`\nYou can claim a map for your own team by beating the achieved score on the map!`;
@@ -1051,6 +1068,8 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 
 	let winningTeam = checkWin(mappool, gracePeriod, gameStart);
 
+	let newScores = [];
+
 	for (let i = 0; i < everyUser.length && !winningTeam; i++) {
 		logOsuAPICalls('commands/osu-bingo.js');
 		await osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0, limit: 10 })
@@ -1062,78 +1081,40 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 					if (scoreDate > matchStart) {
 						for (let k = 0; k < mappool.length && !winningTeam; k++) {
 							if (mappool[k].beatmapId === scores[j].beatmapId) {
-								if (requirement === 'S' && (scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
-									|| requirement === 'A' && (scores[j].rank === 'A' || scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X'))
+								if (requirement === 'S' && (scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X') || scores[j].rank === 'SH' || scores[j].rank === 'XH')
+									|| requirement === 'A' && (scores[j].rank === 'A' || scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X') || scores[j].rank === 'SH' || scores[j].rank === 'XH')
 									|| requirement === 'Pass' && scores[j].rank !== 'F') {
 									if (!getMods(scores[j].raw_mods).includes('NF') && !getMods(scores[j].raw_mods).includes('HT')) {
 										if (mappool[k].score) {
 											if (mappool[k].score < Number(scores[j].score)) {
-												mappool[k].score = Number(scores[j].score);
-												mappool[k].achievedCombo = scores[j].maxCombo;
+												newScores.push({
+													scoreDate: scoreDate,
+													mappoolIndex: k,
+													userIndex: i,
+													score: Number(scores[j].score),
+													maxCombo: scores[j].maxCombo,
+												});
+
 												if (getMods(scores[j].raw_mods).length === 0) {
-													mappool[k].mods = 'NM';
+													newScores[newScores.length - 1].mods = 'NM';
 												} else {
-													mappool[k].mods = getMods(scores[j].raw_mods).join('');
+													newScores[newScores.length - 1].mods = getMods(scores[j].raw_mods).join('');
 												}
-
-												// Get the players team
-												mappool[k].team = everyUser[i].team;
-
-												await mappool[k].message.fetch();
-												await mappool[k].message.delete();
-
-												// Translate K into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
-												let code = '';
-												if (k < 5) {
-													code = 'A' + (k + 1).toString();
-												} else if (k < 10) {
-													code = 'B' + (k - 4).toString();
-												} else if (k < 15) {
-													code = 'C' + (k - 9).toString();
-												} else if (k < 20) {
-													code = 'D' + (k - 14).toString();
-												} else {
-													code = 'E' + (k - 19).toString();
-												}
-
-												mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just reclaimed map ${code}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
-												lastRefresh.lastScore = new Date();
 											}
 										} else {
-											mappool[k].score = Number(scores[j].score);
-											mappool[k].achievedCombo = scores[j].maxCombo;
+											newScores.push({
+												scoreDate: scoreDate,
+												mappoolIndex: k,
+												userIndex: i,
+												score: Number(scores[j].score),
+												maxCombo: scores[j].maxCombo,
+											});
+
 											if (getMods(scores[j].raw_mods).length === 0) {
-												mappool[k].mods = 'NM';
+												newScores[newScores.length - 1].mods = 'NM';
 											} else {
-												mappool[k].mods = getMods(scores[j].raw_mods).join('');
+												newScores[newScores.length - 1].mods = getMods(scores[j].raw_mods).join('');
 											}
-
-											// Get the players team
-											mappool[k].team = everyUser[i].team;
-
-											// Translate K into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
-											let code = '';
-											if (k < 5) {
-												code = 'A' + (k + 1).toString();
-											} else if (k < 10) {
-												code = 'B' + (k - 4).toString();
-											} else if (k < 15) {
-												code = 'C' + (k - 9).toString();
-											} else if (k < 20) {
-												code = 'D' + (k - 14).toString();
-											} else {
-												code = 'E' + (k - 19).toString();
-											}
-
-											mappool[k].message = await message.channel.send(`<@${everyUser[i].userId}> (${mappool[k].team}) just claimed map ${code}: \`${mappool[k].artist} - ${mappool[k].title} [${mappool[k].difficulty}] (${mappool[k].starRating.toFixed(2)}* - ${Math.floor(mappool[k].drainLength / 60).toString().padStart(1, '0')}:${(mappool[k].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[k].score)} score; ${humanReadable(mappool[k].achievedCombo)}/${humanReadable(mappool[k].maxCombo)} combo; ${mappool[k].mods}\`!`);
-											lastRefresh.lastScore = new Date();
-										}
-
-										winningTeam = checkWin(mappool, gracePeriod, gameStart);
-										if (winningTeam) {
-											// End the game
-											await message.channel.send(`${winningTeam} has won the game!\n\nMatch finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`);
-											break;
 										}
 									}
 								}
@@ -1149,6 +1130,53 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 			});
 
 		await pause(1000);
+	}
+
+	// Sort the new scores by date
+	newScores.sort((a, b) => {
+		return a.scoreDate.getTime() - b.scoreDate.getTime();
+	});
+
+	for (let i = 0; i < newScores.length; i++) {
+		if (mappool[newScores[i].mappoolIndex].score >= newScores[i].score) {
+			continue; // If the score is not higher than the current score, skip
+		}
+
+		let mappoolIndex = newScores[i].mappoolIndex;
+
+		mappool[mappoolIndex].score = newScores[i].score;
+		mappool[mappoolIndex].achievedCombo = newScores[i].maxCombo;
+		mappool[mappoolIndex].mods = newScores[i].mods;
+		mappool[mappoolIndex].team = everyUser[newScores[i].userIndex].team;
+
+		if (mappool[mappoolIndex].message) {
+			await mappool[mappoolIndex].message.fetch();
+			await mappool[mappoolIndex].message.delete();
+		}
+
+		// Translate mappoolIndex into A1, A2, A3, A4, A5, B1, B2, ... E4, E5
+		let code = '';
+		if (mappoolIndex < 5) {
+			code = 'A' + (mappoolIndex + 1).toString();
+		} else if (mappoolIndex < 10) {
+			code = 'B' + (mappoolIndex - 4).toString();
+		} else if (mappoolIndex < 15) {
+			code = 'C' + (mappoolIndex - 9).toString();
+		} else if (mappoolIndex < 20) {
+			code = 'D' + (mappoolIndex - 14).toString();
+		} else {
+			code = 'E' + (mappoolIndex - 19).toString();
+		}
+
+		mappool[mappoolIndex].message = await message.channel.send(`<@${everyUser[newScores[i].userIndex].userId}> (${mappool[mappoolIndex].team}) just claimed map ${code}: \`${mappool[mappoolIndex].artist} - ${mappool[mappoolIndex].title} [${mappool[mappoolIndex].difficulty}] (${mappool[mappoolIndex].starRating.toFixed(2)}* - ${Math.floor(mappool[mappoolIndex].drainLength / 60).toString().padStart(1, '0')}:${(mappool[mappoolIndex].drainLength % 60).toString().padStart(2, '0')})\` with \`${humanReadable(mappool[mappoolIndex].score)} score; ${humanReadable(mappool[mappoolIndex].achievedCombo)}/${humanReadable(mappool[mappoolIndex].maxCombo)} combo; ${mappool[mappoolIndex].mods}\`!`);
+		lastRefresh.lastScore = new Date();
+
+		winningTeam = checkWin(mappool, gracePeriod, gameStart);
+		if (winningTeam) {
+			// End the game
+			await message.channel.send(`${winningTeam} has won the game!\n\nMatch finished: <t:${Math.floor(lastRefresh.date.getTime() / 1000)}:f>`);
+			break;
+		}
 	}
 
 	await refreshMessage(message, mappool, lastRefresh, gracePeriod, maximumGameTime, gameStart);
