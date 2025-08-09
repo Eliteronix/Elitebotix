@@ -1674,7 +1674,7 @@ module.exports = {
 					serverHint = ' from the server';
 				}
 
-				while (interaction.client.slashCommandData) {
+				while (!interaction.client.slashCommandData) {
 					await pause(1000);
 				}
 
