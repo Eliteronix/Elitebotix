@@ -1277,6 +1277,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 		if (multiScores[i].teamType === 1 || multiScores[i].teamType === 3) {
 			multiScores.splice(i, 1);
 			i--;
+			continue;
 		}
 
 		try {
