@@ -325,8 +325,21 @@ module.exports = {
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
-			//TODO: add attributes
 			let forumPosts = await DBOsuForumPosts.findAll({
+				attributes: [
+					'title',
+					'forumPost',
+					'discord',
+					'host',
+					'format',
+					'rankRange',
+					'gamemode',
+					'region',
+					'notes',
+					'bws',
+					'badged',
+					'posted'
+				],
 				where: {
 					pinged: false,
 					outdated: false,
@@ -407,8 +420,22 @@ module.exports = {
 		} else if (interaction.options.getSubcommand() === 'ping') {
 			let id = getIDFromPotentialOsuLink(interaction.options.getString('id'));
 
-			//TODO: add attributes
 			let forumPost = await DBOsuForumPosts.findOne({
+				attributes: [
+					'title',
+					'forumPost',
+					'discord',
+					'host',
+					'format',
+					'rankRange',
+					'gamemode',
+					'region',
+					'notes',
+					'bws',
+					'badged',
+					'postId',
+					'posted'
+				],
 				where: {
 					forumPost: `https://osu.ppy.sh/community/forums/topics/${id}`
 				}
@@ -480,8 +507,19 @@ module.exports = {
 				sentMessage.crosspost();
 			}
 
-			//TODO: add attributes
 			let pingUsers = await DBDiscordUsers.findAll({
+				attributes: [
+					'userId',
+					'osuRank',
+					'taikoRank',
+					'catchRank',
+					'maniaRank',
+					'osuBadges',
+					'tournamentPingsMode',
+					'tournamentPingsStartingFrom',
+					'tournamentPingsBadged',
+					'country',
+				],
 				where: {
 					tournamentPings: true
 				}
