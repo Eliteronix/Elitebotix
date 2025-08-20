@@ -631,11 +631,13 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 
 			let sentMessage = await interaction.followUp({ content: messageContent, files: [scoreCard] });
 
-			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-				await sentMessage.react('<:COMPARE:827974793365159997>');
+			if (interaction.context === 1 || interaction.guild) {
+				if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+					await sentMessage.react('<:COMPARE:827974793365159997>');
+				}
+				await sentMessage.react('🗺️');
+				await sentMessage.react('👤');
 			}
-			await sentMessage.react('🗺️');
-			await sentMessage.react('👤');
 		}
 	} else if (server === 'gatari') {
 		let gatariUser = await fetch(`https://api.gatari.pw/users/get?u=${username}`)
