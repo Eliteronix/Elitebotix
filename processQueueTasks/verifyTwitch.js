@@ -18,7 +18,7 @@ module.exports = {
 			attributes: ['id', 'twitchVerified', 'twitchName'],
 			where: {
 				userId: discordUser.id,
-				twitchName: args[0],
+				twitchName: args[0].toLowercase(),
 			}
 		});
 
