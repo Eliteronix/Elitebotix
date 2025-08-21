@@ -308,6 +308,11 @@ module.exports = {
 		if (!usernames[0]) {
 			//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
+				try {
+					commandUser.osuUserId.replace(/`/g, '');
+				} catch (err) {
+					console.error('Error replacing backticks in osuUserId:', commandUser, commandUser.osuUserId, err);
+				}
 				getTopPlays(interaction, commandUser.osuUserId, server, gamemode, false, sorting, limit, tracking, order, csv);
 			} else {
 				let userDisplayName = interaction.user.username;
