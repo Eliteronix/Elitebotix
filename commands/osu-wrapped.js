@@ -178,6 +178,9 @@ module.exports = {
 				score: {
 					[Op.gt]: 10000,
 				},
+				warmup: {
+					[Op.not]: true,
+				},
 			},
 		});
 
