@@ -183,9 +183,12 @@ module.exports = {
 		}
 
 		//get guild from db
-		//TODO: add attributes
 		const guild = await DBGuilds.findOne({
-			where: { guildId: msg.guildId, ticketsEnabled: true },
+			attributes: ['id'],
+			where: {
+				guildId: msg.guildId,
+				ticketsEnabled: true
+			},
 		});
 
 		if (guild) {
