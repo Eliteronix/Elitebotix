@@ -1259,36 +1259,36 @@ module.exports = {
 
 					additionalInfo.tournamentBan = tournamentBans[0];
 				}
-			} else {
-				console.log('Account history not found', osuUserId, json.account_history);
 			}
 
-			additionalInfo.badges = json.badges;
+			if (json.badges) {
+				additionalInfo.badges = json.badges;
 
-			for (let i = 0; i < json.badges.length; i++) {
-				const badge = json.badges[i];
-				if (!badge.description.startsWith('Beatmap Spotlights: ')
-					&& !badge.description.includes(' contribution to the ')
-					&& !badge.description.includes(' contributor')
-					&& !badge.description.includes('Contributions')
-					&& !badge.description.includes('commitment')
-					&& !badge.description.includes('Mapper\'s Favourite ')
-					&& !badge.description.includes('Community Favourite ')
-					&& !badge.description.includes('Community Choice ')
-					&& !badge.description.includes('Mapping')
-					&& !badge.description.includes('Aspire')
-					&& !badge.description.includes('Beatmapping')
-					&& !badge.description.includes('osu!idol')
-					&& badge.description !== 'The official voice behind osu!'
-					&& !badge.description.includes('Newspaper ')
-					&& !badge.description.includes('Pending Cup ')
-					&& !badge.description.includes('Mapper\'s Choice ')
-					&& !badge.description.includes('Exemplary performance')
-					&& !badge.description.toLowerCase().includes('contribution')
-					&& !badge.description.toLowerCase().includes('elite mapper')
-					&& !badge.description.toLowerCase().includes('outstanding commitment')
-					&& !badge.description.toLowerCase().includes('featured artist playlist')) {
-					additionalInfo.tournamentBadges.push(badge);
+				for (let i = 0; i < json.badges.length; i++) {
+					const badge = json.badges[i];
+					if (!badge.description.startsWith('Beatmap Spotlights: ')
+						&& !badge.description.includes(' contribution to the ')
+						&& !badge.description.includes(' contributor')
+						&& !badge.description.includes('Contributions')
+						&& !badge.description.includes('commitment')
+						&& !badge.description.includes('Mapper\'s Favourite ')
+						&& !badge.description.includes('Community Favourite ')
+						&& !badge.description.includes('Community Choice ')
+						&& !badge.description.includes('Mapping')
+						&& !badge.description.includes('Aspire')
+						&& !badge.description.includes('Beatmapping')
+						&& !badge.description.includes('osu!idol')
+						&& badge.description !== 'The official voice behind osu!'
+						&& !badge.description.includes('Newspaper ')
+						&& !badge.description.includes('Pending Cup ')
+						&& !badge.description.includes('Mapper\'s Choice ')
+						&& !badge.description.includes('Exemplary performance')
+						&& !badge.description.toLowerCase().includes('contribution')
+						&& !badge.description.toLowerCase().includes('elite mapper')
+						&& !badge.description.toLowerCase().includes('outstanding commitment')
+						&& !badge.description.toLowerCase().includes('featured artist playlist')) {
+						additionalInfo.tournamentBadges.push(badge);
+					}
 				}
 			}
 		})
