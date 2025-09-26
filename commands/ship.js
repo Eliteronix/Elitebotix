@@ -88,7 +88,7 @@ module.exports = {
 			await interaction.editReply(data.join('\n'));
 		} catch (e) {
 			if (e.message !== 'Error [GuildMembersTimeout]: Members didn\'t arrive in time.') {
-				console.error('commands/ship.js | Get ship member', e);
+				console.error('commands/ship.js | Get ship member', interaction, e);
 			}
 
 			await interaction.editReply('Error, please try again later.');
