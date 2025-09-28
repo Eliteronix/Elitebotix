@@ -9,7 +9,7 @@ module.exports = {
 	name: 'referee-leaderboard',
 	description: 'Sends a leaderboard of all the referees',
 	integration_types: [0, 1], // 0 for guild, 1 for user
-	contexts: [0], // 0 for guilds, 1 for bot DMs, 2 for user DMs
+	contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
 	botPermissions: [PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.AttachFiles],
 	botPermissionsTranslated: 'Send Messages and Attach Files',
 	cooldown: 30,
@@ -117,6 +117,27 @@ module.exports = {
 			value: entry.dataValues.matchesReffed,
 		}));
 
+		const commandUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId'],
+			where: {
+				userId: interaction.user.id
+			},
+		});
+
+		let authorPlacement = null;
+
+		if (commandUser && commandUser.osuUserId) {
+			authorPlacement = leaderboardData.findIndex(entry => entry.referee === commandUser.osuUserId) + 1;
+
+			if (authorPlacement > 0) {
+				page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
+			}
+		}
+
+		if (authorPlacement > 0) {
+			additionalInfo += `You are ranked #${humanReadable(authorPlacement)} on the referee leaderboard with ${humanReadable(leaderboardData[authorPlacement - 1].value)} matches reffed.\n\n`;
+		}
+
 		let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
 
 		let page = interaction.options.getInteger('page');
@@ -124,16 +145,7 @@ module.exports = {
 		if (!page && leaderboardData.length > 150) {
 			page = 1;
 
-			const commandUser = await DBDiscordUsers.findOne({
-				attributes: ['osuUserId'],
-				where: {
-					userId: interaction.user.id
-				},
-			});
-
-			if (commandUser && commandUser.osuUserId) {
-				const authorPlacement = leaderboardData.findIndex(entry => entry.referee === commandUser.osuUserId) + 1;
-
+			if (authorPlacement > 0) {
 				page = Math.floor(authorPlacement / leaderboardEntriesPerPage) + 1;
 			}
 		}
@@ -164,7 +176,7 @@ module.exports = {
 
 		const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', 'Referee leaderboard', filename, page);
 
-		let leaderboardMessage = await interaction.editReply({
+		await interaction.editReply({
 			content: `${additionalInfo}`,
 			files: [attachment],
 		});
