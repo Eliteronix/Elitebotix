@@ -148,7 +148,7 @@ module.exports = {
 
 		if (page) {
 			start = (page - 1) * leaderboardEntriesPerPage;
-			end = start + leaderboardEntriesPerPage - 1;
+			end = start + leaderboardEntriesPerPage;
 		}
 
 		for (let i = start; i < end; i++) {
