@@ -5135,10 +5135,10 @@ module.exports = {
 
 		let issues = responseJson.issues;
 
-		if (logBroadcastEval) {
-			// eslint-disable-next-line no-console
-			console.log('Broadcasting utils.js jira cards to shards...');
-		}
+		// if (logBroadcastEval) {
+		// eslint-disable-next-line no-console
+		console.log('Broadcasting utils.js jira cards to shards...');
+		// }
 
 		client.shard.broadcastEval(async (c, { issues }) => {
 
