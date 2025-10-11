@@ -5119,7 +5119,7 @@ module.exports = {
 			return;
 		}
 
-		let response = await fetch('https://eliteronix.atlassian.net/rest/api/2/search?jql=project=EL and updated>=-20m&maxResults=100', {
+		let response = await fetch('https://eliteronix.atlassian.net/rest/api/3/search/jql?jql=project=EL and updated>=-20m&maxResults=100', {
 			method: 'GET',
 			headers: {
 				'Authorization': `Basic ${Buffer.from(
@@ -5135,10 +5135,10 @@ module.exports = {
 
 		let issues = responseJson.issues;
 
-		// if (logBroadcastEval) {
-		// eslint-disable-next-line no-console
-		console.log('Broadcasting utils.js jira cards to shards...');
-		// }
+		if (logBroadcastEval) {
+			// eslint-disable-next-line no-console
+			console.log('Broadcasting utils.js jira cards to shards...');
+		}
 
 		client.shard.broadcastEval(async (c, { issues }) => {
 
