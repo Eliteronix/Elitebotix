@@ -419,7 +419,7 @@ module.exports = {
 											try {
 												lastMessage = await msg.channel.send({ embeds: [embed] });
 											} catch (error) {
-												if(error.message === 'Missing Permissions') {
+												if (error.message === 'Missing Permissions') {
 													stop = true;
 													break;
 												} else {
@@ -753,6 +753,7 @@ async function getResultImage(event, users, client) {
 		try {
 			ctx.fillText(user.username, 100, 330 + i * 75);
 		} catch (e) {
+			console.log(e);
 			let username = await getOsuPlayerName(scores[i].user_id);
 
 			ctx.fillText(username, 100, 330 + i * 75);
