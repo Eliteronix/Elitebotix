@@ -786,6 +786,14 @@ module.exports = {
 			}
 		} catch (error) {
 			console.error('osu-host backup catch', error);
+
+			try {
+				interaction.editReply({ content: 'An error occurred while processing the command. Please try again later.' });
+			} catch (e) {
+				if (e.message === 'Unknown interaction' && showUnknownInteractionError || e.message !== 'Unknown interaction') {
+					console.error(e);
+				}
+			}
 		}
 
 		if (interaction.client.hostCommands.includes(randomString)) {
