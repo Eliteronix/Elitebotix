@@ -2829,6 +2829,27 @@ module.exports = {
 					const birthdayMessageChannel = await c.channels.cache.get(channelId);
 
 					if (birthdayMessageChannel) {
+						// Check if the user is still in the guild
+						const guild = await c.guilds.cache.get(guildId);
+						if (!guild) {
+							return false;
+						}
+
+						const member = await guild.members.fetch(userId).catch(() => null);
+
+						if (!member) {
+							const { DBBirthdayGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+
+							await DBBirthdayGuilds.destroy({
+								where: {
+									userId: userId,
+									guildId: guildId
+								}
+							});
+
+							return false;
+						}
+
 						if (birthdayMessageChannel.type !== 0) {
 							const { DBGuilds } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 
