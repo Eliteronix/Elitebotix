@@ -202,13 +202,13 @@ const totalCommandsUsed = new client.Counter({
 });
 register.registerMetric(totalCommandsUsed);
 
-const incompleteGameScoreCount = new client.Counter({
+const incompleteGameScoreCount = new client.Gauge({
 	name: 'incomplete_game_score_count',
 	help: 'Incomplete game score count',
 });
 register.registerMetric(incompleteGameScoreCount);
 
-const verifyMatchesCount = new client.Counter({
+const verifyMatchesCount = new client.Gauge({
 	name: 'verify_matches_count',
 	help: 'Verify matches count',
 });
