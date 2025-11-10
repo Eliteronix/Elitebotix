@@ -509,11 +509,11 @@ setInterval(() => {
 			}
 
 			if (lastImport.incompleteGameScoreCount) {
-				incompleteGameScoreCount.inc(lastImport.incompleteGameScoreCount);
+				incompleteGameScoreCount.set(lastImport.incompleteGameScoreCount);
 			}
 
 			if (lastImport.verifyMatchesCount) {
-				verifyMatchesCount.inc(lastImport.verifyMatchesCount);
+				verifyMatchesCount.set(lastImport.verifyMatchesCount);
 			}
 		}
 	} catch (error) {
