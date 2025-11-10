@@ -102,7 +102,13 @@ module.exports = async function (client, interaction) {
 
 		interaction.client.cooldowns = cooldowns;
 
-		process.send(`command ${command.name}`);
+		let commandName = command.name;
+
+		if (interaction.options._subcommand) {
+			commandName += `_${interaction.options._subcommand}`;
+		}
+
+		process.send(`command ${commandName}`);
 		// console.log(`${client.shardId} command ${command.name} ${interaction.options._subcommand}`);
 
 		command.execute(interaction, null, []);
