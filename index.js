@@ -205,19 +205,19 @@ register.registerMetric(totalCommandsUsed);
 const commandSpecificMetrics = [];
 
 //get all command files
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 //Add the commands from the command files to the client.commands collection
-for (const file of commandFiles) {
-	const commandMetrics = new client.Counter({
-		name: `command_${file.replace('.js', '').replaceAll('-', '_')}`,
-		help: `Command ${file.replace('.js', '').replaceAll('-', '_')} used`,
-	});
-	register.registerMetric(commandMetrics);
+// for (const file of commandFiles) {
+// 	const commandMetrics = new client.Counter({
+// 		name: `command_${file.replace('.js', '').replaceAll('-', '_')}`,
+// 		help: `Command ${file.replace('.js', '').replaceAll('-', '_')} used`,
+// 	});
+// 	register.registerMetric(commandMetrics);
 
-	// set a new item in the Array
-	commandSpecificMetrics.push({ command: file.replace('.js', '').replaceAll('-', '_'), counter: commandMetrics });
-}
+// 	// set a new item in the Array
+// 	commandSpecificMetrics.push({ command: file.replace('.js', '').replaceAll('-', '_'), counter: commandMetrics });
+// }
 
 // Define the HTTP server
 const server = http.createServer(async (req, res) => {
@@ -442,6 +442,7 @@ manager.spawn()
 					osuUpdateUsersQueueLength.set(Number(message.split(' ')[1]));
 				} else if (typeof message === 'string' && message.startsWith('command')) {
 					let command = message.replace('command ', '').replaceAll('-', '_');
+
 					let commandCounter = commandSpecificMetrics.find(counter => counter.command === command);
 
 					totalCommandsUsed.inc();
@@ -458,6 +459,8 @@ manager.spawn()
 						});
 
 						commandSpecificMetrics[commandSpecificMetrics.length - 1].counter.inc();
+
+						register.registerMetric(commandSpecificMetrics[commandSpecificMetrics.length - 1].counter);
 					}
 				}
 			});
