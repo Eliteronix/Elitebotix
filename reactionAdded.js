@@ -250,7 +250,7 @@ module.exports = async function (reaction, user) {
 
 				const command = require('./commands/osu-duel.js');
 
-				process.send(`command ${command.name}`);
+				process.send(`command ${command.name}_rating-leaderboard`);
 
 				command.execute(interaction, null, [page]);
 			}
@@ -802,7 +802,7 @@ module.exports = async function (reaction, user) {
 				};
 
 				try {
-					process.send(`command ${command.name}`);
+					process.send(`command ${command.name}_1v1`);
 
 					command.execute(interaction);
 				} catch (error) {
@@ -896,7 +896,7 @@ module.exports = async function (reaction, user) {
 				};
 
 				try {
-					process.send(`command ${command.name}`);
+					process.send(`command ${command.name}_rating`);
 
 					command.execute(interaction, null, args);
 				} catch (error) {
