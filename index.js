@@ -202,6 +202,18 @@ const totalCommandsUsed = new client.Counter({
 });
 register.registerMetric(totalCommandsUsed);
 
+const incompleteGameScoreCount = new client.Counter({
+	name: 'incomplete_game_score_count',
+	help: 'Incomplete game score count',
+});
+register.registerMetric(incompleteGameScoreCount);
+
+const verifyMatchesCount = new client.Counter({
+	name: 'verify_matches_count',
+	help: 'Verify matches count',
+});
+register.registerMetric(verifyMatchesCount);
+
 const commandSpecificMetrics = [];
 
 //get all command files
@@ -489,10 +501,20 @@ setInterval(() => {
 	try {
 		const lastImport = JSON.parse(fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8'));
 
-		if (lastImport && lastImport.matchStart) {
-			let time = Date.now() - lastImport.matchStart;
+		if (lastImport) {
+			if (lastImport.matchStart) {
+				let time = Date.now() - lastImport.matchStart;
 
-			timeBehindMatchCreation.set(Math.floor(time / 1000));
+				timeBehindMatchCreation.set(Math.floor(time / 1000));
+			}
+
+			if (lastImport.incompleteGameScoreCount) {
+				incompleteGameScoreCount.inc(lastImport.incompleteGameScoreCount);
+			}
+
+			if (lastImport.verifyMatchesCount) {
+				verifyMatchesCount.inc(lastImport.verifyMatchesCount);
+			}
 		}
 	} catch (error) {
 		if (error.message === 'Unexpected end of JSON input') {
