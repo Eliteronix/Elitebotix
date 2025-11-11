@@ -518,11 +518,11 @@ setInterval(() => {
 				incompleteGameScoreCount.set(lastImport.incompleteGameScoreCount);
 			}
 
-			if (lastImport.verifyMatchesCount) {
+			if (lastImport.verifyMatchesCount !== null) {
 				verifyMatchesCount.set(lastImport.verifyMatchesCount);
 			}
 
-			if (lastImport.refereeMatchesCount) {
+			if (lastImport.refereeMatchesCount !== null) {
 				refereeMatchesCount.set(lastImport.refereeMatchesCount);
 			}
 		}
