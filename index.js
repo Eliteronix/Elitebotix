@@ -214,6 +214,12 @@ const verifyMatchesCount = new client.Gauge({
 });
 register.registerMetric(verifyMatchesCount);
 
+const refereeMatchesCount = new client.Gauge({
+	name: 'referee_matches_count',
+	help: 'Referee matches count',
+});
+register.registerMetric(refereeMatchesCount);
+
 const commandSpecificMetrics = [];
 
 //get all command files
@@ -514,6 +520,10 @@ setInterval(() => {
 
 			if (lastImport.verifyMatchesCount) {
 				verifyMatchesCount.set(lastImport.verifyMatchesCount);
+			}
+
+			if (lastImport.refereeMatchesCount) {
+				refereeMatchesCount.set(lastImport.refereeMatchesCount);
 			}
 		}
 	} catch (error) {
