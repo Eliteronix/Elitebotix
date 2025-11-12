@@ -514,7 +514,7 @@ setInterval(() => {
 				timeBehindMatchCreation.set(Math.floor(time / 1000));
 			}
 
-			if (lastImport.incompleteGameScoreCount) {
+			if (lastImport.incompleteGameScoreCount !== null) {
 				incompleteGameScoreCount.set(lastImport.incompleteGameScoreCount);
 			}
 
