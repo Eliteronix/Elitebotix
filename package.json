@@ -20,7 +20,7 @@
 		"event-loop-lag": "^1.4.0",
 		"expr-eval": "^2.0.2",
 		"fastest-levenshtein": "^1.0.16",
-		"form-data": "^4.0.0",
+		"form-data": "^4.0.4",
 		"fsp": "^0.1.2",
 		"google-spreadsheet": "^3.3.0",
 		"jszip": "^3.10.1",
