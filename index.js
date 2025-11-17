@@ -17,23 +17,17 @@ register.setDefaultLabels({
 // Enable the collection of default metrics
 client.collectDefaultMetrics({ register });
 
-const amountOfApiRequestsInTheLast24Hours = new client.Gauge({
-	name: 'osu_api_requests_in_the_last_24_hours',
-	help: 'API requests in the last 24 hours',
+const osuApiRequestss = new client.Counter({
+	name: 'osu_api_requests',
+	help: 'osu! API requests',
 });
-register.registerMetric(amountOfApiRequestsInTheLast24Hours);
+register.registerMetric(osuApiRequestss);
 
-const amountOfOsuWebRequestsInTheLast24Hours = new client.Gauge({
-	name: 'osu_web_requests_in_the_last_24_hours',
-	help: 'Osu web requests in the last 24 hours',
+const osuWebRequests = new client.Counter({
+	name: 'osu_web_requests',
+	help: 'osu! web requests',
 });
-register.registerMetric(amountOfOsuWebRequestsInTheLast24Hours);
-
-const amountOfApiOrOsuWebRequestsInTheLast24Hours = new client.Gauge({
-	name: 'osu_api_or_web_requests_in_the_last_24_hours',
-	help: 'Osu api or web requests in the last 24 hours',
-});
-register.registerMetric(amountOfApiOrOsuWebRequestsInTheLast24Hours);
+register.registerMetric(osuWebRequests);
 
 const beatmapsAccessInTheLastMinute = new client.Gauge({
 	name: 'beatmaps_access_in_the_last_minute',
@@ -311,15 +305,7 @@ manager.spawn()
 		shards.forEach(shard => {
 			shard.on('message', message => {
 				if (message === 'osu!API') {
-					amountOfApiRequestsInTheLast24Hours.inc();
-					setTimeout(() => {
-						amountOfApiRequestsInTheLast24Hours.dec();
-					}, 86400000);
-
-					amountOfApiOrOsuWebRequestsInTheLast24Hours.inc();
-					setTimeout(() => {
-						amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
-					}, 86400000);
+					osuApiRequestss.inc();
 				} else if (typeof message === 'string' && message.startsWith('osu! website')) {
 					let request = message.replace('osu! website ', '');
 
@@ -486,15 +472,7 @@ async function processOsuWebRequests(client) {
 	osuWebRequestsQueueLength.set([...new Set(osuWebRequestQueue.map(item => item.string))].length);
 
 	if (osuWebRequestQueue.length) {
-		amountOfOsuWebRequestsInTheLast24Hours.inc();
-		setTimeout(() => {
-			amountOfOsuWebRequestsInTheLast24Hours.dec();
-		}, 86400000);
-
-		amountOfApiOrOsuWebRequestsInTheLast24Hours.inc();
-		setTimeout(() => {
-			amountOfApiOrOsuWebRequestsInTheLast24Hours.dec();
-		}, 86400000);
+		osuWebRequests.inc();
 
 		let osuWebRequest = osuWebRequestQueue[0];
 
