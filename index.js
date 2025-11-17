@@ -1,6 +1,5 @@
 const { ShardingManager } = require('discord.js');
 require('dotenv').config();
-const fs = require('fs');
 
 const http = require('http');
 const url = require('url');
@@ -35,12 +34,6 @@ const amountOfApiOrOsuWebRequestsInTheLast24Hours = new client.Gauge({
 	help: 'Osu api or web requests in the last 24 hours',
 });
 register.registerMetric(amountOfApiOrOsuWebRequestsInTheLast24Hours);
-
-const timeBehindMatchCreation = new client.Gauge({
-	name: 'time_behind_match_creation',
-	help: 'The time behind match creation in seconds',
-});
-register.registerMetric(timeBehindMatchCreation);
 
 const beatmapsAccessInTheLastMinute = new client.Gauge({
 	name: 'beatmaps_access_in_the_last_minute',
@@ -201,24 +194,6 @@ const totalCommandsUsed = new client.Counter({
 	help: 'Total commands used',
 });
 register.registerMetric(totalCommandsUsed);
-
-const incompleteGameScoreCount = new client.Gauge({
-	name: 'incomplete_game_score_count',
-	help: 'Incomplete game score count',
-});
-register.registerMetric(incompleteGameScoreCount);
-
-const verifyMatchesCount = new client.Gauge({
-	name: 'verify_matches_count',
-	help: 'Verify matches count',
-});
-register.registerMetric(verifyMatchesCount);
-
-const refereeMatchesCount = new client.Gauge({
-	name: 'referee_matches_count',
-	help: 'Referee matches count',
-});
-register.registerMetric(refereeMatchesCount);
 
 const commandSpecificMetrics = [];
 
@@ -503,42 +478,6 @@ setInterval(() => {
 
 	uniqueDiscordUsers.set(uniqueDiscordUsersList.length);
 	uniqueOsuUsers.set(uniqueOsuUsersList.length);
-
-	try {
-		const lastImport = JSON.parse(fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8'));
-
-		if (lastImport) {
-			if (lastImport.matchStart) {
-				let time = Date.now() - lastImport.matchStart;
-
-				timeBehindMatchCreation.set(Math.floor(time / 1000));
-			}
-
-			if (lastImport.incompleteGameScoreCount !== null) {
-				incompleteGameScoreCount.set(lastImport.incompleteGameScoreCount);
-			}
-
-			if (lastImport.verifyMatchesCount !== null) {
-				verifyMatchesCount.set(lastImport.verifyMatchesCount);
-			}
-
-			if (lastImport.refereeMatchesCount !== null) {
-				refereeMatchesCount.set(lastImport.refereeMatchesCount);
-			}
-		}
-	} catch (error) {
-		if (error.message === 'Unexpected end of JSON input') {
-			let fileContent = fs.readFileSync(`${process.env.ELITEBOTIXARCHIVERROOTPATH}/lastImport.json`, 'utf8');
-
-			if (fileContent.length === 0) {
-				console.error('index.js | lastImport.json is empty');
-			} else {
-				//console.error('index.js | lastImport.json is corrupted'); Nothing
-			}
-		} else {
-			console.error('index.js | lastImport.json', error);
-		}
-	}
 }, 5000);
 
 processOsuWebRequests(client);
