@@ -17,11 +17,11 @@ register.setDefaultLabels({
 // Enable the collection of default metrics
 client.collectDefaultMetrics({ register });
 
-const osuApiRequestss = new client.Counter({
+const osuApiRequests = new client.Counter({
 	name: 'osu_api_requests',
 	help: 'osu! API requests',
 });
-register.registerMetric(osuApiRequestss);
+register.registerMetric(osuApiRequests);
 
 const osuWebRequests = new client.Counter({
 	name: 'osu_web_requests',
@@ -305,7 +305,7 @@ manager.spawn()
 		shards.forEach(shard => {
 			shard.on('message', message => {
 				if (message === 'osu!API') {
-					osuApiRequestss.inc();
+					osuApiRequests.inc();
 				} else if (typeof message === 'string' && message.startsWith('osu! website')) {
 					let request = message.replace('osu! website ', '');
 
