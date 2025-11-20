@@ -29,72 +29,6 @@ const osuWebRequests = new client.Counter({
 });
 register.registerMetric(osuWebRequests);
 
-const beatmapsAccessInTheLastMinute = new client.Gauge({
-	name: 'beatmaps_access_in_the_last_minute',
-	help: 'Beatmaps access in the last minute',
-});
-register.registerMetric(beatmapsAccessInTheLastMinute);
-
-const discordUsersAccessInTheLastMinute = new client.Gauge({
-	name: 'discord_users_access_in_the_last_minute',
-	help: 'Discord users access in the last minute',
-});
-register.registerMetric(discordUsersAccessInTheLastMinute);
-
-const elitiriDataAccessInTheLastMinute = new client.Gauge({
-	name: 'elitiri_data_access_in_the_last_minute',
-	help: 'Elitiri data access in the last minute',
-});
-register.registerMetric(elitiriDataAccessInTheLastMinute);
-
-const guildsAccessInTheLastMinute = new client.Gauge({
-	name: 'guilds_access_in_the_last_minute',
-	help: 'Guilds access in the last minute',
-});
-register.registerMetric(guildsAccessInTheLastMinute);
-
-const multiMatchesAccessInTheLastMinute = new client.Gauge({
-	name: 'multi_matches_access_in_the_last_minute',
-	help: 'Multi matches access in the last minute',
-});
-register.registerMetric(multiMatchesAccessInTheLastMinute);
-
-const multiGamesAccessInTheLastMinute = new client.Gauge({
-	name: 'multi_games_access_in_the_last_minute',
-	help: 'Multi games access in the last minute',
-});
-register.registerMetric(multiGamesAccessInTheLastMinute);
-
-const multiGameScoresAccessInTheLastMinute = new client.Gauge({
-	name: 'multi_game_scores_access_in_the_last_minute',
-	help: 'Multi game scores access in the last minute',
-});
-register.registerMetric(multiGameScoresAccessInTheLastMinute);
-
-const osuDataAccessInTheLastMinute = new client.Gauge({
-	name: 'osu_data_access_in_the_last_minute',
-	help: 'Osu data access in the last minute',
-});
-register.registerMetric(osuDataAccessInTheLastMinute);
-
-const processQueueAccessInTheLastMinute = new client.Gauge({
-	name: 'process_queue_access_in_the_last_minute',
-	help: 'Process queue access in the last minute',
-});
-register.registerMetric(processQueueAccessInTheLastMinute);
-
-const serverActivityAccessInTheLastMinute = new client.Gauge({
-	name: 'server_activity_access_in_the_last_minute',
-	help: 'Server activity access in the last minute',
-});
-register.registerMetric(serverActivityAccessInTheLastMinute);
-
-const soloScoresAccessInTheLastMinute = new client.Gauge({
-	name: 'solo_scores_access_in_the_last_minute',
-	help: 'Solo scores access in the last minute',
-});
-register.registerMetric(soloScoresAccessInTheLastMinute);
-
 const runningTournamentMatches = new client.Gauge({
 	name: 'running_tournament_matches',
 	help: 'Running tournament matches',
@@ -188,6 +122,8 @@ const totalCommandsUsed = new client.Counter({
 	help: 'Total commands used',
 });
 register.registerMetric(totalCommandsUsed);
+
+const databaseMetrics = [];
 
 const commandSpecificMetrics = [];
 
@@ -310,78 +246,25 @@ manager.spawn()
 					let request = message.replace('osu! website ', '');
 
 					osuWebRequestQueue.push({ string: request.split(' ')[0], link: request.split(' ')[1] });
-				} else if (typeof message === 'string' && message.startsWith('traceDatabaseQueries:')) {
-					if (message.includes('DBOsuBeatmaps')) {
-						beatmapsAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							beatmapsAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBDiscordUsers')) {
-						discordUsersAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							discordUsersAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBElitiriCupSignUp')
-						|| message.includes('DBElitiriCupStaff')
-						|| message.includes('DBElitiriCupSubmissions')
-						|| message.includes('DBElitiriCupLobbies')) {
-						elitiriDataAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							elitiriDataAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBGuilds')
-						|| message.includes('DBReactionRoles')
-						|| message.includes('DBReactionRolesHeader')
-						|| message.includes('DBAutoRoles')
-						|| message.includes('DBTemporaryVoices')
-						|| message.includes('DBActivityRoles')
-						|| message.includes('DBStarboardMessages')
-						|| message.includes('DBTickets')
-						|| message.includes('DBBirthdayGuilds')
-						|| message.includes('DBOsuGuildTrackers')) {
-						guildsAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							guildsAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBOsuMultiMatches')) {
-						multiMatchesAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							multiMatchesAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBOsuMultiGames')) {
-						multiGamesAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							multiGamesAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBOsuMultiGameScores')) {
-						multiGameScoresAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							multiGameScoresAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBMOTDPoints')
-						|| message.includes('DBOsuTourneyFollows')
-						|| message.includes('DBDuelRatingHistory')
-						|| message.includes('DBOsuForumPosts')
-						|| message.includes('DBOsuTrackingUsers')) {
-						osuDataAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							osuDataAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBProcessQueue')) {
-						processQueueAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							processQueueAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBServerUserActivity')) {
-						serverActivityAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							serverActivityAccessInTheLastMinute.dec();
-						}, 60000);
-					} else if (message.includes('DBOsuSoloScores')) {
-						soloScoresAccessInTheLastMinute.inc();
-						setTimeout(() => {
-							soloScoresAccessInTheLastMinute.dec();
-						}, 60000);
+				} else if (typeof message === 'string' && message.startsWith('DB')) {
+					let database = message.replace('DB ', '');
+
+					let databaseCounter = databaseMetrics.find(counter => counter.database === database);
+
+					if (databaseCounter) {
+						databaseCounter.counter.inc();
+					} else {
+						databaseMetrics.push({
+							database: database,
+							counter: new client.Gauge({
+								name: `database_${database}`,
+								help: `Database ${database} accessed`
+							})
+						});
+
+						databaseMetrics[databaseMetrics.length - 1].counter.inc();
+
+						register.registerMetric(databaseMetrics[databaseMetrics.length - 1].counter);
 					}
 				} else if (message === 'importMatch') {
 					DBProcessQueue.count({

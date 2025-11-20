@@ -2,44 +2,48 @@ const Sequelize = require('sequelize');
 require('dotenv').config();
 
 const logging = {
-	logging: async (sql, timing) => {
-		// if (process.shardId !== undefined) {
-		// 	let operation = 'Unknown';
-		// 	let table = 'Unknown';
+	// logging: async (sql, timing) => {
+	// if (process.shardId !== undefined) {
+	// 	let operation = 'Unknown';
+	// 	let table = 'Unknown';
 
-		// 	if (sql.startsWith('Executed (default): SELECT')) {
-		// 		operation = 'SELECT';
-		// 		table = sql.replace(/.+FROM `/gm, '').replace(/`.+/gm, '');
-		// 	} else if (sql.startsWith('Executed (default): UPDATE')) {
-		// 		operation = 'UPDATE';
-		// 		table = sql.replace(/.+UPDATE `/gm, '').replace(/`.+/gm, '');
-		// 	} else if (sql.startsWith('Executed (default): INSERT')) {
-		// 		operation = 'INSERT';
-		// 		table = sql.replace(/.+INSERT INTO `/gm, '').replace(/`.+/gm, '');
-		// 	} else if (sql.startsWith('Executed (default): DELETE')) {
-		// 		operation = 'DELETE';
-		// 		table = sql.replace(/.+DELETE FROM `/gm, '').replace(/`.+/gm, '');
-		// 	} else {
-		// 		//This shouldnt happen but if it does, we want to know about it
-		// 		// eslint-disable-next-line no-console
-		// 		console.log(sql);
-		// 	}
+	// 	if (sql.startsWith('Executed (default): SELECT')) {
+	// 		operation = 'SELECT';
+	// 		table = sql.replace(/.+FROM `/gm, '').replace(/`.+/gm, '');
+	// 	} else if (sql.startsWith('Executed (default): UPDATE')) {
+	// 		operation = 'UPDATE';
+	// 		table = sql.replace(/.+UPDATE `/gm, '').replace(/`.+/gm, '');
+	// 	} else if (sql.startsWith('Executed (default): INSERT')) {
+	// 		operation = 'INSERT';
+	// 		table = sql.replace(/.+INSERT INTO `/gm, '').replace(/`.+/gm, '');
+	// 	} else if (sql.startsWith('Executed (default): DELETE')) {
+	// 		operation = 'DELETE';
+	// 		table = sql.replace(/.+DELETE FROM `/gm, '').replace(/`.+/gm, '');
+	// 	} else {
+	// 		//This shouldnt happen but if it does, we want to know about it
+	// 		// eslint-disable-next-line no-console
+	// 		console.log(sql);
+	// 	}
 
-		// 	process.messages.push(`[${process.shardId}] Database access: ${operation} ${table} | ${timing}ms`);
-		// }
+	// 	process.send(`[${process.shardId}] Database access: ${operation} ${table} | ${timing}ms`);
+	// }
 
-		// if (timing > 8000) { // Only log if execution time is greater than 1000ms
-		// 	// eslint-disable-next-line no-console
-		// 	console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
-		// }
-	},
+	// if (timing > 8000) { // Only log if execution time is greater than 1000ms
+	// 	// eslint-disable-next-line no-console
+	// 	console.log(`[SLOW QUERY] (${timing} ms): ${sql}`);
+	// }
+	// },
 	benchmark: true,
 };
 
 const guilds = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB guilds');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/guilds.sqlite`,
 	retry: {
@@ -55,7 +59,11 @@ const guilds = new Sequelize('database', 'username', 'password', {
 const discordUsers = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB discordUsers');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/discordUsers.sqlite`,
 	retry: {
@@ -71,7 +79,11 @@ const discordUsers = new Sequelize('database', 'username', 'password', {
 const serverActivity = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB serverActivity');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/serverActivity.sqlite`,
 	retry: {
@@ -87,7 +99,11 @@ const serverActivity = new Sequelize('database', 'username', 'password', {
 const processQueue = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB processQueue');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/processQueue.sqlite`,
 	retry: {
@@ -103,7 +119,11 @@ const processQueue = new Sequelize('database', 'username', 'password', {
 const osuData = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB osuData');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/osuData.sqlite`,
 	retry: {
@@ -119,7 +139,11 @@ const osuData = new Sequelize('database', 'username', 'password', {
 const elitiriData = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB elitiriData');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/elitiriData.sqlite`,
 	retry: {
@@ -135,7 +159,11 @@ const elitiriData = new Sequelize('database', 'username', 'password', {
 const multiScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB multiScores');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiScores.sqlite`,
 	retry: {
@@ -151,7 +179,11 @@ const multiScores = new Sequelize('database', 'username', 'password', {
 const multiMatches = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB multiMatches');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiMatches.sqlite`,
 	retry: {
@@ -167,7 +199,11 @@ const multiMatches = new Sequelize('database', 'username', 'password', {
 const multiGames = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB multiGames');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGames.sqlite`,
 	retry: {
@@ -183,7 +219,11 @@ const multiGames = new Sequelize('database', 'username', 'password', {
 const multiGameScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB multiGameScores');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGameScores.sqlite`,
 	retry: {
@@ -199,7 +239,11 @@ const multiGameScores = new Sequelize('database', 'username', 'password', {
 const beatmaps = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB beatmaps');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/beatmaps.sqlite`,
 	retry: {
@@ -215,7 +259,11 @@ const beatmaps = new Sequelize('database', 'username', 'password', {
 const soloScores = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB soloScores');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/soloScores.sqlite`,
 	retry: {
@@ -231,7 +279,11 @@ const soloScores = new Sequelize('database', 'username', 'password', {
 const elitebotixBanchoProcessQueue = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: logging.logging,
+	logging: async () => {
+		if (process.shardId !== undefined) {
+			process.send('DB processQueue');
+		}
+	},
 	benchmark: logging.benchmark,
 	storage: `${process.env.ELITEBOTIXBANCHOROOTPATH}/databases/processQueue.sqlite`,
 	retry: {
