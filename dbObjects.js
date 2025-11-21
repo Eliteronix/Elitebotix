@@ -101,7 +101,7 @@ const processQueue = new Sequelize('database', 'username', 'password', {
 	dialect: 'sqlite',
 	logging: async () => {
 		if (process.shardId !== undefined) {
-			process.send('DB elitebotix-processQueue');
+			process.send('DB elitebotix_processQueue');
 		}
 	},
 	benchmark: logging.benchmark,
@@ -281,7 +281,7 @@ const elitebotixBanchoProcessQueue = new Sequelize('database', 'username', 'pass
 	dialect: 'sqlite',
 	logging: async () => {
 		if (process.shardId !== undefined) {
-			process.send('DB elitebotix-bancho-processQueue');
+			process.send('DB elitebotix_bancho_processQueue');
 		}
 	},
 	benchmark: logging.benchmark,
