@@ -5,6 +5,7 @@ const http = require('http');
 const url = require('url');
 const client = require('prom-client');
 const { DBProcessQueue } = require('./dbObjects');
+const fs = require('fs');
 
 // Create a Registry which registers the metrics
 const register = new client.Registry();
@@ -34,8 +35,6 @@ const runningTournamentMatches = new client.Gauge({
 	help: 'Running tournament matches',
 });
 register.registerMetric(runningTournamentMatches);
-
-let uniqueDiscordUsersList = [];
 
 const uniqueDiscordUsersInTheLastMinute = new client.Gauge({
 	name: 'unique_discord_users_in_the_last_minute',
@@ -247,15 +246,57 @@ manager.spawn()
 							console.error('index.js | importMatch' + error);
 						});
 				} else if (typeof message === 'string' && message.startsWith('discorduser')) {
-					let discordUser = uniqueDiscordUsersList.find(user => user.id === message.split(' ')[1]);
-					if (discordUser) {
-						discordUser.lastRequest = Date.now();
-					} else {
-						uniqueDiscordUsersList.push({
-							id: message.split(' ')[1],
-							lastRequest: Date.now()
-						});
+					let discordUserId = message.split(' ')[1];
+
+					let uniqueUsersData = {};
+
+					if (fs.existsSync('./uniqueDiscordUsers.json')) {
+						let rawData = fs.readFileSync('./uniqueDiscordUsers.json');
+						uniqueUsersData = JSON.parse(rawData);
 					}
+
+					uniqueUsersData[discordUserId] = Date.now();
+
+					// Update the file
+					fs.writeFileSync('./uniqueDiscordUsers.json', JSON.stringify(uniqueUsersData));
+
+					// Calculate unique users in different timeframes
+					let now = Date.now();
+					let oneMinuteAgo = now - 60000;
+					let oneHourAgo = now - 3600000;
+					let oneDayAgo = now - 86400000;
+					let oneWeekAgo = now - 604800000;
+
+					let countLastMinute = 0;
+					let countLastHour = 0;
+					let countLastDay = 0;
+					let countLastWeek = 0;
+
+					for (let userId in uniqueUsersData) {
+						let lastActive = uniqueUsersData[userId];
+
+						if (lastActive >= oneWeekAgo) {
+							countLastWeek++;
+
+							if (lastActive >= oneDayAgo) {
+								countLastDay++;
+
+								if (lastActive >= oneHourAgo) {
+									countLastHour++;
+
+									if (lastActive >= oneMinuteAgo) {
+										countLastMinute++;
+									}
+								}
+							}
+						}
+					}
+
+					uniqueDiscordUsersInTheLastMinute.set(countLastMinute);
+					uniqueDiscordUsersInTheLastHour.set(countLastHour);
+					uniqueDiscordUsersInTheLastDay.set(countLastDay);
+					uniqueDiscordUsersInTheLastWeek.set(countLastWeek);
+					uniqueDiscordUsers.set(Object.keys(uniqueUsersData).length);
 				} else if (typeof message === 'string' && message.startsWith('osuTrackQueue')) {
 					osuTrackUsersQueueLength.set(Number(message.split(' ')[1]));
 				} else if (typeof message === 'string' && message.startsWith('osuUpdateQueue')) {
