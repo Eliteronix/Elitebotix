@@ -67,38 +67,6 @@ const uniqueDiscordUsers = new client.Gauge({
 });
 register.registerMetric(uniqueDiscordUsers);
 
-let uniqueOsuUsersList = [];
-
-const uniqueOsuUsersInTheLastMinute = new client.Gauge({
-	name: 'unique_osu_users_in_the_last_minute',
-	help: 'Unique osu users in the last minute',
-});
-register.registerMetric(uniqueOsuUsersInTheLastMinute);
-
-const uniqueOsuUsersInTheLastHour = new client.Gauge({
-	name: 'unique_osu_users_in_the_last_hour',
-	help: 'Unique osu users in the last hour',
-});
-register.registerMetric(uniqueOsuUsersInTheLastHour);
-
-const uniqueOsuUsersInTheLastDay = new client.Gauge({
-	name: 'unique_osu_users_in_the_last_day',
-	help: 'Unique osu users in the last day',
-});
-register.registerMetric(uniqueOsuUsersInTheLastDay);
-
-const uniqueOsuUsersInTheLastWeek = new client.Gauge({
-	name: 'unique_osu_users_in_the_last_week',
-	help: 'Unique osu users in the last week',
-});
-register.registerMetric(uniqueOsuUsersInTheLastWeek);
-
-const uniqueOsuUsers = new client.Gauge({
-	name: 'unique_osu_users',
-	help: 'Unique osu users',
-});
-register.registerMetric(uniqueOsuUsers);
-
 const osuWebRequestsQueueLength = new client.Gauge({
 	name: 'osu_web_requests_queue_length',
 	help: 'osu! Web requests queue length',
@@ -288,16 +256,6 @@ manager.spawn()
 							lastRequest: Date.now()
 						});
 					}
-				} else if (typeof message === 'string' && message.startsWith('osuuser')) {
-					let osuUser = uniqueOsuUsersList.find(user => user.id === message.split(' ')[1]);
-					if (osuUser) {
-						osuUser.lastRequest = Date.now();
-					} else {
-						uniqueOsuUsersList.push({
-							id: message.split(' ')[1],
-							lastRequest: Date.now()
-						});
-					}
 				} else if (typeof message === 'string' && message.startsWith('osuTrackQueue')) {
 					osuTrackUsersQueueLength.set(Number(message.split(' ')[1]));
 				} else if (typeof message === 'string' && message.startsWith('osuUpdateQueue')) {
@@ -331,23 +289,6 @@ manager.spawn()
 	.catch(error => {
 		console.error('index.js | shard spawn', error);
 	});
-
-setInterval(() => {
-	uniqueDiscordUsersInTheLastMinute.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 60000).length);
-	uniqueOsuUsersInTheLastMinute.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 60000).length);
-
-	uniqueDiscordUsersInTheLastHour.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 3600000).length);
-	uniqueOsuUsersInTheLastHour.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 3600000).length);
-
-	uniqueDiscordUsersInTheLastDay.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 86400000).length);
-	uniqueOsuUsersInTheLastDay.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 86400000).length);
-
-	uniqueDiscordUsersInTheLastWeek.set(uniqueDiscordUsersList.filter(user => Date.now() - user.lastRequest < 604800000).length);
-	uniqueOsuUsersInTheLastWeek.set(uniqueOsuUsersList.filter(user => Date.now() - user.lastRequest < 604800000).length);
-
-	uniqueDiscordUsers.set(uniqueDiscordUsersList.length);
-	uniqueOsuUsers.set(uniqueOsuUsersList.length);
-}, 5000);
 
 processOsuWebRequests(client);
 
