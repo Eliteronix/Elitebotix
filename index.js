@@ -96,6 +96,14 @@ const totalErrorCount = new client.Counter({
 });
 register.registerMetric(totalErrorCount);
 
+const originalConsoleError = console.error;
+
+console.error = function (...args) {
+	totalErrorCount.inc();
+	originalConsoleError.apply(console, args);
+};
+
+
 const databaseMetrics = [];
 
 const commandSpecificMetrics = [];
@@ -150,8 +158,6 @@ if (process.env.SERVER === 'Dev') {
 
 manager.on('Error', error => {
 	console.error('index.js | manager error' + error);
-
-	totalErrorCount.inc();
 });
 
 manager.on('shardCreate', shard => {
@@ -166,8 +172,6 @@ manager.on('shardCreate', shard => {
 			.catch(error => {
 				if (error.message !== 'Channel closed') {
 					console.error('index.js | shardId', error);
-
-					totalErrorCount.inc();
 				}
 			});
 
@@ -177,8 +181,6 @@ manager.on('shardCreate', shard => {
 				.catch(error => {
 					if (error.message !== 'Channel closed') {
 						console.error('index.js | totalShards', error);
-
-						totalErrorCount.inc();
 					}
 				});
 		});
@@ -209,8 +211,6 @@ manager.on('shardCreate', shard => {
 
 manager.on('shardError', (error, shardId) => {
 	console.error(`Shard ${shardId} encountered an error:`, error);
-
-	totalErrorCount.inc();
 });
 
 manager.on('shardDisconnect', (event, shardId) => {
@@ -258,8 +258,6 @@ manager.spawn()
 						})
 						.catch(error => {
 							console.error('index.js | importMatch' + error);
-
-							totalErrorCount.inc();
 						});
 				} else if (typeof message === 'string' && message.startsWith('discorduser')) {
 					let discordUserId = message.split(' ')[1];
@@ -347,8 +345,6 @@ manager.spawn()
 	})
 	.catch(error => {
 		console.error('index.js | shard spawn', error);
-
-		totalErrorCount.inc();
 	});
 
 processOsuWebRequests(client);
@@ -366,8 +362,6 @@ async function processOsuWebRequests(client) {
 				.catch(error => {
 					if (error.message !== 'Channel closed') {
 						console.error('index.js | processOsuWebRequests osuWebRequest string', error);
-
-						totalErrorCount.inc();
 					}
 				});
 		});
@@ -377,8 +371,6 @@ async function processOsuWebRequests(client) {
 				.catch(error => {
 					if (error.message !== 'Channel closed') {
 						console.error('index.js | processOsuWebRequests osuWebRequest link', error);
-
-						totalErrorCount.inc();
 					}
 				});
 		});
@@ -402,6 +394,4 @@ async function processOsuWebRequests(client) {
 
 process.on('unhandledRejection', (reason, promise) => {
 	console.error('Unhandled rejection, index.js:', reason, promise);
-
-	totalErrorCount.inc();
 });

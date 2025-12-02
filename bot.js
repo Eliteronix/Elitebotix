@@ -4,6 +4,13 @@ const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack 
 
 require('dotenv').config();
 
+const originalConsoleError = console.error;
+
+console.error = function (...args) {
+	process.send('error');
+	originalConsoleError.apply(console, args);
+};
+
 //require the discord.js module
 const Discord = require('discord.js');
 //create a Discord client with discord.js
@@ -163,8 +170,6 @@ process.on('message', message => {
 });
 
 process.on('uncaughtException', (error, origin) => {
-	process.send('error');
-
 	if (error?.code === 'ECONNRESET') {
 		return;
 	} else if (error?.code === 'ETIMEDOUT') {
@@ -179,8 +184,6 @@ process.on('uncaughtException', (error, origin) => {
 process.on('unhandledRejection', (reason) => {
 	if (reason.message !== 'Channel closed') {
 		console.error('Unhandled rejection, bot.js: ', reason.message, ' | ', reason);
-
-		process.send('error');
 	}
 });
 
@@ -239,8 +242,6 @@ function readyDiscord() {
 				notDone = false;
 			} catch (error) {
 				console.error('bot.js | Set application commands' + error);
-
-				process.send('error');
 			}
 		}
 	})();
@@ -351,11 +352,7 @@ client.on('interactionCreate', interaction => {
 	interactionCreate(client, interaction);
 });
 
-client.on('error', (error) => {
-	console.error('Discord client error: ', error);
-
-	process.send('error');
-});
+client.on('error', console.error);
 
 setTimeout(() => {
 	if (wrongCluster(client)) {
@@ -405,8 +402,6 @@ async function executeProcessQueue(client) {
 		await executeNextProcessQueueTask(client);
 	} catch (e) {
 		console.error('bot.js | executeNextProcessQueueTask' + e);
-
-		process.send('error');
 	}
 
 	setTimeout(() => {
@@ -419,8 +414,6 @@ async function cleanUpDuplicates(client) {
 		await cleanUpDuplicateEntries(client);
 	} catch (e) {
 		console.error('bot.js | cleanUpDuplicates' + e);
-
-		process.send('error');
 	}
 
 	setTimeout(() => {
@@ -433,8 +426,6 @@ async function startJiraCardSync(client) {
 		await syncJiraCards(client);
 	} catch (e) {
 		console.error('bot.js | syncJiraCards' + e);
-
-		process.send('error');
 	}
 
 	setTimeout(() => {
@@ -447,8 +438,6 @@ async function getForumPosts(client) {
 		await createNewForumPostRecords(client);
 	} catch (e) {
 		console.error('bot.js | createNewForumPostRecords' + e);
-
-		process.send('error');
 	}
 
 	setTimeout(() => {
@@ -462,8 +451,6 @@ async function checkOsuTracks(client) {
 	} catch (e) {
 		if (e !== 'Timeout in osu! track - reject') {
 			console.error('bot.js | processOsuTrack ' + e);
-
-			process.send('error');
 		}
 	}
 
@@ -497,8 +484,6 @@ async function resetImportMatches() {
 		}
 	} catch (e) {
 		console.error('bot.js | resetImportMatches' + e);
-
-		process.send('error');
 	}
 
 	setTimeout(() => {
