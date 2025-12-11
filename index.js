@@ -145,6 +145,7 @@ let manager = new ShardingManager('./bot.js', {
 	execArgv: ['--use_strict', '--unhandled-rejections=warn', '--max-old-space-size=4096'],
 	totalShards: 'auto',
 	timeout: 30000,
+	respawn: false
 });
 
 if (process.env.SERVER === 'Dev') {
@@ -153,6 +154,7 @@ if (process.env.SERVER === 'Dev') {
 		execArgv: ['--use_strict', '--unhandled-rejections=warn', '--max-old-space-size=4096'],
 		totalShards: 1,
 		timeout: 30000,
+		respawn: false
 	});
 }
 
@@ -183,6 +185,19 @@ manager.on('shardCreate', shard => {
 						console.error('index.js | totalShards', error);
 					}
 				});
+		});
+
+		shard.process.on('exit', (code, signal) => {
+			// eslint-disable-next-line no-console
+			console.log(`Shard ${shard.id} exited (code: ${code}, signal: ${signal})`);
+
+			if (shard.process) return;  // Already respawning internally — not your case
+
+			if (shard.id > 0) {
+				// eslint-disable-next-line no-console
+				console.log(`Manually restarting shard ${shard.id}...`);
+				shard.spawn(); // Safe restart, creates a new child process
+			}
 		});
 	});
 

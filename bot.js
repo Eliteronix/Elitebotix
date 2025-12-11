@@ -4,19 +4,16 @@ const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack 
 
 require('dotenv').config();
 
+if (typeof process.send !== 'function') {
+	process.send = () => { };
+}
+
 const originalConsoleError = console.error;
 
 console.error = function (...args) {
 	process.send('error');
 	originalConsoleError.apply(console, args);
 };
-
-const shardId = parseInt(process.argv[2]);
-const shardCount = parseInt(process.argv[3]);
-
-// command to start a specific shard:
-// clinic flame -- node shard.js shardId shardCount
-// console.log(`Starting shard ${shardId} out of ${shardCount} shards.`);
 
 //require the discord.js module
 const Discord = require('discord.js');
@@ -43,9 +40,17 @@ let clientProperties = {
 	]
 };
 
+const shardId = parseInt(process.argv[2]);
+const shardCount = parseInt(process.argv[3]);
+
 if (shardId) {
 	clientProperties.shards = [shardId];
 	clientProperties.shardCount = shardCount;
+
+	// command to start a specific shard:
+	// clinic flame -- node shard.js shardId shardCount
+	// eslint-disable-next-line no-console
+	console.log(`Starting shard ${shardId} out of ${shardCount} shards manually with PID ${process.pid}`);
 }
 
 //create a Discord client with discord.js
@@ -154,7 +159,7 @@ process.on('message', message => {
 
 	if (message.type == 'shardId') {
 		// eslint-disable-next-line no-console
-		console.log(`Shard ${message.data.shardId} is ready.`);
+		console.log(`Shard ${message.data.shardId} is ready with PID ${process.pid}`);
 		client.shardId = message.data.shardId;
 		process.shardId = message.data.shardId;
 
@@ -388,9 +393,10 @@ setTimeout(() => {
 }, 60000);
 
 // Set update to 1 after 23 hours to make it restart
-setTimeout(() => {
-	client.update = 1;
-}, 82800000);
+// setTimeout(() => {
+// 	//TODO: Enable this again after testing
+// 	client.update = 1;
+// }, 82800000);
 
 // let nextMBThreshold = 3000;
 
