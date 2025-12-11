@@ -5,7 +5,9 @@ const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack 
 require('dotenv').config();
 
 if (typeof process.send !== 'function') {
-	process.send = () => { };
+	const noop = () => { };
+	noop.__isNoop = true;
+	process.send = noop;
 }
 
 const originalConsoleError = console.error;

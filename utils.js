@@ -7427,6 +7427,11 @@ module.exports = {
 		return await Canvas.loadImage(path);
 	},
 	async awaitWebRequestPermission(request, client) {
+		// If there is no process.send, we are not in a child process and can proceed directly
+		if (process.send.__isNoop) {
+			return true;
+		}
+
 		let randomString = Math.random().toString(36).substring(2);
 
 		process.webRequestsWaiting.push({ string: randomString, link: request });
