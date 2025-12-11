@@ -11,10 +11,17 @@ console.error = function (...args) {
 	originalConsoleError.apply(console, args);
 };
 
+const shardId = parseInt(process.argv[2]);
+const shardCount = parseInt(process.argv[3]);
+
+// command to start a specific shard:
+// clinic flame -- node shard.js shardId shardCount
+// console.log(`Starting shard ${shardId} out of ${shardCount} shards.`);
+
 //require the discord.js module
 const Discord = require('discord.js');
-//create a Discord client with discord.js
-const client = new Discord.Client({
+
+let clientProperties = {
 	intents: [
 		Discord.GatewayIntentBits.Guilds,
 		Discord.GatewayIntentBits.GuildMembers,
@@ -34,7 +41,15 @@ const client = new Discord.Client({
 		Discord.Partials.Reaction,
 		Discord.Partials.Channel,
 	]
-});
+};
+
+if (shardId) {
+	clientProperties.shards = [shardId];
+	clientProperties.shardCount = shardCount;
+}
+
+//create a Discord client with discord.js
+const client = new Discord.Client(clientProperties);
 
 //Get gotMessage
 const gotMessage = require('./gotMessage');
