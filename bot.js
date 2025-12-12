@@ -395,10 +395,9 @@ setTimeout(() => {
 }, 60000);
 
 // Set update to 1 after 23 hours to make it restart
-// setTimeout(() => {
-// 	//TODO: Enable this again after testing
-// 	client.update = 1;
-// }, 82800000);
+setTimeout(() => {
+	client.update = 1;
+}, 82800000);
 
 // let nextMBThreshold = 3000;
 
