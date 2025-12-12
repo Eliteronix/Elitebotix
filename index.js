@@ -166,6 +166,13 @@ manager.on('shardCreate', shard => {
 	// eslint-disable-next-line no-console
 	console.log(`Launched shard ${shard.id}`);
 
+	if (shard.id === 0) {
+		shard.process.spawnargs = [
+			'clinic', 'flame', '--',
+			'node', 'bot.js', shard.id, manager.totalShards
+		];
+	}
+
 	// Listeing for the ready event on shard.
 	shard.on('ready', () => {
 		// console.log(`[DEBUG/SHARD] Shard ${shard.id} connected to Discord's Gateway.`);
@@ -194,9 +201,15 @@ manager.on('shardCreate', shard => {
 			if (shard.process) return;  // Already respawning internally — not your case
 
 			// if (shard.id > 0) {
+<<<<<<< Updated upstream
 				// eslint-disable-next-line no-console
 				console.log(`Manually restarting shard ${shard.id}...`);
 				shard.spawn(); // Safe restart, creates a new child process
+=======
+			// eslint-disable-next-line no-console
+			console.log(`Manually restarting shard ${shard.id}...`);
+			shard.spawn(); // Safe restart, creates a new child process
+>>>>>>> Stashed changes
 			// }
 		});
 	});
