@@ -201,15 +201,9 @@ manager.on('shardCreate', shard => {
 			if (shard.process) return;  // Already respawning internally — not your case
 
 			// if (shard.id > 0) {
-<<<<<<< Updated upstream
-				// eslint-disable-next-line no-console
-				console.log(`Manually restarting shard ${shard.id}...`);
-				shard.spawn(); // Safe restart, creates a new child process
-=======
 			// eslint-disable-next-line no-console
 			console.log(`Manually restarting shard ${shard.id}...`);
 			shard.spawn(); // Safe restart, creates a new child process
->>>>>>> Stashed changes
 			// }
 		});
 	});
