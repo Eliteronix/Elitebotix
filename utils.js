@@ -1436,108 +1436,8 @@ module.exports = {
 		// await new Promise((resolve) => {
 		// 	child.on('close', resolve);
 		// });
-		let matchAlreadyGetsImported = true;
-		let waitForADifferentImport = false;
 
-		if (!client) {
-			matchAlreadyGetsImported = false;
-		}
-
-		while (matchAlreadyGetsImported) {
-			try {
-				if (logBroadcastEval) {
-					// eslint-disable-next-line no-console
-					console.log('Broadcasting utils.js sameMatchGettingImported to shards...');
-				}
-				let sameMatchGettingImported = false;
-				sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
-					if (c.shardId === 0) {
-						if (c.matchesGettingImported === undefined) {
-							c.matchesGettingImported = [];
-						}
-
-						let minutesAgo = new Date();
-						minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
-
-						let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
-
-						if (match) {
-							return match.games;
-						} else {
-							c.matchesGettingImported.push({
-								matchId: matchId,
-								games: games,
-								date: new Date()
-							});
-							return false;
-						}
-					}
-				}, {
-					context: {
-						matchId: match.id,
-						games: match.games.length
-					}
-				});
-
-				sameMatchGettingImported = sameMatchGettingImported[0];
-
-				if (sameMatchGettingImported === false) {
-					matchAlreadyGetsImported = false;
-				} else if (sameMatchGettingImported >= match.games.length) {
-					waitForADifferentImport = true;
-					matchAlreadyGetsImported = false;
-				}
-
-				if (matchAlreadyGetsImported) {
-					await new Promise(resolve => setTimeout(resolve, 5000));
-				}
-			} catch (error) {
-				console.error(error);
-				await new Promise(resolve => setTimeout(resolve, 5000));
-			}
-		}
-
-		while (waitForADifferentImport) {
-			try {
-				if (logBroadcastEval) {
-					// eslint-disable-next-line no-console
-					console.log('Broadcasting utils.js waitForADifferentImport to shards...');
-				}
-				let sameMatchGettingImported = false;
-
-				if (client) {
-					sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
-						if (c.shardId === 0) {
-							if (c.matchesGettingImported === undefined) {
-								c.matchesGettingImported = [];
-							}
-
-							let match = c.matchesGettingImported.find(m => m.matchId === matchId);
-							if (match) {
-								return true;
-							} else {
-								return false;
-							}
-						}
-					}, {
-						context: {
-							matchId: match.id,
-						}
-					});
-				}
-
-				sameMatchGettingImported = sameMatchGettingImported[0];
-
-				if (sameMatchGettingImported === false) {
-					return;
-				}
-
-				await new Promise(resolve => setTimeout(resolve, 5000));
-			} catch (error) {
-				console.error(error);
-				await new Promise(resolve => setTimeout(resolve, 5000));
-			}
-		}
+		await module.exports.checkMatchAlreadyGettingImported(match, client);
 
 		if (match.games.length && match.raw_end === null) {
 			let yesterday = new Date();
@@ -1919,45 +1819,7 @@ module.exports = {
 
 		// Bulkcreate the new scores
 		if (newScores.length) {
-			let created = false;
-			while (!created) {
-				try {
-					await DBOsuMultiGameScores.bulkCreate(newScores)
-						.then(async (scores) => {
-							// Update warmup flags if needed
-							if (!matchMakingAcronyms.includes(acronym)) {
-								for (let i = 0; i < scores.length; i++) {
-									if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
-										let modPool = module.exports.getScoreModpool(scores[i]);
-
-										let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === modPool);
-
-										if (!existingEntry) {
-											beatmapModPools.push({
-												beatmapId: scores[i].beatmapId,
-												modPool: modPool,
-											});
-										}
-									}
-								}
-
-								//Set back warmup flag if it was set by amount | warmup = false is always gonna get reset | the rest only if the map was played
-								for (let i = 0; i < sameTournamentGames.length; i++) {
-									if (sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup !== null
-										&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentGames[i].beatmapId)
-										|| sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup === false) {
-										sameTournamentGames[i].warmup = null;
-										await sameTournamentGames[i].save();
-									}
-								}
-							}
-
-							created = true;
-						});
-				} catch (e) {
-					await new Promise(resolve => setTimeout(resolve, 5000));
-				}
-			}
+			await module.exports.createNewScores(match, tourneyMatch, acronym, newScores, beatmapModPools, sameTournamentGames);
 		}
 
 		let existingGames = await DBOsuMultiGames.findAll({
@@ -2318,6 +2180,152 @@ module.exports = {
 			}
 		} catch (err) {
 			//Ignore
+		}
+	},
+	async checkMatchAlreadyGettingImported(match, client) {
+		let matchAlreadyGetsImported = true;
+		let waitForADifferentImport = false;
+
+		if (!client) {
+			matchAlreadyGetsImported = false;
+		}
+
+		while (matchAlreadyGetsImported) {
+			try {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting utils.js sameMatchGettingImported to shards...');
+				}
+
+				let sameMatchGettingImported = false;
+				sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId, games }) => {
+					if (c.shardId === 0) {
+						if (c.matchesGettingImported === undefined) {
+							c.matchesGettingImported = [];
+						}
+
+						let minutesAgo = new Date();
+						minutesAgo.setMinutes(minutesAgo.getMinutes() - 5);
+
+						let match = c.matchesGettingImported.find(m => m.matchId === matchId && m.date > minutesAgo);
+
+						if (match) {
+							return match.games;
+						} else {
+							c.matchesGettingImported.push({
+								matchId: matchId,
+								games: games,
+								date: new Date()
+							});
+							return false;
+						}
+					}
+				}, {
+					context: {
+						matchId: match.id,
+						games: match.games.length
+					}
+				});
+
+				sameMatchGettingImported = sameMatchGettingImported[0];
+
+				if (sameMatchGettingImported === false) {
+					matchAlreadyGetsImported = false;
+				} else if (sameMatchGettingImported >= match.games.length) {
+					waitForADifferentImport = true;
+					matchAlreadyGetsImported = false;
+				}
+
+				if (matchAlreadyGetsImported) {
+					await new Promise(resolve => setTimeout(resolve, 5000));
+				}
+			} catch (error) {
+				console.error(error);
+				await new Promise(resolve => setTimeout(resolve, 5000));
+			}
+		}
+
+		while (waitForADifferentImport) {
+			try {
+				if (logBroadcastEval) {
+					// eslint-disable-next-line no-console
+					console.log('Broadcasting utils.js waitForADifferentImport to shards...');
+				}
+				let sameMatchGettingImported = false;
+
+				if (client) {
+					sameMatchGettingImported = await client.shard.broadcastEval(async (c, { matchId }) => {
+						if (c.shardId === 0) {
+							if (c.matchesGettingImported === undefined) {
+								c.matchesGettingImported = [];
+							}
+
+							let match = c.matchesGettingImported.find(m => m.matchId === matchId);
+							if (match) {
+								return true;
+							} else {
+								return false;
+							}
+						}
+					}, {
+						context: {
+							matchId: match.id,
+						}
+					});
+				}
+
+				sameMatchGettingImported = sameMatchGettingImported[0];
+
+				if (sameMatchGettingImported === false) {
+					return;
+				}
+
+				await new Promise(resolve => setTimeout(resolve, 5000));
+			} catch (error) {
+				console.error(error);
+				await new Promise(resolve => setTimeout(resolve, 5000));
+			}
+		}
+	},
+	async createNewScores(match, tourneyMatch, acronym, newScores, beatmapModPools, sameTournamentGames) {
+		let created = false;
+		while (!created) {
+			try {
+				await DBOsuMultiGameScores.bulkCreate(newScores)
+					.then(async (scores) => {
+						// Update warmup flags if needed
+						if (!matchMakingAcronyms.includes(acronym)) {
+							for (let i = 0; i < scores.length; i++) {
+								if (tourneyMatch && !match.name.startsWith('MOTD:') && scores[i].warmup === false) {
+									let modPool = module.exports.getScoreModpool(scores[i]);
+
+									let existingEntry = beatmapModPools.find(x => x.beatmapId === scores[i].beatmapId && x.modPool === modPool);
+
+									if (!existingEntry) {
+										beatmapModPools.push({
+											beatmapId: scores[i].beatmapId,
+											modPool: modPool,
+										});
+									}
+								}
+							}
+
+							//Set back warmup flag if it was set by amount | warmup = false is always gonna get reset | the rest only if the map was played
+							for (let i = 0; i < sameTournamentGames.length; i++) {
+								if (sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup !== null
+									&& beatmapModPools.map(x => x.beatmapId).includes(sameTournamentGames[i].beatmapId)
+									|| sameTournamentGames[i].warmupDecidedByAmount && sameTournamentGames[i].warmup === false) {
+									sameTournamentGames[i].warmup = null;
+									await sameTournamentGames[i].save();
+								}
+							}
+						}
+
+						created = true;
+					});
+			} catch (e) {
+				await new Promise(resolve => setTimeout(resolve, 5000));
+			}
 		}
 	},
 	async populateMsgFromInteraction(interaction) {
