@@ -1819,7 +1819,7 @@ module.exports = {
 
 		// Bulkcreate the new scores
 		if (newScores.length) {
-			await module.exports.createNewScores(match, tourneyMatch, acronym, newScores, beatmapModPools, sameTournamentGames);
+			beatmapModPools = await module.exports.createNewScores(match, tourneyMatch, acronym, newScores, beatmapModPools, sameTournamentGames);
 		}
 
 		let existingGames = await DBOsuMultiGames.findAll({
@@ -2327,6 +2327,8 @@ module.exports = {
 				await new Promise(resolve => setTimeout(resolve, 5000));
 			}
 		}
+
+		return beatmapModPools;
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
