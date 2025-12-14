@@ -2011,6 +2011,8 @@ module.exports = {
 		}
 	},
 	async getSameTournamentGames(match) {
+		let start = Date.now();
+
 		let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 		let weeksPrior = new Date(match.raw_start);
@@ -2035,6 +2037,8 @@ module.exports = {
 			}
 		});
 
+		console.log(`getSameTournamentGames DB query took ${Date.now() - start}ms and found ${sameTournamentGames.length} games for acronym ${acronym}`);
+
 		// Adapt the timespan to make sure the matches are included
 		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
 		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
@@ -2055,6 +2059,8 @@ module.exports = {
 			}
 		});
 
+		console.log(`getSameTournamentGames second DB query took ${Date.now() - start}ms and found ${sameTournamentGameMatches.length} matches for acronym ${acronym}`);
+
 		for (let i = 0; i < sameTournamentGames.length; i++) {
 			let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
 
@@ -2063,6 +2069,8 @@ module.exports = {
 				i--;
 			}
 		}
+
+		console.log(`getSameTournamentGames finished in ${Date.now() - start}ms and returning ${sameTournamentGames.length} games for acronym ${acronym}`);
 
 		return sameTournamentGames;
 	},
