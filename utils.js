@@ -2021,34 +2021,12 @@ module.exports = {
 		let weeksAfter = new Date(match.raw_start);
 		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
 
-		let sameTournamentGames = await DBOsuMultiGames.findAll({
-			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
-			where: {
-				gameStartDate: {
-					[Op.gte]: weeksPrior
-				},
-				gameEndDate: {
-					[Op.lte]: weeksAfter
-				},
-				tourneyMatch: true,
-				matchId: {
-					[Op.not]: match.id
-				}
-			}
-		});
-
-		console.log(`getSameTournamentGames DB query took ${Date.now() - start}ms and found ${sameTournamentGames.length} games for acronym ${acronym}`);
-
-		// Adapt the timespan to make sure the matches are included
-		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
-		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
-
 		let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId'],
 			where: {
 				acronym: acronym,
 				matchId: {
-					[Op.in]: [...new Set(sameTournamentGames.map(m => m.matchId))]
+					[Op.not]: match.id
 				},
 				matchStartDate: {
 					[Op.gte]: weeksPrior
@@ -2059,18 +2037,19 @@ module.exports = {
 			}
 		});
 
-		console.log(`getSameTournamentGames second DB query took ${Date.now() - start}ms and found ${sameTournamentGameMatches.length} matches for acronym ${acronym}`);
+		console.log(`(reworked) getSameTournamentGames DB query took ${Date.now() - start}ms and found ${sameTournamentGameMatches.length} matches for acronym ${acronym}`);
 
-		for (let i = 0; i < sameTournamentGames.length; i++) {
-			let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
-
-			if (!match) {
-				sameTournamentGames.splice(i, 1);
-				i--;
+		let sameTournamentGames = await DBOsuMultiGames.findAll({
+			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+			where: {
+				tourneyMatch: true,
+				matchId: {
+					[Op.in]: [...new Set(sameTournamentGameMatches.map(m => m.matchId))]
+				},
 			}
-		}
+		});
 
-		console.log(`getSameTournamentGames finished in ${Date.now() - start}ms and returning ${sameTournamentGames.length} games for acronym ${acronym}`);
+		console.log(`(reworked) getSameTournamentGames finished in ${Date.now() - start}ms and returning ${sameTournamentGames.length} games for acronym ${acronym}`);
 
 		return sameTournamentGames;
 	},
