@@ -1880,151 +1880,7 @@ module.exports = {
 				});
 			}
 
-			for (let i = 0; i < newMatchPlayers.length; i++) {
-				if (existingMatchPlayers.includes(newMatchPlayers[i])) {
-					newMatchPlayers.splice(i, 1);
-					i--;
-				}
-			}
-
-			if (newMatchPlayers.length) {
-				//Get all follows for the players in the match
-				let follows = await DBOsuTourneyFollows.findAll({
-					attributes: ['userId', 'osuUserId'],
-					where: {
-						osuUserId: {
-							[Op.in]: newMatchPlayers
-						}
-					}
-				});
-
-				//Collect the follows per user
-				let usersToNotify = [];
-				let usersToNotifyIds = [];
-
-				for (let i = 0; i < follows.length; i++) {
-					if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
-						usersToNotifyIds.push(follows[i].userId);
-						usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
-					} else {
-						usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
-					}
-				}
-
-				//Create a notification for each user
-				let now = new Date();
-				for (let i = 0; i < usersToNotify.length; i++) {
-					await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')};${match.name}`, date: now });
-				}
-			}
-
-			//Manage osu-track follows for guilds
-			if (newMatchPlayers.length) {
-				//Get all follows for the players in the match
-				let guildTrackers = await DBOsuGuildTrackers.findAll({
-					attributes: ['guildId', 'osuUserId', 'acronym', 'channelId', 'matchActivityAutoTrack'],
-					where: {
-						osuUserId: {
-							[Op.in]: newMatchPlayers
-						},
-						matchActivity: true
-					}
-				});
-
-				//Check for the acronym
-				for (let i = 0; i < guildTrackers.length; i++) {
-					if (!guildTrackers[i].acronym) {
-						continue;
-					}
-
-					let acronyms = guildTrackers[i].acronym.split(',');
-
-					let correctAcronym = false;
-
-					for (let j = 0; j < acronyms.length; j++) {
-						if (match.name.toLowerCase().startsWith(acronyms[j].toLowerCase().trim())) {
-							correctAcronym = true;
-						}
-					}
-
-					if (!correctAcronym) {
-						guildTrackers.splice(i, 1);
-						i--;
-					}
-				}
-
-				let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
-					attributes: ['channelId'],
-					where: {
-						osuUserId: {
-							[Op.in]: existingMatchPlayers
-						},
-						matchActivity: true,
-						matchActivityAutoTrack: true,
-					}
-				});
-
-				let existingMatchPlayerChannelIds = [];
-
-				for (let i = 0; i < existingMatchPlayerTrackers.length; i++) {
-					existingMatchPlayerChannelIds.push(existingMatchPlayerTrackers[i].channelId);
-				}
-
-				//Collect the follows per user
-				let channelsToNotify = [];
-				let channelsToNotifyIds = [];
-
-				for (let i = 0; i < guildTrackers.length; i++) {
-					if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
-						channelsToNotifyIds.push(guildTrackers[i].channelId);
-						let trackMatch = guildTrackers[i].matchActivityAutoTrack;
-						if (existingMatchPlayerChannelIds.includes(guildTrackers[i].channelId)) {
-							trackMatch = false;
-						}
-						channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId], trackMatch: trackMatch });
-					} else {
-						channelsToNotify[channelsToNotifyIds.indexOf(guildTrackers[i].channelId)].osuUserIds.push(guildTrackers[i].osuUserId);
-					}
-				}
-
-				//Create a notification for each channel
-				let now = new Date();
-				for (let i = 0; i < channelsToNotify.length; i++) {
-					await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
-				}
-			}
-
-			//Manage osu-track follows for guilds for acronyms
-			if (newMatchPlayers.length && existingMatchPlayers.length === 0) {
-				//Get all follows for the players in the match
-				let guildTrackers = await DBOsuGuildTrackers.findAll({
-					attributes: ['guildId', 'channelId', 'matchActivityAutoTrack'],
-					where: {
-						osuUserId: null,
-						acronym: match.name.replace(/:.*/gm, ''),
-						matchActivity: true
-					}
-				});
-
-
-				//Collect the follows
-				let channelsToNotify = [];
-				let channelsToNotifyIds = [];
-
-				for (let i = 0; i < guildTrackers.length; i++) {
-					if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
-						channelsToNotifyIds.push(guildTrackers[i].channelId);
-						let trackMatch = guildTrackers[i].matchActivityAutoTrack;
-						channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, trackMatch: trackMatch });
-					}
-				}
-
-				//Create a notification for each channel
-				let now = new Date();
-				for (let i = 0; i < channelsToNotify.length; i++) {
-					await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
-				}
-			}
+			await module.exports.notifyTourneyMatchTracking(match, newMatchPlayers, existingMatchPlayers);
 		}
 
 		// Remove the match from the getting imported list
@@ -2351,6 +2207,153 @@ module.exports = {
 					},
 					silent: true,
 				});
+			}
+		}
+	},
+	async notifyTourneyMatchTracking(match, newMatchPlayers, existingMatchPlayers) {
+		for (let i = 0; i < newMatchPlayers.length; i++) {
+			if (existingMatchPlayers.includes(newMatchPlayers[i])) {
+				newMatchPlayers.splice(i, 1);
+				i--;
+			}
+		}
+
+		if (newMatchPlayers.length) {
+			//Get all follows for the players in the match
+			let follows = await DBOsuTourneyFollows.findAll({
+				attributes: ['userId', 'osuUserId'],
+				where: {
+					osuUserId: {
+						[Op.in]: newMatchPlayers
+					}
+				}
+			});
+
+			//Collect the follows per user
+			let usersToNotify = [];
+			let usersToNotifyIds = [];
+
+			for (let i = 0; i < follows.length; i++) {
+				if (usersToNotifyIds.indexOf(follows[i].userId) === -1) {
+					usersToNotifyIds.push(follows[i].userId);
+					usersToNotify.push({ userId: follows[i].userId, osuUserIds: [follows[i].osuUserId] });
+				} else {
+					usersToNotify[usersToNotifyIds.indexOf(follows[i].userId)].osuUserIds.push(follows[i].osuUserId);
+				}
+			}
+
+			//Create a notification for each user
+			let now = new Date();
+			for (let i = 0; i < usersToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'tourneyFollow', priority: 1, additions: `${usersToNotify[i].userId};${match.id};${usersToNotify[i].osuUserIds.join(',')};${match.name}`, date: now });
+			}
+		}
+
+		//Manage osu-track follows for guilds
+		if (newMatchPlayers.length) {
+			//Get all follows for the players in the match
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
+				attributes: ['guildId', 'osuUserId', 'acronym', 'channelId', 'matchActivityAutoTrack'],
+				where: {
+					osuUserId: {
+						[Op.in]: newMatchPlayers
+					},
+					matchActivity: true
+				}
+			});
+
+			//Check for the acronym
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (!guildTrackers[i].acronym) {
+					continue;
+				}
+
+				let acronyms = guildTrackers[i].acronym.split(',');
+
+				let correctAcronym = false;
+
+				for (let j = 0; j < acronyms.length; j++) {
+					if (match.name.toLowerCase().startsWith(acronyms[j].toLowerCase().trim())) {
+						correctAcronym = true;
+					}
+				}
+
+				if (!correctAcronym) {
+					guildTrackers.splice(i, 1);
+					i--;
+				}
+			}
+
+			let existingMatchPlayerTrackers = await DBOsuGuildTrackers.findAll({
+				attributes: ['channelId'],
+				where: {
+					osuUserId: {
+						[Op.in]: existingMatchPlayers
+					},
+					matchActivity: true,
+					matchActivityAutoTrack: true,
+				}
+			});
+
+			let existingMatchPlayerChannelIds = [];
+
+			for (let i = 0; i < existingMatchPlayerTrackers.length; i++) {
+				existingMatchPlayerChannelIds.push(existingMatchPlayerTrackers[i].channelId);
+			}
+
+			//Collect the follows per user
+			let channelsToNotify = [];
+			let channelsToNotifyIds = [];
+
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
+					channelsToNotifyIds.push(guildTrackers[i].channelId);
+					let trackMatch = guildTrackers[i].matchActivityAutoTrack;
+					if (existingMatchPlayerChannelIds.includes(guildTrackers[i].channelId)) {
+						trackMatch = false;
+					}
+					channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, osuUserIds: [guildTrackers[i].osuUserId], trackMatch: trackMatch });
+				} else {
+					channelsToNotify[channelsToNotifyIds.indexOf(guildTrackers[i].channelId)].osuUserIds.push(guildTrackers[i].osuUserId);
+				}
+			}
+
+			//Create a notification for each channel
+			let now = new Date();
+			for (let i = 0; i < channelsToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'guildTourneyFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${channelsToNotify[i].osuUserIds.join(',')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
+			}
+		}
+
+		//Manage osu-track follows for guilds for acronyms
+		if (newMatchPlayers.length && existingMatchPlayers.length === 0) {
+			//Get all follows for the players in the match
+			let guildTrackers = await DBOsuGuildTrackers.findAll({
+				attributes: ['guildId', 'channelId', 'matchActivityAutoTrack'],
+				where: {
+					osuUserId: null,
+					acronym: match.name.replace(/:.*/gm, ''),
+					matchActivity: true
+				}
+			});
+
+
+			//Collect the follows
+			let channelsToNotify = [];
+			let channelsToNotifyIds = [];
+
+			for (let i = 0; i < guildTrackers.length; i++) {
+				if (channelsToNotifyIds.indexOf(guildTrackers[i].channelId) === -1) {
+					channelsToNotifyIds.push(guildTrackers[i].channelId);
+					let trackMatch = guildTrackers[i].matchActivityAutoTrack;
+					channelsToNotify.push({ guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, trackMatch: trackMatch });
+				}
+			}
+
+			//Create a notification for each channel
+			let now = new Date();
+			for (let i = 0; i < channelsToNotify.length; i++) {
+				await DBProcessQueue.create({ task: 'guildTourneyAcronymFollow', priority: 1, additions: `${channelsToNotify[i].guildId};${channelsToNotify[i].channelId};${match.id};${match.name.replace(/:.*/gm, '')};${channelsToNotify[i].trackMatch};${match.name}`, date: now });
 			}
 		}
 	},
