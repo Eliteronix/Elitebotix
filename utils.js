@@ -2117,97 +2117,94 @@ module.exports = {
 		return beatmapModPools;
 	},
 	async updateBeatmapTourneyFlags(beatmapModPools) {
-		//TODO: The loop is not needed probably, but left to check performance change after removing it
-		for (let i = 0; i < beatmapModPools.length; i++) {
-			let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
+		let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
 
-			if (NMBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					noModMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: NMBeatmaps,
-						},
-						noModMap: {
-							[Op.not]: true,
-						}
+		if (NMBeatmaps.length) {
+			await DBOsuBeatmaps.update({
+				noModMap: true,
+			}, {
+				where: {
+					beatmapId: {
+						[Op.in]: NMBeatmaps,
 					},
-					silent: true,
-				});
-			}
+					noModMap: {
+						[Op.not]: true,
+					}
+				},
+				silent: true,
+			});
+		}
 
-			let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
+		let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
 
-			if (HDBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					hiddenMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: HDBeatmaps,
-						},
-						hiddenMap: {
-							[Op.not]: true,
-						}
+		if (HDBeatmaps.length) {
+			await DBOsuBeatmaps.update({
+				hiddenMap: true,
+			}, {
+				where: {
+					beatmapId: {
+						[Op.in]: HDBeatmaps,
 					},
-					silent: true,
-				});
-			}
+					hiddenMap: {
+						[Op.not]: true,
+					}
+				},
+				silent: true,
+			});
+		}
 
-			let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
+		let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
 
-			if (HRBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					hardRockMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: HRBeatmaps,
-						},
-						hardRockMap: {
-							[Op.not]: true,
-						}
+		if (HRBeatmaps.length) {
+			await DBOsuBeatmaps.update({
+				hardRockMap: true,
+			}, {
+				where: {
+					beatmapId: {
+						[Op.in]: HRBeatmaps,
 					},
-					silent: true,
-				});
-			}
+					hardRockMap: {
+						[Op.not]: true,
+					}
+				},
+				silent: true,
+			});
+		}
 
-			let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
+		let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
 
-			if (DTBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					doubleTimeMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: DTBeatmaps,
-						},
-						doubleTimeMap: {
-							[Op.not]: true,
-						}
+		if (DTBeatmaps.length) {
+			await DBOsuBeatmaps.update({
+				doubleTimeMap: true,
+			}, {
+				where: {
+					beatmapId: {
+						[Op.in]: DTBeatmaps,
 					},
-					silent: true,
-				});
-			}
+					doubleTimeMap: {
+						[Op.not]: true,
+					}
+				},
+				silent: true,
+			});
+		}
 
-			let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
+		let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
 
-			if (FMBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					freeModMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: FMBeatmaps,
-						},
-						freeModMap: {
-							[Op.not]: true,
-						}
+		if (FMBeatmaps.length) {
+			await DBOsuBeatmaps.update({
+				freeModMap: true,
+			}, {
+				where: {
+					beatmapId: {
+						[Op.in]: FMBeatmaps,
 					},
-					silent: true,
-				});
-			}
+					freeModMap: {
+						[Op.not]: true,
+					}
+				},
+				silent: true,
+			});
 		}
 	},
 	async notifyTourneyMatchTracking(match, newMatchPlayers, existingMatchPlayers) {
