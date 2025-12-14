@@ -2011,8 +2011,6 @@ module.exports = {
 		}
 	},
 	async getSameTournamentGames(match) {
-		let start = Date.now();
-
 		let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
 
 		let weeksPrior = new Date(match.raw_start);
@@ -2037,8 +2035,6 @@ module.exports = {
 			}
 		});
 
-		console.log(`(reworked) getSameTournamentGames DB query took ${Date.now() - start}ms and found ${sameTournamentGameMatches.length} matches for acronym ${acronym}`);
-
 		let sameTournamentGames = await DBOsuMultiGames.findAll({
 			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
 			where: {
@@ -2048,8 +2044,6 @@ module.exports = {
 				},
 			}
 		});
-
-		console.log(`(reworked) getSameTournamentGames finished in ${Date.now() - start}ms and returning ${sameTournamentGames.length} games for acronym ${acronym}`);
 
 		return sameTournamentGames;
 	},
