@@ -1510,50 +1510,7 @@ module.exports = {
 		let sameTournamentGames = null;
 
 		if (!matchMakingAcronyms.includes(acronym)) {
-			sameTournamentGames = await DBOsuMultiGames.findAll({
-				attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
-				where: {
-					gameStartDate: {
-						[Op.gte]: weeksPrior
-					},
-					gameEndDate: {
-						[Op.lte]: weeksAfter
-					},
-					tourneyMatch: true,
-					matchId: {
-						[Op.not]: match.id
-					}
-				}
-			});
-
-			// Adapt the timespan to make sure the matches are included
-			weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
-			weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
-
-			let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
-				attributes: ['matchId'],
-				where: {
-					acronym: acronym,
-					matchId: {
-						[Op.in]: [...new Set(sameTournamentGames.map(m => m.matchId))]
-					},
-					matchStartDate: {
-						[Op.gte]: weeksPrior
-					},
-					matchEndDate: {
-						[Op.lte]: weeksAfter
-					},
-				}
-			});
-
-			for (let i = 0; i < sameTournamentGames.length; i++) {
-				let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
-
-				if (!match) {
-					sameTournamentGames.splice(i, 1);
-					i--;
-				}
-			}
+			sameTournamentGames = await module.exports.getSameTournamentGames(match);
 		}
 
 		let games = [];
@@ -1819,7 +1776,7 @@ module.exports = {
 
 		// Bulkcreate the new scores
 		if (newScores.length) {
-			beatmapModPools = await module.exports.createNewScores(match, tourneyMatch, acronym, newScores, beatmapModPools, sameTournamentGames);
+			beatmapModPools = await module.exports.createNewScores(match, newScores, beatmapModPools, sameTournamentGames);
 		}
 
 		let existingGames = await DBOsuMultiGames.findAll({
@@ -1907,97 +1864,7 @@ module.exports = {
 		}
 
 		//Set the tournament flags on the corresponding beatmaps
-		for (let i = 0; i < beatmapModPools.length; i++) {
-			let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
-
-			if (NMBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					noModMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: NMBeatmaps,
-						},
-						noModMap: {
-							[Op.not]: true,
-						}
-					},
-					silent: true,
-				});
-			}
-
-			let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
-
-			if (HDBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					hiddenMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: HDBeatmaps,
-						},
-						hiddenMap: {
-							[Op.not]: true,
-						}
-					},
-					silent: true,
-				});
-			}
-
-			let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
-
-			if (HRBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					hardRockMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: HRBeatmaps,
-						},
-						hardRockMap: {
-							[Op.not]: true,
-						}
-					},
-					silent: true,
-				});
-			}
-
-			let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
-
-			if (DTBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					doubleTimeMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: DTBeatmaps,
-						},
-						doubleTimeMap: {
-							[Op.not]: true,
-						}
-					},
-					silent: true,
-				});
-			}
-
-			let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
-
-			if (FMBeatmaps.length) {
-				await DBOsuBeatmaps.update({
-					freeModMap: true,
-				}, {
-					where: {
-						beatmapId: {
-							[Op.in]: FMBeatmaps,
-						},
-						freeModMap: {
-							[Op.not]: true,
-						}
-					},
-					silent: true,
-				});
-			}
-		}
+		await module.exports.updateBeatmapTourneyFlags(beatmapModPools);
 
 		if (tourneyMatch) {
 			if (playersToUpdate.length) {
@@ -2287,7 +2154,70 @@ module.exports = {
 			}
 		}
 	},
-	async createNewScores(match, tourneyMatch, acronym, newScores, beatmapModPools, sameTournamentGames) {
+	async getSameTournamentGames(match) {
+		let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+
+		let weeksPrior = new Date(match.raw_start);
+		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 14);
+
+		let weeksAfter = new Date(match.raw_start);
+		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 14);
+
+		let sameTournamentGames = await DBOsuMultiGames.findAll({
+			attributes: ['id', 'matchId', 'gameId', 'warmup', 'warmupDecidedByAmount', 'beatmapId'],
+			where: {
+				gameStartDate: {
+					[Op.gte]: weeksPrior
+				},
+				gameEndDate: {
+					[Op.lte]: weeksAfter
+				},
+				tourneyMatch: true,
+				matchId: {
+					[Op.not]: match.id
+				}
+			}
+		});
+
+		// Adapt the timespan to make sure the matches are included
+		weeksPrior.setUTCDate(weeksPrior.getUTCDate() - 1);
+		weeksAfter.setUTCDate(weeksAfter.getUTCDate() + 1);
+
+		let sameTournamentGameMatches = await DBOsuMultiMatches.findAll({
+			attributes: ['matchId'],
+			where: {
+				acronym: acronym,
+				matchId: {
+					[Op.in]: [...new Set(sameTournamentGames.map(m => m.matchId))]
+				},
+				matchStartDate: {
+					[Op.gte]: weeksPrior
+				},
+				matchEndDate: {
+					[Op.lte]: weeksAfter
+				},
+			}
+		});
+
+		for (let i = 0; i < sameTournamentGames.length; i++) {
+			let match = sameTournamentGameMatches.find(m => m.matchId === sameTournamentGames[i].matchId);
+
+			if (!match) {
+				sameTournamentGames.splice(i, 1);
+				i--;
+			}
+		}
+
+		return sameTournamentGames;
+	},
+	async createNewScores(match, newScores, beatmapModPools, sameTournamentGames) {
+		let tourneyMatch = false;
+		if (match.name.toLowerCase().match(/.+:.+vs.+/g)) {
+			tourneyMatch = true;
+		}
+
+		let acronym = match.name.toLowerCase().replace(/:.+/gm, '').trim();
+
 		let created = false;
 		while (!created) {
 			try {
@@ -2329,6 +2259,100 @@ module.exports = {
 		}
 
 		return beatmapModPools;
+	},
+	async updateBeatmapTourneyFlags(beatmapModPools) {
+		//TODO: The loop is not needed probably, but left to check performance change after removing it
+		for (let i = 0; i < beatmapModPools.length; i++) {
+			let NMBeatmaps = beatmapModPools.filter(x => x.modPool === 'NM').map(x => x.beatmapId);
+
+			if (NMBeatmaps.length) {
+				await DBOsuBeatmaps.update({
+					noModMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: NMBeatmaps,
+						},
+						noModMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let HDBeatmaps = beatmapModPools.filter(x => x.modPool === 'HD').map(x => x.beatmapId);
+
+			if (HDBeatmaps.length) {
+				await DBOsuBeatmaps.update({
+					hiddenMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: HDBeatmaps,
+						},
+						hiddenMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let HRBeatmaps = beatmapModPools.filter(x => x.modPool === 'HR').map(x => x.beatmapId);
+
+			if (HRBeatmaps.length) {
+				await DBOsuBeatmaps.update({
+					hardRockMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: HRBeatmaps,
+						},
+						hardRockMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let DTBeatmaps = beatmapModPools.filter(x => x.modPool === 'DT').map(x => x.beatmapId);
+
+			if (DTBeatmaps.length) {
+				await DBOsuBeatmaps.update({
+					doubleTimeMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: DTBeatmaps,
+						},
+						doubleTimeMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+
+			let FMBeatmaps = beatmapModPools.filter(x => x.modPool === 'FM').map(x => x.beatmapId);
+
+			if (FMBeatmaps.length) {
+				await DBOsuBeatmaps.update({
+					freeModMap: true,
+				}, {
+					where: {
+						beatmapId: {
+							[Op.in]: FMBeatmaps,
+						},
+						freeModMap: {
+							[Op.not]: true,
+						}
+					},
+					silent: true,
+				});
+			}
+		}
 	},
 	async populateMsgFromInteraction(interaction) {
 		let userMentions = new Discord.Collection();
