@@ -942,7 +942,6 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			'title',
 			'artist',
 			'difficulty',
-			'drain',
 		],
 		where: {
 			beatmapId: {
@@ -1178,7 +1177,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			} else if (sorting == 'cs') {
 				sortingText = ` (CS: ${beatmaps[i].circleSize})`;
 			} else if (sorting == 'drain') {
-				sortingText = ` (HP: ${beatmaps[i].drain})`;
+				sortingText = ` (HP: ${beatmaps[i].hpDrain})`;
 			} else if (sorting == 'od') {
 				sortingText = ` (OD: ${beatmaps[i].overallDifficulty})`;
 			} else if (sorting == 'bpm') {
