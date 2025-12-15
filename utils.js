@@ -2377,9 +2377,6 @@ module.exports = {
 		};
 	},
 	async getOsuBeatmap(input) {
-		// Log where the beatmap request is coming from
-		console.trace('getOsuBeatmap called');
-
 		let beatmapId = input.beatmapId;
 		let modBits = 0;
 		if (input.modBits) {
@@ -2432,6 +2429,9 @@ module.exports = {
 		//Repeat up to 3 times if errors appear
 		for (let i = 0; i < 3; i++) {
 			if (!dbBeatmap) {
+				// Log where the beatmap request is coming from
+				console.trace('getOsuBeatmap called');
+
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
 						beatmapId: beatmapId, mods: modBits
