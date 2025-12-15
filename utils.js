@@ -2430,7 +2430,8 @@ module.exports = {
 		for (let i = 0; i < 3; i++) {
 			if (!dbBeatmap) {
 				// Log where the beatmap request is coming from
-				console.trace('getOsuBeatmap called');
+				const err = new Error('getOsuBeatmap called');
+				console.log(err.stack);
 
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
