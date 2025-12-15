@@ -2377,6 +2377,9 @@ module.exports = {
 		};
 	},
 	async getOsuBeatmap(input) {
+		// Log where the beatmap request is coming from
+		console.trace('getOsuBeatmap called');
+
 		let beatmapId = input.beatmapId;
 		let modBits = 0;
 		if (input.modBits) {

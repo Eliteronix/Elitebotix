@@ -239,10 +239,8 @@ const multiGameScores = new Sequelize('database', 'username', 'password', {
 const beatmaps = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: async (sql) => {
+	logging: async () => {
 		if (process.shardId !== undefined) {
-			console.log(sql);
-
 			process.send('DB beatmaps');
 		}
 	},
