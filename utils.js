@@ -3848,9 +3848,30 @@ module.exports = {
 		}
 
 		let stars = [];
+
+		let dbBeatmaps = await DBOsuBeatmaps.findAll({
+			attributes: [
+				'beatmapId',
+				'beatmapsetId',
+				'approvalStatus',
+				'mods',
+				'updatedAt',
+				'starRating',
+				'maxCombo',
+				'mode',
+			],
+			where: {
+				beatmapId: {
+					[Op.in]: topScores.map(score => score.beatmapId)
+				},
+			}
+		});
+
 		for (let i = 0; i < topScores.length; i++) {
+			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === topScores[i].beatmapId && dbBeatmap.mods === topScores[i].raw_mods);
+
 			//Add difficulty ratings
-			const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
+			dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods, beatmap: dbBeatmap });
 			if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
 				stars.push(dbBeatmap.starRating);
 			}
