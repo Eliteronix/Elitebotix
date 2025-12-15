@@ -3269,7 +3269,7 @@ module.exports = {
 					}
 				}
 
-				let dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId === userMaps[i].beatmapId && beatmap.mods === mods);
+				let dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId == userMaps[i].beatmapId && beatmap.mods === mods);
 				console.log(typeof userMaps[i].beatmapId, typeof mods, 'type check getUserDuelStarRating');
 
 				if (dbBeatmap) {
