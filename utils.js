@@ -2431,7 +2431,7 @@ module.exports = {
 			if (!dbBeatmap) {
 				// Log where the beatmap request is coming from
 				const err = new Error('getOsuBeatmap called');
-				if (!err.stack.includes('utils.js:3840:')) {
+				if (!err.stack.includes('utils.js:3840:') && !err.stack.includes('osu-matchtrack.js:475:')) {// && !err.stack.includes('osu-top.js:957:')) {
 					console.log(err.stack);
 				}
 

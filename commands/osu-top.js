@@ -922,8 +922,39 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		beatmaps.push(await getOsuBeatmap({ beatmapId: '658127', modBits: 16 }));
 	}
 
+	let dbBeatmaps = await DBOsuBeatmaps.findAll({
+		attributes: [
+			'id',
+			'beatmapId',
+			'beatmapsetId',
+			'approvalStatus',
+			'mods',
+			'updatedAt',
+			'starRating',
+			'maxCombo',
+			'mode',
+			'approachRate',
+			'overallDifficulty',
+			'circleSize',
+			'hpDrain',
+			'bpm',
+			'totalLength',
+			'title',
+			'artist',
+			'difficulty',
+			'drain',
+		],
+		where: {
+			beatmapId: {
+				[Op.in]: scores.map(score => score.beatmapId)
+			},
+		}
+	});
+
 	for (let i = 0; i < limit && i < scores.length; i++) {
-		let dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
+		let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === scores[i].beatmapId && dbBeatmap.mods === scores[i].raw_mods);
+
+		dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		if (dbBeatmap) {
 			beatmaps.push(dbBeatmap);
 		} else {
