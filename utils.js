@@ -3241,8 +3241,8 @@ module.exports = {
 				],
 				where: {
 					beatmapId: {
-						[Op.in]: userMapIds
-					}
+						[Op.in]: userMaps.map(beatmap => beatmap.beatmapId)
+					},
 				}
 			});
 
