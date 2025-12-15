@@ -2431,7 +2431,9 @@ module.exports = {
 			if (!dbBeatmap) {
 				// Log where the beatmap request is coming from
 				const err = new Error('getOsuBeatmap called');
-				console.log(err.stack);
+				if (!err.stack.includes('utils.js:3840:')) {
+					console.log(err.stack);
+				}
 
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
@@ -2441,35 +2443,6 @@ module.exports = {
 			}
 
 			try {
-				//Date of reworked mania values
-				if (dbBeatmap && dbBeatmap.mode === 'Mania') {
-					lastRework.setUTCFullYear(2022);
-					lastRework.setUTCMonth(9);
-					lastRework.setUTCDate(12);
-				}
-
-				//Date of reworked SO values
-				if (mods.includes('SO')) {
-					lastRework.setUTCFullYear(2023);
-					lastRework.setUTCMonth(0);
-					lastRework.setUTCDate(13);
-				}
-
-				//Date of reworked EZ / HR + DT / HT values
-				if ((mods.includes('EZ') || mods.includes('HR')) && (mods.includes('DT') || mods.includes('NC') || mods.includes('HT'))) {
-					lastRework.setUTCFullYear(2023);
-					lastRework.setUTCMonth(2);
-					lastRework.setUTCDate(1);
-				}
-
-				//Fucked up Not found partially, this should make the process faster
-				if (dbBeatmap && dbBeatmap.approvalStatus === 'Not found') {
-					lastRework.setUTCFullYear(2022);
-					lastRework.setUTCMonth(11);
-					lastRework.setUTCDate(12);
-					lastRework.setUTCHours(18);
-				}
-
 				if (!dbBeatmap
 					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
@@ -2497,16 +2470,6 @@ module.exports = {
 					module.exports.logOsuAPICalls(`utils.js getOsuBeatmap ${beatmapId} ${modBits}`);
 					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 						.then(async (beatmaps) => {
-							let noVisualModBeatmap = beatmaps[0];
-							//TODO: Check if this is still necessary
-							if (mods.includes('MI') || mods.includes('HD') && !mods.includes('FL') || mods.includes('FI') || mods.includes('NF') || mods.includes('NC') || mods.includes('PF') || mods.includes('SD') || mods.includes('SO')) {
-								let realNoVisualModBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: module.exports.getModBits(mods.join(''), true) });
-								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
-								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
-								noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
-								noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
-							}
-
 							//Recalculate bpm for HT and DT
 							let bpm = beatmaps[0].bpm;
 							let cs = beatmaps[0].difficulty.size;
@@ -2606,9 +2569,9 @@ module.exports = {
 								dbBeatmap.title = beatmaps[0].title;
 								dbBeatmap.artist = beatmaps[0].artist;
 								dbBeatmap.difficulty = beatmaps[0].version;
-								dbBeatmap.starRating = noVisualModBeatmap.difficulty.rating;
-								dbBeatmap.aimRating = noVisualModBeatmap.difficulty.aim;
-								dbBeatmap.speedRating = noVisualModBeatmap.difficulty.speed;
+								dbBeatmap.starRating = beatmaps[0].difficulty.rating;
+								dbBeatmap.aimRating = beatmaps[0].difficulty.aim;
+								dbBeatmap.speedRating = beatmaps[0].difficulty.speed;
 								dbBeatmap.drainLength = drainLength;
 								dbBeatmap.totalLength = totalLength;
 								dbBeatmap.circleSize = cs;
@@ -2620,7 +2583,7 @@ module.exports = {
 								dbBeatmap.bpm = bpm;
 								dbBeatmap.mode = beatmaps[0].mode;
 								dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
-								dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
+								dbBeatmap.maxCombo = beatmaps[0].maxCombo;
 								dbBeatmap.circles = beatmaps[0].objects.normal;
 								dbBeatmap.sliders = beatmaps[0].objects.slider;
 								dbBeatmap.spinners = beatmaps[0].objects.spinner;
@@ -2696,9 +2659,9 @@ module.exports = {
 									title: beatmaps[0].title,
 									artist: beatmaps[0].artist,
 									difficulty: beatmaps[0].version,
-									starRating: noVisualModBeatmap.difficulty.rating,
-									aimRating: noVisualModBeatmap.difficulty.aim,
-									speedRating: noVisualModBeatmap.difficulty.speed,
+									starRating: beatmaps[0].difficulty.rating,
+									aimRating: beatmaps[0].difficulty.aim,
+									speedRating: beatmaps[0].difficulty.speed,
 									drainLength: drainLength,
 									totalLength: totalLength,
 									circleSize: cs,
@@ -2711,7 +2674,7 @@ module.exports = {
 									bpm: bpm,
 									mode: beatmaps[0].mode,
 									approvalStatus: beatmaps[0].approvalStatus,
-									maxCombo: noVisualModBeatmap.maxCombo,
+									maxCombo: beatmaps[0].maxCombo,
 									circles: beatmaps[0].objects.normal,
 									sliders: beatmaps[0].objects.slider,
 									spinners: beatmaps[0].objects.spinner,
@@ -2744,6 +2707,8 @@ module.exports = {
 									starRating: 0,
 									maxCombo: 0,
 								});
+							} else {
+								console.error(`Error fetching beatmap ${beatmapId} with mods ${modBits}:`, error);
 							}
 						});
 				}
@@ -3851,6 +3816,7 @@ module.exports = {
 
 		let dbBeatmaps = await DBOsuBeatmaps.findAll({
 			attributes: [
+				'id',
 				'beatmapId',
 				'beatmapsetId',
 				'approvalStatus',
