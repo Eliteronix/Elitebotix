@@ -3271,6 +3271,10 @@ module.exports = {
 
 				let dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId === userMaps[i].beatmapId && beatmap.mods === mods);
 
+				if (dbBeatmap) {
+					console.log(`Found beatmap ${dbBeatmap.beatmapId} with mods ${mods} in database for getUserDuelStarRating.`);
+				}
+
 				dbBeatmap = await module.exports.getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: userMaps[i].beatmapId, modBits: mods });
 
 				//Filter by ranked / popular maps > 4*
