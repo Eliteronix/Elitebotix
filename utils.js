@@ -3270,11 +3270,6 @@ module.exports = {
 				}
 
 				let dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId == userMaps[i].beatmapId && beatmap.mods === mods);
-				console.log(typeof userMaps[i].beatmapId, typeof mods, 'type check getUserDuelStarRating');
-
-				if (dbBeatmap) {
-					console.log(`Found beatmap ${dbBeatmap.beatmapId} with mods ${mods} in database for getUserDuelStarRating.`);
-				}
 
 				dbBeatmap = await module.exports.getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: userMaps[i].beatmapId, modBits: mods });
 
