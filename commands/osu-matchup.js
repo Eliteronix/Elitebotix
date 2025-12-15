@@ -1212,7 +1212,7 @@ module.exports = {
 				modPoolNumber = 4;
 			}
 
-			let dbBeatmap = dbBeatmaps.find((dbBeatmap) => dbBeatmap.beatmapId === beatmaps[i].beatmapId);
+			let dbBeatmap = dbBeatmaps.find((dbBeatmap) => dbBeatmap.beatmapId == beatmaps[i].beatmapId);
 
 			dbBeatmap = await getOsuBeatmap({ beatmapId: beatmaps[i].beatmapId, beatmap: dbBeatmap });
 
