@@ -951,8 +951,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	});
 
 	for (let i = 0; i < limit && i < scores.length; i++) {
-		console.log(typeof scores[i].beatmapId, typeof scores[i].raw_mods, 'type check osu-top');
-		let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === scores[i].beatmapId && dbBeatmap.mods === scores[i].raw_mods);
+		let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId == scores[i].beatmapId && dbBeatmap.mods === scores[i].raw_mods);
 
 		dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
 		if (dbBeatmap) {
