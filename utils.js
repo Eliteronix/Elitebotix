@@ -2431,7 +2431,7 @@ module.exports = {
 			if (!dbBeatmap) {
 				// Log where the beatmap request is coming from
 				const err = new Error('getOsuBeatmap called');
-				if (!err.stack.includes('utils.js:3840:') && !err.stack.includes('osu-matchtrack') && !err.stack.includes('multiToBanchoScore') && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-score.js') && !err.stack.includes('osu-recent.js') && !err.stack.includes('osu-beatmap.js')) {
+				if (!err.stack.includes('utils.js:3274:') && !err.stack.includes('utils.js:3840:') && !err.stack.includes('osu-matchtrack') && !err.stack.includes('multiToBanchoScore') && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-score.js') && !err.stack.includes('osu-recent.js') && !err.stack.includes('osu-beatmap.js')) {
 					console.log(err.stack);
 				}
 
@@ -3834,7 +3834,7 @@ module.exports = {
 		});
 
 		for (let i = 0; i < topScores.length; i++) {
-			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId === topScores[i].beatmapId && dbBeatmap.mods === topScores[i].raw_mods);
+			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId == topScores[i].beatmapId && dbBeatmap.mods === topScores[i].raw_mods);
 
 			//Add difficulty ratings
 			dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods, beatmap: dbBeatmap });
