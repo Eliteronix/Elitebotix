@@ -5974,6 +5974,33 @@ module.exports = {
 			// }
 		}
 
+		let fmhdBeatmaps = [];
+		let fmhrBeatmaps = [];
+
+		if (modPool === 'FM') {
+			//Get HD versions of all maps
+			fmhdBeatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
+				where: {
+					beatmapId: {
+						[Op.in]: beatmaps.map(b => b.beatmapId),
+					},
+					mods: 8,
+				},
+			});
+
+			//Get HR versions of all maps
+			fmhrBeatmaps = await DBOsuBeatmaps.findAll({
+				attributes: beatmapAttributes,
+				where: {
+					beatmapId: {
+						[Op.in]: beatmaps.map(b => b.beatmapId),
+					},
+					mods: 16,
+				},
+			});
+		}
+
 		//Loop through the beatmaps until a fitting one is found
 		while (beatmaps.length) {
 			const index = Math.floor(Math.random() * beatmaps.length);
@@ -6018,8 +6045,18 @@ module.exports = {
 					continue;
 				}
 
-				let HDStarRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 8);
-				let randomBeatmapHR = await module.exports.getOsuBeatmap({ beatmapId: randomBeatmap.beatmapId, modBits: 16 });
+				let randomBeatmapHD = fmhdBeatmaps.find(b => b.beatmapId === randomBeatmap.beatmapId);
+				randomBeatmapHD = await module.exports.getOsuBeatmap({ beatmap: randomBeatmapHD, beatmapId: randomBeatmapHD.beatmapId, modBits: 8 });
+
+				if (!randomBeatmapHD) {
+					beatmaps.splice(index, 1);
+					continue;
+				}
+
+				randomBeatmapHD.starRating = module.exports.adjustStarRating(randomBeatmapHD.starRating, randomBeatmapHD.approachRate, randomBeatmapHD.circleSize, 8);
+
+				let randomBeatmapHR = fmhrBeatmaps.find(b => b.beatmapId === randomBeatmap.beatmapId);
+				randomBeatmapHR = await module.exports.getOsuBeatmap({ beatmap: randomBeatmapHR, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
 				if (!randomBeatmapHR) {
 					beatmaps.splice(index, 1);
@@ -6028,7 +6065,7 @@ module.exports = {
 
 				randomBeatmapHR.starRating = module.exports.adjustStarRating(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, randomBeatmapHR.circleSize, 16);
 
-				randomBeatmap.starRating = (HDStarRating + randomBeatmapHR.starRating) / 2;
+				randomBeatmap.starRating = (randomBeatmapHD.starRating + randomBeatmapHR.starRating) / 2;
 			}
 
 			if (!randomBeatmap) {
