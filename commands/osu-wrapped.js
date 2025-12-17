@@ -1,4 +1,4 @@
-const { DBDiscordUsers, DBOsuMultiGames, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
+const { DBDiscordUsers, DBOsuMultiGames, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuBeatmaps } = require('../dbObjects');
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, matchMakingAcronyms } = require('../config.json');
@@ -689,8 +689,34 @@ module.exports = {
 		ctx.textAlign = 'left';
 		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 300);
 		ctx.font = '11px comfortaa, arial';
+
+		let dbBeatmaps = await DBOsuBeatmaps.findAll({
+			attributes: [
+				'id',
+				'beatmapId',
+				'beatmapsetId',
+				'approvalStatus',
+				'mods',
+				'updatedAt',
+				'starRating',
+				'maxCombo',
+				'mode',
+				'title',
+				'artist',
+				'difficulty',
+			],
+			where: {
+				beatmapId: {
+					[Op.in]: tourneyPPPlays.map(score => score.beatmapId)
+				},
+			}
+		});
+
 		for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
-			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId });
+			let dbBeatmap = dbBeatmaps.find(beatmap => beatmap.beatmapId == tourneyPPPlays[i].beatmapId);
+
+			tourneyPPPlays[i].beatmap = await getOsuBeatmap({ beatmapId: tourneyPPPlays[i].beatmapId, beatmap: dbBeatmap });
+
 			let title = 'Unavailable';
 			let artist = 'Unavailable';
 			let difficulty = 'Unavailable';
