@@ -2432,7 +2432,7 @@ module.exports = {
 			if (!dbBeatmap) {
 				// Log where the beatmap request is coming from
 				const err = new Error('getOsuBeatmap called');
-				if (!err.stack.includes('utils.js:3274:') && !err.stack.includes('utils.js:3841:') && !err.stack.includes('osu-matchtrack') && !err.stack.includes('multiToBanchoScore') && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-score.js') && !err.stack.includes('osu-recent.js') && !err.stack.includes('osu-beatmap.js') && !err.stack.includes('osu-history.js') && !err.stack.includes('osu-skills.js')) {
+				if (!err.stack.includes('utils.js:3274:') && !err.stack.includes('utils.js:3841:') && !err.stack.includes('osu-matchtrack') && !err.stack.includes('multiToBanchoScore') && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-score.js') && !err.stack.includes('osu-recent.js') && !err.stack.includes('osu-beatmap.js') && !err.stack.includes('osu-history.js') && !err.stack.includes('osu-skills.js') && !err.stack.includes('osu-wrapped.js')) {
 					console.log(err.stack);
 				}
 

@@ -64,7 +64,10 @@ module.exports = {
 
 			let wrappedYears = [];
 
-			for (let i = 2018; i <= new Date().getFullYear() - 1; i++) {
+			let wrappedYearDate = new Date();
+			wrappedYearDate.setMonth(wrappedYearDate.getMonth() - 11); // Wrapped is usually released in early December, so we consider December as part of the previous year
+
+			for (let i = 2018; i <= wrappedYearDate.getFullYear(); i++) {
 				wrappedYears.push({
 					name: i.toString(),
 					value: i,
@@ -158,7 +161,10 @@ module.exports = {
 		}
 
 		// Gather all the data
-		let year = new Date().getFullYear() - 1;
+		let wrappedYearDate = new Date();
+		wrappedYearDate.setMonth(wrappedYearDate.getMonth() - 11); // Wrapped is usually released in early December
+
+		let year = wrappedYearDate.getFullYear();
 
 		if (interaction.options.getInteger('year')) {
 			year = interaction.options.getInteger('year');
