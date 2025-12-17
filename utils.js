@@ -7,6 +7,7 @@ const osu = require('node-osu');
 const { Op } = require('sequelize');
 const rosu = require('rosu-pp-js');
 const mapsRetriedTooOften = [];
+const beatmapCache = {};
 const fs = require('fs');
 
 module.exports = {
@@ -7177,15 +7178,27 @@ module.exports = {
 		//Check if the map is already downloaded and download if necessary
 		const path = `./listcovers/${beatmapsetId}.jpg`;
 
-		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+		let beatmapData = beatmapCache[beatmapId];
 
-		if (dbBeatmap.approvalStatus === 'Not found') {
+		if (!beatmapData) {
+			//Force download if the map is recently updated in the database and therefore probably updated
+			const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+
+			let relevantData = {
+				approvalStatus: dbBeatmap.approvalStatus,
+				updatedAt: dbBeatmap.updatedAt,
+			};
+
+			beatmapData = relevantData;
+			beatmapCache[beatmapId] = relevantData;
+		}
+
+		if (beatmapData.approvalStatus === 'Not found') {
 			return null;
 		}
 
 		try {
-			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < beatmapData.updatedAt) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/list@2x.jpg`, client);
 
 				if (permission) {
@@ -7237,15 +7250,27 @@ module.exports = {
 		//Check if the map is already downloaded and download if necessary
 		const path = `./beatmapcovers/${beatmapsetId}.jpg`;
 
-		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+		let beatmapData = beatmapCache[beatmapId];
 
-		if (dbBeatmap.approvalStatus === 'Not found') {
+		if (!beatmapData) {
+			//Force download if the map is recently updated in the database and therefore probably updated
+			const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+
+			let relevantData = {
+				approvalStatus: dbBeatmap.approvalStatus,
+				updatedAt: dbBeatmap.updatedAt,
+			};
+
+			beatmapData = relevantData;
+			beatmapCache[beatmapId] = relevantData;
+		}
+
+		if (beatmapData.approvalStatus === 'Not found') {
 			return null;
 		}
 
 		try {
-			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < beatmapData.updatedAt) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/cover.jpg`, client);
 
 				if (permission) {
@@ -7293,15 +7318,27 @@ module.exports = {
 		//Check if the map is already downloaded and download if necessary
 		const path = `./slimcovers/${beatmapsetId}.jpg`;
 
-		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+		let beatmapData = beatmapCache[beatmapId];
 
-		if (dbBeatmap.approvalStatus === 'Not found') {
+		if (!beatmapData) {
+			//Force download if the map is recently updated in the database and therefore probably updated
+			const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+
+			let relevantData = {
+				approvalStatus: dbBeatmap.approvalStatus,
+				updatedAt: dbBeatmap.updatedAt,
+			};
+
+			beatmapData = relevantData;
+			beatmapCache[beatmapId] = relevantData;
+		}
+
+		if (beatmapData.approvalStatus === 'Not found') {
 			return null;
 		}
 
 		try {
-			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < dbBeatmap.updatedAt) {
+			if (!fs.existsSync(path) || fs.existsSync(path) && fs.statSync(path).mtime < beatmapData.updatedAt) {
 				let permission = await module.exports.awaitWebRequestPermission(`https://assets.ppy.sh/beatmaps/${beatmapsetId}/covers/slimcover.jpg`, client);
 
 				if (permission) {
