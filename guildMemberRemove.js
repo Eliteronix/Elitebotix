@@ -1,4 +1,3 @@
-const Discord = require('discord.js');
 const { DBGuilds, DBBirthdayGuilds } = require('./dbObjects');
 
 module.exports = async function (member) {
@@ -8,7 +7,7 @@ module.exports = async function (member) {
 
 	//Get the guild dataset from the db
 	const guild = await DBGuilds.findOne({
-		attributes: ['id', 'sendGoodbyeMessage', 'goodbyeMessageChannel', 'goodbyeMessageText', 'loggingChannel', 'loggingMemberRemove'],
+		attributes: ['id', 'sendGoodbyeMessage', 'goodbyeMessageChannel', 'goodbyeMessageText'],
 		where: {
 			guildId: member.guild.id
 		},
@@ -37,33 +36,6 @@ module.exports = async function (member) {
 			}
 		}
 
-		if (guild.loggingChannel && guild.loggingMemberRemove) {
-			let channel;
-			try {
-				channel = await member.client.channels.fetch(guild.loggingChannel);
-			} catch (error) {
-				if (error.message === 'Unknown Channel') {
-					guild.loggingChannel = null;
-					guild.save();
-					const owner = await member.message.client.users.fetch(member.guild.ownerId);
-					return await owner.send(`It seems like the logging channel on the guild \`${member.guild.name}\` has been deleted.\nThe logging has been deactivated.`);
-				}
-				console.error('guildMemberRemove.js | logging' + error);
-			}
-
-			const changeEmbed = new Discord.EmbedBuilder()
-				.setColor('#0099ff')
-				.setAuthor({ name: `${member.user.username}#${member.user.discriminator}`, iconURL: member.user.displayAvatarURL() })
-				.setDescription(`<@${member.user.id}> left the server!`)
-				.setThumbnail(member.user.displayAvatarURL())
-				.addFields(
-					{ name: 'Left the server', value: `<@${member.user.id}>` },
-				)
-				.setTimestamp()
-				.setFooter({ text: 'Eventname: userleaving' });
-
-			await channel.send({ embeds: [changeEmbed] });
-		}
 		// destroy the guild dataset in the db
 		await DBBirthdayGuilds.destroy({
 			where: {
