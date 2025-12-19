@@ -6046,7 +6046,7 @@ module.exports = {
 				}
 
 				let randomBeatmapHD = fmhdBeatmaps.find(b => b.beatmapId === randomBeatmap.beatmapId);
-				randomBeatmapHD = await module.exports.getOsuBeatmap({ beatmap: randomBeatmapHD, beatmapId: randomBeatmapHD.beatmapId, modBits: 8 });
+				randomBeatmapHD = await module.exports.getOsuBeatmap({ beatmap: randomBeatmapHD, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
 				if (!randomBeatmapHD) {
 					beatmaps.splice(index, 1);
