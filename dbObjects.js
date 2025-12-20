@@ -341,6 +341,38 @@ const DBOsuSoloScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuS
 
 const DBElitebotixBanchoProcessQueue = require(`${process.env.ELITEBOTIXBANCHOROOTPATH}/models/DBProcessQueue`)(elitebotixBanchoProcessQueue, Sequelize.DataTypes);
 
+let ignoreSources = [
+	'processQueueTasks\\updateOsuRank.js:88',
+	'processQueueTasks\\updateOsuRank.js:96',
+	'processQueueTasks\\updateOsuRank.js:248',
+	'utils.js:4240',
+];
+
+//Overwrite DBDiscordUsers findOne/findAll to also log call stack
+const originalFindOne = DBDiscordUsers.findOne;
+DBDiscordUsers.findOne = async function () {
+	if (process.shardId !== undefined) {
+		const err = new Error();
+		const stack = err.stack.split('\n').slice(2).join('\n');
+		if (!ignoreSources.some(source => stack.includes(source))) {
+			console.log(`[${process.shardId}] DBDiscordUsers.findOne called from:\n${stack}`);
+		}
+	}
+	return originalFindOne.apply(this, arguments);
+};
+
+const originalFindAll = DBDiscordUsers.findAll;
+DBDiscordUsers.findAll = async function () {
+	if (process.shardId !== undefined) {
+		const err = new Error();
+		const stack = err.stack.split('\n').slice(2).join('\n');
+		if (!ignoreSources.some(source => stack.includes(source))) {
+			console.log(`[${process.shardId}] DBDiscordUsers.findAll called from:\n${stack}`);
+		}
+	}
+	return originalFindAll.apply(this, arguments);
+};
+
 module.exports = {
 	DBGuilds,
 	DBReactionRoles,
