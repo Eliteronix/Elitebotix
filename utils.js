@@ -2446,6 +2446,7 @@ module.exports = {
 
 				let similarStacks = getOsuBeatmapCallStacks.filter(x => x.stack === err.stack);
 				if (similarStacks.length === 60) {
+					// eslint-disable-next-line no-console
 					console.log(`getOsuBeatmap similar stack called 60 times in the last minute:\n${err.stack}`);
 				}
 
