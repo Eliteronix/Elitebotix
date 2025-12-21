@@ -753,7 +753,6 @@ async function getResultImage(event, users, client) {
 		try {
 			ctx.fillText(user.username, 100, 330 + i * 75);
 		} catch (e) {
-			console.log(e, scores[i].user_id, users);
 			let username = await getOsuPlayerName(scores[i].user_id);
 
 			ctx.fillText(username, 100, 330 + i * 75);
