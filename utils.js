@@ -9,6 +9,7 @@ const rosu = require('rosu-pp-js');
 const mapsRetriedTooOften = [];
 const beatmapCache = {};
 const fs = require('fs');
+let getOsuBeatmapCallStacks = [];
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -2435,6 +2436,18 @@ module.exports = {
 				// if (!err.stack.includes('utils.js:3275:') && !err.stack.includes('utils.js:3841:') && !err.stack.includes('osu-matchtrack') && !err.stack.includes('multiToBanchoScore') && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-score.js') && !err.stack.includes('osu-recent.js') && !err.stack.includes('osu-beatmap.js') && !err.stack.includes('osu-history.js') && !err.stack.includes('osu-skills.js') && !err.stack.includes('osu-wrapped.js')) {
 				// 	console.log(err.stack);
 				// }
+
+				// Log the stack if the same stack appeared more than 60 times in the last minute
+				const err = new Error('getOsuBeatmap called');
+
+				getOsuBeatmapCallStacks.push({ stack: err.stack, date: new Date() });
+
+				getOsuBeatmapCallStacks = getOsuBeatmapCallStacks.filter(x => (new Date() - x.date) < 60000);
+
+				let similarStacks = getOsuBeatmapCallStacks.filter(x => x.stack === err.stack);
+				if (similarStacks.length === 60) {
+					console.log(`getOsuBeatmap similar stack called 60 times in the last minute:\n${err.stack}`);
+				}
 
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
