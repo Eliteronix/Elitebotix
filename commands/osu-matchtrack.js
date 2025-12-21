@@ -349,7 +349,7 @@ module.exports = {
 												let blueTotal = null;
 
 												for (let j = 0; j < json.events[i].game.scores.length; j++) {
-													json.events[i].game.scores[j].username = await getOsuPlayerName(json.events[i].game.scores[j].user_id);
+													json.events[i].game.scores[j].username = await getPlayerName(json.events[i].game.scores[j].user_id, json.users);
 													if (json.events[i].game.scores[j].username === redPlayer) {
 														redTotal = json.events[i].game.scores[j].score;
 													}
@@ -367,7 +367,7 @@ module.exports = {
 											}
 										}
 									} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
-										let playerName = await getOsuPlayerName(json.events[i].user_id);
+										let playerName = await getPlayerName(json.events[i].user_id, json.users);
 										playerUpdates.push(`<:exchangealtsolid:1005141205069344859> \`${playerName}\` became the host.`);
 									} else if (json.events[i].detail.type === 'host-changed') {
 										playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
@@ -377,13 +377,13 @@ module.exports = {
 											blueScore = 0;
 										}
 									} else if (json.events[i].detail.type === 'player-joined') {
-										let playerName = await getOsuPlayerName(json.events[i].user_id);
+										let playerName = await getPlayerName(json.events[i].user_id, json.users);
 										playerUpdates.push(`<:arrowrightsolid:1005141207879536761> \`${playerName}\` joined the match.`);
 									} else if (json.events[i].detail.type === 'player-left') {
-										let playerName = await getOsuPlayerName(json.events[i].user_id);
+										let playerName = await getPlayerName(json.events[i].user_id, json.users);
 										playerUpdates.push(`<:arrowleftsolid:1005141359008682024> \`${playerName}\` left the match.`);
 									} else if (json.events[i].detail.type === 'player-kicked') {
-										let playerName = await getOsuPlayerName(json.events[i].user_id);
+										let playerName = await getPlayerName(json.events[i].user_id, json.users);
 										playerUpdates.push(`<:bansolid:1032747189941829683> \`${playerName}\` has been kicked from the match.`);
 									} else if (json.events[i].detail.type === 'match-disbanded') {
 										playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
@@ -1012,4 +1012,14 @@ async function getPlayingImage(event, client) {
 
 	//Create as an attachment
 	return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-game-${event.game.id}-${event.game.beatmap.id}-${modBits}.png` });
+}
+
+async function getPlayerName(userId, users) {
+	let user = users.find(u => u.id === userId);
+
+	if (user && user.username) {
+		return user.username;
+	}
+
+	return await getOsuPlayerName(userId);
 }
