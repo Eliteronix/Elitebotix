@@ -10,6 +10,7 @@ const mapsRetriedTooOften = [];
 const beatmapCache = {};
 const fs = require('fs');
 let getOsuBeatmapCallStacks = [];
+const osuPlayerNameCache = {};
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -5271,6 +5272,10 @@ module.exports = {
 	async getOsuPlayerName(osuUserId) {
 		let playerName = osuUserId;
 
+		if (osuPlayerNameCache[osuUserId]) {
+			return osuPlayerNameCache[osuUserId];
+		}
+
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuName'],
 			where: {
@@ -5300,6 +5305,13 @@ module.exports = {
 				//Nothing
 			}
 		}
+
+		osuPlayerNameCache[osuUserId] = playerName;
+
+		//Expire cache after 1 hour
+		setTimeout(() => {
+			delete osuPlayerNameCache[osuUserId];
+		}, 3600000);
 
 		return playerName;
 	},
