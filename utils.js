@@ -3996,7 +3996,7 @@ module.exports = {
 		}
 		return true;
 	},
-	async getOsuPP(beatmapId, mode, modBits, accuracy, misses, combo, client, depth) {
+	async getOsuPP(beatmapId, dbBeatmap, mode, modBits, accuracy, misses, combo, client, depth) {
 		const fs = require('fs');
 
 		if (!depth) {
@@ -4012,7 +4012,7 @@ module.exports = {
 		const path = `${process.env.ELITEBOTIXROOTPATH}/maps/${beatmapId}.osu`;
 
 		//Force download if the map is recently updated in the database and therefore probably updated
-		const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 });
+		dbBeatmap = await module.exports.getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: beatmapId, modBits: 0 });
 
 		if (dbBeatmap.approvalStatus === 'Not found') {
 			return null;
@@ -4060,7 +4060,7 @@ module.exports = {
 				if (depth < 3) {
 					depth++;
 
-					return await module.exports.getOsuPP(beatmapId, mode, modBits, accuracy, misses, combo, client, depth);
+					return await module.exports.getOsuPP(beatmapId, dbBeatmap, mode, modBits, accuracy, misses, combo, client, depth);
 				} else {
 					mapsRetriedTooOften.push(beatmapId);
 					return null;
@@ -4135,7 +4135,7 @@ module.exports = {
 
 				depth++;
 
-				return await module.exports.getOsuPP(beatmapId, mode, modBits, accuracy, misses, combo, client, depth);
+				return await module.exports.getOsuPP(beatmapId, dbBeatmap, mode, modBits, accuracy, misses, combo, client, depth);
 			} else if (e.message !== 'Failed to parse beatmap: expected `osu file format v` at file begin' &&
 				!e.message.includes('Failed to parse beatmap: IO error  - caused by: The system cannot find the file specified. (os error 2)') &&
 				!e.message.includes('ENOENT: no such file or directory')) {
@@ -4225,9 +4225,9 @@ module.exports = {
 
 		try {
 			if (!outputScore.pp && outputScore.maxCombo) {
-				const dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: outputScore.beatmapId, modBits: 0 });
-				if (dbBeatmap) {
-					let pp = await module.exports.getOsuPP(outputScore.beatmapId, inputScore.mode, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo), client);
+				inputScore.dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: outputScore.beatmapId, modBits: 0, beatmap: inputScore.dbBeatmap });
+				if (inputScore.dbBeatmap) {
+					let pp = await module.exports.getOsuPP(outputScore.beatmapId, inputScore.dbBeatmap, inputScore.mode, outputScore.raw_mods, module.exports.getAccuracy(outputScore) * 100, parseInt(outputScore.counts.miss), parseInt(outputScore.maxCombo), client);
 
 					try {
 						await DBOsuMultiGameScores.update({ pp: pp }, { where: { id: inputScore.id } });
@@ -6194,7 +6194,7 @@ module.exports = {
 					const osu = require('node-osu');
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuBeatmaps } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					const { getOsuPlayerName, multiToBanchoScore, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
@@ -6790,6 +6790,27 @@ module.exports = {
 									}
 								}
 
+								let beatmaps = await DBOsuBeatmaps.findAll({
+									attributes: [
+										'id',
+										'beatmapId',
+										'mods',
+										'starRating',
+										'approvalStatus',
+										'popular',
+										'approachRate',
+										'circleSize',
+										'updatedAt',
+										'maxCombo',
+									],
+									where: {
+										beatmapId: {
+											[Op.in]: multiScores.map(score => score.beatmapId)
+										},
+										mods: 0,
+									}
+								});
+
 								//Translate the scores to bancho scores
 								for (let j = 0; j < multiScores.length; j++) {
 									if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
@@ -6799,6 +6820,8 @@ module.exports = {
 									if (parseInt(multiScores[j].rawMods) % 2 === 1) {
 										multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
 									}
+
+									multiScores[j].dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId == multiScores[j].beatmapId);
 
 									multiScores[j] = await multiToBanchoScore(multiScores[j], c);
 
@@ -8029,7 +8052,7 @@ module.exports = {
 		if (input.score.pp) {
 			pp = Math.round(input.score.pp);
 		} else {
-			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
+			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.beatmap, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
 		}
 
 		ctx.font = '18px comfortaa, arial';
@@ -8044,7 +8067,7 @@ module.exports = {
 			};
 
 			let fcScoreAccuracy = module.exports.getAccuracy(fcScore, 0) * 100;
-			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.mode, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
+			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.beatmap, input.mode, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
 			if (pp !== fcpp) {
 				pp = `${pp} (${Math.round(fcpp)} FC)`;
 				ctx.font = '16px comfortaa, arial';
