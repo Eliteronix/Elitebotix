@@ -196,6 +196,7 @@ module.exports = {
 
 		let multiScores = await DBOsuMultiGameScores.findAll({
 			attributes: [
+				'id',
 				'score',
 				'gameRawMods',
 				'rawMods',
