@@ -1328,14 +1328,39 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 		}
 	}
 
+	let beatmaps = await DBOsuBeatmaps.findAll({
+		attributes: [
+			'id',
+			'beatmapId',
+			'mods',
+			'starRating',
+			'approvalStatus',
+			'popular',
+			'approachRate',
+			'circleSize',
+			'updatedAt',
+			'maxCombo',
+		],
+		where: {
+			beatmapId: {
+				[Op.in]: multiScores.map(score => score.beatmapId)
+			},
+			mods: 0,
+		}
+	});
+
 	//Translate the scores to bancho scores
 	for (let i = 0; i < multiScores.length; i++) {
 		if (parseInt(multiScores[i].gameRawMods) % 2 === 1) {
 			multiScores[i].gameRawMods = parseInt(multiScores[i].gameRawMods) - 1;
 		}
+
 		if (parseInt(multiScores[i].rawMods) % 2 === 1) {
 			multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 		}
+
+		multiScores[i].dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId == multiScores[i].beatmapId);
+
 		multiScores[i] = await multiToBanchoScore(multiScores[i], client);
 
 		if (!multiScores[i].pp || parseFloat(multiScores[i].pp) > 2000 || !parseFloat(multiScores[i].pp)) {
