@@ -557,14 +557,33 @@ module.exports = {
 		ctx.textAlign = 'left';
 		ctx.fillText(`Played tournaments: ${tourneysPlayed.length}`, 50, 90);
 
-		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 140);
+		ctx.fillText(`Played matches: ${multiMatches.length}`, 50, 115);
 		ctx.font = '18px comfortaa, arial';
-		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 165);
+		ctx.fillText(`Won: ${matchesWon} / Lost: ${matchesLost}`, 75, 140);
+
+		let referees = await DBOsuMultiMatches.findAll({
+			attributes: ['referee', [Sequelize.fn('COUNT', Sequelize.col('referee')), 'amount']],
+			where: {
+				tourneyMatch: true,
+				matchId: {
+					[Op.in]: multiMatches.map(match => match.matchId),
+				},
+				referee: {
+					[Op.not]: null,
+				},
+			},
+			group: ['referee'],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('referee')), 'DESC']],
+		});
 
 		ctx.font = '22px comfortaa, arial';
-		ctx.fillText(`Played maps: ${gamesChecked.length}`, 50, 220);
-		ctx.font = '18px comfortaa, arial';
-		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 75, 245);
+		ctx.fillText('Most common referees:', 50, 175);
+		ctx.font = '16px comfortaa, arial';
+		for (let i = 0; i < Math.min(5, referees.length); i++) {
+			const refereeUsername = await getOsuPlayerName(referees[i].referee);
+
+			ctx.fillText(`#${i + 1} ${refereeUsername} (${referees[i].dataValues.amount} times)`, 75, 200 + i * 20);
+		}
 
 		if (isNaN(duelRating.total) || duelRating.total === null) {
 			duelRating.total = 0;
@@ -616,62 +635,62 @@ module.exports = {
 
 		ctx.font = '22px comfortaa, arial';
 		ctx.textAlign = 'left';
-		ctx.fillText('Duel Rating changes:', 50, 300);
-		ctx.font = '18px comfortaa, arial';
+		ctx.fillText('Duel Rating changes:', 50, 325);
+		ctx.font = '16px comfortaa, arial';
 		ctx.textAlign = 'right';
-		ctx.fillText('Total: ', 106, 325);
-		ctx.fillText(oldDuelRating.total.toFixed(3), 150, 325);
-		ctx.fillText('→', 172, 325);
-		ctx.fillText(duelRating.total.toFixed(3), 224, 325);
-		ctx.fillText('|', 236, 325);
-		if (duelRating.total - oldDuelRating.total < 0) {
-			ctx.fillText((duelRating.total - oldDuelRating.total).toFixed(3), 295, 325);
-		} else {
-			ctx.fillText(`+${(duelRating.total - oldDuelRating.total).toFixed(3)}`, 295, 325);
-		}
-
-		ctx.fillText('NM: ', 106, 350);
-		ctx.fillText(oldDuelRating.noMod.toFixed(3), 150, 350);
+		ctx.fillText('Total: ', 106, 350);
+		ctx.fillText(oldDuelRating.total.toFixed(3), 150, 350);
 		ctx.fillText('→', 172, 350);
-		ctx.fillText(duelRating.noMod.toFixed(3), 224, 350);
+		ctx.fillText(duelRating.total.toFixed(3), 224, 350);
 		ctx.fillText('|', 236, 350);
+		if (duelRating.total - oldDuelRating.total < 0) {
+			ctx.fillText((duelRating.total - oldDuelRating.total).toFixed(3), 295, 350);
+		} else {
+			ctx.fillText(`+${(duelRating.total - oldDuelRating.total).toFixed(3)}`, 295, 350);
+		}
+
+		ctx.fillText('NM: ', 106, 370);
+		ctx.fillText(oldDuelRating.noMod.toFixed(3), 150, 370);
+		ctx.fillText('→', 172, 370);
+		ctx.fillText(duelRating.noMod.toFixed(3), 224, 370);
+		ctx.fillText('|', 236, 370);
 		if (duelRating.noMod - oldDuelRating.noMod < 0) {
-			ctx.fillText((duelRating.noMod - oldDuelRating.noMod).toFixed(3), 295, 350);
+			ctx.fillText((duelRating.noMod - oldDuelRating.noMod).toFixed(3), 295, 370);
 		} else {
-			ctx.fillText(`+${(duelRating.noMod - oldDuelRating.noMod).toFixed(3)}`, 295, 350);
+			ctx.fillText(`+${(duelRating.noMod - oldDuelRating.noMod).toFixed(3)}`, 295, 370);
 		}
 
-		ctx.fillText('HD: ', 106, 375);
-		ctx.fillText(oldDuelRating.hidden.toFixed(3), 150, 375);
-		ctx.fillText('→', 172, 375);
-		ctx.fillText(duelRating.hidden.toFixed(3), 224, 375);
-		ctx.fillText('|', 236, 375);
+		ctx.fillText('HD: ', 106, 390);
+		ctx.fillText(oldDuelRating.hidden.toFixed(3), 150, 390);
+		ctx.fillText('→', 172, 390);
+		ctx.fillText(duelRating.hidden.toFixed(3), 224, 390);
+		ctx.fillText('|', 236, 390);
 		if (duelRating.hidden - oldDuelRating.hidden < 0) {
-			ctx.fillText((duelRating.hidden - oldDuelRating.hidden).toFixed(3), 295, 375);
+			ctx.fillText((duelRating.hidden - oldDuelRating.hidden).toFixed(3), 295, 390);
 		} else {
-			ctx.fillText(`+${(duelRating.hidden - oldDuelRating.hidden).toFixed(3)}`, 295, 375);
+			ctx.fillText(`+${(duelRating.hidden - oldDuelRating.hidden).toFixed(3)}`, 295, 390);
 		}
 
-		ctx.fillText('HR: ', 106, 400);
-		ctx.fillText(oldDuelRating.hardRock.toFixed(3), 150, 400);
-		ctx.fillText('→', 172, 400);
-		ctx.fillText(duelRating.hardRock.toFixed(3), 224, 400);
-		ctx.fillText('|', 236, 400);
+		ctx.fillText('HR: ', 106, 410);
+		ctx.fillText(oldDuelRating.hardRock.toFixed(3), 150, 410);
+		ctx.fillText('→', 172, 410);
+		ctx.fillText(duelRating.hardRock.toFixed(3), 224, 410);
+		ctx.fillText('|', 236, 410);
 		if (duelRating.hardRock - oldDuelRating.hardRock < 0) {
-			ctx.fillText((duelRating.hardRock - oldDuelRating.hardRock).toFixed(3), 295, 400);
+			ctx.fillText((duelRating.hardRock - oldDuelRating.hardRock).toFixed(3), 295, 410);
 		} else {
-			ctx.fillText(`+${(duelRating.hardRock - oldDuelRating.hardRock).toFixed(3)}`, 295, 400);
+			ctx.fillText(`+${(duelRating.hardRock - oldDuelRating.hardRock).toFixed(3)}`, 295, 410);
 		}
 
-		ctx.fillText('DT: ', 106, 425);
-		ctx.fillText(oldDuelRating.doubleTime.toFixed(3), 150, 425);
-		ctx.fillText('→', 172, 425);
-		ctx.fillText(duelRating.doubleTime.toFixed(3), 224, 425);
-		ctx.fillText('|', 236, 425);
+		ctx.fillText('DT: ', 106, 430);
+		ctx.fillText(oldDuelRating.doubleTime.toFixed(3), 150, 430);
+		ctx.fillText('→', 172, 430);
+		ctx.fillText(duelRating.doubleTime.toFixed(3), 224, 430);
+		ctx.fillText('|', 236, 430);
 		if (duelRating.doubleTime - oldDuelRating.doubleTime < 0) {
-			ctx.fillText((duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3), 295, 425);
+			ctx.fillText((duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3), 295, 430);
 		} else {
-			ctx.fillText(`+${(duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3)}`, 295, 425);
+			ctx.fillText(`+${(duelRating.doubleTime - oldDuelRating.doubleTime).toFixed(3)}`, 295, 430);
 		}
 
 		ctx.fillText('FM: ', 106, 450);
@@ -687,14 +706,20 @@ module.exports = {
 
 		ctx.textAlign = 'center';
 		ctx.font = '22px comfortaa, arial';
-		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 90);
+		ctx.fillText(`Played maps: ${gamesChecked.length}`, 800, 85);
 		ctx.font = '18px comfortaa, arial';
+		ctx.fillText(`Won: ${gamesWon} / Lost: ${gamesLost}`, 800, 110);
+
+		ctx.font = '22px comfortaa, arial';
+		ctx.fillText(`Played with ${mostPlayedWith.length} players:`, 800, 145);
+		ctx.font = '16px comfortaa, arial';
 		for (let i = 0; i < Math.min(5, mostPlayedWith.length); i++) {
-			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 115 + i * 25);
+			ctx.fillText(`#${i + 1} ${mostPlayedWith[i].osuName} (${mostPlayedWith[i].amount} times)`, 800, 170 + i * 20);
 		}
 
 		ctx.textAlign = 'left';
-		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 300);
+		ctx.font = '22px comfortaa, arial';
+		ctx.fillText(`Top ${Math.min(10, tourneyPPPlays.length)} tournament pp plays:`, 635, 290);
 		ctx.font = '11px comfortaa, arial';
 
 		let dbBeatmaps = await DBOsuBeatmaps.findAll({
@@ -742,7 +767,7 @@ module.exports = {
 				mapString += '...';
 			}
 
-			ctx.fillText(mapString, 635, 318 + i * 16);
+			ctx.fillText(mapString, 635, 308 + i * 16);
 		}
 
 		// Write the title of the player
