@@ -4233,6 +4233,7 @@ module.exports = {
 						await DBOsuMultiGameScores.update({ pp: pp }, { where: { id: inputScore.id } });
 					} catch (e) {
 						console.error(`Error updating pp for score ${inputScore.id}`, e);
+						console.log(e.message);
 					}
 
 					outputScore.pp = pp;
