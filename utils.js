@@ -4232,8 +4232,9 @@ module.exports = {
 					try {
 						await DBOsuMultiGameScores.update({ pp: pp }, { where: { id: inputScore.id } });
 					} catch (e) {
-						console.error(`Error updating pp for score ${inputScore.id}`, e);
-						console.log(e.message);
+						if (e.message !== 'SQLITE_BUSY: database is locked') {
+							console.error(`Error updating pp for score ${inputScore.id}`, e);
+						}
 					}
 
 					outputScore.pp = pp;
