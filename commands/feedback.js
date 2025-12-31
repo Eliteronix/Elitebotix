@@ -60,7 +60,7 @@ module.exports = {
 					'en-US': 'The feedback message',
 				})
 				.setRequired(true)
-				.setMaxLength(200)
+				.setMaxLength(500)
 		),
 	async execute(interaction) {
 		try {
@@ -79,50 +79,42 @@ module.exports = {
 		let message = interaction.options.getString('feedback');
 
 		if (type === 'bug') {
-			createJiraIssue('10006', `[BUG] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('user-bug', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return await interaction.editReply('Your bug report was sent to the developers.');
 		} else if (type === 'feature') {
-			createJiraIssue('10007', `[FEATURE] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('user-feature', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return await interaction.editReply('Your feature-request was sent to the developers.');
 		} else if (type === 'feedback') {
-			createJiraIssue('10005', `[FEEDBACK] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('user-feedback', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return await interaction.editReply('Your feedback has been sent to the developers.');
 		} else if (type === 'question') {
-			createJiraIssue('10008', `[QUESTION] ${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('question', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
 
 			return await interaction.editReply('Your question has been sent to the developers. They will respond to you as soon as possible.');
 		}
 	},
 };
 
-async function createJiraIssue(issuetypeId, text) {
-	const bodyData = `{
-		"fields": {
-		   "project":
-		   {
-			  "id": "10000"
-		   },
-		   "summary": "${text}",
-		   "description": "${text}",
-		   "issuetype": {
-			  "id": "${issuetypeId}"
-		   }
-	   }
-	}`;
+async function createGithubIssue(label, text) {
+	const bodyData = {
+		'title': text,
+		'body': text,
+		'labels': [
+			label
+		]
+	};
 
-	fetch('https://eliteronix.atlassian.net/rest/api/2/issue/', {
+	fetch('https://api.github.com/repos/Eliteronix/Elitebotix/issues', {
 		method: 'POST',
 		headers: {
-			'Authorization': `Basic ${Buffer.from(
-				`zimmermann.mariomarvin@gmail.com:${process.env.ATLASSIANTOKEN}`
-			).toString('base64')}`,
-			'Accept': 'application/json',
+			'Authorization': `token ${process.env.GITHUB_ACCESS_TOKEN}`,
+			'Accept': 'application/vnd.github.v3+json',
 			'Content-Type': 'application/json'
 		},
-		body: bodyData
+		body: JSON.stringify(bodyData)
 	})
 		.catch(err => console.error(err));
 }
