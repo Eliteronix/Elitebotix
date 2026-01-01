@@ -1,6 +1,6 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
-const { wrongCluster, syncJiraCards, createNewForumPostRecords, processOsuTrack } = require('./utils');
+const { wrongCluster, createNewForumPostRecords, processOsuTrack } = require('./utils');
 
 require('dotenv').config();
 
@@ -219,8 +219,6 @@ function readyDiscord() {
 
 	setTimeout(() => {
 		executeProcessQueue(client);
-
-		startJiraCardSync(client);
 	}, 60000);
 
 	const blocked = require('blocked-at');
@@ -356,18 +354,6 @@ async function cleanUpDuplicates(client) {
 	setTimeout(() => {
 		cleanUpDuplicates(client);
 	}, 3600000);
-}
-
-async function startJiraCardSync(client) {
-	try {
-		await syncJiraCards(client);
-	} catch (e) {
-		console.error('bot.js | syncJiraCards' + e);
-	}
-
-	setTimeout(() => {
-		startJiraCardSync(client);
-	}, 900000);
 }
 
 async function getForumPosts(client) {
