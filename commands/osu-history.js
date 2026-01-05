@@ -439,6 +439,27 @@ module.exports = {
 				}
 			}
 
+			let scoresBeatmaps = await DBOsuBeatmaps.findAll({
+				attributes: [
+					'id',
+					'beatmapId',
+					'mods',
+					'starRating',
+					'approvalStatus',
+					'popular',
+					'approachRate',
+					'circleSize',
+					'updatedAt',
+					'maxCombo',
+				],
+				where: {
+					beatmapId: {
+						[Op.in]: multiScores.map(score => score.beatmapId)
+					},
+					mods: 0,
+				}
+			});
+
 			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
 				if (newMatch) {
 					let matchWonAgainst = false;
@@ -527,6 +548,8 @@ module.exports = {
 					if (parseInt(multiScores[i].rawMods) % 2 === 1) {
 						multiScores[i].rawMods = parseInt(multiScores[i].rawMods) - 1;
 					}
+
+					multiScores[i].dbBeatmap = scoresBeatmaps.find(beatmap => beatmap.beatmapId == multiScores[i].beatmapId);
 
 					let banchoScore = await multiToBanchoScore(multiScores[i], interaction.client);
 
