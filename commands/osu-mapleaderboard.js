@@ -197,7 +197,7 @@ module.exports = {
 			mode = 0;
 		} else if (mode == 'Taiko') {
 			mode = 1;
-		} else if (mode == 'Catch') {
+		} else if (mode == 'Catch the Beat') {
 			mode = 2;
 		} else if (mode == 'Mania') {
 			mode = 3;
@@ -290,6 +290,7 @@ module.exports = {
 					score: {
 						[Op.gt]: 10000
 					},
+					mode: mode,
 				},
 				order: [
 					['score', 'DESC'],
