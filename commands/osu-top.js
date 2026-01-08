@@ -431,17 +431,23 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 						noLinkedAccount = false;
 					}
 
-					//Send attachment
-					let sentMessage;
-					if (noLinkedAccount) {
-						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-					} else {
-						sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
-					}
+					try {
+						//Send attachment
+						let sentMessage;
+						if (noLinkedAccount) {
+							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
+						} else {
+							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+						}
 
-					if (interaction.context === 1 || interaction.guild) {
-						await sentMessage.react('👤');
-						await sentMessage.react('📈');
+						if (interaction.context === 1 || interaction.guild) {
+							await sentMessage.react('👤');
+							await sentMessage.react('📈');
+						}
+					} catch (err) {
+						if (err.message !== 'Unknown Message') {
+							console.error(err);
+						}
 					}
 				}
 			})
