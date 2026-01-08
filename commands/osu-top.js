@@ -959,7 +959,8 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	for (let i = 0; i < limit && i < scores.length; i++) {
 		let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId == scores[i].beatmapId && dbBeatmap.mods === scores[i].raw_mods);
 
-		dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods });
+		dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: scores[i].raw_mods, beatmap: dbBeatmap });
+
 		if (dbBeatmap) {
 			beatmaps.push(dbBeatmap);
 		} else {
