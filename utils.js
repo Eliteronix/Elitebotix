@@ -11,6 +11,7 @@ const beatmapCache = {};
 const fs = require('fs');
 let getOsuBeatmapCallStacks = [];
 const osuPlayerNameCache = {};
+const activityRolesCache = {};
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -722,15 +723,24 @@ module.exports = {
 					serverUserActivity.points = serverUserActivity.points + 1;
 					await serverUserActivity.save();
 
-					const activityRoles = await DBActivityRoles.count({
-						where: { guildId: msg.guildId }
-					});
-					if (activityRoles) {
-						const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-						if (existingTask === 0) {
-							let date = new Date();
-							date.setUTCMinutes(date.getUTCMinutes() + 5);
-							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+					if (activityRolesCache[msg.guildId] === undefined) {
+						const activityRoles = await DBActivityRoles.count({
+							where: { guildId: msg.guildId }
+						});
+
+						if (activityRoles) {
+							const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+							if (existingTask === 0) {
+								let date = new Date();
+								date.setUTCMinutes(date.getUTCMinutes() + 5);
+								await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+							}
+						} else {
+							activityRolesCache[msg.guildId] = activityRoles;
+
+							setTimeout(() => {
+								delete activityRolesCache[msg.guildId];
+							}, 300000); //Cache for 5 minutes
 						}
 					}
 				}
@@ -738,15 +748,24 @@ module.exports = {
 				if (!serverUserActivity) {
 					await DBServerUserActivity.create({ guildId: msg.guildId, userId: msg.author.id });
 
-					const activityRoles = await DBActivityRoles.count({
-						where: { guildId: msg.guildId }
-					});
-					if (activityRoles) {
-						const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
-						if (existingTask === 0) {
-							let date = new Date();
-							date.setUTCMinutes(date.getUTCMinutes() + 5);
-							await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+					if (activityRolesCache[msg.guildId] === undefined) {
+						const activityRoles = await DBActivityRoles.count({
+							where: { guildId: msg.guildId }
+						});
+
+						if (activityRoles) {
+							const existingTask = await DBProcessQueue.count({ where: { guildId: msg.guildId, task: 'updateActivityRoles', priority: 5 } });
+							if (existingTask === 0) {
+								let date = new Date();
+								date.setUTCMinutes(date.getUTCMinutes() + 5);
+								await DBProcessQueue.create({ guildId: msg.guildId, task: 'updateActivityRoles', priority: 5, date: date });
+							}
+						} else {
+							activityRolesCache[msg.guildId] = activityRoles;
+
+							setTimeout(() => {
+								delete activityRolesCache[msg.guildId];
+							}, 300000); //Cache for 5 minutes
 						}
 					}
 				}
