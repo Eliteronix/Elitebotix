@@ -332,6 +332,12 @@ module.exports = {
 				modBits--;
 			}
 
+			let beatmapForPpCalc = dbBeatmap;
+
+			if (modBits > 0) {
+				beatmapForPpCalc = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(id), modBits: 0 });
+			}
+
 			for (let i = 0; i < multiScores.length; i++) {
 				//Check mods
 				if (interaction.options.getString('mods')) {
@@ -350,6 +356,8 @@ module.exports = {
 
 				if (!addedUserScores.includes(multiScores[i].osuUserId)) {
 					addedUserScores.push(multiScores[i].osuUserId);
+
+					multiScores[i].dbBeatmap = beatmapForPpCalc;
 
 					let banchoScore = await multiToBanchoScore(multiScores[i], interaction.client);
 
