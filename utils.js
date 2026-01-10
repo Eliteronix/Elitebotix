@@ -757,7 +757,7 @@ module.exports = {
 	},
 	getMessageUserDisplayname: async function (msg) {
 		let userDisplayName = msg.author.username;
-		if (msg.channel.type !== Discord.ChannelType.DM) {
+		if (msg.channel && msg.guild && msg.channel.type !== Discord.ChannelType.DM) {
 			let member = null;
 
 			while (!member) {
