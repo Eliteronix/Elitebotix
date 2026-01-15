@@ -341,7 +341,7 @@ async function executeProcessQueue(client) {
 
 	setTimeout(() => {
 		executeProcessQueue(client);
-	}, 1000);
+	}, 2000);
 }
 
 async function cleanUpDuplicates(client) {
