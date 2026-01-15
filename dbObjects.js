@@ -42,8 +42,6 @@ const guilds = new Sequelize('database', 'username', 'password', {
 	logging: async (sql, timing) => {
 		if (process.shardId !== undefined) {
 			process.send('DB guilds');
-
-			console.log(`${timing} ms): ${sql}`);
 		}
 	},
 	benchmark: logging.benchmark,
