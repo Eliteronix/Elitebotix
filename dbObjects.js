@@ -39,7 +39,7 @@ const logging = {
 const guilds = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: async (sql, timing) => {
+	logging: async () => {
 		if (process.shardId !== undefined) {
 			process.send('DB guilds');
 		}
