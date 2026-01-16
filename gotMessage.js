@@ -1,6 +1,7 @@
 const { updateServerUserActivity } = require('./utils');
 const Discord = require('discord.js');
 const { DBTickets } = require('./dbObjects');
+const noTicketCache = {};
 
 module.exports = async function (msg) {
 	//check if the message wasn't sent by the bot itself or another bot
@@ -16,6 +17,11 @@ module.exports = async function (msg) {
 };
 
 async function handleTicketStatus(msg) {
+	//Check if the channel is a ticket channel
+	if (noTicketCache[msg.channel.id]) {
+		return;
+	}
+
 	const ticket = await DBTickets.findOne({
 		attributes: ['id', 'statusId', 'statusName', 'creatorId', 'additionalParties'],
 		where: {
@@ -24,7 +30,13 @@ async function handleTicketStatus(msg) {
 		}
 	});
 
-	if (ticket && ticket.statusId !== 0 && ticket.statusId !== 75 && ticket.statusId !== 100) {
+	//If no ticket found, add to cache and return
+	if (!ticket) {
+		noTicketCache[msg.channel.id] = true;
+		return;
+	}
+
+	if (ticket.statusId !== 0 && ticket.statusId !== 75 && ticket.statusId !== 100) {
 		ticket.statusId = 75;
 		ticket.statusName = 'Awaiting Response';
 		ticket.save();
