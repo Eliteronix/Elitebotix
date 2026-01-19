@@ -1105,7 +1105,7 @@ module.exports = {
 				ctx.drawImage(emblemImages[duelLeague.imageName], 50, 350, 100, 100);
 
 				ctx.fillText(leagueText, 100, 475, 100);
-				if (userDuelStarRating.noMod !== null) {
+				if (userDuelStarRating.noMod !== null && !isNaN(userDuelStarRating.noMod)) {
 					let limited = '';
 					if (userDuelStarRating.noModLimited) {
 						limited = '~';
@@ -1126,7 +1126,7 @@ module.exports = {
 				ctx.drawImage(emblemImages[duelLeague.imageName], 175, 350, 100, 100);
 
 				ctx.fillText(leagueText, 225, 475, 100);
-				if (userDuelStarRating.hidden !== null) {
+				if (userDuelStarRating.hidden !== null && !isNaN(userDuelStarRating.hidden)) {
 					let limited = '';
 					if (userDuelStarRating.hiddenLimited) {
 						limited = '~';
@@ -1147,7 +1147,7 @@ module.exports = {
 				ctx.drawImage(emblemImages[duelLeague.imageName], 300, 350, 100, 100);
 
 				ctx.fillText(leagueText, 350, 475, 100);
-				if (userDuelStarRating.hardRock !== null) {
+				if (userDuelStarRating.hardRock !== null && !isNaN(userDuelStarRating.hardRock)) {
 					let limited = '';
 					if (userDuelStarRating.hardRockLimited) {
 						limited = '~';
@@ -1168,7 +1168,7 @@ module.exports = {
 				ctx.drawImage(emblemImages[duelLeague.imageName], 425, 350, 100, 100);
 
 				ctx.fillText(leagueText, 475, 475, 100);
-				if (userDuelStarRating.doubleTime !== null) {
+				if (userDuelStarRating.doubleTime !== null && !isNaN(userDuelStarRating.doubleTime)) {
 					let limited = '';
 					if (userDuelStarRating.doubleTimeLimited) {
 						limited = '~';
@@ -1189,7 +1189,7 @@ module.exports = {
 				ctx.drawImage(emblemImages[duelLeague.imageName], 550, 350, 100, 100);
 
 				ctx.fillText(leagueText, 600, 475, 100);
-				if (userDuelStarRating.freeMod !== null) {
+				if (userDuelStarRating.freeMod !== null && !isNaN(userDuelStarRating.freeMod)) {
 					let limited = '';
 					if (userDuelStarRating.freeModLimited) {
 						limited = '~';
