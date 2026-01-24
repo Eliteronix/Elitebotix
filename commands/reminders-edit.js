@@ -1,6 +1,5 @@
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const { DBProcessQueue } = require('../dbObjects');
-const { populateMsgFromInteraction } = require('../utils');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -147,32 +146,25 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(interaction, msg) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			try {
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-			} catch (error) {
-				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
-					console.error(error);
-				}
-				const timestamps = interaction.client.cooldowns.get(this.name);
-				timestamps.delete(interaction.user.id);
-				return;
+	async execute(interaction) {
+		try {
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		} catch (error) {
+			if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
+				console.error(error);
 			}
-
-			msg = await populateMsgFromInteraction(interaction);
-		} else if (msg.id) {
-			return msg.reply('Please edit your reminders by using the / command `/reminders-edit`');
+			const timestamps = interaction.client.cooldowns.get(this.name);
+			timestamps.delete(interaction.user.id);
+			return;
 		}
 
 		//getting reminders
-		//TODO: add attributes
 		const reminders = await DBProcessQueue.findAll({
+			attributes: ['id', 'date'],
 			where: {
 				task: 'remind',
 				additions: {
-					[Op.like]: `${msg.author.id}%`,
+					[Op.like]: `${interaction.user.id}%`,
 				}
 			},
 			order: [
@@ -241,6 +233,7 @@ module.exports = {
 			} catch (error) {
 				return await interaction.editReply({ content: 'There are no reminders with the given ID', flags: MessageFlags.Ephemeral });
 			}
+
 			//If no reminder with the given Id
 			//destroy previous reminder
 			DBProcessQueue.destroy({
@@ -250,7 +243,7 @@ module.exports = {
 				}
 			});
 			//Set a new reminder
-			DBProcessQueue.create({ id: reminderId, guildId: 'None', task: 'remind', priority: 10, additions: `${msg.author.id};${userReminderMessage}`, date: userReminderDate });
+			DBProcessQueue.create({ id: reminderId, guildId: 'None', task: 'remind', priority: 10, additions: `${interaction.user.id};${userReminderMessage}`, date: userReminderDate });
 
 			return await interaction.editReply({
 				content: `Your reminder has been successfully edited.\nNew message: \`${userReminderMessage}\`\nNew date: \`${userReminderDate.toLocaleTimeString('en-UK', {
