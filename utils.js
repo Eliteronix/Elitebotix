@@ -257,6 +257,8 @@ module.exports = {
 	getModBits: function (input, noVisualMods) {
 		let modBits = 0;
 
+		input = input.toUpperCase();
+
 		if (input === 'NM') {
 			return modBits;
 		}
