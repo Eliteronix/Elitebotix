@@ -2483,7 +2483,7 @@ module.exports = {
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
 					|| dbBeatmap && dbBeatmap.approvalStatus === 'Qualified'
 					|| dbBeatmap && dbBeatmap.approvalStatus !== 'Ranked' && dbBeatmap.approvalStatus !== 'Approved' && (!dbBeatmap.updatedAt || dbBeatmap.updatedAt.getTime() < lastMonth.getTime()) //Update if old non-ranked map
-					|| dbBeatmap && dbBeatmap.approvalStatus === 'Ranked' && dbBeatmap.approvalStatus === 'Approved' && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
+					|| dbBeatmap && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved') && (!dbBeatmap.starRating || !dbBeatmap.maxCombo || dbBeatmap.starRating == 0 || !dbBeatmap.mode)) { //Always update ranked maps if values are missing
 
 					//Delete the map if it exists and we are checking NM
 					const path = `./maps/${beatmapId}.osu`;
@@ -2505,6 +2505,17 @@ module.exports = {
 					module.exports.logOsuAPICalls(`utils.js getOsuBeatmap ${beatmapId} ${modBits}`);
 					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 						.then(async (beatmaps) => {
+							let noVisualModBeatmap = beatmaps[0];
+							//TODO: Check if this is still necessary
+							if (mods.includes('MI') || mods.includes('FI') || mods.includes('NF') || mods.includes('NC') || mods.includes('PF') || mods.includes('SD') || mods.includes('SO')) {
+								let realNoVisualModBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: module.exports.getModBits(mods.join(''), true) });
+								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
+								noVisualModBeatmap.difficulty.aim = realNoVisualModBeatmap.aimRating;
+								noVisualModBeatmap.difficulty.speed = realNoVisualModBeatmap.speedRating;
+								noVisualModBeatmap.maxCombo = realNoVisualModBeatmap.maxCombo;
+							}
+
+
 							//Recalculate bpm for HT and DT
 							let bpm = beatmaps[0].bpm;
 							let cs = beatmaps[0].difficulty.size;
@@ -2604,9 +2615,9 @@ module.exports = {
 								dbBeatmap.title = beatmaps[0].title;
 								dbBeatmap.artist = beatmaps[0].artist;
 								dbBeatmap.difficulty = beatmaps[0].version;
-								dbBeatmap.starRating = beatmaps[0].difficulty.rating;
-								dbBeatmap.aimRating = beatmaps[0].difficulty.aim;
-								dbBeatmap.speedRating = beatmaps[0].difficulty.speed;
+								dbBeatmap.starRating = noVisualModBeatmap.difficulty.rating;
+								dbBeatmap.aimRating = noVisualModBeatmap.difficulty.aim;
+								dbBeatmap.speedRating = noVisualModBeatmap.difficulty.speed;
 								dbBeatmap.drainLength = drainLength;
 								dbBeatmap.totalLength = totalLength;
 								dbBeatmap.circleSize = cs;
@@ -2618,7 +2629,7 @@ module.exports = {
 								dbBeatmap.bpm = bpm;
 								dbBeatmap.mode = beatmaps[0].mode;
 								dbBeatmap.approvalStatus = beatmaps[0].approvalStatus;
-								dbBeatmap.maxCombo = beatmaps[0].maxCombo;
+								dbBeatmap.maxCombo = noVisualModBeatmap.maxCombo;
 								dbBeatmap.circles = beatmaps[0].objects.normal;
 								dbBeatmap.sliders = beatmaps[0].objects.slider;
 								dbBeatmap.spinners = beatmaps[0].objects.spinner;
@@ -2694,9 +2705,9 @@ module.exports = {
 									title: beatmaps[0].title,
 									artist: beatmaps[0].artist,
 									difficulty: beatmaps[0].version,
-									starRating: beatmaps[0].difficulty.rating,
-									aimRating: beatmaps[0].difficulty.aim,
-									speedRating: beatmaps[0].difficulty.speed,
+									starRating: noVisualModBeatmap.difficulty.rating,
+									aimRating: noVisualModBeatmap.difficulty.aim,
+									speedRating: noVisualModBeatmap.difficulty.speed,
 									drainLength: drainLength,
 									totalLength: totalLength,
 									circleSize: cs,
@@ -2709,7 +2720,7 @@ module.exports = {
 									bpm: bpm,
 									mode: beatmaps[0].mode,
 									approvalStatus: beatmaps[0].approvalStatus,
-									maxCombo: beatmaps[0].maxCombo,
+									maxCombo: noVisualModBeatmap.maxCombo,
 									circles: beatmaps[0].objects.normal,
 									sliders: beatmaps[0].objects.slider,
 									spinners: beatmaps[0].objects.spinner,
@@ -3308,7 +3319,7 @@ module.exports = {
 
 				dbBeatmap = await module.exports.getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: userMaps[i].beatmapId, modBits: mods });
 
-				//Filter by ranked / popular maps > 4*
+				//Filter by ranked / popular maps > 3.5*
 				if (dbBeatmap && parseFloat(dbBeatmap.starRating) > 3.5 && (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.popular)) {
 					//Standardize the score from the mod multiplier
 					if (modPools[modIndex] === 'HD') {
