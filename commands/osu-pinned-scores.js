@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { DBDiscordUsers } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, logOsuAPICalls, fitTextOnMiddleCanvas, roundedRect, getOsuBeatmap, humanReadable, getRankImage, getModImage} = require('../utils.js');
+const { getIDFromPotentialOsuLink, logOsuAPICalls, fitTextOnMiddleCanvas, roundedRect, humanReadable, getRankImage, getModImage} = require('../utils.js');
 const osu = require('node-osu');
 
 module.exports = {
@@ -91,7 +91,7 @@ module.exports = {
                 userId: interaction.user.id
             },
         });
-        
+        // CHECK THIS PART!!1
         if (!username) {
             //Get profile by author if no argument
             if (commandUser && commandUser.osuUserId) {
@@ -202,6 +202,7 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
             }
             
             let sentMessage;
+            // CHeCK THIS PART
             try {
                 if (noLinkedAccount) {
                     sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
@@ -232,6 +233,7 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
                         console.log(interaction, e);
                     }
                 }
+                // do i need it here????
             } else if (err.message === 'Missing Permissions') {
                 DBOsuGuildTrackers.destroy({
                     where: {
@@ -293,6 +295,10 @@ async function drawPinnedScores(input, data) {
 
     for (let i = 0; i < data.length; i++) {
         let score = data[i];
+
+        // IN CASE WE NEED TO ADD SCORE MAPS TO THE DB USE THESE:
+        // score.beatmap_id => map id
+        // score.beatmap.beatmapset_id => mapset id
 
         roundedRect(ctx, canvas.width / 70, 500 / 8 + (500 / 12) * i, canvas.width - canvas.width / 35, 500 / 13, 500 / 70, '70', '57', '63', 0.75);
 
