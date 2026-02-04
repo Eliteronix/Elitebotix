@@ -599,22 +599,42 @@ async function drawStats(input, accuracy, client) {
 	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, null, beatmap.mods, accuracy, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
-	ctx.font = 'bold 15px comfortaa, arial';
-	ctx.fillText('Circle Size', canvas.width / 1000 * 580, canvas.height / 500 * 170);
-	ctx.font = 'bold 30px comfortaa, arial';
-	ctx.fillText(`CS ${beatmap.circleSize}`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
-	ctx.font = 'bold 15px comfortaa, arial';
-	ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 230);
-	ctx.font = 'bold 30px comfortaa, arial';
-	ctx.fillText(`AR ${beatmap.approachRate}`, canvas.width / 1000 * 580, canvas.height / 500 * 260);
-	ctx.font = 'bold 15px comfortaa, arial';
-	ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 290);
-	ctx.font = 'bold 30px comfortaa, arial';
-	ctx.fillText(`OD ${beatmap.overallDifficulty}`, canvas.width / 1000 * 580, canvas.height / 500 * 320);
-	ctx.font = 'bold 15px comfortaa, arial';
-	ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 350);
-	ctx.font = 'bold 30px comfortaa, arial';
-	ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 380);
+	if (beatmap.mode === 'Mania') { 
+		ctx.font = 'bold 15px comfortaa, arial'; // Key Count
+		ctx.fillText('Key count', canvas.width / 1000 * 580, canvas.height / 500 * 170);
+		ctx.font = 'bold 30px comfortaa, arial';
+		// fix in the future probably, cant think of a good way without using getBeatmap again
+		if (getMods(beatmap.mods).includes('HR')) {
+			ctx.fillText(`${beatmap.circleSize / 1.3}K`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
+		} else {
+			ctx.fillText(`${beatmap.circleSize}K`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
+		}
+		ctx.font = 'bold 15px comfortaa, arial'; // Overall Difficulty
+		ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 230);
+		ctx.font = 'bold 30px comfortaa, arial';
+		ctx.fillText(`OD ${beatmap.overallDifficulty}`, canvas.width / 1000 * 580, canvas.height / 500 * 260);
+		ctx.font = 'bold 15px comfortaa, arial'; // HP Drain
+		ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 290);
+		ctx.font = 'bold 30px comfortaa, arial';
+		ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 320);
+	} else {
+		ctx.font = 'bold 15px comfortaa, arial'; // Circle Size
+		ctx.fillText('Circle Size', canvas.width / 1000 * 580, canvas.height / 500 * 170);
+		ctx.font = 'bold 30px comfortaa, arial';
+		ctx.fillText(`CS ${beatmap.circleSize}`, canvas.width / 1000 * 580, canvas.height / 500 * 200); 
+		ctx.font = 'bold 15px comfortaa, arial'; // Approach Rate
+		ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 230);
+		ctx.font = 'bold 30px comfortaa, arial';
+		ctx.fillText(`AR ${beatmap.approachRate}`, canvas.width / 1000 * 580, canvas.height / 500 * 260);
+		ctx.font = 'bold 15px comfortaa, arial'; // Overall Difficulty
+		ctx.fillText('Overall Difficulty', canvas.width / 1000 * 580, canvas.height / 500 * 290);
+		ctx.font = 'bold 30px comfortaa, arial';
+		ctx.fillText(`OD ${beatmap.overallDifficulty}`, canvas.width / 1000 * 580, canvas.height / 500 * 320);
+		ctx.font = 'bold 15px comfortaa, arial'; // HP Drain
+		ctx.fillText('HP Drain', canvas.width / 1000 * 580, canvas.height / 500 * 350);
+		ctx.font = 'bold 30px comfortaa, arial';
+		ctx.fillText(`HP ${beatmap.hpDrain}`, canvas.width / 1000 * 580, canvas.height / 500 * 380);
+	}
 
 	ctx.font = 'bold 15px comfortaa, arial';
 	ctx.fillText('99% Accuracy', canvas.width / 1000 * 580, canvas.height / 500 * 410);
