@@ -161,6 +161,10 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
                 return interaction.followUp(`User \`${user.name}\` has no pinned scores.`);
             }
 
+            if (data.length < limit) {
+                limit = data.length;
+            }
+
             const canvasWidth = 1000;
             const canvasHeight = 83 + limit * 41.66666;
 
