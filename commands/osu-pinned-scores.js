@@ -76,7 +76,7 @@ module.exports = {
         let limit = interaction.options.getInteger('amount');
 
         if (!limit) {
-            limit = 5;
+            limit = 100;
         } else if (limit <= 1) {
             limit = 1;
         } else if (limit >= 100) {
