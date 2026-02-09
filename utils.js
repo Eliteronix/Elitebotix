@@ -2467,7 +2467,7 @@ module.exports = {
 				getOsuBeatmapCallStacks = getOsuBeatmapCallStacks.filter(x => (new Date() - x.date) < 60000);
 
 				let similarStacks = getOsuBeatmapCallStacks.filter(x => x.stack === err.stack);
-				if (similarStacks.length === 60 && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-wrapped.js:481:') && !err.stack.includes('utils.js:3322:')) {
+				if (similarStacks.length === 60 && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-wrapped.js:481:') && !err.stack.includes('getUserDuelStarRating')) {
 					// eslint-disable-next-line no-console
 					console.log(`getOsuBeatmap similar stack called 60 times in the last minute:\n${err.stack}`);
 				}
