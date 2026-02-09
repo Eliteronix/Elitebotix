@@ -58,7 +58,7 @@ module.exports = {
 				})
 				.setRequired(false)
 				.setMinValue(1)
-				.setMaxValue(50)
+				.setMaxValue(100)
 		),
 
     async execute(interaction) {
@@ -79,8 +79,8 @@ module.exports = {
             limit = 5;
         } else if (limit <= 1) {
             limit = 1;
-        } else if (limit >= 20) {
-            limit = 20;
+        } else if (limit >= 100) {
+            limit = 100;
         }
 
         let username = interaction.options.getString('username');
