@@ -31,7 +31,11 @@ module.exports = {
 					return;
 				}
 
-				await channel.send(message);
+				try {
+					await channel.send(message);
+				} catch (err) {
+					console.error('Broadcasting processQueueTasks/guildTourneyAcronymFollow.js to shards', err);
+				}
 
 				if (autoTrack === 'true') {
 					let trackCommand = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\commands\\osu-matchtrack.js`);

@@ -3787,7 +3787,11 @@ module.exports = {
 
 										let channel = await guild.channels.cache.get(channelId);
 										if (channel) {
-											await channel.send(message);
+											try {
+												await channel.send(message);
+											} catch (err) {
+												console.error('Broadcasting utils.js duel Rating change for guilds to shards', err);
+											}
 										}
 									}, { context: { guildId: guildTrackers[i].guildId, channelId: guildTrackers[i].channelId, message: `\`\`\`${message.join('\n')}\`\`\`` } });
 								} catch (err) {
