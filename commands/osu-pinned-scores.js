@@ -58,7 +58,7 @@ module.exports = {
 				})
 				.setRequired(false)
 				.setMinValue(1)
-				.setMaxValue(20)
+				.setMaxValue(50)
 		),
 
     async execute(interaction) {
@@ -237,13 +237,6 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
                         console.log(interaction, e);
                     }
                 }
-                // do i need it here????
-            } else if (err.message === 'Missing Permissions') {
-                DBOsuGuildTrackers.destroy({
-                    where: {
-                        channelId: interaction.channel.id
-                    }
-                });
             } else {
                 console.error(err);
             }
