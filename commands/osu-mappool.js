@@ -703,6 +703,7 @@ module.exports = {
 
 			let beatmaps = await DBOsuBeatmaps.findAll({
 				attributes: [
+					'id',
 					'beatmapId',
 					'beatmapsetId',
 					'approvalStatus',
