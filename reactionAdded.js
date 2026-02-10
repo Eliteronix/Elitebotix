@@ -4,7 +4,7 @@ const cooldowns = new Discord.Collection();
 const { developers } = require('./config.json');
 //Import Sequelize for operations
 const Sequelize = require('sequelize');
-const { getMods, getOsuBeatmap, pause, getBeatmapModeId } = require('./utils');
+const { getMods, getOsuBeatmap, pause } = require('./utils');
 const Op = Sequelize.Op;
 
 module.exports = async function (reaction, user) {
@@ -260,50 +260,7 @@ module.exports = async function (reaction, user) {
 
 		//For the compare emoji
 		if (reaction._emoji.id === '827974793365159997') {
-			if (firstAttachment.name.startsWith('osu-score')) {
-				const beatmapId = firstAttachment.name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
-
-				const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
-
-				let args = [beatmapId, `--${beatmap.mode}`];
-
-				const command = require('./commands/osu-score.js');
-
-				if (await checkCooldown(reaction, command, user, args) !== undefined) {
-					return;
-				}
-
-				//Setup artificial interaction
-				let interaction = {
-					id: null,
-					commandName: 'osu-score',
-					channel: reaction.message.channel,
-					client: reaction.message.client,
-					guild: reaction.message.guild,
-					user: user,
-					options: {
-						getString: (string) => {
-							if (string === 'beatmap') {
-								return beatmapId;
-							}
-						},
-						getNumber: (string) => {
-							if (string === 'gamemode') {
-								return getBeatmapModeId(beatmap);
-							}
-						},
-						getInteger: () => { },
-					},
-					deferReply: () => { },
-					followUp: async (input) => {
-						return await reaction.message.channel.send(input);
-					},
-				};
-
-				process.send(`command ${command.name}`);
-
-				command.execute(interaction);
-			} else if (firstAttachment.name.startsWith('osu-beatmap')) {
+			if (firstAttachment.name.startsWith('osu-beatmap')) {
 				const beatmapId = firstAttachment.name.replace('osu-beatmap-', '').replace(/-.+/gm, '');
 
 				const command = require('./commands/osu-score.js');
@@ -380,58 +337,7 @@ module.exports = async function (reaction, user) {
 
 		//Check if reacted for map information
 		if (reaction._emoji.name === '🗺️') {
-			//Check if it is actually a scorepost
-			if (firstAttachment.name.startsWith('osu-score')) {
-				//Regex the beatmapId out of there
-				const beatmapId = firstAttachment.name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
-
-				//get the mods used
-				const modBits = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
-
-				let mods = getMods(modBits);
-
-				if (!mods[0]) {
-					mods = ['NM'];
-				}
-
-				//Setup artificial arguments
-				let args = [beatmapId, `--${mods.join('')}`];
-
-				const command = require('./commands/osu-beatmap.js');
-
-				if (await checkCooldown(reaction, command, user, args) !== undefined) {
-					return;
-				}
-
-				//Setup artificial interaction
-				let interaction = {
-					id: null,
-					client: reaction.message.client,
-					commandName: 'osu-beatmap',
-					channel: reaction.message.channel,
-					guild: reaction.message.guild,
-					user: user,
-					options: {
-						getString: (string) => {
-							if (string === 'id') {
-								return beatmapId;
-							} else if (string === 'mods') {
-								return getMods(modBits).join('');
-							}
-						},
-						getNumber: () => { },
-						getBoolean: () => { },
-					},
-					deferReply: () => { },
-					followUp: async (input) => {
-						return await reaction.message.channel.send(input);
-					},
-				};
-
-				process.send(`command ${command.name}`);
-
-				command.execute(interaction);
-			} else if (firstAttachment.name.startsWith('osu-game-')) {
+			if (firstAttachment.name.startsWith('osu-game-')) {
 				const beatmapId = firstAttachment.name.replace(/osu-game-\d+-/gm, '').replace(/-.*/gm, '');
 
 				//get the mods used
@@ -534,9 +440,9 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for profile information
 		if (reaction._emoji.name === '👤') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
 				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+				const osuUserId = firstAttachment.name.replace('osu-league-ratings-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 				//Setup artificial arguments
 				let args = [osuUserId];
