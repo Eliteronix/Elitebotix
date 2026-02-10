@@ -550,11 +550,12 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 		//Create as an attachment
 		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
-		//Send attachment
-		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+		const osuTop = new ButtonBuilder().setCustomId(`osu-top||{"username": "${user.id}"}`).setLabel('/osu-top').setStyle(ButtonStyle.Primary);
+		const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+		const row = new ActionRowBuilder().addComponents(osuTop, osuSkills);
 
-		await sentMessage.react('🥇');
-		await sentMessage.react('📈');
+		//Send attachment
+		await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment], components: [row] });
 	}
 }
 
