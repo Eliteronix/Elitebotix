@@ -126,8 +126,53 @@ module.exports = async function (client, interaction) {
 			console.error('interactionCreate.js | autocomplete', error);
 		}
 	} else if (interaction.isButton()) {
-		// TODO: Add cooldowns for buttons
 		let commandName = interaction.customId.split('|')[0];
+
+		//Set the command and check for possible uses of aliases
+		let command = client.commands.get(commandName)
+			|| client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+		//Check if the cooldown collection has the command already; if not write it in
+		if (!cooldowns.has(command.name)) {
+			cooldowns.set(command.name, new Discord.Collection());
+		}
+
+		//Set current time
+		const now = Date.now();
+		//gets the collections for the current command used
+		const timestamps = cooldowns.get(command.name);
+		//set necessary cooldown amount; if non stated in command default to 5; calculate ms afterwards
+		const cooldownAmount = (command.cooldown || 5) * 1000;
+
+		//get expiration times for the cooldowns for the authorId
+		if (timestamps.has(interaction.user.id)) {
+			const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
+
+			//If cooldown didn't expire yet send cooldown message
+			if (command.noCooldownMessage) {
+				return;
+			} else if (now < expirationTime) {
+				const timeLeft = (expirationTime - now) / 1000;
+				try {
+					await interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`, flags: MessageFlags.Ephemeral });
+				} catch (error) {
+					if (error.message !== 'Unknown interaction') {
+						console.error('interactionCreate.js | Cooldown message', error);
+					}
+				}
+				return;
+			}
+		}
+
+		//Set timestamp for the used command
+		if (!developers.includes(interaction.user.id) && !salesmen.includes(interaction.user.id)) {
+			timestamps.set(interaction.user.id, now);
+		}
+
+		//Automatically delete the timestamp after the cooldown
+		setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
+
+		interaction.client.cooldowns = cooldowns;
 
 		interaction.arguments = JSON.parse(interaction.customId.split('|')[2]);
 
@@ -155,8 +200,6 @@ module.exports = async function (client, interaction) {
 				};
 			})
 		};
-
-		const command = interaction.client.commands.get(commandName);
 
 		if (!command) {
 			console.error(`No command matching ${commandName} was found.`);
