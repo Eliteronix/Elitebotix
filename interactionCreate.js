@@ -125,5 +125,45 @@ module.exports = async function (client, interaction) {
 		} catch (error) {
 			console.error('interactionCreate.js | autocomplete', error);
 		}
+	} else if (interaction.isButton()) {
+		let commandName = interaction.customId.split('|')[0];
+
+		interaction.arguments = JSON.parse(interaction.customId.split('|')[2]);
+
+		interaction.options = {
+			_subcommand: interaction.customId.split('|')[1],
+			getSubcommand: () => {
+				return interaction.customId.split('|')[1];
+			},
+			getString: (string) => {
+				return interaction.arguments[string];
+			},
+			getBoolean: (string) => {
+				return interaction.arguments[string];
+			},
+			getInteger: (string) => {
+				return interaction.arguments[string];
+			},
+			getNumber: (string) => {
+				return interaction.arguments[string];
+			},
+			_hoistedOptions: Object.keys(interaction.arguments).map(key => {
+				return {
+					name: key,
+					value: interaction.arguments[key]
+				};
+			})
+		};
+
+		const command = interaction.client.commands.get(commandName);
+
+		if (!command) {
+			console.error(`No command matching ${commandName} was found.`);
+			return;
+		}
+
+		process.send(`command ${commandName}`);
+
+		await command.execute(interaction);
 	}
 };

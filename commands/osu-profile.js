@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
 const { humanReadable, getGameModeName, getLinkModeName, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getUserDuelStarRating, getOsuDuelLeague, getAdditionalOsuInfo, getBadgeImage, awaitWebRequestPermission, getAvatar, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
 const { developers, showUnknownInteractionError } = require('../config.json');
 const ChartJsImage = require('chartjs-to-image');
@@ -339,49 +339,52 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 					noLinkedAccount = false;
 				}
 
-				//Send attachment
-				let sentMessage = null;
-				try {
-					if (noLinkedAccount) {
-						sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-					} else {
-						sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+				const osuTop = new ButtonBuilder().setCustomId(`osu-top||{"username": "${user.id}"}`).setLabel('/osu-top').setStyle(ButtonStyle.Primary);
+				const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+
+				const row = new ActionRowBuilder().addComponents(osuTop, osuSkills);
+
+				let userScore = await DBOsuMultiGameScores.findOne({
+					attributes: ['id'],
+					where: {
+						osuUserId: user.id,
+						score: {
+							[Op.gte]: 10000
+						},
+						warmup: {
+							[Op.not]: true
+						}
 					}
+				});
+
+				if (userScore) {
+					try {
+						const osuDuel = new ButtonBuilder().setCustomId(`osu-duel|rating|{"username": "${user.id}"}`).setLabel('/osu-duel rating').setStyle(ButtonStyle.Primary);
+						const osuMatchup = new ButtonBuilder().setCustomId(`osu-matchup||{"username": "${user.id}"}`).setLabel('/osu-matchup').setStyle(ButtonStyle.Primary);
+						const osuSchedule = new ButtonBuilder().setCustomId(`osu-schedule||{"team1player1": "${user.id}"}`).setLabel('/osu-schedule').setStyle(ButtonStyle.Primary);
+
+						row.addComponents(osuDuel, osuMatchup, osuSchedule);
+					} catch (e) {
+						if (e.message !== 'Unknown Message') {
+							console.error(e);
+						}
+					}
+				}
+
+				//Send attachment
+				try {
+					let noLinkedAccountString = '';
+
+					if (noLinkedAccount) {
+						noLinkedAccountString = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
+					}
+
+					await interaction.followUp({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 				} catch (e) {
 					if (e.message !== 'Unknown Message') {
 						console.error(e);
 					}
 					return;
-				}
-
-				if (interaction.context === 1 || interaction.guild) {
-					await sentMessage.react('🥇');
-					await sentMessage.react('📈');
-
-					let userScore = await DBOsuMultiGameScores.findOne({
-						attributes: ['id'],
-						where: {
-							osuUserId: user.id,
-							score: {
-								[Op.gte]: 10000
-							},
-							warmup: {
-								[Op.not]: true
-							}
-						}
-					});
-
-					if (userScore) {
-						try {
-							await sentMessage.react('<:master:951396806653255700>');
-							await sentMessage.react('🆚');
-							await sentMessage.react('📊');
-						} catch (e) {
-							if (e.message !== 'Unknown Message') {
-								console.error(e);
-							}
-						}
-					}
 				}
 			})
 			.catch(err => {
@@ -432,11 +435,12 @@ async function getProfile(interaction, username, server, mode, showGraph, noLink
 				//Create as an attachment
 				const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-profile-${getGameModeName(mode)}-${user.id}.png` });
 
-				//Send attachment
-				let sentMessage = await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment] });
+				const osuTop = new ButtonBuilder().setCustomId(`osu-top||{"username": "${user.id}"}`).setLabel('/osu-top').setStyle(ButtonStyle.Primary);
+				const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+				const row = new ActionRowBuilder().addComponents(osuTop, osuSkills);
 
-				await sentMessage.react('🥇');
-				await sentMessage.react('📈');
+				//Send attachment
+				await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nSpectate: <osu://spectate/${user.id}>`, files: [attachment], components: [row] });
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
