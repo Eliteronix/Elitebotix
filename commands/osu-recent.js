@@ -1,6 +1,6 @@
 ﻿const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls, getMods } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -358,7 +358,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 					row.addComponents(osuCompare);
 				}
 
-				const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+				const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
 				const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
 				row.addComponents(osuBeatmap, osuProfile);
 
@@ -430,7 +430,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 							row.addComponents(osuCompare);
 						}
 
-						const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+						const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
 						const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
 						row.addComponents(osuBeatmap, osuProfile);
 
@@ -580,7 +580,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 			row.addComponents(osuCompare);
 		}
 
-		const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+		const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
 		const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
 		row.addComponents(osuBeatmap, osuProfile);
 
