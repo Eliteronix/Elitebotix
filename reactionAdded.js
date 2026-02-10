@@ -537,9 +537,9 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for profile information
 		if (reaction._emoji.name === '👤') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-recent') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-recent') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-mostplayed') || firstAttachment.name.startsWith('osu-pinned-scores')) {
 				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+				const osuUserId = firstAttachment.name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace('osu-pinned-scores-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 				//Setup artificial arguments
 				let args = [osuUserId];
