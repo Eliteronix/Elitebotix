@@ -2508,7 +2508,6 @@ module.exports = {
 					await osuApi.getBeatmaps({ b: beatmapId, mods: modBits })
 						.then(async (beatmaps) => {
 							let noVisualModBeatmap = beatmaps[0];
-							//TODO: Check if this is still necessary
 							if (mods.includes('MI') || mods.includes('FI') || mods.includes('NF') || mods.includes('NC') || mods.includes('PF') || mods.includes('SD') || mods.includes('SO')) {
 								let realNoVisualModBeatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: module.exports.getModBits(mods.join(''), true) });
 								noVisualModBeatmap.difficulty.rating = realNoVisualModBeatmap.starRating;
