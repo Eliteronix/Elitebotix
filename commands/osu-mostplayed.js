@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
 const { roundedRect, rippleToBanchoUser, getOsuUserServerMode, getMessageUserDisplayname, getIDFromPotentialOsuLink, populateMsgFromInteraction, getOsuBeatmap, getMapListCover, awaitWebRequestPermission, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showUnknownInteractionError, matchMakingAcronyms } = require('../config.json');
 const Sequelize = require('sequelize');
 const ObjectsToCsv = require('objects-to-csv');
@@ -693,18 +693,21 @@ async function getMostPlayed(msg, username, server, mode, noLinkedAccount, limit
 					noLinkedAccount = false;
 				}
 
-				//Send attachment
-				let sentMessage;
+				const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+				const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+
+				const row = new ActionRowBuilder().addComponents(osuProfile, osuSkills);
+
+				let noLinkedAccountString = '';
+
 				if (noLinkedAccount) {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>\nFeel free to use </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: [attachment] });
-				} else {
-					sentMessage = await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>`, files: [attachment] });
+					noLinkedAccountString = `\nFeel free to use </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
 				}
-				await sentMessage.react('👤');
-				await sentMessage.react('📈');
+
+				//Send attachment
+				await msg.channel.send({ content: `${user.name}: <https://osu.ppy.sh/users/${user.id}>${noLinkedAccountString}`, files: [attachment], components: [row] });
 
 				await processingMessage.delete();
-
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {

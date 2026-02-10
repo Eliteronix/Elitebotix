@@ -391,7 +391,7 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for skills information
 		if (reaction._emoji.name === '📈') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings')) {
 				//get the osuUserId used
 				let osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -440,9 +440,9 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for profile information
 		if (reaction._emoji.name === '👤') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings')) {
 				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace('osu-league-ratings-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+				const osuUserId = firstAttachment.name.replace('osu-league-ratings-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 				//Setup artificial arguments
 				let args = [osuUserId];
