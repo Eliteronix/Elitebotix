@@ -4,7 +4,7 @@ const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
 const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
@@ -431,19 +431,20 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 						noLinkedAccount = false;
 					}
 
+					const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+					const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+
+					const row = new ActionRowBuilder().addComponents(osuProfile, osuSkills);
+
+					//Send attachment
 					try {
-						//Send attachment
-						let sentMessage;
+						let noLinkedAccountString = '';
+
 						if (noLinkedAccount) {
-							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-						} else {
-							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+							noLinkedAccountString = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
 						}
 
-						if (interaction.context === 1 || interaction.guild) {
-							await sentMessage.react('👤');
-							await sentMessage.react('📈');
-						}
+						await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 					} catch (err) {
 						if (err.message !== 'Unknown Message') {
 							console.error(err);
@@ -655,27 +656,26 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 						noLinkedAccount = false;
 					}
 
+					const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+					const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+
+					const row = new ActionRowBuilder().addComponents(osuProfile, osuSkills);
+
+					let noLinkedAccountString = '';
+
+					if (noLinkedAccount) {
+						noLinkedAccountString = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
+					}
+
 					//Send attachment
-					let sentMessage;
 					try {
-						if (noLinkedAccount) {
-							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-						} else {
-							sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
-						}
+						await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 					} catch (err) {
 						if (err.message === 'Invalid Webhook Token') {
-							sentMessage = await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>`, files: files });
+							await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 						} else if (err.message !== 'Unknown Message') {
 							console.error(err);
 						}
-					}
-
-					try {
-						await sentMessage.react('👤');
-						await sentMessage.react('📈');
-					} catch (err) {
-						//Nothing
 					}
 				}
 			})

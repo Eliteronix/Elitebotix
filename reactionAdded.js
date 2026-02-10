@@ -485,12 +485,9 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for skills information
 		if (reaction._emoji.name === '📈') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-top') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
 				//get the osuUserId used
 				let osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
-				if (firstAttachment.name.startsWith('osu-top')) {
-					osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
-				}
 
 				//Setup artificial arguments
 				let args = [osuUserId];
@@ -563,48 +560,6 @@ module.exports = async function (reaction, user) {
 							}
 						},
 						getNumber: () => { },
-						getBoolean: () => { },
-					},
-					deferReply: () => { },
-					followUp: async (input) => {
-						return await reaction.message.channel.send(input);
-					},
-				};
-
-				process.send(`command ${command.name}`);
-
-				command.execute(interaction);
-			} else if (firstAttachment.name.startsWith('osu-top')) {
-				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
-				let mode = firstAttachment.name.replace(/.+.mode/gm, '').replace('.png', '');
-
-				//Setup artificial arguments
-				let args = [osuUserId, mode];
-
-				const command = require('./commands/osu-profile.js');
-
-				if (await checkCooldown(reaction, command, user, args) !== undefined) {
-					return;
-				}
-
-				//Setup artificial interaction
-				let interaction = {
-					id: null,
-					client: reaction.message.client,
-					channel: reaction.message.channel,
-					user: user,
-					options: {
-						getString: (string) => {
-							if (string === 'username') {
-								return osuUserId.toString();
-							}
-						},
-						getNumber: (string) => {
-							if (string === 'gamemode') {
-								return mode;
-							}
-						},
 						getBoolean: () => { },
 					},
 					deferReply: () => { },
