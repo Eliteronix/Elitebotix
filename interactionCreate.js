@@ -126,6 +126,7 @@ module.exports = async function (client, interaction) {
 			console.error('interactionCreate.js | autocomplete', error);
 		}
 	} else if (interaction.isButton()) {
+		// TODO: Add cooldowns for buttons
 		let commandName = interaction.customId.split('|')[0];
 
 		interaction.arguments = JSON.parse(interaction.customId.split('|')[2]);
