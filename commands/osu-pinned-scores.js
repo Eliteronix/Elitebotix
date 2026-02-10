@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle  } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { DBDiscordUsers } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, logOsuAPICalls, fitTextOnMiddleCanvas, roundedRect, humanReadable, getRankImage, getModImage} = require('../utils.js');
@@ -191,8 +191,11 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
 
             await drawFooter(elements);
 
-            const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-pinned-scores-${user.id}.png` })];
+            const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
 
+            const row = new ActionRowBuilder().addComponents(osuProfile);
+
+            const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-pinned-scores-${user.id}.png` })];
 
             const linkedUser = await DBDiscordUsers.findOne({
 					attributes: ['userId'],
@@ -205,28 +208,22 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
 				noLinkedAccount = false;
             }
             
-            let sentMessage;
+            let NoLinkedAccountStr = '';
+
             // CHeCK THIS PART
             try {
                 if (noLinkedAccount) {
-                    sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}}>\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`, files: files });
-                } else {
-                    sentMessage = await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}}>`, files: files });
-                }
+                    NoLinkedAccountStr = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
+                } 
+                
+                await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}}>${NoLinkedAccountStr}`, files: files, components: [row] });
             } catch (err) {
                 if (err.message === 'Invalid Webhook Token') {
-                    sentMessage = await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}}>`, files: files });
+                    await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}}>${NoLinkedAccountStr}`, files: files, components: [row] });
                 } else if (err.message !== 'Unknown Message') {
                     console.error(err);
                 }
             }
-
-            try {
-                await sentMessage.react('👤');
-            } catch (err) {
-                //Nothing
-            }
-
         })
         .catch(async (err) => {
             if (err.message === 'Not found') {
