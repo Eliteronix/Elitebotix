@@ -537,9 +537,9 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for profile information
 		if (reaction._emoji.name === '👤') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-mostplayed')) {
 				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+				const osuUserId = firstAttachment.name.replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 				//Setup artificial arguments
 				let args = [osuUserId];
@@ -574,7 +574,7 @@ module.exports = async function (reaction, user) {
 				process.send(`command ${command.name}`);
 
 				command.execute(interaction);
-			} else if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-top')) {
+			} else if (firstAttachment.name.startsWith('osu-top')) {
 				//get the osuUserId used
 				const osuUserId = firstAttachment.name.replace(/.mode./gm, '').replace('.png', '').replace(/.*-/, '');
 				let mode = firstAttachment.name.replace(/.+.mode/gm, '').replace('.png', '');
@@ -622,7 +622,7 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for schedule information
 		if (reaction._emoji.name === '📊') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-league-ratings')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings')) {
 				//get the osuUserId used
 				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -666,7 +666,7 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for schedule information
 		if (reaction._emoji.name === '🥇') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-league-ratings')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings')) {
 				//get the osuUserId used
 				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -757,7 +757,7 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for matchup information
 		if (reaction._emoji.name === '🆚') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-league-ratings')) {
+			if (firstAttachment.name.startsWith('osu-league-ratings')) {
 				//get the osuUserId used
 				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
 
@@ -857,54 +857,6 @@ module.exports = async function (reaction, user) {
 				process.send(`command ${command.name}`);
 
 				command.execute(interaction);
-			}
-		}
-
-		//Check if reacted for osu-duel-rating information
-		if (reaction._emoji.id === '951396806653255700') {
-			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-topPlayStats')) {
-				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
-
-				//Setup artificial arguments
-				let args = [osuUserId];
-
-				const command = require('./commands/osu-duel.js');
-
-				if (await checkCooldown(reaction, command, user, args) !== undefined) {
-					return;
-				}
-
-				//Set author of a temporary message copy to the reacting user to not break the commands
-				let guildId = null;
-
-				if (reaction.message.guild) {
-					guildId = reaction.message.guild.id;
-				}
-
-				let interaction = {
-					client: reaction.client,
-					guild: reaction.message.guild,
-					guildId: guildId,
-					options: {
-						_subcommand: 'rating',
-						_hoistedOptions: [{ name: 'username', value: args[0] }]
-					},
-					user: user,
-					channel: reaction.message.channel,
-				};
-
-				try {
-					process.send(`command ${command.name}_rating`);
-
-					command.execute(interaction, null, args);
-				} catch (error) {
-					console.error(error);
-					const eliteronixUser = await reaction.message.client.users.cache.find(user => user.id === '138273136285057025');
-					reaction.message.reply('There was an error trying to execute that command. The developers have been alerted.');
-					await eliteronixUser.send(`There was an error trying to execute a command.\nReaction by ${user.username}#${user.discriminator}: \`Compare Reaction\`\n\n${error}`);
-				}
 			}
 		}
 
