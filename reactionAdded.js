@@ -260,7 +260,7 @@ module.exports = async function (reaction, user) {
 
 		//For the compare emoji
 		if (reaction._emoji.id === '827974793365159997') {
-			if (firstAttachment.name.startsWith('osu-recent') || firstAttachment.name.startsWith('osu-score')) {
+			if (firstAttachment.name.startsWith('osu-score')) {
 				const beatmapId = firstAttachment.name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
 
 				const beatmap = await getOsuBeatmap({ beatmapId: beatmapId });
@@ -381,7 +381,7 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for map information
 		if (reaction._emoji.name === '🗺️') {
 			//Check if it is actually a scorepost
-			if (firstAttachment.name.startsWith('osu-recent-') || firstAttachment.name.startsWith('osu-score')) {
+			if (firstAttachment.name.startsWith('osu-score')) {
 				//Regex the beatmapId out of there
 				const beatmapId = firstAttachment.name.replace(/osu-(recent|score)-\d+-/, '').replace(/-.*/gm, '');
 
@@ -537,9 +537,9 @@ module.exports = async function (reaction, user) {
 		//Check if reacted for profile information
 		if (reaction._emoji.name === '👤') {
 			//Check if it is a profile
-			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-recent') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-mostplayed')) {
+			if (firstAttachment.name.startsWith('osu-score') || firstAttachment.name.startsWith('osu-league-ratings') || firstAttachment.name.startsWith('osu-topPlayStats') || firstAttachment.name.startsWith('osu-mostplayed')) {
 				//get the osuUserId used
-				const osuUserId = firstAttachment.name.replace('osu-recent-', '').replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
+				const osuUserId = firstAttachment.name.replace('osu-score-', '').replace('osu-league-ratings-', '').replace('osu-topPlayStats-', '').replace('osu-mostplayed-', '').replace(/-.+.png/gm, '').replace('.png', '');
 
 				//Setup artificial arguments
 				let args = [osuUserId];

@@ -155,7 +155,7 @@ module.exports = {
 				.setMaxLength(15)
 		),
 	async execute(interaction) {
-		if (interaction.commandName === 'osu-beatmap') {
+		if (interaction.commandName === 'osu-beatmap' || interaction.customId) {
 			try {
 				await interaction.deferReply();
 			} catch (error) {
@@ -422,7 +422,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	}
 
 	//Send attachment
-	if (interaction.commandName !== 'osu-beatmap') {
+	if (interaction.commandName !== 'osu-beatmap' && interaction.customId === null) {
 		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, flags: MessageFlags.Ephemeral });
 	} else {
 		try {
@@ -599,7 +599,7 @@ async function drawStats(input, accuracy, client) {
 	ctx.fillText(`${Math.round(await getOsuPP(beatmap.beatmapId, null, null, beatmap.mods, accuracy, 0, beatmap.maxCombo, client))} pp`, canvas.width / 1000 * 330, canvas.height / 500 * 440);
 
 	//Second column
-	if (beatmap.mode === 'Mania') { 
+	if (beatmap.mode === 'Mania') {
 		ctx.font = 'bold 15px comfortaa, arial'; // Key Count
 		ctx.fillText('Key count', canvas.width / 1000 * 580, canvas.height / 500 * 170);
 		ctx.font = 'bold 30px comfortaa, arial';
@@ -621,7 +621,7 @@ async function drawStats(input, accuracy, client) {
 		ctx.font = 'bold 15px comfortaa, arial'; // Circle Size
 		ctx.fillText('Circle Size', canvas.width / 1000 * 580, canvas.height / 500 * 170);
 		ctx.font = 'bold 30px comfortaa, arial';
-		ctx.fillText(`CS ${beatmap.circleSize}`, canvas.width / 1000 * 580, canvas.height / 500 * 200); 
+		ctx.fillText(`CS ${beatmap.circleSize}`, canvas.width / 1000 * 580, canvas.height / 500 * 200);
 		ctx.font = 'bold 15px comfortaa, arial'; // Approach Rate
 		ctx.fillText('Approach Rate', canvas.width / 1000 * 580, canvas.height / 500 * 230);
 		ctx.font = 'bold 30px comfortaa, arial';

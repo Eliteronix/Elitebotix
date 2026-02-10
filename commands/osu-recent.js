@@ -1,8 +1,8 @@
 ﻿const { DBDiscordUsers } = require('../dbObjects');
 const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls, getMods } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -351,13 +351,18 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 					messageContent += `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
 				}
 
-				let sentMessage = await interaction.followUp({ content: messageContent, files: [scoreCard] });
+				const row = new ActionRowBuilder();
 
 				if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
-					await sentMessage.react('<:COMPARE:827974793365159997>');
+					const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${dbBeatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+					row.addComponents(osuCompare);
 				}
-				await sentMessage.react('🗺️');
-				await sentMessage.react('👤');
+
+				const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+				const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+				row.addComponents(osuBeatmap, osuProfile);
+
+				await interaction.followUp({ content: messageContent, files: [scoreCard], components: [row] });
 			})
 			.catch(err => {
 				if (err.message === 'Not found') {
@@ -418,15 +423,19 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 
 						const scoreCard = await scoreCardAttachment(input);
 
-						//Send attachment
-						const sentMessage = await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`, files: [scoreCard] });
+						const row = new ActionRowBuilder();
 
 						if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
-							await sentMessage.react('<:COMPARE:827974793365159997>');
+							const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${dbBeatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+							row.addComponents(osuCompare);
 						}
-						await sentMessage.react('🗺️');
-						await sentMessage.react('👤');
 
+						const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+						const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+						row.addComponents(osuBeatmap, osuProfile);
+
+						//Send attachment
+						await interaction.followUp({ content: `${user.name}: <https://ripple.moe/u/${user.id}?mode=${mode}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`, files: [scoreCard], components: [row] });
 					})
 					.catch(async (err) => {
 						if (err.message === 'Not found') {
@@ -564,13 +573,18 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 
 		const scoreCard = await scoreCardAttachment(input);
 
-		//Send attachment
-		let sentMessage = await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`, files: [scoreCard] });
+		const row = new ActionRowBuilder();
 
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-			await sentMessage.react('<:COMPARE:827974793365159997>');
+			const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+			row.addComponents(osuCompare);
 		}
-		await sentMessage.react('🗺️');
-		await sentMessage.react('👤');
+
+		const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+		const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+		row.addComponents(osuBeatmap, osuProfile);
+
+		//Send attachment
+		await interaction.followUp({ content: `${user.name}: <https://osu.gatari.pw/u/${user.id}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`, files: [scoreCard], components: [row] });
 	}
 }
