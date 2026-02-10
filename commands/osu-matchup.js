@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, fitTextOnMiddleCanvas, getScoreModpool, humanReadable, getOsuBeatmap, getAvatar, logOsuAPICalls } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const ChartJsImage = require('chartjs-to-image');
 const { Op } = require('sequelize');
@@ -1801,13 +1801,30 @@ module.exports = {
 			files.push(matchesPlayed);
 		}
 
-		try {
-			let sentMessage = await interaction.editReply({ content: content, files: files });
+		const row = new ActionRowBuilder();
 
-			if (team1.length === 1 && team2.length === 1 && (interaction.context === 1 || interaction.guild)) {
-				await sentMessage.react('🔵');
-				await sentMessage.react('🔴');
+		if (team1.length === 1 && team2.length === 1) {
+			let possessive = 's';
+			if (team1Names[0].endsWith('s') || team1Names[0].endsWith('x')) {
+				possessive = '';
 			}
+
+			const osuProfile1 = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${team1[0]}"}`).setLabel(`${team1Names[0]}'${possessive} profile`).setStyle(ButtonStyle.Primary);
+			row.addComponents(osuProfile1);
+
+			if (team1[0] !== team2[0]) {
+				let possessive2 = 's';
+				if (team2Names[0].endsWith('s') || team2Names[0].endsWith('x')) {
+					possessive2 = '';
+				}
+
+				const osuProfile2 = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${team2[0]}"}`).setLabel(`${team2Names[0]}'${possessive2} profile`).setStyle(ButtonStyle.Primary);
+				row.addComponents(osuProfile2);
+			}
+		}
+
+		try {
+			await interaction.editReply({ content: content, files: files, components: [row] });
 		} catch (error) {
 			if (error.message !== 'Unknown Message') {
 				console.error(error);

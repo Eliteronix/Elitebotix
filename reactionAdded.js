@@ -675,52 +675,6 @@ module.exports = async function (reaction, user) {
 			}
 		}
 
-		if (reaction._emoji.name === '🔵' || reaction._emoji.name === '🔴') {
-			//Check if it is a matchup
-			if (firstAttachment.name.startsWith('osu-matchup')) {
-				//get the osuUserId used
-				let osuUserId;
-				if (reaction._emoji.name === '🔴') {
-					osuUserId = firstAttachment.name.replace(/.+-/gm, '').replace('.png', '');
-				} else {
-					osuUserId = firstAttachment.name.replace('osu-matchup-', '').replace(/-.+/, '');
-				}
-				//Setup artificial arguments
-				let args = [osuUserId];
-
-				const command = require('./commands/osu-profile.js');
-
-				if (await checkCooldown(reaction, command, user, args) !== undefined) {
-					return;
-				}
-
-				//Setup artificial interaction
-				let interaction = {
-					id: null,
-					client: reaction.message.client,
-					channel: reaction.message.channel,
-					user: user,
-					options: {
-						getString: (string) => {
-							if (string === 'username') {
-								return osuUserId.toString();
-							}
-						},
-						getNumber: () => { },
-						getBoolean: () => { },
-					},
-					deferReply: () => { },
-					followUp: async (input) => {
-						return await reaction.message.channel.send(input);
-					},
-				};
-
-				process.send(`command ${command.name}`);
-
-				command.execute(interaction);
-			}
-		}
-
 		//For the compare emoji | EZ | HT | HD | DT | HR | FL | FI
 		if (reaction._emoji.id === '918920760586805259'
 			|| reaction._emoji.id === '918921193426411544'
