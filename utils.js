@@ -3278,6 +3278,7 @@ module.exports = {
 					'id',
 					'beatmapId',
 					'mods',
+					'mode',
 					'starRating',
 					'approvalStatus',
 					'popular',
@@ -5826,6 +5827,7 @@ module.exports = {
 			'drainLength',
 			'totalLength',
 			'bpm',
+			'mode'
 		];
 
 		const where = {

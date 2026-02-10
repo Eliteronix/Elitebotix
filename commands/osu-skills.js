@@ -317,6 +317,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 					'aimRating',
 					'speedRating',
 					'bpm',
+					'mode'
 				],
 				where: {
 					beatmapId: topScores.map(score => score.beatmapId)
