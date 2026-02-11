@@ -461,7 +461,7 @@ module.exports = {
 
 											const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${json.events[i].game.beatmap.id}", "server":"tournaments"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
 											const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${json.events[i].game.beatmap.id}","mods":"${combinedMods}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
-											const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+											const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
 											const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
 
 											if (lastMessageType === 'playing') {
@@ -526,7 +526,7 @@ module.exports = {
 
 												const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${json.events[i].game.beatmap.id}", "server":"tournaments"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
 												const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${json.events[i].game.beatmap.id}","mods":"${combinedMods}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
-												const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+												const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
 												const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
 
 												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment], components: [row] });
