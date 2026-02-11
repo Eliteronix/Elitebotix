@@ -1,6 +1,6 @@
 const osu = require('node-osu');
 const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, logOsuAPICalls, getNewOsuAPIv2TokenIfNecessary } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
@@ -427,6 +427,23 @@ module.exports = {
 												}
 											}
 										} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
+											let mods = json.events[i].game.mods;
+											for (let i = 0; i < mods.length; i++) {
+												if (mods[i].includes('no-fail')) {
+													mods[i] = 'NF';
+												} else if (mods[i].includes('hidden')) {
+													mods[i] = 'HD';
+												} else if (mods[i].includes('hard-rock')) {
+													mods[i] = 'HR';
+												} else if (mods[i].includes('double-time')) {
+													mods[i] = 'DT';
+												} else if (mods[i].includes('half-time')) {
+													mods[i] = 'HT';
+												}
+											}
+
+											let combinedMods = mods.join('');
+
 											let attachment = await getResultImage(json.events[i], json.users, client);
 											let currentScore = '';
 											if (redScore + blueScore > 0) {
@@ -442,9 +459,14 @@ module.exports = {
 												sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
 											}
 
+											const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${json.events[i].game.beatmap.id}", "server":"tournaments"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+											const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${json.events[i].game.beatmap.id}","mods":"${combinedMods}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+											const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+											const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
+
 											if (lastMessageType === 'playing') {
 												try {
-													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
+													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment], components: [row] });
 												} catch (e) {
 													if (e.message !== 'Unknown Message') {
 														console.error(e);
@@ -452,17 +474,7 @@ module.exports = {
 													}
 												}
 											} else {
-												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment] });
-											}
-
-											try {
-												await lastMessage.react('<:COMPARE:827974793365159997>');
-												await lastMessage.react('🗺️');
-												await lastMessage.react('🥇');
-											} catch (e) {
-												if (e.message !== 'Unknown Message') {
-													console.error(e);
-												}
+												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment], components: [row] });
 											}
 
 											await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
@@ -480,6 +492,23 @@ module.exports = {
 											}
 
 											if (lastMessageType !== 'playing') {
+												let mods = json.events[i].game.mods;
+												for (let i = 0; i < mods.length; i++) {
+													if (mods[i].includes('no-fail')) {
+														mods[i] = 'NF';
+													} else if (mods[i].includes('hidden')) {
+														mods[i] = 'HD';
+													} else if (mods[i].includes('hard-rock')) {
+														mods[i] = 'HR';
+													} else if (mods[i].includes('double-time')) {
+														mods[i] = 'DT';
+													} else if (mods[i].includes('half-time')) {
+														mods[i] = 'HT';
+													}
+												}
+
+												let combinedMods = mods.join('');
+
 												let attachment = await getPlayingImage(json.events[i], client);
 												let currentScore = '';
 												if (redScore + blueScore > 0) {
@@ -495,11 +524,12 @@ module.exports = {
 													sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
 												}
 
-												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment] });
+												const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${json.events[i].game.beatmap.id}", "server":"tournaments"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+												const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${json.events[i].game.beatmap.id}","mods":"${combinedMods}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+												const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+												const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
 
-												await lastMessage.react('<:COMPARE:827974793365159997>');
-												await lastMessage.react('🗺️');
-												await lastMessage.react('🥇');
+												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment], components: [row] });
 
 												await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
 											}
