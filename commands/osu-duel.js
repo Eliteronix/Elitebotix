@@ -1,7 +1,7 @@
 const { DBDiscordUsers, DBProcessQueue, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const osu = require('node-osu');
 const { getOsuUserServerMode, populateMsgFromInteraction, pause, getMessageUserDisplayname, getIDFromPotentialOsuLink, getUserDuelStarRating, createLeaderboard, getOsuDuelLeague, updateQueueChannels, getDerankStats, humanReadable, getOsuPlayerName, getAdditionalOsuInfo, getBadgeImage, getAvatar, logOsuAPICalls } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
 const { leaderboardEntriesPerPage } = require('../config.json');
 const Canvas = require('@napi-rs/canvas');
@@ -1368,11 +1368,25 @@ module.exports = {
 				//Create as an attachment
 				const leagueRatings = new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-league-ratings-${osuUser.id}.png` });
 
-				let sentMessage = null;
-
 				try {
 					let now = new Date();
 					now.setUTCMinutes(now.getUTCMinutes() - 15);
+
+					const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${osuUser.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+					const osuTop = new ButtonBuilder().setCustomId(`osu-top||{"username": "${osuUser.id}"}`).setLabel('/osu-top').setStyle(ButtonStyle.Primary);
+					const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${osuUser.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+
+					const row = new ActionRowBuilder().addComponents(osuProfile, osuTop, osuSkills);
+
+					if (userDuelStarRating.noMod !== null
+						|| userDuelStarRating.hidden !== null
+						|| userDuelStarRating.hardRock !== null
+						|| userDuelStarRating.doubleTime !== null
+						|| userDuelStarRating.freeMod !== null) {
+						const osuMatchup = new ButtonBuilder().setCustomId(`osu-matchup||{"username": "${osuUser.id}"}`).setLabel('/osu-matchup').setStyle(ButtonStyle.Primary);
+						const osuSchedule = new ButtonBuilder().setCustomId(`osu-schedule||{"team1player1": "${osuUser.id}"}`).setLabel('/osu-schedule').setStyle(ButtonStyle.Primary);
+						row.addComponents(osuMatchup, osuSchedule);
+					}
 
 					if (interaction.id && interaction.createdAt > now) {
 
@@ -1380,28 +1394,14 @@ module.exports = {
 							await pause(1000);
 						}
 
-						sentMessage = await interaction.editReply({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings] });
+						await interaction.editReply({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings], components: [row] });
 					} else {
 						if (processingMessage) {
 							await processingMessage.delete();
 						}
 
 						if (interaction.context === 1 || interaction.guild) {
-							sentMessage = await interaction.channel.send({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings] });
-						}
-					}
-
-					if (interaction.context === 1 || interaction.guild) {
-						await sentMessage.react('👤');
-						await sentMessage.react('🥇');
-						await sentMessage.react('📈');
-						if (userDuelStarRating.noMod !== null
-							|| userDuelStarRating.hidden !== null
-							|| userDuelStarRating.hardRock !== null
-							|| userDuelStarRating.doubleTime !== null
-							|| userDuelStarRating.freeMod !== null) {
-							await sentMessage.react('🆚');
-							await sentMessage.react('📊');
+							await interaction.channel.send({ content: `The data is based on matches played using </osu-duel queue1v1:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> and any other tournament matches.\nThe values are supposed to show a star rating where a player will get around 350k average score with Score v2.`, files: [leagueRatings], components: [row] });
 						}
 					}
 				} catch (error) {
