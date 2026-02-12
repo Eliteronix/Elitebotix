@@ -455,7 +455,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 			}
 
 			const selectMenu = new StringSelectMenuBuilder()
-				.setCustomId('multi_select_example')
+				.setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}"}`)
 				.setPlaceholder('Select one or more options')
 				.addOptions([
 					{
