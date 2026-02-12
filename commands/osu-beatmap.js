@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
@@ -426,30 +426,127 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		return interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, flags: MessageFlags.Ephemeral });
 	} else {
 		try {
-			const sentMessage = await interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files });
 
-			if (interaction.context !== 1 && !interaction.guild) {
-				return;
+			let mods = getMods(beatmap.mods);
+
+			// if (!mods.includes('HD') && !mods.includes('HR')) {
+			// 	mods.push('HD');
+			// 	mods.push('HR');
+			// } else if (mods.includes('HD') && !mods.includes('HR')) {
+			// 	mods.push('HR');
+			// } else if (!mods.includes('HD') && mods.includes('HR')) {
+			// 	mods.push('HD');
+			// } else {
+			// 	mods.splice(mods.indexOf('HD'), 1);
+			// 	mods.splice(mods.indexOf('HR'), 1);
+			// }
+
+			if (!mods[0]) {
+				mods = ['NM'];
 			}
+
+			const components = [];
 
 			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-				await sentMessage.react('<:COMPARE:827974793365159997>');
-			}
-			await sentMessage.react('<:HD:918922015182827531>');
-			await await sentMessage.react('<:HR:918938816377671740>');
-			await sentMessage.react('<:DT:918920670023397396>');
-			if (beatmap.mode === 'Standard') {
-				await sentMessage.react('<:HDHR:918935327215861760>');
-				await sentMessage.react('<:HDDT:918935350125142036>');
-			}
-			if (beatmap.mode === 'Mania') {
-				await sentMessage.react('<:FI:918922047994880010>');
-			}
-			await sentMessage.react('<:EZ:918920760586805259>');
-			await sentMessage.react('<:HT:918921193426411544>');
-			await sentMessage.react('<:FL:918920836755382343>');
 
-			return;
+				const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "mods":"${mods.join('')}"}`).setLabel('Check own score').setStyle(ButtonStyle.Primary);
+				const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${beatmap.beatmapId}", "mods":"${mods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
+				components.push(new ActionRowBuilder().addComponents(osuCompare, osuMapleaderboard));
+			}
+
+			const selectMenu = new StringSelectMenuBuilder()
+				.setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}"}`)
+				.setPlaceholder('Select one or more options')
+				.addOptions([
+					{
+						label: 'NoFail',
+						value: 'NF',
+						emoji: {
+							name: 'NF',
+							id: '1471321785743048978',
+						},
+						default: mods.includes('NF'),
+					},
+					{
+						label: 'Easy',
+						value: 'EZ',
+						emoji: {
+							name: 'EZ',
+							id: '918920760586805259',
+						},
+						default: mods.includes('EZ'),
+					},
+					{
+						label: 'HalfTime',
+						value: 'HT',
+						emoji: {
+							name: 'HT',
+							id: '918921193426411544',
+						},
+						default: mods.includes('HT'),
+					},
+					{
+						label: 'Hidden',
+						value: 'HD',
+						emoji: {
+							name: 'HD',
+							id: '918922015182827531',
+						},
+						default: mods.includes('HD'),
+					},
+				]);
+
+			if (beatmap.mode === 'Mania') {
+				selectMenu.addOptions([
+					{
+						label: 'FadeIn',
+						value: 'FI',
+						emoji: {
+							name: 'FI',
+							id: '918922047994880010',
+						},
+						default: mods.includes('FI'),
+					}
+				]);
+			}
+
+			selectMenu.addOptions([
+				{
+					label: 'HardRock',
+					value: 'HR',
+					emoji: {
+						name: 'HR',
+						id: '918938816377671740',
+					},
+					default: mods.includes('HR'),
+				},
+				{
+					label: 'DoubleTime',
+					value: 'DT',
+					emoji: {
+						name: 'DT',
+						id: '918920670023397396',
+					},
+					default: mods.includes('DT'),
+				},
+				{
+					label: 'Flashlight',
+					value: 'FL',
+					emoji: {
+						name: 'FL',
+						id: '918920836755382343',
+					},
+					default: mods.includes('FL'),
+				}
+			]);
+
+			selectMenu.setMaxValues(selectMenu.options.length);
+
+			const modSelection = new ActionRowBuilder().addComponents(selectMenu);
+
+			components.push(modSelection);
+
+			await interaction.followUp({ content: `Website: <https://osu.ppy.sh/b/${beatmap.beatmapId}>\n${tournamentOccurences}`, files: files, components: components });
 		} catch (error) {
 			if (error.message !== 'Unknown Message') {
 				console.error(error, interaction, beatmap, tournament, accuracy);
