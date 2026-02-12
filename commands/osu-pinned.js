@@ -1,12 +1,12 @@
 const Discord = require('discord.js');
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle  } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
-const { DBDiscordUsers } = require('../dbObjects');
+const { DBDiscordUsers } = require('../dbObjects.js');
 const { getIDFromPotentialOsuLink, logOsuAPICalls, fitTextOnMiddleCanvas, roundedRect, humanReadable, getRankImage, getModImage} = require('../utils.js');
 const osu = require('node-osu');
 
 module.exports = {
-    name: 'osu-pinned-scores',
+    name: 'osu-pinned',
     description: 'Sends list of pinned scores for the specified player',
     integration_types: [0, 1], // 0 for guild, 1 for user
     contexts: [0, 1, 2], // 0 for guilds, 1 for bot DMs, 2 for user DMs
@@ -15,11 +15,11 @@ module.exports = {
     cooldown: 5,
     tags: 'osu',
     data: new SlashCommandBuilder()
-        .setName('osu-pinned-scores')
+        .setName('osu-pinned')
         .setNameLocalizations({
-            'de': 'osu-pinned-scores',
-            'en-GB': 'osu-pinned-scores',
-            'en-US': 'osu-pinned-scores',
+            'de': 'osu-pinned',
+            'en-GB': 'osu-pinned',
+            'en-US': 'osu-pinned',
         })
         .setDescription('Sends list of pinned scores for the specified player')
         .setDescriptionLocalizations({
@@ -149,7 +149,7 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
         parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
     });
 
-    logOsuAPICalls('commands/osu-pinned-scores.js getUser Bancho');
+    logOsuAPICalls('commands/osu-pinned.js getUser Bancho');
     osuApi.getUser({ u: username })
         .then(async (user) => {
 
@@ -195,7 +195,7 @@ async function getPinnedScoresUser(interaction, username, limit, noLinkedAccount
 
             const row = new ActionRowBuilder().addComponents(osuProfile);
 
-            const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-pinned-scores-${user.id}.png` })];
+            const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-pinned-${user.id}.png` })];
 
             const linkedUser = await DBDiscordUsers.findOne({
 					attributes: ['userId'],
