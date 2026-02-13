@@ -450,7 +450,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
 
 				const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "mods":"${mods.join('')}"}`).setLabel('Check own score').setStyle(ButtonStyle.Primary);
-				const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${beatmap.beatmapId}", "mods":"${mods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
+				const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${beatmap.beatmapId}", "mods":"${mods.join('')}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
 				components.push(new ActionRowBuilder().addComponents(osuCompare, osuMapleaderboard));
 			}
 
