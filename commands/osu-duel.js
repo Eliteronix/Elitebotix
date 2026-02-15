@@ -1681,18 +1681,40 @@ module.exports = {
 					await pause(1000);
 				}
 
-				//Send attachment
-				let leaderboardMessage = await interaction.channel.send({ content: `The leaderboard consists of all players${serverHint} that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> is being used.`, files: files });
+				const components = [];
 
-				if (page) {
-					if (page > 1) {
-						await leaderboardMessage.react('◀️');
+				if (totalPages > 1) {
+					const row = new ActionRowBuilder();
+
+					if (page && page > 1) {
+						const firstPage = new ButtonBuilder().setCustomId('osu-duel|rating-leaderboard|{"page": 1}').setLabel('First page').setStyle(ButtonStyle.Primary);
+						row.addComponents(firstPage);
 					}
 
-					if (page < totalPages) {
-						await leaderboardMessage.react('▶️');
+					//Show previous page button if page is higher than 2, because if page is 2, there is only one previous page which is the first page and there is already a button for it
+					if (page && page > 2) {
+						const previousPage = new ButtonBuilder().setCustomId(`osu-duel|rating-leaderboard|{"page": ${page - 1}}`).setLabel('Previous page').setStyle(ButtonStyle.Primary);
+						row.addComponents(previousPage);
+					}
+
+					//Show next page button if page is lower than totalPages - 1, because if page is totalPages - 1, there is only one next page which is the last page and there is already a button for it
+					if (page && page < totalPages - 1) {
+						const nextPage = new ButtonBuilder().setCustomId(`osu-duel|rating-leaderboard|{"page": ${page + 1}}`).setLabel('Next page').setStyle(ButtonStyle.Primary);
+						row.addComponents(nextPage);
+					}
+
+					if (page && page < totalPages) {
+						const lastPage = new ButtonBuilder().setCustomId(`osu-duel|rating-leaderboard|{"page": ${totalPages}}`).setLabel('Last page').setStyle(ButtonStyle.Primary);
+						row.addComponents(lastPage);
+					}
+
+					if (row.components.length > 0) {
+						components.push(row);
 					}
 				}
+
+				//Send attachment
+				await interaction.channel.send({ content: `The leaderboard consists of all players${serverHint} that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-duel rating:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}> is being used.`, files: files, components: components });
 			} else if (interaction.options._subcommand === 'data') {
 				try {
 					await interaction.deferReply({ flags: MessageFlags.Ephemeral });

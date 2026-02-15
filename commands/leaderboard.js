@@ -1,4 +1,3 @@
-const { populateMsgFromInteraction } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
@@ -78,48 +77,18 @@ module.exports = {
 					{ name: 'mania', value: '--m' },
 				)
 		),
-	async execute(interaction, msg, args) {
-		//TODO: Remove message code and replace with interaction code
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
-			args = [];
-
-			let type = null;
-			let page = null;
-			let mode = null;
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				if (interaction.options._hoistedOptions[i].name === 'type') {
-					type = interaction.options._hoistedOptions[i].value;
-				} else if (interaction.options._hoistedOptions[i].name === 'page') {
-					page = interaction.options._hoistedOptions[i].value;
-				} else {
-					mode = interaction.options._hoistedOptions[i].value;
-				}
-			}
-
-			args.push(type);
-			if (page) {
-				args.push(page);
-			}
-			if (type === 'osu' && mode !== null) {
-				args.push(mode);
-			}
-		}
+	async execute(interaction) {
+		let type = interaction.options.getString('type');
 
 		let command;
-		if (args[0] === 'osu') {
+		if (type === 'osu') {
 			command = require('./osu-leaderboard.js');
-		} else if (args[0] === 'guild' || args[0] === 'server' || args[0] === 'chat') {
+		} else if (type === 'guild' || type === 'server') {
 			command = require('./guild-leaderboard.js');
-		} else {
-			return;
 		}
-
-		args.shift();
 
 		process.send(`command ${command.name}`);
 
-		command.execute(interaction, msg, args);
+		command.execute(interaction);
 	},
 };

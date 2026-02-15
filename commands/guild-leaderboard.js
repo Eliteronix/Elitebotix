@@ -1,7 +1,7 @@
 const { DBServerUserActivity } = require('../dbObjects');
-const { createLeaderboard, humanReadable, populateMsgFromInteraction } = require('../utils.js');
+const { createLeaderboard, humanReadable } = require('../utils.js');
 const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -40,14 +40,10 @@ module.exports = {
 				})
 				.setRequired(false)
 		),
-	async execute(interaction, msg, args) {
-		//TODO: Remove message code and replace with interaction code
+	async execute(interaction) {
 		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
-
 			try {
-				//TODO: deferReply
-				await interaction.reply('Processing guild leaderboard...');
+				await interaction.deferReply();
 			} catch (error) {
 				if (error.message === 'Unknown interaction' && showUnknownInteractionError || error.message !== 'Unknown interaction') {
 					console.error(error);
@@ -58,25 +54,12 @@ module.exports = {
 				}
 				return;
 			}
-
-			if (interaction.options._hoistedOptions[1]) {
-				args = [interaction.options._hoistedOptions[1].value];
-			} else if (interaction.options._hoistedOptions[0]) {
-				args = [interaction.options._hoistedOptions[0].value];
-			} else {
-				args = [];
-			}
-		}
-
-		let processingMessage;
-		if (msg.id) {
-			processingMessage = await msg.reply('Processing guild leaderboard...');
 		}
 
 		let discordUsers = [];
 
 		try {
-			let members = await msg.guild.members.fetch({ time: 300000 });
+			let members = await interaction.guild.members.fetch({ time: 300000 });
 
 			members = members.map(member => member);
 
@@ -86,7 +69,7 @@ module.exports = {
 					userId: {
 						[Op.in]: members.map(member => member.id),
 					},
-					guildId: msg.guildId,
+					guildId: interaction.guildId,
 				},
 			});
 
@@ -110,12 +93,12 @@ module.exports = {
 		let authorPlacement = 0;
 
 		for (let i = 0; i < discordUsers.length; i++) {
-			if (msg.author.id === discordUsers[i].userId) {
+			if (interaction.user.id === discordUsers[i].userId) {
 				messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
 				authorPlacement = i + 1;
 			}
 
-			let member = await msg.guild.members.cache.get(discordUsers[i].userId);
+			let member = await interaction.guild.members.cache.get(discordUsers[i].userId);
 
 			let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 
@@ -134,11 +117,7 @@ module.exports = {
 
 		let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
 
-		let page;
-
-		if (args[0] && !isNaN(args[0])) {
-			page = Math.abs(parseInt(args[0]));
-		}
+		let page = interaction.options.getInteger('page');
 
 		if (!page && leaderboardData.length > 150) {
 			page = 1;
@@ -151,42 +130,52 @@ module.exports = {
 			page = null;
 		}
 
-		let filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}.png`;
-
+		let filename = `guild-leaderboard-${interaction.user.id}-${interaction.guild.name}.png`;
 		if (page) {
-			filename = `guild-leaderboard-${msg.author.id}-${msg.guild.name}-page${page}.png`;
+			filename = `guild-leaderboard-${interaction.user.id}-${interaction.guild.name}-page${page}.png`;
 		}
 
 		//Remove trailing s if guild name stops with s or x
-		let title = `${msg.guild.name}'s activity leaderboard`;
-		if (msg.guild.name.endsWith('s') || msg.guild.name.endsWith('x')) {
-			title = `${msg.guild.name}' activity leaderboard`;
+		let title = `${interaction.guild.name}'s activity leaderboard`;
+		if (interaction.guild.name.endsWith('s') || interaction.guild.name.endsWith('x')) {
+			title = `${interaction.guild.name}' activity leaderboard`;
 		}
 
 		const attachment = await createLeaderboard(leaderboardData, 'discord-background.png', title, filename, page);
 
+		const components = [];
+
+		if (totalPages > 1) {
+			const row = new ActionRowBuilder();
+
+			if (page && page > 1) {
+				const firstPage = new ButtonBuilder().setCustomId('guild-leaderboard||{"page": 1}').setLabel('First page').setStyle(ButtonStyle.Primary);
+				row.addComponents(firstPage);
+			}
+
+			//Show previous page button if page is higher than 2, because if page is 2, there is only one previous page which is the first page and there is already a button for it
+			if (page && page > 2) {
+				const previousPage = new ButtonBuilder().setCustomId(`guild-leaderboard||{"page": ${page - 1}}`).setLabel('Previous page').setStyle(ButtonStyle.Primary);
+				row.addComponents(previousPage);
+			}
+
+			//Show next page button if page is lower than totalPages - 1, because if page is totalPages - 1, there is only one next page which is the last page and there is already a button for it
+			if (page && page < totalPages - 1) {
+				const nextPage = new ButtonBuilder().setCustomId(`guild-leaderboard||{"page": ${page + 1}}`).setLabel('Next page').setStyle(ButtonStyle.Primary);
+				row.addComponents(nextPage);
+			}
+
+			if (page && page < totalPages) {
+				const lastPage = new ButtonBuilder().setCustomId(`guild-leaderboard||{"page": ${totalPages}}`).setLabel('Last page').setStyle(ButtonStyle.Primary);
+				row.addComponents(lastPage);
+			}
+
+			if (row.components.length > 0) {
+				components.push(row);
+			}
+		}
+
 		//Send attachment
-		let leaderboardMessage;
-		if (msg.id) {
-			leaderboardMessage = await msg.reply({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
-		} else if (interaction) {
-			leaderboardMessage = await interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
-		} else {
-			leaderboardMessage = await msg.channel.send({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment] });
-		}
-
-		if (page) {
-			if (page > 1) {
-				await leaderboardMessage.react('◀️');
-			}
-
-			if (page < totalPages) {
-				await leaderboardMessage.react('▶️');
-			}
-		}
-
-		if (processingMessage) {
-			await processingMessage.delete();
-		}
+		await interaction.followUp({ content: `The leaderboard shows the most active users of the server.${messageToAuthor}`, files: [attachment], components: components });
 	},
 };
