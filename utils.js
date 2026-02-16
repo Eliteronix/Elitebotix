@@ -8191,6 +8191,65 @@ module.exports = {
 			}
 		});
 	},
+	async getUserData(interaction, username) {
+		const userData = {
+			username: username,
+			noLinkedAccount: true,
+		};
+
+		const commandUser = await DBDiscordUsers.findOne({
+			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
+			where: {
+				userId: interaction.user.id
+			},
+		});
+
+		if (commandUser && commandUser.osuUserId) {
+			userData.noLinkedAccount = false;
+		}
+
+		if (userData.username) {
+			userData.username = module.exports.getIDFromPotentialOsuLink(userData.username).replace(/`/g, '');
+
+			if (username.startsWith('<@') && username.endsWith('>')) {
+				const discordUser = await DBDiscordUsers.findOne({
+					attributes: ['osuUserId'],
+					where: {
+						userId: username.replace('<@', '').replace('>', '').replace('!', '')
+					},
+				});
+
+				if (discordUser && discordUser.osuUserId) {
+					userData.username = discordUser.osuUserId;
+					userData.noLinkedAccount = false;
+
+					return userData;
+				}
+
+				userData.response = `\`${userData.username}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`;
+
+				return userData;
+			}
+
+			return userData;
+		}
+
+		if (commandUser && commandUser.osuUserId) {
+			userData.username = commandUser.osuUserId;
+
+			return userData;
+		}
+
+		let userDisplayName = interaction.user.username;
+
+		if (interaction.member && interaction.member.displayName) {
+			userDisplayName = interaction.member.displayName;
+		}
+
+		userData.username = userDisplayName;
+
+		return userData;
+	}
 };
 
 function applyOsuDuelStarratingCorrection(rating, score, weight) {

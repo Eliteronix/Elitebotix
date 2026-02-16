@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { DBDiscordUsers } = require('../dbObjects.js');
-const { getIDFromPotentialOsuLink, logOsuAPICalls, fitTextOnMiddleCanvas, roundedRect, humanReadable, getRankImage, getModImage } = require('../utils.js');
+const { logOsuAPICalls, fitTextOnMiddleCanvas, roundedRect, humanReadable, getRankImage, getModImage, getUserData } = require('../utils.js');
 const osu = require('node-osu');
 const { showUnknownInteractionError } = require('../config.json');
 
@@ -82,57 +82,13 @@ module.exports = {
 
 		let username = interaction.options.getString('username');
 
-		const commandUser = await DBDiscordUsers.findOne({
-			attributes: ['osuUserId', 'osuMainMode', 'osuMainServer'],
-			where: {
-				userId: interaction.user.id
-			},
-		});
-		// CHECK THIS PART!!1
-		if (!username) {
-			//Get profile by author if no argument
-			if (commandUser && commandUser.osuUserId) {
-				try {
-					commandUser.osuUserId.replace(/`/g, '');
-				} catch (err) {
-					console.error('Error replacing backticks in osuUserId:', commandUser, commandUser.osuUserId, err);
-				}
-				await getPinnedScoresUser(interaction, commandUser.osuUserId, limit, false);
-			} else {
-				let userDisplayName = interaction.user.username;
+		let userData = await getUserData(interaction, username);
 
-				if (interaction.member) {
-					userDisplayName = interaction.member.displayName;
-				}
-				await getPinnedScoresUser(interaction, userDisplayName, limit, false);
-			}
-		} else {
-			if (username.startsWith('<@') && username.endsWith('>')) {
-				const discordUser = await DBDiscordUsers.findOne({
-					attributes: ['osuUserId'],
-					where: {
-						userId: username.replace('<@', '').replace('>', '').replace('!', '')
-					},
-				});
-
-				if (discordUser && discordUser.osuUserId) {
-					await getPinnedScoresUser(interaction, discordUser.osuUserId, limit, false);
-				} else {
-					await interaction.followUp(`\`${username.replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
-					await getPinnedScoresUser(interaction, username, limit, true);
-				}
-			} else {
-				if (username.length === 1 && !(username.startsWith('<@')) && !(username.endsWith('>'))) {
-					if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-						await getPinnedScoresUser(interaction, getIDFromPotentialOsuLink(username), limit, true);
-					} else {
-						await getPinnedScoresUser(interaction, getIDFromPotentialOsuLink(username), limit, false);
-					}
-				} else {
-					await getPinnedScoresUser(interaction, getIDFromPotentialOsuLink(username), limit, false);
-				}
-			}
+		if (userData.response) {
+			return await interaction.followUp(userData.response);
 		}
+
+		await getPinnedScoresUser(interaction, userData.username, limit, userData.noLinkedAccount);
 	},
 };
 
