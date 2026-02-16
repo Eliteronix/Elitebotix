@@ -638,7 +638,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			const row = new ActionRowBuilder();
 
 			if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-				const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+				const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "gamemode":${mode}, "server": "${server}"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
 				row.addComponents(osuCompare);
 			}
 
