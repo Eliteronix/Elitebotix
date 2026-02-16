@@ -1015,6 +1015,7 @@ module.exports = {
 					'title',
 					'artist',
 					'difficulty',
+					'mode'
 				],
 				where: {
 					beatmapId: {

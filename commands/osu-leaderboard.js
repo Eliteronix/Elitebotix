@@ -1,7 +1,7 @@
 const { DBDiscordUsers } = require('../dbObjects');
-const { humanReadable, createLeaderboard, populateMsgFromInteraction, getOsuUserServerMode, getGameModeName } = require('../utils');
+const { humanReadable, createLeaderboard, getGameModeName } = require('../utils');
 const { leaderboardEntriesPerPage } = require('../config.json');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -42,7 +42,7 @@ module.exports = {
 				})
 				.setRequired(false)
 		)
-		.addStringOption(option =>
+		.addIntegerOption(option =>
 			option.setName('mode')
 				.setNameLocalizations({
 					'de': 'modus',
@@ -57,39 +57,56 @@ module.exports = {
 				})
 				.setRequired(false)
 				.addChoices(
-					{ name: 'standard', value: '--s' },
-					{ name: 'taiko', value: '--t' },
-					{ name: 'catch', value: '--c' },
-					{ name: 'mania', value: '--m' },
+					{ name: 'standard', value: 0 },
+					{ name: 'taiko', value: 1 },
+					{ name: 'catch', value: 2 },
+					{ name: 'mania', value: 3 },
 				)
 		),
-	async execute(interaction, msg, args) {
-		//TODO: Remove message code and replace with interaction code
-		//TODO: deferReply
-		if (interaction) {
-			msg = await populateMsgFromInteraction(interaction);
+	async execute(interaction) {
+		await interaction.deferReply();
 
-			await interaction.reply('osu! leaderboard will be created');
+		let mode = interaction.options.getInteger('mode');
 
-			args = [];
+		if (mode === null) {
+			mode = 0;
 
-			for (let i = 0; i < interaction.options._hoistedOptions.length; i++) {
-				args.push(interaction.options._hoistedOptions[i].value);
+			const discordUser = await DBDiscordUsers.findOne({
+				attributes: [
+					'id',
+					'userId',
+					'osuName',
+					'osuUserId',
+					'osuRank',
+					'osuPP',
+					'osuVerified',
+					'osuMainServer',
+					'osuMainMode',
+					'tournamentPings',
+					'tournamentPingsMode',
+					'tournamentPingsBadged',
+					'tournamentPingsStartingFrom',
+					'osuDuelStarRating',
+					'osuNoModDuelStarRating',
+					'osuHiddenDuelStarRating',
+					'osuHardRockDuelStarRating',
+					'osuDoubleTimeDuelStarRating',
+					'osuFreeModDuelStarRating',
+				],
+				where: {
+					userId: interaction.user.id
+				},
+			});
+
+			if (discordUser && discordUser.osuMainMode) {
+				mode = discordUser.osuMainMode;
 			}
 		}
-
-		let processingMessage;
-		if (msg.id) {
-			processingMessage = await msg.reply('Processing osu! leaderboard...');
-		}
-
-		const commandConfig = await getOsuUserServerMode(msg, args);
-		const mode = commandConfig[2];
 
 		let discordUsers = [];
 
 		try {
-			let members = await msg.guild.members.fetch({ time: 300000 });
+			let members = await interaction.guild.members.fetch({ time: 300000 });
 
 			members = members.map(member => member.id);
 
@@ -174,12 +191,12 @@ module.exports = {
 		let authorPlacement = 0;
 
 		for (let i = 0; i < osuAccounts.length; i++) {
-			if (msg.author.id === osuAccounts[i].userId) {
+			if (interaction.user.id === osuAccounts[i].userId) {
 				messageToAuthor = `\nYou are currently rank \`#${i + 1}\` on the leaderboard.`;
 				authorPlacement = i + 1;
 			}
 
-			let member = await msg.guild.members.cache.get(osuAccounts[i].userId);
+			let member = await interaction.guild.members.cache.get(osuAccounts[i].userId);
 
 			let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
 
@@ -204,11 +221,7 @@ module.exports = {
 
 		let totalPages = Math.floor(leaderboardData.length / leaderboardEntriesPerPage) + 1;
 
-		let page;
-
-		if (args[0] && !isNaN(args[0])) {
-			page = Math.abs(parseInt(args[0]));
-		}
+		let page = interaction.options.getInteger('page');
 
 		if (!page && leaderboardData.length > 150) {
 			page = 1;
@@ -221,36 +234,47 @@ module.exports = {
 			page = null;
 		}
 
-		let filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}.png`;
+		let filename = `osu-leaderboard-${interaction.user.id}-mode-${getGameModeName(mode)}-${interaction.guild.name}.png`;
 
 		if (page) {
-			filename = `osu-leaderboard-${msg.author.id}-mode-${getGameModeName(mode)}-${msg.guild.name}-page${page}.png`;
+			filename = `osu-leaderboard-${interaction.user.id}-mode-${getGameModeName(mode)}-${interaction.guild.name}-page${page}.png`;
 		}
 
-		const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${msg.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
+		const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', `${interaction.guild.name}'s osu! ${getGameModeName(mode)} leaderboard`, filename, page);
+
+		const components = [];
+
+		if (totalPages > 1) {
+			const row = new ActionRowBuilder();
+
+			if (page && page > 1) {
+				const firstPage = new ButtonBuilder().setCustomId('osu-leaderboard||{"page": 1}').setLabel('First page').setStyle(ButtonStyle.Primary);
+				row.addComponents(firstPage);
+			}
+
+			//Show previous page button if page is higher than 2, because if page is 2, there is only one previous page which is the first page and there is already a button for it
+			if (page && page > 2) {
+				const previousPage = new ButtonBuilder().setCustomId(`osu-leaderboard||{"page": ${page - 1}}`).setLabel('Previous page').setStyle(ButtonStyle.Primary);
+				row.addComponents(previousPage);
+			}
+
+			//Show next page button if page is lower than totalPages - 1, because if page is totalPages - 1, there is only one next page which is the last page and there is already a button for it
+			if (page && page < totalPages - 1) {
+				const nextPage = new ButtonBuilder().setCustomId(`osu-leaderboard||{"page": ${page + 1}}`).setLabel('Next page').setStyle(ButtonStyle.Primary);
+				row.addComponents(nextPage);
+			}
+
+			if (page && page < totalPages) {
+				const lastPage = new ButtonBuilder().setCustomId(`osu-leaderboard||{"page": ${totalPages}}`).setLabel('Last page').setStyle(ButtonStyle.Primary);
+				row.addComponents(lastPage);
+			}
+
+			if (row.components.length > 0) {
+				components.push(row);
+			}
+		}
 
 		//Send attachment
-		let leaderboardMessage;
-		if (msg.id) {
-			leaderboardMessage = await msg.reply({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-profile:${msg.client.slashCommandData.find(command => command.name === 'osu-profile').id}> is being used.`, files: [attachment] });
-		} else if (interaction) {
-			leaderboardMessage = await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-profile:${interaction.client.slashCommandData.find(command => command.name === 'osu-profile').id}> is being used.`, files: [attachment] });
-		} else {
-			leaderboardMessage = await msg.channel.send({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${msg.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-profile:${msg.client.slashCommandData.find(command => command.name === 'osu-profile').id}> is being used.`, files: [attachment] });
-		}
-
-		if (page) {
-			if (page > 1) {
-				await leaderboardMessage.react('◀️');
-			}
-
-			if (page < totalPages) {
-				await leaderboardMessage.react('▶️');
-			}
-		}
-
-		if (processingMessage) {
-			await processingMessage.delete();
-		}
+		await interaction.followUp({ content: `The leaderboard consists of all players that have their osu! account connected to the bot.${messageToAuthor}\nUse </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> to connect your osu! account.\nData is being updated once a day or when </osu-profile:${interaction.client.slashCommandData.find(command => command.name === 'osu-profile').id}> is being used.`, files: [attachment], components: components });
 	},
 };

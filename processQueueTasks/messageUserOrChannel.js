@@ -18,7 +18,11 @@ module.exports = {
 				client.shard.broadcastEval(async (c, { channelId, message }) => {
 					let channel = await c.channels.cache.get(channelId);
 					if (channel) {
-						await channel.send(message);
+						try {
+							await channel.send(message);
+						} catch (err) {
+							console.error('Broadcasting processQueueTasks/messageUserOrChannel.js', err);
+						}
 					}
 				}, { context: { channelId: args[1], message: args[3] } });
 			} else {

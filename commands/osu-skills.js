@@ -3,7 +3,7 @@ const osu = require('node-osu');
 const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
 const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -317,6 +317,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 					'aimRating',
 					'speedRating',
 					'bpm',
+					'mode'
 				],
 				where: {
 					beatmapId: topScores.map(score => score.beatmapId)
@@ -1027,17 +1028,26 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 					content = `${content} and Modpool evaluation development for ${user.name} (Score ${scoringType}; ${tourneyMatchText})${scaledText}${runningAverageText}\n${user.name}: <https://osu.ppy.sh/users/${user.id}>`;
 				}
 
-				let sentMessage = await interaction.followUp({ content: content, files: files });
+				const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+				const osuTop = new ButtonBuilder().setCustomId(`osu-top||{"username": "${user.id}"}`).setLabel('/osu-top').setStyle(ButtonStyle.Primary);
 
-				if (interaction.context === 1 || interaction.guild) {
-					await sentMessage.react('👤');
-					await sentMessage.react('🥇');
-					if (userScores.length) {
-						await sentMessage.react('<:master:951396806653255700>');
-						await sentMessage.react('🆚');
-						await sentMessage.react('📊');
+				const row = new ActionRowBuilder().addComponents(osuProfile, osuTop);
+
+				if (userScores.length) {
+					try {
+						const osuDuel = new ButtonBuilder().setCustomId(`osu-duel|rating|{"username": "${user.id}"}`).setLabel('/osu-duel rating').setStyle(ButtonStyle.Primary);
+						const osuMatchup = new ButtonBuilder().setCustomId(`osu-matchup||{"username": "${user.id}"}`).setLabel('/osu-matchup').setStyle(ButtonStyle.Primary);
+						const osuSchedule = new ButtonBuilder().setCustomId(`osu-schedule||{"team1player1": "${user.id}"}`).setLabel('/osu-schedule').setStyle(ButtonStyle.Primary);
+
+						row.addComponents(osuDuel, osuMatchup, osuSchedule);
+					} catch (e) {
+						if (e.message !== 'Unknown Message') {
+							console.error(e);
+						}
 					}
 				}
+
+				await interaction.followUp({ content: content, files: files, components: [row] });
 			})();
 		})
 		.catch(async (err) => {

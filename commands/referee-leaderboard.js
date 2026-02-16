@@ -2,7 +2,7 @@ const { DBOsuMultiMatches, DBDiscordUsers } = require('../dbObjects');
 const { humanReadable, createLeaderboard, getOsuPlayerName } = require('../utils');
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
-const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
+const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { leaderboardEntriesPerPage, showUnknownInteractionError } = require('../config.json');
 
 module.exports = {
@@ -176,20 +176,42 @@ module.exports = {
 
 		const attachment = await createLeaderboard(leaderboardData, 'osu-background.png', 'Referee leaderboard', filename, page);
 
+		const components = [];
+
+		if (totalPages > 1) {
+			const row = new ActionRowBuilder();
+
+			if (page && page > 1) {
+				const firstPage = new ButtonBuilder().setCustomId('referee-leaderboard||{"page": 1}').setLabel('First page').setStyle(ButtonStyle.Primary);
+				row.addComponents(firstPage);
+			}
+
+			//Show previous page button if page is higher than 2, because if page is 2, there is only one previous page which is the first page and there is already a button for it
+			if (page && page > 2) {
+				const previousPage = new ButtonBuilder().setCustomId(`referee-leaderboard||{"page": ${page - 1}}`).setLabel('Previous page').setStyle(ButtonStyle.Primary);
+				row.addComponents(previousPage);
+			}
+
+			//Show next page button if page is lower than totalPages - 1, because if page is totalPages - 1, there is only one next page which is the last page and there is already a button for it
+			if (page && page < totalPages - 1) {
+				const nextPage = new ButtonBuilder().setCustomId(`referee-leaderboard||{"page": ${page + 1}}`).setLabel('Next page').setStyle(ButtonStyle.Primary);
+				row.addComponents(nextPage);
+			}
+
+			if (page && page < totalPages) {
+				const lastPage = new ButtonBuilder().setCustomId(`referee-leaderboard||{"page": ${totalPages}}`).setLabel('Last page').setStyle(ButtonStyle.Primary);
+				row.addComponents(lastPage);
+			}
+
+			if (row.components.length > 0) {
+				components.push(row);
+			}
+		}
+
 		await interaction.editReply({
 			content: `${additionalInfo}`,
 			files: [attachment],
+			components: components,
 		});
-
-		// TODO: This but interaction based
-		// if (page) {
-		// 	if (page > 1) {
-		// 		await leaderboardMessage.react('◀️');
-		// 	}
-
-		// 	if (page < totalPages) {
-		// 		await leaderboardMessage.react('▶️');
-		// 	}
-		// }
 	},
 };
