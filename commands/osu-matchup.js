@@ -1801,13 +1801,15 @@ module.exports = {
 			files.push(matchesPlayed);
 		}
 
-		const row = new ActionRowBuilder();
+		const components = [];
 
 		if (team1.length === 1 && team2.length === 1) {
 			let possessive = 's';
 			if (team1Names[0].endsWith('s') || team1Names[0].endsWith('x')) {
 				possessive = '';
 			}
+
+			const row = new ActionRowBuilder();
 
 			const osuProfile1 = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${team1[0]}"}`).setLabel(`${team1Names[0]}'${possessive} profile`).setStyle(ButtonStyle.Primary);
 			row.addComponents(osuProfile1);
@@ -1821,10 +1823,12 @@ module.exports = {
 				const osuProfile2 = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${team2[0]}"}`).setLabel(`${team2Names[0]}'${possessive2} profile`).setStyle(ButtonStyle.Primary);
 				row.addComponents(osuProfile2);
 			}
+
+			components.push(row);
 		}
 
 		try {
-			await interaction.editReply({ content: content, files: files, components: [row] });
+			await interaction.editReply({ content: content, files: files, components: components });
 		} catch (error) {
 			if (error.message !== 'Unknown Message') {
 				console.error(error);
