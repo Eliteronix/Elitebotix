@@ -289,7 +289,13 @@ async function rollRound(msg, sentMessage, players, rounds) {
 
 	mCollector.on('end', async () => {
 		rCollector.stop();
-		await sentMessage.reactions.removeAll();
+		try {
+			await sentMessage.reactions.removeAll();
+		} catch (e) {
+			if (e.message !== 'Unknown Message' && e.message !== 'Missing Permissions') {
+				console.error(e);
+			}
+		}
 
 		if (currentRound === rounds.length) {
 			const roll = rollMax(toRoll);
