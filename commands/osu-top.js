@@ -672,7 +672,13 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 						await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 					} catch (err) {
 						if (err.message === 'Invalid Webhook Token') {
-							await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
+							try {
+								await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
+							} catch (e) {
+								if (e.message !== 'Missing Access') {
+									console.error(interaction, e);
+								}
+							}
 						} else if (err.message !== 'Unknown Message') {
 							console.error(err);
 						}
