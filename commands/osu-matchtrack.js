@@ -260,9 +260,11 @@ module.exports = {
 								let firstIdNewJson = json.events[0].id;
 
 								// Add all old events that are not in the new array to the new array
-								for (let i = 0; i < oldJson.events.length; i++) {
-									if (oldJson.events[i].id < firstIdNewJson) {
-										json.events.push(oldJson.events[i]);
+								if (oldJson.events) {
+									for (let i = 0; i < oldJson.events.length; i++) {
+										if (oldJson.events[i].id < firstIdNewJson) {
+											json.events.push(oldJson.events[i]);
+										}
 									}
 								}
 
