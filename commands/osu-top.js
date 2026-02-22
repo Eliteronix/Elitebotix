@@ -317,7 +317,7 @@ module.exports = {
 			} else {
 				let userDisplayName = interaction.user.username;
 
-				if (interaction.member) {
+				if (interaction.member && interaction.member.displayName) {
 					userDisplayName = interaction.member.displayName;
 				}
 
@@ -454,13 +454,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					try {
-						await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
-					} catch (e) {
-						if (e.message === 'Cannot read properties of undefined (reading \'replace\')') {
-							console.log(interaction, e);
-						}
-					}
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else if (err.message === 'Missing Permissions') {
 					DBOsuGuildTrackers.destroy({
 						where: {
@@ -687,13 +681,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			})
 			.catch(async (err) => {
 				if (err.message === 'Not found') {
-					try {
-						await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
-					} catch (e) {
-						if (e.message === 'Cannot read properties of undefined (reading \'replace\')') {
-							console.log(interaction, e);
-						}
-					}
+					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 				} else {
 					console.error(err);
 				}
