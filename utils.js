@@ -3790,6 +3790,22 @@ module.exports = {
 											try {
 												await channel.send(message);
 											} catch (err) {
+												if (err.message === 'Missing Access') {
+													try {
+														const { DBOsuGuildTrackers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
+
+														return await DBOsuGuildTrackers.destroy({
+															where: {
+																guildId: guildId,
+																channelId: channelId,
+															},
+														});
+													} catch (e) {
+														console.error('Error deleting duel rating tracker for guild ' + guildId + ' and channel ' + channelId + ' during broadcastEval', e);
+														return;
+													}
+												}
+
 												console.error('Broadcasting utils.js duel Rating change for guilds to shards', err);
 											}
 										}
