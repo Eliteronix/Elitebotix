@@ -669,7 +669,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 							try {
 								await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 							} catch (e) {
-								if (e.message !== 'Missing Access') {
+								if (e.message !== 'Missing Access' && e.message !== 'TypeError: Cannot read properties of null (reading \'send\')') {
 									console.error(interaction, e);
 								}
 							}
