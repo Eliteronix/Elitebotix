@@ -1299,9 +1299,15 @@ module.exports = {
 			return await interaction.editReply({ content: content, files: files });
 		} catch (error) {
 			if (error.message === 'Invalid Webhook Token') {
-				return await interaction.channel.send({ content: content, files: files });
+				try {
+					return await interaction.channel.send({ content: content, files: files });
+				} catch (error) {
+					if (error.message !== 'Missing Access') {
+						console.error(error);
+					}
+				}
 			} else if (error.message !== 'Unknown Message') {
-				return console.error(error);
+				console.error(error);
 			}
 		}
 	},
