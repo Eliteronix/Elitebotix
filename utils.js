@@ -1401,6 +1401,44 @@ module.exports = {
 
 		return await response.json();
 	},
+	async getOsuMatchV2(input) {
+		const client = input.client;
+		const matchId = input.matchId;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!matchId) {
+			throw new Error('matchId is required to get osu! match from API v2');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/matches/${matchId}`
+		);
+
+		let params = input.params;
+
+		if (params) {
+			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+		}
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		return await response.json();
+	},
 	async restartProcessQueueTask() {
 		const tasksInWork = await DBProcessQueue.findAll({
 			attributes: ['id', 'beingExecuted'],

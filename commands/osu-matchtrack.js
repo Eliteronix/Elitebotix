@@ -1,7 +1,6 @@
 const osu = require('node-osu');
-const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, logOsuAPICalls, getNewOsuAPIv2TokenIfNecessary } = require('../utils');
+const { getGuildPrefix, getIDFromPotentialOsuLink, populateMsgFromInteraction, pause, getOsuPlayerName, saveOsuMultiScores, roundedRect, humanReadable, getModImage, calculateGrade, getModBits, getRankImage, getOsuBeatmap, getBeatmapSlimcover, getAvatar, logOsuAPICalls, getOsuMatchV2 } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
@@ -231,206 +230,231 @@ module.exports = {
 					let pauseTime = 30000;
 
 					try {
-						await getNewOsuAPIv2TokenIfNecessary(client);
+						let matchResponse = await getOsuMatchV2({ matchId: match.id, client });
 
-						const url = new URL(
-							`https://osu.ppy.sh/api/v2/matches/${match.id}`
-						);
+						if (json) {
+							// Theoretically something could be missing in between this batch of 100 events and the last batch
+							// The chance for that happening is so low though that its not worth checking as it
+							// would require a major delay between the two requests
+							let oldJson = json;
 
-						const headers = {
-							'Content-Type': 'application/json',
-							'Accept': 'application/json',
-							'Authorization': `Bearer ${client.osuv2_access_token}`
-						};
+							json = matchResponse;
 
-						process.send('osu!API v2');
-						await fetch(url, {
-							method: 'GET',
-							headers,
-						}).then(async (response) => {
-							let resJson = await response.json();
+							let firstIdNewJson = json.events[0].id;
 
-							if (json) {
-								// Theoretically something could be missing in between this batch of 100 events and the last batch
-								// The chance for that happening is so low though that its not worth checking as it
-								// would require a major delay between the two requests
-								let oldJson = json;
-
-								json = resJson;
-
-								let firstIdNewJson = json.events[0].id;
-
-								// Add all old events that are not in the new array to the new array
-								if (oldJson.events) {
-									for (let i = 0; i < oldJson.events.length; i++) {
-										if (oldJson.events[i].id < firstIdNewJson) {
-											json.events.push(oldJson.events[i]);
-										}
+							// Add all old events that are not in the new array to the new array
+							if (oldJson.events) {
+								for (let i = 0; i < oldJson.events.length; i++) {
+									if (oldJson.events[i].id < firstIdNewJson) {
+										json.events.push(oldJson.events[i]);
 									}
 								}
-
-								// Sort the array by id
-								json.events.sort((a, b) => a.id - b.id);
-							} else {
-								json = resJson;
 							}
 
-							if (!latestEventId) {
-								latestEventId = json.latest_event_id - 1;
-							}
+							// Sort the array by id
+							json.events.sort((a, b) => a.id - b.id);
+						} else {
+							json = matchResponse;
+						}
 
-							while (json.first_event_id !== json.events[0].id) {
-								await getNewOsuAPIv2TokenIfNecessary(client);
+						if (!latestEventId) {
+							latestEventId = json.latest_event_id - 1;
+						}
 
-								const url = new URL(
-									`https://osu.ppy.sh/api/v2/matches/${match.id}?before=${json.events[0].id}&limit=101`
-								);
+						while (json.first_event_id !== json.events[0].id) {
+							let earlierMatchData = await getOsuMatchV2({ matchId: match.id, client, params: { before: json.events[0].id, limit: 101 } });
 
-								const headers = {
-									'Content-Type': 'application/json',
-									'Accept': 'application/json',
-									'Authorization': `Bearer ${client.osuv2_access_token}`
-								};
+							json.events = earlierMatchData.events.concat(json.events);
+						}
 
-								process.send('osu!API v2');
-								let earlierEvents = await fetch(url, {
-									method: 'GET',
-									headers,
-								}).then(async (response) => {
-									let json = await response.json();
+						if (json.latest_event_id > latestEventId) {
+							let playerUpdates = [];
+							let redScore = 0; //Score on the left side / first slots
+							let blueScore = 0; //Score on the right side / last slots
+							for (let i = 0; i < json.events.length; i++) {
+								if (json.events[i].detail.type === 'other') {
+									//Reset player updates
+									playerUpdates = [];
 
-									return json.events;
-								})
-									.catch(err => {
-										console.error(err);
-									});
+									//Get the scores of the teams
+									let blueScores = json.events[i].game.scores.filter(score => score.match.team === 'blue');
+									let redScores = json.events[i].game.scores.filter(score => score.match.team === 'red');
 
-								json.events = earlierEvents.concat(json.events);
-							}
+									if (blueScores.length || redScores.length) {
+										//Team vs
+										blueScores.sort((a, b) => b.score - a.score);
+										redScores.sort((a, b) => b.score - a.score);
 
-							if (json.latest_event_id > latestEventId) {
-								let playerUpdates = [];
-								let redScore = 0; //Score on the left side / first slots
-								let blueScore = 0; //Score on the right side / last slots
-								for (let i = 0; i < json.events.length; i++) {
-									if (json.events[i].detail.type === 'other') {
-										//Reset player updates
-										playerUpdates = [];
+										let blueTotalScore = 0;
+										for (let i = 0; i < blueScores.length; i++) {
+											blueTotalScore += blueScores[i].score;
+										}
 
-										//Get the scores of the teams
-										let blueScores = json.events[i].game.scores.filter(score => score.match.team === 'blue');
-										let redScores = json.events[i].game.scores.filter(score => score.match.team === 'red');
+										let redTotalScore = 0;
+										for (let i = 0; i < redScores.length; i++) {
+											redTotalScore += redScores[i].score;
+										}
 
-										if (blueScores.length || redScores.length) {
-											//Team vs
-											blueScores.sort((a, b) => b.score - a.score);
-											redScores.sort((a, b) => b.score - a.score);
+										if (blueTotalScore > redTotalScore) {
+											blueScore++;
+										} else if (blueTotalScore < redTotalScore) {
+											redScore++;
+										}
+									} else if (json.events[i].game.scores.length === 2) {
+										//Head to head
+										let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
+										//basically a check if its a tourney match (basically)
+										if (playerNames[1]) {
+											let redPlayer = playerNames[0].replace(/.+\(/gm, '');
+											let bluePlayer = playerNames[1].replace(')', '');
 
-											let blueTotalScore = 0;
-											for (let i = 0; i < blueScores.length; i++) {
-												blueTotalScore += blueScores[i].score;
+											let redTotal = null;
+											let blueTotal = null;
+
+											for (let j = 0; j < json.events[i].game.scores.length; j++) {
+												json.events[i].game.scores[j].username = await getPlayerName(json.events[i].game.scores[j].user_id, json.users);
+												if (json.events[i].game.scores[j].username === redPlayer) {
+													redTotal = json.events[i].game.scores[j].score;
+												}
+
+												if (json.events[i].game.scores[j].username === bluePlayer) {
+													blueTotal = json.events[i].game.scores[j].score;
+												}
 											}
 
-											let redTotalScore = 0;
-											for (let i = 0; i < redScores.length; i++) {
-												redTotalScore += redScores[i].score;
-											}
-
-											if (blueTotalScore > redTotalScore) {
+											if (blueTotal > redTotal) {
 												blueScore++;
-											} else if (blueTotalScore < redTotalScore) {
+											} else if (blueTotal < redTotal) {
 												redScore++;
 											}
-										} else if (json.events[i].game.scores.length === 2) {
-											//Head to head
-											let playerNames = match.name.split(/\) ?vs.? ?\(/gm);
-											//basically a check if its a tourney match (basically)
-											if (playerNames[1]) {
-												let redPlayer = playerNames[0].replace(/.+\(/gm, '');
-												let bluePlayer = playerNames[1].replace(')', '');
-
-												let redTotal = null;
-												let blueTotal = null;
-
-												for (let j = 0; j < json.events[i].game.scores.length; j++) {
-													json.events[i].game.scores[j].username = await getPlayerName(json.events[i].game.scores[j].user_id, json.users);
-													if (json.events[i].game.scores[j].username === redPlayer) {
-														redTotal = json.events[i].game.scores[j].score;
-													}
-
-													if (json.events[i].game.scores[j].username === bluePlayer) {
-														blueTotal = json.events[i].game.scores[j].score;
-													}
-												}
-
-												if (blueTotal > redTotal) {
-													blueScore++;
-												} else if (blueTotal < redTotal) {
-													redScore++;
-												}
-											}
 										}
-									} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
-										let playerName = await getPlayerName(json.events[i].user_id, json.users);
-										playerUpdates.push(`<:exchangealtsolid:1005141205069344859> \`${playerName}\` became the host.`);
-									} else if (json.events[i].detail.type === 'host-changed') {
-										playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
+									}
+								} else if (json.events[i].detail.type === 'host-changed' && json.events[i].user_id) {
+									let playerName = await getPlayerName(json.events[i].user_id, json.users);
+									playerUpdates.push(`<:exchangealtsolid:1005141205069344859> \`${playerName}\` became the host.`);
+								} else if (json.events[i].detail.type === 'host-changed') {
+									playerUpdates.push('<:exchangealtsolid:1005141205069344859> The host has been reset.');
 
-										if (json.events[i].user_id === 0) {
-											redScore = 0;
-											blueScore = 0;
-										}
-									} else if (json.events[i].detail.type === 'player-joined') {
-										let playerName = await getPlayerName(json.events[i].user_id, json.users);
-										playerUpdates.push(`<:arrowrightsolid:1005141207879536761> \`${playerName}\` joined the match.`);
-									} else if (json.events[i].detail.type === 'player-left') {
-										let playerName = await getPlayerName(json.events[i].user_id, json.users);
-										playerUpdates.push(`<:arrowleftsolid:1005141359008682024> \`${playerName}\` left the match.`);
-									} else if (json.events[i].detail.type === 'player-kicked') {
-										let playerName = await getPlayerName(json.events[i].user_id, json.users);
-										playerUpdates.push(`<:bansolid:1032747189941829683> \`${playerName}\` has been kicked from the match.`);
-									} else if (json.events[i].detail.type === 'match-disbanded') {
-										playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
-									} else if (json.events[i].detail.type === 'match-created') {
-										playerUpdates.push('<:plussolid:1005142572823494677> The match has been created.');
-									} else {
-										playerUpdates.push(`${json.events[i].detail.type}, ${json.events[i].user_id}`);
+									if (json.events[i].user_id === 0) {
+										redScore = 0;
+										blueScore = 0;
+									}
+								} else if (json.events[i].detail.type === 'player-joined') {
+									let playerName = await getPlayerName(json.events[i].user_id, json.users);
+									playerUpdates.push(`<:arrowrightsolid:1005141207879536761> \`${playerName}\` joined the match.`);
+								} else if (json.events[i].detail.type === 'player-left') {
+									let playerName = await getPlayerName(json.events[i].user_id, json.users);
+									playerUpdates.push(`<:arrowleftsolid:1005141359008682024> \`${playerName}\` left the match.`);
+								} else if (json.events[i].detail.type === 'player-kicked') {
+									let playerName = await getPlayerName(json.events[i].user_id, json.users);
+									playerUpdates.push(`<:bansolid:1032747189941829683> \`${playerName}\` has been kicked from the match.`);
+								} else if (json.events[i].detail.type === 'match-disbanded') {
+									playerUpdates.push('<:timessolid:1005141203819434104> The match has been closed.');
+								} else if (json.events[i].detail.type === 'match-created') {
+									playerUpdates.push('<:plussolid:1005142572823494677> The match has been created.');
+								} else {
+									playerUpdates.push(`${json.events[i].detail.type}, ${json.events[i].user_id}`);
+								}
+
+								if (json.events[i].id > latestEventId) {
+									if (json.events[i].detail.type === 'match-disbanded') {
+										reactionCollector.stop();
 									}
 
-									if (json.events[i].id > latestEventId) {
-										if (json.events[i].detail.type === 'match-disbanded') {
-											reactionCollector.stop();
+									if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other'
+										|| playerUpdates.join('\n').length > 4096) {
+
+										// Remove all but the last one in case we come from a truncated array (4096 character limit)
+										playerUpdates.splice(0, playerUpdates.length - 1);
+
+										let embed = new Discord.EmbedBuilder()
+											.setColor(0x0099FF)
+											.setTitle(`${match.name.replace(/`/g, '')}`)
+											.setDescription(`${playerUpdates.join('\n')}`);
+
+										let hideQualifiers = new Date();
+										hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+										if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
+											embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
 										}
 
-										if (lastMessageType === 'mapresult' && json.events[i].detail.type !== 'other'
-											|| playerUpdates.join('\n').length > 4096) {
-
-											// Remove all but the last one in case we come from a truncated array (4096 character limit)
-											playerUpdates.splice(0, playerUpdates.length - 1);
-
-											let embed = new Discord.EmbedBuilder()
-												.setColor(0x0099FF)
-												.setTitle(`${match.name.replace(/`/g, '')}`)
-												.setDescription(`${playerUpdates.join('\n')}`);
-
-											let hideQualifiers = new Date();
-											hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
-
-											if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
-												embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+										try {
+											lastMessage = await msg.channel.send({ embeds: [embed] });
+										} catch (error) {
+											if (error.message === 'Missing Permissions') {
+												stop = true;
+												break;
+											} else {
+												console.error(error);
 											}
+										}
+									} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
+										let mods = json.events[i].game.mods;
+										for (let i = 0; i < mods.length; i++) {
+											if (mods[i].includes('no-fail')) {
+												mods[i] = 'NF';
+											} else if (mods[i].includes('hidden')) {
+												mods[i] = 'HD';
+											} else if (mods[i].includes('hard-rock')) {
+												mods[i] = 'HR';
+											} else if (mods[i].includes('double-time')) {
+												mods[i] = 'DT';
+											} else if (mods[i].includes('half-time')) {
+												mods[i] = 'HT';
+											}
+										}
 
+										let combinedMods = mods.join('');
+
+										let attachment = await getResultImage(json.events[i], json.users, client);
+										let currentScore = '';
+										if (redScore + blueScore > 0) {
+											currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
+										}
+
+										let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
+
+										let hideQualifiers = new Date();
+										hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
+
+										if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
+											sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
+										}
+
+										const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${json.events[i].game.beatmap.id}", "server":"tournaments"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+										const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${json.events[i].game.beatmap.id}","mods":"${combinedMods}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+										const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
+										const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
+
+										if (lastMessageType === 'playing') {
 											try {
-												lastMessage = await msg.channel.send({ embeds: [embed] });
-											} catch (error) {
-												if (error.message === 'Missing Permissions') {
-													stop = true;
-													break;
-												} else {
-													console.error(error);
+												lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment], components: [row] });
+											} catch (e) {
+												if (e.message !== 'Unknown Message') {
+													console.error(e);
+													console.error(lastMessage);
 												}
 											}
-										} else if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
+										} else {
+											lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment], components: [row] });
+										}
+
+										await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
+									} else if (json.events[i].detail.type === 'other') {
+										let startDate = new Date(json.events[i].game.start_time);
+
+										let modBits = getModBits(json.events[i].game.mods.join(''));
+
+										if (json.events[i].game.beatmap) {
+											let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
+
+											if (beatmap) {
+												startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 20);
+											}
+										}
+
+										if (lastMessageType !== 'playing') {
 											let mods = json.events[i].game.mods;
 											for (let i = 0; i < mods.length; i++) {
 												if (mods[i].includes('no-fail')) {
@@ -448,7 +472,7 @@ module.exports = {
 
 											let combinedMods = mods.join('');
 
-											let attachment = await getResultImage(json.events[i], json.users, client);
+											let attachment = await getPlayingImage(json.events[i], client);
 											let currentScore = '';
 											if (redScore + blueScore > 0) {
 												currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
@@ -468,129 +492,60 @@ module.exports = {
 											const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
 											const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
 
-											if (lastMessageType === 'playing') {
-												try {
-													lastMessage = await lastMessage.edit({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment], components: [row] });
-												} catch (e) {
-													if (e.message !== 'Unknown Message') {
-														console.error(e);
-														console.error(lastMessage);
-													}
-												}
-											} else {
-												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}`, files: [attachment], components: [row] });
-											}
+											lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment], components: [row] });
 
 											await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
-										} else if (json.events[i].detail.type === 'other') {
-											let startDate = new Date(json.events[i].game.start_time);
+										}
 
-											let modBits = getModBits(json.events[i].game.mods.join(''));
+										pauseTime = startDate - new Date();
+									} else if (json.events[i].detail.type !== 'other') {
+										let embed = new Discord.EmbedBuilder()
+											.setColor(0x0099FF)
+											.setTitle(`${match.name.replace(/`/g, '')}`)
+											.setDescription(`${playerUpdates.join('\n')}`);
 
-											if (json.events[i].game.beatmap) {
-												let beatmap = await getOsuBeatmap({ beatmapId: json.events[i].game.beatmap.id, modBits: modBits });
+										let hideQualifiers = new Date();
+										hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
 
-												if (beatmap) {
-													startDate.setUTCSeconds(startDate.getUTCSeconds() + parseInt(beatmap.totalLength) + 20);
-												}
-											}
+										if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
+											embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
+										}
 
-											if (lastMessageType !== 'playing') {
-												let mods = json.events[i].game.mods;
-												for (let i = 0; i < mods.length; i++) {
-													if (mods[i].includes('no-fail')) {
-														mods[i] = 'NF';
-													} else if (mods[i].includes('hidden')) {
-														mods[i] = 'HD';
-													} else if (mods[i].includes('hard-rock')) {
-														mods[i] = 'HR';
-													} else if (mods[i].includes('double-time')) {
-														mods[i] = 'DT';
-													} else if (mods[i].includes('half-time')) {
-														mods[i] = 'HT';
-													}
-												}
+										try {
+											await lastMessage.edit({ embeds: [embed] });
+										} catch (e) {
+											console.error(e);
+											console.error(lastMessage);
+										}
+									}
 
-												let combinedMods = mods.join('');
 
-												let attachment = await getPlayingImage(json.events[i], client);
-												let currentScore = '';
-												if (redScore + blueScore > 0) {
-													currentScore = `\n**Current score:** \`${redScore} - ${blueScore}\``;
-												}
+									if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
+										lastMessageType = 'mapresult';
+										latestEventId = json.events[i].id;
+									} else if (json.events[i].detail.type === 'other') {
+										lastMessageType = 'playing';
+										let notLastMap = false;
 
-												let sharedLink = `<https://osu.ppy.sh/mp/${match.id}>`;
-
-												let hideQualifiers = new Date();
-												hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
-
-												if (match.name.toLowerCase().includes('qualifier') && new Date(match.raw_start) > hideQualifiers) {
-													sharedLink = `MP Link hidden for ${daysHidingQualifiers} days (Qualifiers)`;
-												}
-
-												const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${json.events[i].game.beatmap.id}", "server":"tournaments"}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
-												const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${json.events[i].game.beatmap.id}","mods":"${combinedMods}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
-												const osuMapleaderboard = new ButtonBuilder().setCustomId(`osu-mapleaderboard||{"id": "${json.events[i].game.beatmap.id}", "server":"tournaments", "mods":"${combinedMods}"}`).setLabel('/osu-mapleaderboard').setStyle(ButtonStyle.Primary);
-												const row = new ActionRowBuilder().addComponents(osuCompare, osuBeatmap, osuMapleaderboard);
-
-												lastMessage = await msg.channel.send({ content: `\`${match.name.replace(/`/g, '')}\`\n${sharedLink}${currentScore}\nExpected end of the map: <t:${Date.parse(startDate) / 1000}:R>`, files: [attachment], components: [row] });
-
-												await pause(5000); // wait 5 seconds before doing other stuff in case this is a matchtrack of an old match, to not overload the bot right away, for current matches it shouldn't matter much
-											}
-
-											pauseTime = startDate - new Date();
-										} else if (json.events[i].detail.type !== 'other') {
-											let embed = new Discord.EmbedBuilder()
-												.setColor(0x0099FF)
-												.setTitle(`${match.name.replace(/`/g, '')}`)
-												.setDescription(`${playerUpdates.join('\n')}`);
-
-											let hideQualifiers = new Date();
-											hideQualifiers.setUTCDate(hideQualifiers.getUTCDate() - daysHidingQualifiers);
-
-											if (!match.name.toLowerCase().includes('qualifier') || new Date(match.raw_start) < hideQualifiers) {
-												embed.setURL(`https://osu.ppy.sh/mp/${match.id}`);
-											}
-
-											try {
-												await lastMessage.edit({ embeds: [embed] });
-											} catch (e) {
-												console.error(e);
-												console.error(lastMessage);
+										for (let j = i + 1; j < json.events.length; j++) {
+											if (json.events[j].detail.type === 'other') {
+												notLastMap = true;
 											}
 										}
 
-
-										if (json.events[i].detail.type === 'other' && json.events[i].game.end_time !== null) {
-											lastMessageType = 'mapresult';
+										if (notLastMap || json.match.end_time) {
 											latestEventId = json.events[i].id;
-										} else if (json.events[i].detail.type === 'other') {
-											lastMessageType = 'playing';
-											let notLastMap = false;
-
-											for (let j = i + 1; j < json.events.length; j++) {
-												if (json.events[j].detail.type === 'other') {
-													notLastMap = true;
-												}
-											}
-
-											if (notLastMap || json.match.end_time) {
-												latestEventId = json.events[i].id;
-											} else {
-												latestEventId = json.events[i].id - 1;
-												break;
-											}
 										} else {
-											lastMessageType = 'updates';
-											latestEventId = json.events[i].id;
+											latestEventId = json.events[i].id - 1;
+											break;
 										}
+									} else {
+										lastMessageType = 'updates';
+										latestEventId = json.events[i].id;
 									}
 								}
 							}
-						})
-							.catch(err => {
-								console.error(err);
-							});
+						}
 					} catch (e) {
 						if (!e.message.endsWith('reason: Client network socket disconnected before secure TLS connection was established')
 							&& !e.message.endsWith('reason: read ECONNRESET')) {
