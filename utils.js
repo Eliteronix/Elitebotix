@@ -1255,6 +1255,7 @@ module.exports = {
 			tournamentBadges: [],
 		};
 
+		process.send('osu!API v2');
 		await fetch(url, {
 			method: 'GET',
 			headers,

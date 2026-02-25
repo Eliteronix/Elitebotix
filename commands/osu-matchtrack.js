@@ -243,6 +243,7 @@ module.exports = {
 							'Authorization': `Bearer ${client.osuv2_access_token}`
 						};
 
+						process.send('osu!API v2');
 						await fetch(url, {
 							method: 'GET',
 							headers,
@@ -291,6 +292,7 @@ module.exports = {
 									'Authorization': `Bearer ${client.osuv2_access_token}`
 								};
 
+								process.send('osu!API v2');
 								let earlierEvents = await fetch(url, {
 									method: 'GET',
 									headers,
