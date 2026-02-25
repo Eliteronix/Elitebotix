@@ -517,10 +517,10 @@ module.exports = {
 			});
 
 			if (!discordUser) {
-				return await interaction.respond({
+				return await interaction.respond([{
 					name: 'You need to link your osu! account first!',
 					value: 'You need to link your osu! account first!',
-				});
+				}]);
 			}
 
 			discordUsers[interaction.user.id] = discordUser.osuUserId;
