@@ -1237,17 +1237,7 @@ module.exports = {
 		return new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: filename });
 	},
 	async getAdditionalOsuInfo(osuUserId, client) {
-		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
-
-		const url = new URL(
-			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu`
-		);
-
-		const headers = {
-			'Content-Type': 'application/json',
-			'Accept': 'application/json',
-			'Authorization': `Bearer ${client.osuv2_access_token}`
-		};
+		let osuProfile = await module.exports.getOsuProfileV2({ osuUserId: osuUserId, client: client });
 
 		const additionalInfo = {
 			tournamentBan: false,
@@ -1255,71 +1245,60 @@ module.exports = {
 			tournamentBadges: [],
 		};
 
-		process.send('osu!API v2');
-		await fetch(url, {
-			method: 'GET',
-			headers,
-		}).then(async (response) => {
-			let json = await response.json();
+		if (osuProfile.account_history) {
+			let tournamentBans = osuProfile.account_history.filter((entry) => entry.type === 'tournament_ban');
 
-			if (json.account_history) {
-				let tournamentBans = json.account_history.filter((entry) => entry.type === 'tournament_ban');
+			if (tournamentBans.length) {
+				tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
 
-				if (tournamentBans.length) {
-					tournamentBans[0].tournamentBannedUntil = new Date(tournamentBans[0].timestamp);
+				if (tournamentBans[0].permanent) {
+					tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
+					tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
+					tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
+					tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
+					tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
+					tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
+					tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
+				} else {
+					tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
+				}
 
-					if (tournamentBans[0].permanent) {
-						tournamentBans[0].tournamentBannedUntil.setUTCMilliseconds(999);
-						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(59);
-						tournamentBans[0].tournamentBannedUntil.setUTCMinutes(59);
-						tournamentBans[0].tournamentBannedUntil.setUTCHours(23);
-						tournamentBans[0].tournamentBannedUntil.setUTCDate(31);
-						tournamentBans[0].tournamentBannedUntil.setUTCMonth(11);
-						tournamentBans[0].tournamentBannedUntil.setUTCFullYear(9999);
-					} else {
-						tournamentBans[0].tournamentBannedUntil.setUTCSeconds(tournamentBans[0].tournamentBannedUntil.getUTCSeconds() + tournamentBans[0].length);
-					}
+				tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
 
-					tournamentBans[0].description = tournamentBans[0].description.replace('&#039;', '\'').replace('&amp;', '&');
+				additionalInfo.tournamentBan = tournamentBans[0];
+			}
+		}
 
-					additionalInfo.tournamentBan = tournamentBans[0];
+		if (osuProfile.badges) {
+			additionalInfo.badges = osuProfile.badges;
+
+			for (let i = 0; i < osuProfile.badges.length; i++) {
+				const badge = osuProfile.badges[i];
+				if (!badge.description.startsWith('Beatmap Spotlights: ')
+					&& !badge.description.includes(' contribution to the ')
+					&& !badge.description.includes(' contributor')
+					&& !badge.description.includes('Contributions')
+					&& !badge.description.includes('commitment')
+					&& !badge.description.includes('Mapper\'s Favourite ')
+					&& !badge.description.includes('Community Favourite ')
+					&& !badge.description.includes('Community Choice ')
+					&& !badge.description.includes('Mapping')
+					&& !badge.description.includes('Aspire')
+					&& !badge.description.includes('Beatmapping')
+					&& !badge.description.includes('osu!idol')
+					&& badge.description !== 'The official voice behind osu!'
+					&& !badge.description.includes('Newspaper ')
+					&& !badge.description.includes('Pending Cup ')
+					&& !badge.description.includes('Mapper\'s Choice ')
+					&& !badge.description.includes('Exemplary performance')
+					&& !badge.description.toLowerCase().includes('contribution')
+					&& !badge.description.toLowerCase().includes('elite mapper')
+					&& !badge.description.toLowerCase().includes('outstanding commitment')
+					&& !badge.description.toLowerCase().includes('featured artist playlist')) {
+					additionalInfo.tournamentBadges.push(badge);
 				}
 			}
-
-			if (json.badges) {
-				additionalInfo.badges = json.badges;
-
-				for (let i = 0; i < json.badges.length; i++) {
-					const badge = json.badges[i];
-					if (!badge.description.startsWith('Beatmap Spotlights: ')
-						&& !badge.description.includes(' contribution to the ')
-						&& !badge.description.includes(' contributor')
-						&& !badge.description.includes('Contributions')
-						&& !badge.description.includes('commitment')
-						&& !badge.description.includes('Mapper\'s Favourite ')
-						&& !badge.description.includes('Community Favourite ')
-						&& !badge.description.includes('Community Choice ')
-						&& !badge.description.includes('Mapping')
-						&& !badge.description.includes('Aspire')
-						&& !badge.description.includes('Beatmapping')
-						&& !badge.description.includes('osu!idol')
-						&& badge.description !== 'The official voice behind osu!'
-						&& !badge.description.includes('Newspaper ')
-						&& !badge.description.includes('Pending Cup ')
-						&& !badge.description.includes('Mapper\'s Choice ')
-						&& !badge.description.includes('Exemplary performance')
-						&& !badge.description.toLowerCase().includes('contribution')
-						&& !badge.description.toLowerCase().includes('elite mapper')
-						&& !badge.description.toLowerCase().includes('outstanding commitment')
-						&& !badge.description.toLowerCase().includes('featured artist playlist')) {
-						additionalInfo.tournamentBadges.push(badge);
-					}
-				}
-			}
-		})
-			.catch(err => {
-				console.error(err);
-			});
+		}
 
 		//get discordUser from db to update pp and rank
 		await DBDiscordUsers.findOne({
@@ -1389,6 +1368,38 @@ module.exports = {
 				client.osuv2_access_token = null;
 			}, json.expires_in * 1000);
 		});
+	},
+	async getOsuProfileV2(input) {
+		const client = input.client;
+		const osuUserId = input.osuUserId;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!osuUserId) {
+			throw new Error('osuUserId is required to get osu! profile from API v2');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu`
+		);
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		return await response.json();
 	},
 	async restartProcessQueueTask() {
 		const tasksInWork = await DBProcessQueue.findAll({
