@@ -1401,6 +1401,49 @@ module.exports = {
 
 		return await response.json();
 	},
+	async getOsuProfileScoresV2(input) {
+		const client = input.client;
+		const osuUserId = input.osuUserId;
+		const type = input.type;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!osuUserId) {
+			throw new Error('osuUserId is required to get osu! profile from API v2');
+		}
+
+		if (!type || (type !== 'best' && type !== 'firsts' && type !== 'recent')) {
+			throw new Error('Invalid type. Must be "best", "firsts", or "recent".');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/users/${osuUserId}/scores/${type}`
+		);
+
+		let params = input.params;
+
+		if (params) {
+			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+		}
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		return await response.json();
+	},
 	async getOsuMatchV2(input) {
 		const client = input.client;
 		const matchId = input.matchId;
