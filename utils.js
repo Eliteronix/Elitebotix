@@ -1395,7 +1395,7 @@ module.exports = {
 		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
 
 		const url = new URL(
-			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu${modeString}`
+			`https://osu.ppy.sh/api/v2/users/${osuUserId}${modeString}`
 		);
 
 		const headers = {

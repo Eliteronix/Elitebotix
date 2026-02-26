@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores,
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls, getOsuProfileV2 } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
@@ -364,6 +364,12 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
 			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
+		});
+
+		let osuProfile = await getOsuProfileV2({
+			client: interaction.client,
+			osuUserId: username,
+			mode: getLinkModeName(mode)
 		});
 
 		logOsuAPICalls('commands/osu-top.js getUser Bancho');
