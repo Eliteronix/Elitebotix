@@ -1410,7 +1410,14 @@ module.exports = {
 			headers,
 		});
 
-		return await response.json();
+		let responseJson = await response.json();
+
+		// Check if the error attribute exists
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! profile: ${responseJson.error}`);
+		}
+
+		return responseJson;
 	},
 	async getOsuProfileScoresV2(input) {
 		const client = input.client;
@@ -1453,7 +1460,14 @@ module.exports = {
 			headers,
 		});
 
-		return await response.json();
+		let responseJson = await response.json();
+
+		// Check if the error attribute exists
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! profile: ${responseJson.error}`);
+		}
+
+		return responseJson;
 	},
 	async getOsuMatchV2(input) {
 		const client = input.client;
@@ -1491,7 +1505,14 @@ module.exports = {
 			headers,
 		});
 
-		return await response.json();
+		let responseJson = await response.json();
+
+		// Check if the error attribute exists
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! profile: ${responseJson.error}`);
+		}
+
+		return responseJson;
 	},
 	async restartProcessQueueTask() {
 		const tasksInWork = await DBProcessQueue.findAll({
