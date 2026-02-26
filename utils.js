@@ -1372,6 +1372,7 @@ module.exports = {
 	async getOsuProfileV2(input) {
 		const client = input.client;
 		const osuUserId = input.osuUserId;
+		const mode = input.mode;
 
 		if (!client) {
 			throw new Error('Client is required to get osu!API v2 token');
@@ -1381,10 +1382,20 @@ module.exports = {
 			throw new Error('osuUserId is required to get osu! profile from API v2');
 		}
 
+		let modeString = '';
+
+		if (mode) {
+			if (mode !== 'osu' && mode !== 'taiko' && mode !== 'fruits' && mode !== 'mania') {
+				throw new Error('Invalid mode. Must be osu, taiko, fruits, or mania.');
+			}
+
+			modeString = `/${mode}`;
+		}
+
 		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
 
 		const url = new URL(
-			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu`
+			`https://osu.ppy.sh/api/v2/users/${osuUserId}/osu${modeString}`
 		);
 
 		const headers = {
