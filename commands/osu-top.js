@@ -359,13 +359,6 @@ module.exports = {
 
 async function getTopPlays(interaction, username, server, mode, noLinkedAccount, sorting, limit, tracking, order, csv) {
 	if (server === 'bancho') {
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		let osuProfile = null;
 
 		try {
@@ -381,7 +374,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
 		}
 
-		updateOsuDetailsforUser(interaction.client, user, mode);
+		updateOsuDetailsforUser(interaction.client, osuProfile, mode);
 
 		const canvasWidth = 1000;
 		const canvasHeight = 83 + limit * 41.66666;
@@ -401,31 +394,31 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			}
 		}
 
-		let elements = [canvas, ctx, user];
+		let elements = [canvas, ctx, osuProfile];
 
-		elements = await drawTitle(elements, server, mode, sorting, order);
+		elements = await drawTitle(elements, server, mode, sorting, order); //TODO: Update mapping for osuProfile here
 
-		elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking);
+		elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking); //TODO: Update mapping for osuProfile here
 
 		let scores = elements[3];
 
 		await drawFooter(elements);
 
 		//Create as an attachment
-		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${osuProfile.id}-mode${mode}.png` })];
 
 		if (csv) {
 			let csv = new ObjectsToCsv(scores);
 			csv = await csv.toString();
 			const buffer = Buffer.from(csv);
 			//Create as an attachment
-			files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
+			files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${osuProfile.id}-mode${mode}.csv` }));
 		}
 
 		//If created by osu-tracking
 		if (tracking) {
 			try {
-				await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
+				await interaction.followUp({ content: `\`${osuProfile.username}\` got ${limit} new top play(s)!`, files: files });
 			} catch (err) {
 				if (err.message !== 'Missing Access') {
 					console.error(err);
@@ -435,7 +428,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			const linkedUser = await DBDiscordUsers.findOne({
 				attributes: ['userId'],
 				where: {
-					osuUserId: user.id
+					osuUserId: osuProfile.id
 				}
 			});
 
@@ -443,10 +436,10 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 				noLinkedAccount = false;
 			}
 
-			const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
-			const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+			const osuProfileButton = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${osuProfile.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+			const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${osuProfile.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
 
-			const row = new ActionRowBuilder().addComponents(osuProfile, osuSkills);
+			const row = new ActionRowBuilder().addComponents(osuProfileButton, osuSkills);
 
 			//Send attachment
 			try {
@@ -456,7 +449,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 					noLinkedAccountString = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
 				}
 
-				await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
+				await interaction.followUp({ content: `\`${osuProfile.username}\`: <https://osu.ppy.sh/users/${osuProfile.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 			} catch (err) {
 				if (err.message !== 'Unknown Message') {
 					console.error(err);
