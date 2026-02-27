@@ -396,9 +396,9 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 
 		let elements = [canvas, ctx, osuProfile];
 
-		elements = await drawTitle(elements, server, mode, sorting, order); //TODO: Update mapping for osuProfile here
+		elements = await drawTitle(elements, server, mode, sorting, order);
 
-		elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking); //TODO: Update mapping for osuProfile here
+		elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking);
 
 		let scores = elements[3];
 
@@ -730,9 +730,9 @@ async function drawTitle(input, server, mode, sorting, order) {
 		orderText = 'in ascending order ';
 	}
 
-	title = `✰ ${serverDisplay}${user.name}'s ${gameMode} top plays ${sortingText}${orderText}✰`;
-	if (user.name.endsWith('s') || user.name.endsWith('x')) {
-		title = `✰ ${serverDisplay}${user.name}' ${gameMode} top plays ${sortingText}${orderText}✰`;
+	title = `✰ ${serverDisplay}${user.username}'s ${gameMode} top plays ${sortingText}${orderText}✰`;
+	if (user.username.endsWith('s') || user.username.endsWith('x')) {
+		title = `✰ ${serverDisplay}${user.username}' ${gameMode} top plays ${sortingText}${orderText}✰`;
 	}
 
 	roundedRect(ctx, canvas.width / 2 - title.length * 8.5, 500 / 50, title.length * 17, 500 / 12, 5, '28', '28', '28', 0.75);
@@ -795,7 +795,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 
 	if (server === 'bancho') {
 		logOsuAPICalls('commands/osu-top.js getUserBest bancho');
-		scores = await osuApi.getUserBest({ u: user.name, m: mode, limit: limit });
+		scores = await osuApi.getUserBest({ u: user.id, m: mode, limit: limit });
 	} else if (server === 'ripple') {
 		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);
 		const responseJson = await response.json();
@@ -849,7 +849,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		unrankedBonusPP = topPlayData.unrankedBonusPP;
 		scores = topPlayData.scores;
 	} else if (server === 'mixed') {
-		let banchoTopPlays = await osuApi.getUserBest({ u: user.name, m: mode, limit: 100 });
+		let banchoTopPlays = await osuApi.getUserBest({ u: user.id, m: mode, limit: 100 });
 
 		let topPlayData = await getTournamentTopPlayData(user.id, mode, interaction.client, true);
 
@@ -872,7 +872,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		}
 
 		// Calculate total pp
-		let banchoTotalPP = parseFloat(user.pp.raw);
+		let banchoTotalPP = parseFloat(user.statistics.pp);
 
 		// Calculate the part of the pp that is coming from the bancho top 100
 		let banchoTopPlaysPP = 0;
@@ -998,7 +998,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		sortedScores.push({
 			score: '150551330',
 			user: {
-				name: user.name,
+				name: user.name || user.username,
 				id: user.id
 			},
 			beatmapId: '658127',
@@ -1250,7 +1250,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			ctx.fillText(`Total pp from tournaments (including unranked): ${humanReadable(Math.round(totalUnrankedPP))}pp (Bonus pp: ${humanReadable(Math.round(unrankedBonusPP))}) -> ~#${closestUnrankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 50);
 			ctx.fillText(`Total pp from tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp (Bonus pp: ${humanReadable(Math.round(rankedBonusPP))}) -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
 		} else if (server === 'mixed') {
-			ctx.fillText(`Total pp on bancho: ${humanReadable(Math.round(user.pp.raw))}pp -> ~#${user.pp.rank}`, canvas.width / 140, canvas.height - 50);
+			ctx.fillText(`Total pp on bancho: ${humanReadable(Math.round(user.statistics.pp))}pp -> ~#${user.statistics.global_rank}`, canvas.width / 140, canvas.height - 50);
 			ctx.fillText(`Total pp from bancho & tournaments (only ranked): ${humanReadable(Math.round(totalRankedPP))}pp -> ~#${closestRankedPPUser.osuRank}`, canvas.width / 140, canvas.height - 25);
 		}
 	}

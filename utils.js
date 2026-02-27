@@ -543,85 +543,85 @@ module.exports = {
 			},
 		})
 			.then(async (discordUser) => {
-				// If the property follower_count exists its a v2 api response and needs different mapping
-				if ('follower_count' in user) {
-					discordUser.osuName = user.username;
-					discordUser.country = user.country.code;
-					if (mode === 0) {
-						if (Number(discordUser.osuPP) !== Number(user.statistics.pp)) {
-							discordUser.lastOsuPPChange = new Date();
-							discordUser.oldOsuRank = user.statistics.global_rank;
-							discordUser.osuPP = user.statistics.pp;
+				if (discordUser && discordUser.osuUserId) {
+					// If the property follower_count exists its a v2 api response and needs different mapping
+					if ('follower_count' in user) {
+						discordUser.osuName = user.username;
+						discordUser.country = user.country.code;
+						if (mode === 0) {
+							if (Number(discordUser.osuPP) !== Number(user.statistics.pp)) {
+								discordUser.lastOsuPPChange = new Date();
+								discordUser.oldOsuRank = user.statistics.global_rank;
+								discordUser.osuPP = user.statistics.pp;
+							}
+
+							if (Number(discordUser.osuPlayCount) !== Number(user.statistics.play_count)) {
+								discordUser.lastOsuPlayCountChange = new Date();
+								discordUser.osuPlayCount = user.statistics.play_count;
+								discordUser.nextOsuPPUpdate = new Date();
+							} else {
+								discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPlayCountChange));
+							}
+
+							discordUser.osuRank = user.statistics.global_rank;
+							discordUser.osuRankedScore = user.statistics.ranked_score;
+							discordUser.osuTotalScore = user.statistics.total_score;
+						} else if (mode === 1) {
+							if (Number(discordUser.taikoPP) !== Number(user.statistics.pp)) {
+								discordUser.lastTaikoPPChange = new Date();
+								discordUser.taikoPP = user.statistics.pp;
+							}
+
+							if (Number(discordUser.taikoPlayCount) !== Number(user.statistics.play_count)) {
+								discordUser.lastTaikoPlayCountChange = new Date();
+								discordUser.taikoPlayCount = user.statistics.play_count;
+								discordUser.nextTaikoPPUpdate = new Date();
+							} else {
+								discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPlayCountChange));
+							}
+
+							discordUser.taikoRank = user.statistics.global_rank;
+							discordUser.taikoRankedScore = user.statistics.ranked_score;
+							discordUser.taikoTotalScore = user.statistics.total_score;
+						} else if (mode === 2) {
+							if (Number(discordUser.catchPP) !== Number(user.statistics.pp)) {
+								discordUser.lastCatchPPChange = new Date();
+								discordUser.catchPP = user.statistics.pp;
+							}
+
+							if (Number(discordUser.catchPlayCount) !== Number(user.statistics.play_count)) {
+								discordUser.lastCatchPlayCountChange = new Date();
+								discordUser.catchPlayCount = user.statistics.play_count;
+								discordUser.nextCatchPPUpdate = new Date();
+							} else {
+								discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPlayCountChange));
+							}
+
+							discordUser.catchRank = user.statistics.global_rank;
+							discordUser.catchRankedScore = user.statistics.ranked_score;
+							discordUser.catchTotalScore = user.statistics.total_score;
+						} else if (mode === 3) {
+							if (Number(discordUser.maniaPP) !== Number(user.statistics.pp)) {
+								discordUser.lastManiaPPChange = new Date();
+								discordUser.maniaPP = user.statistics.pp;
+							}
+
+							if (Number(discordUser.maniaPlayCount) !== Number(user.statistics.play_count)) {
+								discordUser.lastManiaPlayCountChange = new Date();
+								discordUser.maniaPlayCount = user.statistics.play_count;
+								discordUser.nextManiaPPUpdate = new Date();
+							} else {
+								discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPlayCountChange));
+							}
+
+							discordUser.maniaRank = user.statistics.global_rank;
+							discordUser.maniaRankedScore = user.statistics.ranked_score;
+							discordUser.maniaTotalScore = user.statistics.total_score;
 						}
 
-						if (Number(discordUser.osuPlayCount) !== Number(user.statistics.play_count)) {
-							discordUser.lastOsuPlayCountChange = new Date();
-							discordUser.osuPlayCount = user.statistics.play_count;
-							discordUser.nextOsuPPUpdate = new Date();
-						} else {
-							discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPlayCountChange));
-						}
-
-						discordUser.osuRank = user.statistics.global_rank;
-						discordUser.osuRankedScore = user.statistics.ranked_score;
-						discordUser.osuTotalScore = user.statistics.total_score;
-					} else if (mode === 1) {
-						if (Number(discordUser.taikoPP) !== Number(user.statistics.pp)) {
-							discordUser.lastTaikoPPChange = new Date();
-							discordUser.taikoPP = user.statistics.pp;
-						}
-
-						if (Number(discordUser.taikoPlayCount) !== Number(user.statistics.play_count)) {
-							discordUser.lastTaikoPlayCountChange = new Date();
-							discordUser.taikoPlayCount = user.statistics.play_count;
-							discordUser.nextTaikoPPUpdate = new Date();
-						} else {
-							discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPlayCountChange));
-						}
-
-						discordUser.taikoRank = user.statistics.global_rank;
-						discordUser.taikoRankedScore = user.statistics.ranked_score;
-						discordUser.taikoTotalScore = user.statistics.total_score;
-					} else if (mode === 2) {
-						if (Number(discordUser.catchPP) !== Number(user.statistics.pp)) {
-							discordUser.lastCatchPPChange = new Date();
-							discordUser.catchPP = user.statistics.pp;
-						}
-
-						if (Number(discordUser.catchPlayCount) !== Number(user.statistics.play_count)) {
-							discordUser.lastCatchPlayCountChange = new Date();
-							discordUser.catchPlayCount = user.statistics.play_count;
-							discordUser.nextCatchPPUpdate = new Date();
-						} else {
-							discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPlayCountChange));
-						}
-
-						discordUser.catchRank = user.statistics.global_rank;
-						discordUser.catchRankedScore = user.statistics.ranked_score;
-						discordUser.catchTotalScore = user.statistics.total_score;
-					} else if (mode === 3) {
-						if (Number(discordUser.maniaPP) !== Number(user.statistics.pp)) {
-							discordUser.lastManiaPPChange = new Date();
-							discordUser.maniaPP = user.statistics.pp;
-						}
-
-						if (Number(discordUser.maniaPlayCount) !== Number(user.statistics.play_count)) {
-							discordUser.lastManiaPlayCountChange = new Date();
-							discordUser.maniaPlayCount = user.statistics.play_count;
-							discordUser.nextManiaPPUpdate = new Date();
-						} else {
-							discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPlayCountChange));
-						}
-
-						discordUser.maniaRank = user.statistics.global_rank;
-						discordUser.maniaRankedScore = user.statistics.ranked_score;
-						discordUser.maniaTotalScore = user.statistics.total_score;
+						return discordUser.save();
 					}
 
-					return discordUser.save();
-				}
-
-				if (discordUser && discordUser.osuUserId) {
 					discordUser.osuName = user.name;
 					discordUser.country = user.country;
 					if (mode === 0) {
