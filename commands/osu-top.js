@@ -2,7 +2,7 @@ const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores,
 const Discord = require('discord.js');
 const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls, getOsuProfileV2 } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls, getOsuProfileV2, getOsuProfileScoresV2, getModBits } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
@@ -457,6 +457,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			}
 		}
 
+		//TODO
 		// if (err.message === 'Missing Permissions') {
 		// 		DBOsuGuildTrackers.destroy({
 		// 			where: {
@@ -794,8 +795,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	let unrankedBonusPP = 0;
 
 	if (server === 'bancho') {
-		logOsuAPICalls('commands/osu-top.js getUserBest bancho');
-		scores = await osuApi.getUserBest({ u: user.id, m: mode, limit: limit });
+		scores = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: getLinkModeName(mode), limit: limit } });
 	} else if (server === 'ripple') {
 		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);
 		const responseJson = await response.json();
@@ -898,7 +898,15 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	let beatmaps = [];
 
 	for (let i = 0; i < scores.length; i++) {
-		scores[i].acc = getAccuracy(scores[i], mode) * 100;
+		if ('accuracy' in scores[i]) {
+			scores[i].acc = scores[i].accuracy * 100;
+			scores[i].beatmapId = scores[i].beatmap.id;
+			scores[i].raw_mods = getModBits(scores[i].mods.join(''));
+			scores[i].raw_date = scores[i].created_at;
+			scores[i].maxCombo = scores[i].max_combo;
+		} else {
+			scores[i].acc = getAccuracy(scores[i], mode) * 100;
+		}
 	}
 
 	if (sorting && sorting == 'recent') {
@@ -906,9 +914,15 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			scores[i].best = i + 1;
 		}
 
-		scores.sort((a, b) => {
-			return Date.parse(b.raw_date) - Date.parse(a.raw_date);
-		});
+		if ('id' in scores[0]) {
+			scores.sort((a, b) => {
+				return b.id - a.id;
+			});
+		} else {
+			scores.sort((a, b) => {
+				return Date.parse(b.raw_date) - Date.parse(a.raw_date);
+			});
+		}
 	} else if (sorting && sorting == 'acc') {
 		scores = scores.sort((a, b) => {
 			return parseFloat(b.acc) - parseFloat(a.acc);
@@ -1166,8 +1180,10 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			ctx.fillText(hits, (canvas.width / 28) * 23.4 - ctx.measureText(combo).width - 10, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
 		}
 
-
-		const mods = getMods(sortedScores[i].raw_mods);
+		let mods = getMods(sortedScores[i].raw_mods);
+		if (sortedScores[i].mods) {
+			mods = sortedScores[i].mods;
+		}
 
 		let sortingText = '';
 		if (sorting !== null) {
