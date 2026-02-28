@@ -1,8 +1,7 @@
 const { DBDiscordUsers, DBOsuGuildTrackers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
-const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, logOsuAPICalls, getOsuProfileV2, getOsuProfileScoresV2, getModBits } = require('../utils');
+const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, getOsuProfileV2, getOsuProfileScoresV2, getModBits } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Op } = require('sequelize');
@@ -581,108 +580,105 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 		//Send attachment
 		await interaction.followUp({ content: `\`${user.name}\`: <https://osu.gatari.pw/u/${user.id}?mode=${mode}>`, files: files });
 	} else if (server === 'tournaments' || server === 'mixed') {
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
+		let osuProfile = null;
 
-		logOsuAPICalls('commands/osu-top.js getUser tournaments');
-		osuApi.getUser({ u: username, m: mode })
-			.then(async (user) => {
-				updateOsuDetailsforUser(interaction.client, user, mode);
+		try {
+			osuProfile = await getOsuProfileV2({
+				client: interaction.client,
+				osuUserId: username,
+				mode: getLinkModeName(mode)
+			});
+		} catch (err) {
+			if (err.message !== 'Error fetching osu! profile: null') {
+				console.error(err);
+			}
+			return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+		}
 
-				const canvasWidth = 1000;
-				const canvasHeight = 83 + limit * 41.66666 + 50;
+		updateOsuDetailsforUser(interaction.client, osuProfile, mode);
 
-				Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
-				Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
+		const canvasWidth = 1000;
+		const canvasHeight = 83 + limit * 41.66666 + 50;
 
-				//Create Canvas
-				const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
+		Canvas.GlobalFonts.registerFromPath('./other/Comfortaa-Bold.ttf', 'comfortaa');
+		Canvas.GlobalFonts.registerFromPath('./other/arial unicode ms.otf', 'arial');
 
-				//Get context and load the image
-				const ctx = canvas.getContext('2d');
-				const background = await Canvas.loadImage('./other/osu-background.png');
-				for (let i = 0; i < canvas.height / background.height; i++) {
-					for (let j = 0; j < canvas.width / background.width; j++) {
-						ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
-					}
-				}
+		//Create Canvas
+		const canvas = Canvas.createCanvas(canvasWidth, canvasHeight);
 
-				let elements = [canvas, ctx, user];
+		//Get context and load the image
+		const ctx = canvas.getContext('2d');
+		const background = await Canvas.loadImage('./other/osu-background.png');
+		for (let i = 0; i < canvas.height / background.height; i++) {
+			for (let j = 0; j < canvas.width / background.width; j++) {
+				ctx.drawImage(background, j * background.width, i * background.height, background.width, background.height);
+			}
+		}
 
-				elements = await drawTitle(elements, server, mode, sorting, order);
+		let elements = [canvas, ctx, osuProfile];
 
-				elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking);
+		elements = await drawTitle(elements, server, mode, sorting, order);
 
-				let scores = elements[3];
+		elements = await drawTopPlays(elements, server, mode, interaction, sorting, limit, order, tracking); //TODO
 
-				await drawFooter(elements);
+		let scores = elements[3];
 
-				//Create as an attachment
-				const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${user.id}-mode${mode}.png` })];
+		await drawFooter(elements);
 
-				if (csv) {
-					let csv = new ObjectsToCsv(scores);
-					csv = await csv.toString();
-					const buffer = Buffer.from(csv);
-					//Create as an attachment
-					files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${user.id}-mode${mode}.csv` }));
-				}
+		//Create as an attachment
+		const files = [new Discord.AttachmentBuilder(canvas.toBuffer('image/png'), { name: `osu-top-${osuProfile.id}-mode${mode}.png` })];
 
-				//If created by osu-tracking
-				if (tracking) {
-					await interaction.followUp({ content: `\`${user.name}\` got ${limit} new top play(s)!`, files: files });
-				} else {
-					const linkedUser = await DBDiscordUsers.findOne({
-						attributes: ['userId'],
-						where: {
-							osuUserId: user.id
-						}
-					});
+		if (csv) {
+			let csv = new ObjectsToCsv(scores);
+			csv = await csv.toString();
+			const buffer = Buffer.from(csv);
+			//Create as an attachment
+			files.push(new Discord.AttachmentBuilder(buffer, { name: `osu-top-${osuProfile.id}-mode${mode}.csv` }));
+		}
 
-					if (linkedUser && linkedUser.userId) {
-						noLinkedAccount = false;
-					}
-
-					const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
-					const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${user.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
-
-					const row = new ActionRowBuilder().addComponents(osuProfile, osuSkills);
-
-					let noLinkedAccountString = '';
-
-					if (noLinkedAccount) {
-						noLinkedAccountString = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
-					}
-
-					//Send attachment
-					try {
-						await interaction.followUp({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
-					} catch (err) {
-						if (err.message === 'Invalid Webhook Token') {
-							try {
-								await interaction.channel.send({ content: `\`${user.name}\`: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
-							} catch (e) {
-								if (e.message !== 'Missing Access' && e.message !== 'TypeError: Cannot read properties of null (reading \'send\')') {
-									console.error(interaction, e);
-								}
-							}
-						} else if (err.message !== 'Unknown Message') {
-							console.error(err);
-						}
-					}
-				}
-			})
-			.catch(async (err) => {
-				if (err.message === 'Not found') {
-					await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
-				} else {
-					console.error(err);
+		//If created by osu-tracking
+		if (tracking) {
+			await interaction.followUp({ content: `\`${osuProfile.username}\` got ${limit} new top play(s)!`, files: files });
+		} else {
+			const linkedUser = await DBDiscordUsers.findOne({
+				attributes: ['userId'],
+				where: {
+					osuUserId: osuProfile.id
 				}
 			});
+
+			if (linkedUser && linkedUser.userId) {
+				noLinkedAccount = false;
+			}
+
+			const osuProfileButton = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${osuProfile.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+			const osuSkills = new ButtonBuilder().setCustomId(`osu-skills||{"username": "${osuProfile.id}"}`).setLabel('/osu-skills').setStyle(ButtonStyle.Primary);
+
+			const row = new ActionRowBuilder().addComponents(osuProfileButton, osuSkills);
+
+			let noLinkedAccountString = '';
+
+			if (noLinkedAccount) {
+				noLinkedAccountString = `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
+			}
+
+			//Send attachment
+			try {
+				await interaction.followUp({ content: `\`${osuProfile.username}\`: <https://osu.ppy.sh/users/${osuProfile.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
+			} catch (err) {
+				if (err.message === 'Invalid Webhook Token') {
+					try {
+						await interaction.channel.send({ content: `\`${osuProfile.username}\`: <https://osu.ppy.sh/users/${osuProfile.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
+					} catch (e) {
+						if (e.message !== 'Missing Access' && e.message !== 'TypeError: Cannot read properties of null (reading \'send\')') {
+							console.error(interaction, e);
+						}
+					}
+				} else if (err.message !== 'Unknown Message') {
+					console.error(err);
+				}
+			}
+		}
 	}
 }
 
@@ -729,6 +725,10 @@ async function drawTitle(input, server, mode, sorting, order) {
 		orderText = 'in ascending order ';
 	}
 
+	if (!user.username) {
+		user.username = user.name;
+	}
+
 	title = `✰ ${serverDisplay}${user.username}'s ${gameMode} top plays ${sortingText}${orderText}✰`;
 	if (user.username.endsWith('s') || user.username.endsWith('x')) {
 		title = `✰ ${serverDisplay}${user.username}' ${gameMode} top plays ${sortingText}${orderText}✰`;
@@ -771,13 +771,6 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	let canvas = input[0];
 	let ctx = input[1];
 	let user = input[2];
-
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
 
 	let scores = [];
 
@@ -847,7 +840,11 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		unrankedBonusPP = topPlayData.unrankedBonusPP;
 		scores = topPlayData.scores;
 	} else if (server === 'mixed') {
-		let banchoTopPlays = await osuApi.getUserBest({ u: user.id, m: mode, limit: 100 });
+		let banchoTopPlays = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: getLinkModeName(mode), limit: 100 } });
+
+		for (let i = 0; i < banchoTopPlays.length; i++) {
+			banchoTopPlays[i].beatmapId = banchoTopPlays[i].beatmap.id;
+		}
 
 		let topPlayData = await getTournamentTopPlayData(user.id, mode, interaction.client, true);
 
