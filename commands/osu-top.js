@@ -451,19 +451,17 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 
 				await interaction.followUp({ content: `\`${osuProfile.username}\`: <https://osu.ppy.sh/users/${osuProfile.id}/${getLinkModeName(mode)}>${noLinkedAccountString}`, files: files, components: [row] });
 			} catch (err) {
-				if (err.message !== 'Unknown Message') {
+				if (err.message === 'Missing Permissions') {
+					DBOsuGuildTrackers.destroy({
+						where: {
+							channelId: interaction.channel.id
+						}
+					});
+				} else if (err.message !== 'Unknown Message') {
 					console.error(err);
 				}
 			}
 		}
-
-		//TODO
-		// if (err.message === 'Missing Permissions') {
-		// 		DBOsuGuildTrackers.destroy({
-		// 			where: {
-		// 				channelId: interaction.channel.id
-		// 			}
-		// 		});
 	} else if (server === 'ripple') {
 		fetch(`https://www.ripple.moe/api/get_user?u=${username}&m=${mode}`)
 			.then(async (response) => {
