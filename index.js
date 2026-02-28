@@ -24,6 +24,12 @@ const osuApiRequests = new client.Counter({
 });
 register.registerMetric(osuApiRequests);
 
+const osuApiRequestsV2 = new client.Counter({
+	name: 'osu_api_requests_v2',
+	help: 'osu! API v2 requests',
+});
+register.registerMetric(osuApiRequestsV2);
+
 const osuWebRequests = new client.Counter({
 	name: 'osu_web_requests',
 	help: 'osu! web requests',
@@ -223,6 +229,8 @@ manager.spawn()
 			shard.on('message', message => {
 				if (message === 'osu!API') {
 					osuApiRequests.inc();
+				} else if (message === 'osu!API v2') {
+					osuApiRequestsV2.inc();
 				} else if (typeof message === 'string' && message.startsWith('osu! website')) {
 					let request = message.replace('osu! website ', '');
 
