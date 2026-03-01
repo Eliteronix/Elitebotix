@@ -1163,13 +1163,13 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
 
-			let hits = `${sortedScores[i].counts['300']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts['50']}/${sortedScores[i].counts.miss}`;
+			let hits = `${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_50}/${sortedScores[i].statistics.count_miss}`;
 			if (mode === 1) {
-				hits = `${sortedScores[i].counts['300']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts.miss}`;
+				hits = `${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_miss}`;
 			} else if (mode === 2) {
-				hits = `${sortedScores[i].counts['300']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts['katu']}/${sortedScores[i].counts.miss}`;
+				hits = `${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_katu}/${sortedScores[i].statistics.count_miss}`;
 			} else if (mode === 3) {
-				hits = `${sortedScores[i].counts['geki']}/${sortedScores[i].counts['300']}/${sortedScores[i].counts['katu']}/${sortedScores[i].counts['100']}/${sortedScores[i].counts['50']}/${sortedScores[i].counts.miss}`;
+				hits = `${sortedScores[i].statistics.count_geki}/${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_katu}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_50}/${sortedScores[i].statistics.count_miss}`;
 			}
 
 			ctx.fillText(hits, (canvas.width / 28) * 23.4 - ctx.measureText(combo).width - 10, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
