@@ -4053,34 +4053,12 @@ module.exports = {
 
 		duelRatings.provisional = true;
 
-		//Get it from the top plays if no tournament data is available
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-
 		let topScores = null;
 
-		for (let i = 0; i < 5 && !topScores; i++) {
-			module.exports.logOsuAPICalls('utils.js getUserDuelStarRating');
-			topScores = await osuApi.getUserBest({ u: input.osuUserId, m: 0, limit: 100 })
-				.then((response) => {
-					i = Infinity;
-					return response;
-				})
-				.catch(async (err) => {
-					if (i === 4) {
-						if (err.message === 'Not found') {
-							throw new Error('No standard plays');
-						} else {
-							console.error(err);
-						}
-					} else {
-						await new Promise(resolve => setTimeout(resolve, 10000));
-					}
-				});
+		topScores = await module.exports.getOsuProfileScoresV2({ osuUserId: input.osuUserId, client: input.client, type: 'best', params: { ruleset: 'osu', limit: 100 } });
+
+		if ('error' in topScores) {
+			throw new Error('No standard plays');
 		}
 
 		let stars = [];
@@ -4099,16 +4077,16 @@ module.exports = {
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: topScores.map(score => score.beatmapId)
+					[Op.in]: topScores.map(score => score.beatmap.id)
 				},
 			}
 		});
 
 		for (let i = 0; i < topScores.length; i++) {
-			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId == topScores[i].beatmapId && dbBeatmap.mods === topScores[i].raw_mods);
+			let dbBeatmap = dbBeatmaps.find(dbBeatmap => dbBeatmap.beatmapId == topScores[i].beatmap.id && dbBeatmap.mods === module.exports.getModBits(topScores[i].mods.join('')));
 
 			//Add difficulty ratings
-			dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods, beatmap: dbBeatmap });
+			dbBeatmap = await module.exports.getOsuBeatmap({ beatmapId: topScores[i].beatmap.id, modBits: topScores[i].raw_mods, beatmap: dbBeatmap });
 			if (dbBeatmap && dbBeatmap.starRating && parseFloat(dbBeatmap.starRating) > 0) {
 				stars.push(dbBeatmap.starRating);
 			}
