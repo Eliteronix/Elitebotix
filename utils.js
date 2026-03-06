@@ -6320,7 +6320,7 @@ module.exports = {
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuBeatmaps } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
-					const { getOsuPlayerName, multiToBanchoScore, logOsuAPICalls } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+					const { getOsuPlayerName, multiToBanchoScore, logOsuAPICalls, getOsuProfileScoresV2 } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 						// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
@@ -6546,26 +6546,15 @@ module.exports = {
 						if (guildTrackers[i].osuTopPlays) {
 							if (guildTrackers[i].osuNumberTopPlays === undefined) {
 								// console.log(`Getting osu! top plays for ${osuUser.osuUserId}...`);
-								logOsuAPICalls('utils.js processOsuTrack getUserBest standard');
-								guildTrackers[i].osuNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 0 })
-									.then(scores => {
-										let recentPlaysAmount = 0;
-										for (let j = 0; j < scores.length; j++) {
-											//This only works if the local timezone is UTC
-											if (new Date(lastUpdated) <= new Date(scores[j].raw_date)) {
-												recentPlaysAmount++;
-											}
-										}
-										return recentPlaysAmount;
-									})
-									// eslint-disable-next-line no-unused-vars
-									.catch(err => {
-										return err.message;
-									});
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'osu', limit: 100 } });
 
-								if (guildTrackers[i].osuNumberTopPlays === 'Not found') {
-									guildTrackers[i].osuTopPlays = false;
-									await guildTrackers[i].save();
+								guildTrackers[i].osuNumberTopPlays = 0;
+
+								for (let j = 0; j < topPlays.length; j++) {
+									//This only works if the local timezone is UTC
+									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+										guildTrackers[i].osuNumberTopPlays++;
+									}
 								}
 							}
 
@@ -6624,26 +6613,15 @@ module.exports = {
 						if (guildTrackers[i].taikoTopPlays) {
 							if (guildTrackers[i].taikoNumberTopPlays === undefined) {
 								// console.log(`Getting taiko top plays for ${osuUser.osuUserId}...`);
-								logOsuAPICalls('utils.js processOsuTrack getUserBest taiko');
-								guildTrackers[i].taikoNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 1 })
-									.then(scores => {
-										let recentPlaysAmount = 0;
-										for (let j = 0; j < scores.length; j++) {
-											//This only works if the local timezone is UTC
-											if (new Date(lastUpdated) <= new Date(scores[j].raw_date)) {
-												recentPlaysAmount++;
-											}
-										}
-										return recentPlaysAmount;
-									})
-									// eslint-disable-next-line no-unused-vars
-									.catch(err => {
-										return err.message;
-									});
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'taiko', limit: 100 } });
 
-								if (guildTrackers[i].taikoNumberTopPlays === 'Not found') {
-									guildTrackers[i].taikoTopPlays = false;
-									await guildTrackers[i].save();
+								guildTrackers[i].taikoNumberTopPlays = 0;
+
+								for (let j = 0; j < topPlays.length; j++) {
+									//This only works if the local timezone is UTC
+									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+										guildTrackers[i].taikoNumberTopPlays++;
+									}
 								}
 							}
 
@@ -6702,27 +6680,15 @@ module.exports = {
 						if (guildTrackers[i].catchTopPlays) {
 							if (guildTrackers[i].catchNumberTopPlays === undefined) {
 								// console.log(`Getting catch top plays for ${osuUser.osuUserId}...`);
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'fruits', limit: 100 } });
 
-								logOsuAPICalls('utils.js processOsuTrack getUserBest catch');
-								guildTrackers[i].catchNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 2 })
-									.then(scores => {
-										let recentPlaysAmount = 0;
-										for (let j = 0; j < scores.length; j++) {
-											//This only works if the local timezone is UTC
-											if (new Date(lastUpdated) <= new Date(scores[j].raw_date)) {
-												recentPlaysAmount++;
-											}
-										}
-										return recentPlaysAmount;
-									})
-									// eslint-disable-next-line no-unused-vars
-									.catch(err => {
-										return err.message;
-									});
+								guildTrackers[i].catchNumberTopPlays = 0;
 
-								if (guildTrackers[i].catchNumberTopPlays === 'Not found') {
-									guildTrackers[i].catchTopPlays = false;
-									await guildTrackers[i].save();
+								for (let j = 0; j < topPlays.length; j++) {
+									//This only works if the local timezone is UTC
+									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+										guildTrackers[i].catchNumberTopPlays++;
+									}
 								}
 							}
 
@@ -6781,27 +6747,15 @@ module.exports = {
 						if (guildTrackers[i].maniaTopPlays) {
 							if (guildTrackers[i].maniaNumberTopPlays === undefined) {
 								// console.log(`Getting mania top plays for ${osuUser.osuUserId}...`);
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'mania', limit: 100 } });
 
-								logOsuAPICalls('utils.js processOsuTrack getUserBest mania');
-								guildTrackers[i].maniaNumberTopPlays = await osuApi.getUserBest({ u: osuUser.osuUserId, limit: 100, m: 3 })
-									.then(scores => {
-										let recentPlaysAmount = 0;
-										for (let j = 0; j < scores.length; j++) {
-											//This only works if the local timezone is UTC
-											if (new Date(lastUpdated) <= new Date(scores[j].raw_date)) {
-												recentPlaysAmount++;
-											}
-										}
-										return recentPlaysAmount;
-									})
-									// eslint-disable-next-line no-unused-vars
-									.catch(err => {
-										return err.message;
-									});
+								guildTrackers[i].maniaNumberTopPlays = 0;
 
-								if (guildTrackers[i].maniaNumberTopPlays === 'Not found') {
-									guildTrackers[i].maniaTopPlays = false;
-									await guildTrackers[i].save();
+								for (let j = 0; j < topPlays.length; j++) {
+									//This only works if the local timezone is UTC
+									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+										guildTrackers[i].maniaNumberTopPlays++;
+									}
 								}
 							}
 
