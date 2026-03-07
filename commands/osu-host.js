@@ -1,6 +1,6 @@
 const { showUnknownInteractionError } = require('../config.json');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
-const { getOsuPlayerName, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getAdditionalOsuInfo } = require('../utils');
+const { getOsuPlayerName, getMods, multiToBanchoScore, getOsuBeatmap, getUserDuelStarRating, getAdditionalOsuInfo, getOsuProfileScoresV2 } = require('../utils');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores, DBProcessQueue } = require('../dbObjects');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
@@ -633,8 +633,11 @@ module.exports = {
 
 					let user = await osuApi.getUser({ u: osuUserId, m: 0 });
 
-					//TODO: API v2
-					let banchoTopPlays = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 });
+					let banchoTopPlays = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: 'osu', limit: 100 } });
+
+					for (let i = 0; i < banchoTopPlays.length; i++) {
+						banchoTopPlays[i].beatmapId = banchoTopPlays[i].beatmap.id;
+					}
 
 					let topPlayData = await getTournamentTopPlayData(osuUserId, 0, interaction.client);
 
