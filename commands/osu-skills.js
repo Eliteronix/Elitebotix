@@ -283,6 +283,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 	logOsuAPICalls('commands/osu-skills.js');
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
+			//TODO: API v2
 			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 })
 				.catch(err => {
 					if (err.message === 'Not found') {

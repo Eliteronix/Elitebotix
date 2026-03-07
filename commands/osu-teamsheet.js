@@ -719,6 +719,7 @@ module.exports = {
 				}
 
 				if (!['Graveyard', 'WIP', 'Pending'].includes(tourneyMaps[j].approvalStatus)) {
+					//TODO: API v2
 					logOsuAPICalls('commands/osu-teamsheet.js getScores');
 					await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].osuUserId, m: 0 })
 						.then(async mapScores => {

@@ -1071,6 +1071,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 	let newScores = [];
 
 	for (let i = 0; i < everyUser.length && !winningTeam; i++) {
+		//TODO: API v2
 		logOsuAPICalls('commands/osu-bingo.js');
 		await osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0, limit: 10 })
 			.then(async (scores) => {

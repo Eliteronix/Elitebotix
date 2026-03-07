@@ -285,6 +285,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
 		});
 		let i = 0;
+		//TODO: API v2
 		logOsuAPICalls('commands/osu-recent.js getUserRecent Bancho');
 		osuApi.getUserRecent({ u: username, m: mode })
 			.then(async (scores) => {
@@ -307,6 +308,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 				updateOsuDetailsforUser(interaction.client, user, mode);
 
 				let mapRank = 0;
+				//TODO: API v2
 				//Get the map leaderboard and fill the maprank if found
 				logOsuAPICalls('commands/osu-recent.js getScores Bancho');
 				await osuApi.getScores({ b: dbBeatmap.beatmapId, m: mode, limit: 100 })

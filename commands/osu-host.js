@@ -633,6 +633,7 @@ module.exports = {
 
 					let user = await osuApi.getUser({ u: osuUserId, m: 0 });
 
+					//TODO: API v2
 					let banchoTopPlays = await osuApi.getUserBest({ u: osuUserId, m: 0, limit: 100 });
 
 					let topPlayData = await getTournamentTopPlayData(osuUserId, 0, interaction.client);

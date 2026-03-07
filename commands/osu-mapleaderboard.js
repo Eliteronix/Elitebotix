@@ -224,6 +224,7 @@ module.exports = {
 					options.mods = modBits;
 				}
 
+				//TODO: API v2
 				logOsuAPICalls('commands/osu-mapleaderboard.js mapscores');
 				await osuApi.getScores(options)
 					.then(async (mapScores) => {
@@ -249,6 +250,7 @@ module.exports = {
 
 			if (user && !userScore) {
 				try {
+					//TODO: API v2
 					options.u = user.osuUserId;
 					logOsuAPICalls('commands/osu-mapleaderboard.js userScore');
 					await osuApi.getScores(options)

@@ -331,6 +331,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			username = discordUser.osuName;
 		}
 
+		//TODO: API v2
 		logOsuAPICalls('commands/osu-score.js getScores Bancho 1');
 		osuApi.getScores({ b: beatmap.beatmapId, u: username, m: mode })
 			.then(async (scores) => {
@@ -347,6 +348,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 
 						//Get the map leaderboard and fill the maprank if found
 						if (!mapRank) {
+							//TODO: API v2
 							logOsuAPICalls('commands/osu-score.js getScores Bancho 2 maprank');
 							await osuApi.getScores({ b: beatmap.beatmapId, m: mode, limit: 100 })
 								.then(async (mapScores) => {
