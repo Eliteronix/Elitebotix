@@ -786,7 +786,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 	let unrankedBonusPP = 0;
 
 	if (server === 'bancho') {
-		scores = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: getLinkModeName(mode), limit: limit } });
+		scores = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { mode: getLinkModeName(mode), limit: limit } });
 	} else if (server === 'ripple') {
 		const response = await fetch(`https://www.ripple.moe/api/get_user_best?u=${user.name}&m=${mode}&limit=${limit}`);
 		const responseJson = await response.json();
@@ -840,7 +840,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		unrankedBonusPP = topPlayData.unrankedBonusPP;
 		scores = topPlayData.scores;
 	} else if (server === 'mixed') {
-		let banchoTopPlays = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: getLinkModeName(mode), limit: 100 } });
+		let banchoTopPlays = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { mode: getLinkModeName(mode), limit: 100 } });
 
 		for (let i = 0; i < banchoTopPlays.length; i++) {
 			banchoTopPlays[i].beatmapId = banchoTopPlays[i].beatmap.id;

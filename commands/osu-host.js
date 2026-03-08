@@ -633,7 +633,7 @@ module.exports = {
 
 					let user = await osuApi.getUser({ u: osuUserId, m: 0 });
 
-					let banchoTopPlays = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: 'osu', limit: 100 } });
+					let banchoTopPlays = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { mode: 'osu', limit: 100 } });
 
 					for (let i = 0; i < banchoTopPlays.length; i++) {
 						banchoTopPlays[i].beatmapId = banchoTopPlays[i].beatmap.id;

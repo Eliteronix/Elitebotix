@@ -283,7 +283,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 	logOsuAPICalls('commands/osu-skills.js');
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
-			const topScores = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: 'osu', limit: 100 } });
+			const topScores = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { mode: 'osu', limit: 100 } });
 
 			let mods = [];
 			let mappers = [];

@@ -4055,7 +4055,7 @@ module.exports = {
 
 		let topScores = null;
 
-		topScores = await module.exports.getOsuProfileScoresV2({ osuUserId: input.osuUserId, client: input.client, type: 'best', params: { ruleset: 'osu', limit: 100 } });
+		topScores = await module.exports.getOsuProfileScoresV2({ osuUserId: input.osuUserId, client: input.client, type: 'best', params: { mode: 'osu', limit: 100 } });
 
 		if ('error' in topScores) {
 			throw new Error('No standard plays');
@@ -6546,7 +6546,7 @@ module.exports = {
 						if (guildTrackers[i].osuTopPlays) {
 							if (guildTrackers[i].osuNumberTopPlays === undefined) {
 								// console.log(`Getting osu! top plays for ${osuUser.osuUserId}...`);
-								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'osu', limit: 100 } });
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { mode: 'osu', limit: 100 } });
 
 								guildTrackers[i].osuNumberTopPlays = 0;
 
@@ -6613,7 +6613,7 @@ module.exports = {
 						if (guildTrackers[i].taikoTopPlays) {
 							if (guildTrackers[i].taikoNumberTopPlays === undefined) {
 								// console.log(`Getting taiko top plays for ${osuUser.osuUserId}...`);
-								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'taiko', limit: 100 } });
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { mode: 'taiko', limit: 100 } });
 
 								guildTrackers[i].taikoNumberTopPlays = 0;
 
@@ -6680,7 +6680,7 @@ module.exports = {
 						if (guildTrackers[i].catchTopPlays) {
 							if (guildTrackers[i].catchNumberTopPlays === undefined) {
 								// console.log(`Getting catch top plays for ${osuUser.osuUserId}...`);
-								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'fruits', limit: 100 } });
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { mode: 'fruits', limit: 100 } });
 
 								guildTrackers[i].catchNumberTopPlays = 0;
 
@@ -6747,7 +6747,7 @@ module.exports = {
 						if (guildTrackers[i].maniaTopPlays) {
 							if (guildTrackers[i].maniaNumberTopPlays === undefined) {
 								// console.log(`Getting mania top plays for ${osuUser.osuUserId}...`);
-								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { ruleset: 'mania', limit: 100 } });
+								let topPlays = await getOsuProfileScoresV2({ client: c, osuUserId: osuUser.osuUserId, type: 'best', params: { mode: 'mania', limit: 100 } });
 
 								guildTrackers[i].maniaNumberTopPlays = 0;
 
