@@ -909,15 +909,9 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			scores[i].best = i + 1;
 		}
 
-		if ('id' in scores[0]) {
-			scores.sort((a, b) => {
-				return b.id - a.id;
-			});
-		} else {
-			scores.sort((a, b) => {
-				return Date.parse(b.raw_date) - Date.parse(a.raw_date);
-			});
-		}
+		scores.sort((a, b) => {
+			return Date.parse(b.raw_date) - Date.parse(a.raw_date);
+		});
 	} else if (sorting && sorting == 'acc') {
 		scores = scores.sort((a, b) => {
 			return parseFloat(b.acc) - parseFloat(a.acc);
