@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const osu = require('node-osu');
 const ChartJsImage = require('chartjs-to-image');
 const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DBOsuMultiMatches } = require('../dbObjects');
-const { getIDFromPotentialOsuLink, getOsuBeatmap, getMods, getAccuracy, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls } = require('../utils');
+const { getIDFromPotentialOsuLink, getOsuBeatmap, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls, getOsuProfileScoresV2, getModBits } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const { Op } = require('sequelize');
@@ -283,15 +283,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 	logOsuAPICalls('commands/osu-skills.js');
 	osuApi.getUser({ u: username })
 		.then(async (user) => {
-			//TODO: API v2
-			const topScores = await osuApi.getUserBest({ u: user.name, m: 0, limit: 100 })
-				.catch(err => {
-					if (err.message === 'Not found') {
-						throw new Error('No standard plays');
-					} else {
-						console.error(err);
-					}
-				});
+			const topScores = await getOsuProfileScoresV2({ client: interaction.client, osuUserId: user.id, type: 'best', params: { ruleset: 'osu', limit: 100 } });
 
 			let mods = [];
 			let mappers = [];
@@ -321,15 +313,17 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 					'mode'
 				],
 				where: {
-					beatmapId: topScores.map(score => score.beatmapId)
+					beatmapId: topScores.map(score => score.beatmap.id)
 				},
 			});
 
 			for (let i = 0; i < topScores.length; i++) {
+				topScores[i].raw_mods = getModBits(topScores[i].mods.join(''));
+
 				//Add and count mods
 				let modAdded = false;
 				for (let j = 0; j < mods.length && !modAdded; j++) {
-					if (mods[j].bits === topScores[i].raw_mods) {
+					if (mods[j].mods === topScores[i].mods.join('')) {
 						mods[j].amount++;
 						modAdded = true;
 					}
@@ -337,8 +331,8 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 
 				if (!modAdded) {
 					const modObject = {
-						bits: topScores[i].raw_mods,
-						modsReadable: getMods(topScores[i].raw_mods).join(''),
+						mods: topScores[i].mods.join(''),
+						modsReadable: topScores[i].mods.join(''),
 						amount: 1
 					};
 
@@ -352,9 +346,9 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				//Add and count mappers
 				let mapperAdded = false;
 
-				let dbBeatmap = dbBeatmaps.find(beatmap => beatmap.beatmapId === topScores[i].beatmapId && beatmap.mods === topScores[i].raw_mods);
+				let dbBeatmap = dbBeatmaps.find(beatmap => beatmap.beatmapId === topScores[i].beatmap.id && beatmap.mods === topScores[i].raw_mods);
 
-				dbBeatmap = await getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: topScores[i].beatmapId, modBits: topScores[i].raw_mods });
+				dbBeatmap = await getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: topScores[i].beatmap.id, modBits: topScores[i].raw_mods });
 
 				for (let j = 0; j < mappers.length && !mapperAdded; j++) {
 					if (mappers[j] && dbBeatmap && mappers[j].mapper === dbBeatmap.mapper) {
@@ -381,7 +375,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				}
 
 				//Add accuracy
-				acc.push(getAccuracy(topScores[i], 0));
+				acc.push(topScores[i].accuracy);
 
 				//Add bpm
 				if (dbBeatmap && dbBeatmap.bpm) {
