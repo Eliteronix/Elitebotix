@@ -1523,7 +1523,33 @@ module.exports = {
 		let params = input.params;
 
 		if (params) {
-			Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+			Object.keys(params).forEach(key => {
+				if (key === 'mode' && (params[key] !== 'osu' && params[key] !== 'taiko' && params[key] !== 'fruits' && params[key] !== 'mania')) {
+					throw new Error('Invalid mode. Must be "osu", "taiko", "fruits", or "mania".');
+				}
+
+				if (key === 'limit' && (isNaN(params[key]) || params[key] < 1 || params[key] > 100)) {
+					throw new Error('Invalid limit. Must be a number between 1 and 100.');
+				}
+
+				if (key === 'offset' && (isNaN(params[key]) || params[key] < 0)) {
+					throw new Error('Invalid offset. Must be a number greater than or equal to 0.');
+				}
+
+				if (key === 'legacy_only' && isNaN(params[key]) && params[key] != 0 && params[key] != 1) {
+					throw new Error('Invalid legacy_only value. Must be 0 or 1.');
+				}
+
+				if (key === 'include_fails' && isNaN(params[key]) && params[key] != 0 && params[key] != 1) {
+					throw new Error('Invalid include_fails value. Must be 0 or 1.');
+				}
+
+				if (key !== 'mode' && key !== 'limit' && key !== 'offset' && key !== 'legacy_only' && key !== 'include_fails') {
+					throw new Error(`Invalid parameter: ${key}`);
+				}
+
+				url.searchParams.append(key, params[key]);
+			});
 		}
 
 		const headers = {
