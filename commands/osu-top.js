@@ -896,8 +896,8 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		if ('accuracy' in scores[i]) {
 			scores[i].acc = scores[i].accuracy * 100;
 			scores[i].beatmapId = scores[i].beatmap.id;
-			scores[i].raw_mods = getModBits(scores[i].mods.join(''));
-			scores[i].raw_date = scores[i].created_at;
+			scores[i].raw_mods = getModBits(scores[i].mods.map(mod => mod.acronym).join(''));
+			scores[i].raw_date = scores[i].ended_at;
 			scores[i].maxCombo = scores[i].max_combo;
 		} else {
 			scores[i].acc = getAccuracy(scores[i], mode) * 100;
@@ -1171,7 +1171,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 
 		let mods = getMods(sortedScores[i].raw_mods);
 		if (sortedScores[i].mods) {
-			mods = sortedScores[i].mods;
+			mods = sortedScores[i].mods.map(mod => mod.acronym);
 		}
 
 		let sortingText = '';

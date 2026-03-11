@@ -1,6 +1,5 @@
 ﻿const { DBDiscordUsers } = require('../dbObjects');
-const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls, getMods } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, scoreCardAttachment, gatariToBanchoScore, getMods, getOsuProfileScoresV2, getOsuProfileV2, getOsuBeatmapScoresV2 } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -278,101 +277,110 @@ module.exports = {
 
 async function getScore(interaction, username, server, mode, noLinkedAccount, pass) {
 	if (server === 'bancho') {
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
-		let i = 0;
-		//TODO: API v2
-		logOsuAPICalls('commands/osu-recent.js getUserRecent Bancho');
-		osuApi.getUserRecent({ u: username, m: mode })
-			.then(async (scores) => {
-				if (!(scores[0])) {
-					return interaction.followUp(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
-				} else {
-					if (pass) {
-						do {
-							i++;
-						} while (scores[i] && scores[i].rank == 'F');
-						if (!scores[i] || scores[i].rank == 'F') {
-							return interaction.followUp(`Couldn't find any recent passes for \`${username.replace(/`/g, '')}\`.`);
-						}
-					}
-				}
+		let osuProfile = null;
 
-				const dbBeatmap = await getOsuBeatmap({ beatmapId: scores[i].beatmapId, modBits: 0 });
-				logOsuAPICalls('commands/osu-recent.js getUser Bancho');
-				const user = await osuApi.getUser({ u: username, m: mode });
-				updateOsuDetailsforUser(interaction.client, user, mode);
+		try {
+			osuProfile = await getOsuProfileV2({
+				client: interaction.client,
+				osuUserId: username,
+				mode: getLinkModeName(mode)
+			});
+		} catch (err) {
+			if (err.message !== 'Error fetching osu! profile: null') {
+				console.error(err);
+			}
+			return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+		}
 
-				let mapRank = 0;
-				//TODO: API v2
-				//Get the map leaderboard and fill the maprank if found
-				logOsuAPICalls('commands/osu-recent.js getScores Bancho');
-				await osuApi.getScores({ b: dbBeatmap.beatmapId, m: mode, limit: 100 })
-					.then(async (mapScores) => {
-						for (let j = 0; j < mapScores.length && !mapRank; j++) {
-							if (scores[i].raw_mods === mapScores[j].raw_mods && scores[i].user.id === mapScores[j].user.id && scores[i].score === mapScores[j].score) {
-								mapRank = j + 1;
-							}
-						}
-					})
-					// eslint-disable-next-line no-unused-vars
-					.catch(err => {
-						//Nothing
-					});
+		let recentScores = null;
 
-				const input = {
-					beatmap: dbBeatmap,
-					score: scores[i],
-					mode: mode,
-					user: user,
-					server: server,
-					mapRank: mapRank,
-					client: interaction.client,
-				};
-
-				const scoreCard = await scoreCardAttachment(input);
-
-				const linkedUser = await DBDiscordUsers.findOne({
-					attributes: ['userId'],
-					where: {
-						osuUserId: user.id
-					}
-				});
-
-				if (linkedUser && linkedUser.userId) {
-					noLinkedAccount = false;
-				}
-
-				let messageContent = `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`;
-
-				if (noLinkedAccount) {
-					messageContent += `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
-				}
-
-				const row = new ActionRowBuilder();
-
-				if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
-					const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${dbBeatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
-					row.addComponents(osuCompare);
-				}
-
-				const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
-				const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
-				row.addComponents(osuBeatmap, osuProfile);
-
-				await interaction.followUp({ content: messageContent, files: [scoreCard], components: [row] });
-			})
-			.catch(err => {
-				if (err.message === 'Not found') {
-					interaction.followUp(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
-				} else {
-					console.error(err);
+		try {
+			recentScores = await getOsuProfileScoresV2({
+				client: interaction.client,
+				osuUserId: osuProfile.id,
+				type: 'recent',
+				params: {
+					limit: 1,
+					mode: getLinkModeName(mode),
+					include_fails: pass ? 0 : 1,
 				}
 			});
+		} catch (err) {
+			if (err.message !== 'Error fetching osu! profile scores: null') {
+				console.error(err);
+			}
+			return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+		}
+
+		if (recentScores.length === 0) {
+			return await interaction.followUp(`Couldn't find any recent scores for \`${username.replace(/`/g, '')}\`.`);
+		}
+
+		let recentScore = recentScores[0];
+
+		const dbBeatmap = await getOsuBeatmap({ beatmapId: recentScore.beatmap.id, modBits: 0 });
+
+		updateOsuDetailsforUser(interaction.client, osuProfile, mode);
+
+		let mapRank = 0;
+
+		let beatmapScores = await getOsuBeatmapScoresV2({
+			client: interaction.client,
+			beatmap: dbBeatmap.beatmapId,
+			params: {
+				legacy_only: recentScore.legacy_score_id ? 1 : 0,
+				mode: getLinkModeName(mode),
+			}
+		});
+
+
+		for (let i = 0; i < beatmapScores.length && !mapRank; i++) {
+			if (recentScore.id === beatmapScores[i].id) {
+				mapRank = i + 1;
+			}
+		}
+
+		const input = {
+			beatmap: dbBeatmap,
+			score: recentScore,
+			mode: mode,
+			user: osuProfile,
+			server: server,
+			mapRank: mapRank,
+			client: interaction.client,
+		};
+
+		const scoreCard = await scoreCardAttachment(input);
+
+		const linkedUser = await DBDiscordUsers.findOne({
+			attributes: ['userId'],
+			where: {
+				osuUserId: osuProfile.id
+			}
+		});
+
+		if (linkedUser && linkedUser.userId) {
+			noLinkedAccount = false;
+		}
+
+		let messageContent = `${osuProfile.username}: <https://osu.ppy.sh/users/${osuProfile.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${dbBeatmap.beatmapId}>`;
+
+		if (noLinkedAccount) {
+			messageContent += `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
+		}
+
+		const row = new ActionRowBuilder();
+
+		if (dbBeatmap.approvalStatus === 'Ranked' || dbBeatmap.approvalStatus === 'Approved' || dbBeatmap.approvalStatus === 'Qualified' || dbBeatmap.approvalStatus === 'Loved') {
+			const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${dbBeatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+			row.addComponents(osuCompare);
+		}
+
+		const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${dbBeatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+		const osuProfileButton = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${osuProfile.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+		row.addComponents(osuBeatmap, osuProfileButton);
+
+		await interaction.followUp({ content: messageContent, files: [scoreCard], components: [row] });
 	} else if (server === 'ripple') {
 		fetch(`https://www.ripple.moe/api/get_user_recent?u=${username}&m=${mode}`)
 			.then(async (response) => {

@@ -1555,7 +1555,8 @@ module.exports = {
 		const headers = {
 			'Content-Type': 'application/json',
 			'Accept': 'application/json',
-			'Authorization': `Bearer ${client.osuv2_access_token}`
+			'Authorization': `Bearer ${client.osuv2_access_token}`,
+			'x-api-version': '20260311'
 		};
 
 		process.send('osu!API v2');
@@ -1568,7 +1569,77 @@ module.exports = {
 
 		// Check if the error attribute exists
 		if ('error' in responseJson) {
-			throw new Error(`Error fetching osu! profile: ${responseJson.error}`);
+			throw new Error(`Error fetching osu! profile scores: ${responseJson.error}`);
+		}
+
+		return responseJson;
+	},
+	async getOsuBeatmapScoresV2(input) {
+		const client = input.client;
+		const beatmap = input.beatmap;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!beatmap) {
+			throw new Error('Beatmap is required to get osu! beatmap scores from API v2');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/beatmaps/${beatmap}/scores`
+		);
+
+		let params = input.params;
+
+		if (params) {
+			Object.keys(params).forEach(key => {
+				if (key === 'legacy_only' && isNaN(params[key]) && params[key] != 0 && params[key] != 1) {
+					throw new Error('Invalid legacy_only value. Must be 0 or 1.');
+				}
+
+				if (key === 'mode' && (params[key] !== 'osu' && params[key] !== 'taiko' && params[key] !== 'fruits' && params[key] !== 'mania')) {
+					throw new Error('Invalid mode. Must be "osu", "taiko", "fruits", or "mania".');
+				}
+
+				// mods not implemented yet in the api at this point in time
+				// if (key === 'mods' && (isNaN(params[key]) || params[key] < 1 || params[key] > 100)) {
+				// 	throw new Error('Invalid mods. Must be a number between 1 and 100.');
+				// }
+
+				// type not implemented yet in the api at this point in time
+				// if (key === 'type' && (isNaN(params[key]) || params[key] < 0)) {
+				// 	throw new Error('Invalid type. Must be a number greater than or equal to 0.');
+				// }
+
+				if (key !== 'legacy_only' && key !== 'mode') {
+					throw new Error(`Invalid parameter: ${key}`);
+				}
+
+				url.searchParams.append(key, params[key]);
+			});
+		}
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`,
+			'x-api-version': '20260311'
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		let responseJson = await response.json();
+
+		// Check if the error attribute exists
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! beatmap scores: ${responseJson.error}`);
 		}
 
 		return responseJson;
@@ -1613,7 +1684,7 @@ module.exports = {
 
 		// Check if the error attribute exists
 		if ('error' in responseJson) {
-			throw new Error(`Error fetching osu! profile: ${responseJson.error}`);
+			throw new Error(`Error fetching osu! match: ${responseJson.error}`);
 		}
 
 		return responseJson;
@@ -6578,7 +6649,7 @@ module.exports = {
 
 								for (let j = 0; j < topPlays.length; j++) {
 									//This only works if the local timezone is UTC
-									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+									if (new Date(lastUpdated) <= new Date(topPlays[j].ended_at)) {
 										guildTrackers[i].osuNumberTopPlays++;
 									}
 								}
@@ -6645,7 +6716,7 @@ module.exports = {
 
 								for (let j = 0; j < topPlays.length; j++) {
 									//This only works if the local timezone is UTC
-									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+									if (new Date(lastUpdated) <= new Date(topPlays[j].ended_at)) {
 										guildTrackers[i].taikoNumberTopPlays++;
 									}
 								}
@@ -6712,7 +6783,7 @@ module.exports = {
 
 								for (let j = 0; j < topPlays.length; j++) {
 									//This only works if the local timezone is UTC
-									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+									if (new Date(lastUpdated) <= new Date(topPlays[j].ended_at)) {
 										guildTrackers[i].catchNumberTopPlays++;
 									}
 								}
@@ -6779,7 +6850,7 @@ module.exports = {
 
 								for (let j = 0; j < topPlays.length; j++) {
 									//This only works if the local timezone is UTC
-									if (new Date(lastUpdated) <= new Date(topPlays[j].created_at)) {
+									if (new Date(lastUpdated) <= new Date(topPlays[j].ended_at)) {
 										guildTrackers[i].maniaNumberTopPlays++;
 									}
 								}
@@ -7857,7 +7928,11 @@ module.exports = {
 		ctx.fillText(outputString, 60, 35);
 		ctx.font = '25px comfortaa, arial';
 
-		const mods = module.exports.getMods(input.score.raw_mods);
+		let mods = module.exports.getMods(input.score.raw_mods);
+
+		if (input.score.raw_mods === undefined) {
+			mods = input.score.mods.map(mod => mod.acronym);
+		}
 
 		if (mods.includes('NC')) {
 			for (let i = 0, changed = false; i < mods.length && changed === false; i++) {
@@ -7958,7 +8033,11 @@ module.exports = {
 		ctx.globalAlpha = 1;
 
 		//Calculate accuracy
-		let accuracy = module.exports.getAccuracy(input.score, input.mode);
+		let accuracy = input.score.accuracy;
+
+		if (accuracy === null) {
+			accuracy = module.exports.getAccuracy(input.score, input.mode);
+		}
 
 		ctx.beginPath();
 		ctx.arc(canvas.width / 900 * 190, (background.height / background.width * canvas.width) / 250 * 118 + canvas.height / 6.25, 90, 0, (2 * Math.PI));
@@ -8038,9 +8117,9 @@ module.exports = {
 		ctx.textAlign = 'left';
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = 4;
-		ctx.strokeText(module.exports.humanReadable(input.score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
+		ctx.strokeText(module.exports.humanReadable(input.score.score || input.score.legacy_total_score || input.score.total_score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
 		ctx.fillStyle = '#FFFFFF';
-		ctx.fillText(module.exports.humanReadable(input.score.score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
+		ctx.fillText(module.exports.humanReadable(input.score.score || input.score.legacy_total_score || input.score.total_score), canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 100 + canvas.height / 6.25);
 
 		//Write Played By and Submitted on
 		ctx.font = '10px comfortaa, arial';
@@ -8051,6 +8130,10 @@ module.exports = {
 			module.exports.roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, Math.max(220, ctx.measureText(input.score.matchName).width + 100), 75, 5, '00', '00', '00', 0.75);
 		} else {
 			module.exports.roundedRect(ctx, canvas.width / 900 * 300, (background.height / background.width * canvas.width) / 250 * 125 + canvas.height / 6.25, 220, 50, 5, '00', '00', '00', 0.75);
+		}
+
+		if (input.score.raw_date === undefined) {
+			input.score.raw_date = input.score.ended_at;
 		}
 
 		let month = 'January';
@@ -8084,7 +8167,7 @@ module.exports = {
 		ctx.textAlign = 'left';
 		ctx.fillStyle = '#FFFFFF';
 		ctx.fillText('Played by', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
-		ctx.fillText(input.user.name, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
+		ctx.fillText(input.user.name || input.user.username, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 140 + canvas.height / 6.25);
 		ctx.fillText('Submitted on', canvas.width / 900 * 310, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 		ctx.fillText(formattedSubmitDate, canvas.width / 900 * 380, (background.height / background.width * canvas.width) / 250 * 162 + canvas.height / 6.25);
 		if (input.score.matchName) {
@@ -8139,37 +8222,74 @@ module.exports = {
 		ctx.textAlign = 'center';
 		ctx.fillText('Max Combo', canvas.width / 1000 * 735 + 55, canvas.height / 500 * 385);
 
-		let combo = `${input.score.maxCombo}x`;
+		let combo = `${input.score.maxCombo || input.score.max_combo}x`;
 
 		if (input.score.perfect) {
 			ctx.fillStyle = '#B3FF66';
 		} else {
 			if (input.mode === 3 || input.mode === 1) {
-				combo = `${input.score.maxCombo}x`;
+				combo = `${input.score.maxCombo || input.score.max_combo}x`;
 			} else {
-				combo = `${input.score.maxCombo}/${input.beatmap.maxCombo}x`;
+				combo = `${input.score.maxCombo || input.score.max_combo}/${input.beatmap.maxCombo}x`;
 			}
 		}
 		ctx.fillText(combo, canvas.width / 1000 * 735 + 55, canvas.height / 500 * 410);
+
+		if (input.score.raw_mods === undefined) {
+			input.score.raw_mods = module.exports.getModBits(input.score.mods.join(''));
+		}
 
 		let pp = 'None';
 
 		if (input.score.pp) {
 			pp = Math.round(input.score.pp);
 		} else {
-			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.beatmap, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, input.score.counts.miss, input.score.maxCombo, input.client));
+			let misses = input.score.counts?.miss || input.score.statistics?.miss || 0;
+
+			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.beatmap, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, misses, input.score.maxCombo || input.score.max_combo, input.client));
+		}
+
+		if ('accuracy' in input.score) {
+			if (input.score.statistics.great === undefined) {
+				input.score.statistics.great = 0;
+			}
+
+			if (input.score.statistics.ok === undefined) {
+				input.score.statistics.ok = 0;
+			}
+
+			if (input.score.statistics.meh === undefined) {
+				input.score.statistics.meh = 0;
+			}
+
+			if (input.score.statistics.miss === undefined) {
+				input.score.statistics.miss = 0;
+			}
 		}
 
 		ctx.font = '18px comfortaa, arial';
-		if (!input.score.perfect) {
-			let fcScore = {
-				counts: {
-					'300': parseInt(input.score.counts[300]) + parseInt(input.score.counts.miss),
-					'100': parseInt(input.score.counts[100]),
-					'50': parseInt(input.score.counts[50]),
-					miss: 0
-				}
-			};
+		if (!input.score.perfect && !input.score.legacy_perfect) {
+			let fcScore = null;
+
+			if ('accuracy' in input.score) {
+				fcScore = {
+					counts: {
+						'300': parseInt(input.score.statistics.great) + parseInt(input.score.statistics.miss),
+						'100': parseInt(input.score.statistics.ok),
+						'50': parseInt(input.score.statistics.meh),
+						miss: 0
+					}
+				};
+			} else {
+				fcScore = {
+					counts: {
+						'300': parseInt(input.score.counts[300]) + parseInt(input.score.counts.miss),
+						'100': parseInt(input.score.counts[100]),
+						'50': parseInt(input.score.counts[50]),
+						miss: 0
+					}
+				};
+			}
 
 			let fcScoreAccuracy = module.exports.getAccuracy(fcScore, 0) * 100;
 			let fcpp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.beatmap, input.mode, input.score.raw_mods, fcScoreAccuracy, 0, input.beatmap.maxCombo, input.client));
@@ -8197,7 +8317,7 @@ module.exports = {
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('Max', canvas.width / 1000 * 600 + 30, canvas.height / 500 * 445);
-			ctx.fillText(`${input.score.counts.geki}`, canvas.width / 1000 * 600 + 30, canvas.height / 500 * 470);
+			ctx.fillText(`${input.score.counts?.geki || input.score.statistics?.perfect}`, canvas.width / 1000 * 600 + 30, canvas.height / 500 * 470);
 		}
 
 		//300
@@ -8221,7 +8341,11 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(displayTerm, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 445);
-		ctx.fillText(`${input.score.counts[300]}`, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 470);
+		if (input.score.statistics) {
+			ctx.fillText(`${input.score.statistics.great}`, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 470);
+		} else {
+			ctx.fillText(`${input.score.counts[300]}`, canvas.width / 1000 * 600 + 40 + xTextOffset, canvas.height / 500 * 470);
+		}
 
 		//200
 		if (input.mode === 3) {
@@ -8230,7 +8354,7 @@ module.exports = {
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText('200s', canvas.width / 1000 * 728 + 30, canvas.height / 500 * 445);
-			ctx.fillText(`${input.score.counts.katu}`, canvas.width / 1000 * 728 + 30, canvas.height / 500 * 470);
+			ctx.fillText(`${input.score.counts?.katu || input.score.statistics.good}`, canvas.width / 1000 * 728 + 30, canvas.height / 500 * 470);
 		}
 
 		//100
@@ -8255,7 +8379,11 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText(displayTerm, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 445);
-		ctx.fillText(`${input.score.counts[100]}`, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 470);
+		if (input.score.statistics) {
+			ctx.fillText(`${input.score.statistics.large_tick_hit || input.score.statistics.ok}`, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 470);
+		} else {
+			ctx.fillText(`${input.score.counts[100]}`, canvas.width / 1000 * 700 + 40 + xTextOffset, canvas.height / 500 * 470);
+		}
 
 		//50
 		if (input.mode !== 1) {
@@ -8263,10 +8391,18 @@ module.exports = {
 			xRectOffset = 0;
 			widthOffset = 0;
 			xTextOffset = 0;
-			let value = input.score.counts[50];
+
+			let value = null;
+
+			if (input.score.statistics) {
+				value = input.score.statistics.meh;
+			} else {
+				value = input.score.counts[50];
+			}
+
 			if (input.mode === 2) {
 				displayTerm = 'DRPMiss';
-				value = input.score.counts.katu;
+				value = input.score.counts?.katu || input.score.statistics?.small_tick_miss || 0;
 			} else if (input.mode === 3) {
 				xRectOffset = 56;
 				widthOffset = -20;
@@ -8277,7 +8413,7 @@ module.exports = {
 			ctx.fillStyle = '#ffffff';
 			ctx.textAlign = 'center';
 			ctx.fillText(displayTerm, canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 445);
-			ctx.fillText(value, canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 470);
+			ctx.fillText(value.toString(), canvas.width / 1000 * 800 + 40 + xTextOffset, canvas.height / 500 * 470);
 		}
 
 		//Miss
@@ -8298,7 +8434,11 @@ module.exports = {
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'center';
 		ctx.fillText('Miss', canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 445);
-		ctx.fillText(`${input.score.counts.miss}`, canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 470);
+		if (input.score.statistics) {
+			ctx.fillText(`${input.score.statistics.miss}`, canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 470);
+		} else {
+			ctx.fillText(`${input.score.counts.miss}`, canvas.width / 1000 * 900 + 40 + xTextOffset, canvas.height / 500 * 470);
+		}
 
 		//Draw the footer
 		let today = new Date().toLocaleDateString();
@@ -8338,9 +8478,25 @@ module.exports = {
 		ctx.font = '20px comfortaa, arial';
 		ctx.fillStyle = '#ffffff';
 		ctx.textAlign = 'left';
-		ctx.fillText(`Player: ${input.user.name}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
-		ctx.fillText(`Rank: #${module.exports.humanReadable(input.user.pp.rank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
-		ctx.fillText(`PP: ${module.exports.humanReadable(Math.floor(input.user.pp.raw))}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
+
+		let playerName = input.user.name;
+		if (playerName === undefined) {
+			playerName = input.user.username;
+		}
+		ctx.fillText(`Player: ${playerName}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 25);
+
+		let playerRank = 0;
+		let playerPp = 0;
+		if (input.user.pp) {
+			playerRank = input.user.pp.rank;
+			playerPp = input.user.pp.raw;
+		} else {
+			playerRank = input.user.statistics.global_rank;
+			playerPp = input.user.statistics.pp;
+		}
+
+		ctx.fillText(`Rank: #${module.exports.humanReadable(playerRank)}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 55);
+		ctx.fillText(`PP: ${module.exports.humanReadable(Math.floor(playerPp))}`, canvas.width / 900 * 50 + userBackground.height / 10 * 2 + 5, canvas.height / 500 * 375 + 85);
 
 		module.exports.roundedImage(ctx, userAvatar, canvas.width / 900 * 50 + 5, canvas.height / 500 * 375 + 5, userBackground.height / 10 * 2 - 10, userBackground.height / 10 * 2 - 10, 5);
 
