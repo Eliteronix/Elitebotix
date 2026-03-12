@@ -8249,7 +8249,7 @@ module.exports = {
 			pp = Math.round(await module.exports.getOsuPP(input.beatmap.beatmapId, input.beatmap, input.mode, input.score.raw_mods, Math.round(accuracy * 100) / 100, misses, input.score.maxCombo || input.score.max_combo, input.client));
 		}
 
-		if ('accuracy' in input.score) {
+		if ('statistics' in input.score) {
 			if (input.score.statistics.great === undefined) {
 				input.score.statistics.great = 0;
 			}
