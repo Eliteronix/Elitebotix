@@ -1157,13 +1157,13 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
 
-			let hits = `${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_50}/${sortedScores[i].statistics.count_miss}`;
+			let hits = `${sortedScores[i].statistics?.great || 0}/${sortedScores[i].statistics?.ok || 0}/${sortedScores[i].statistics?.meh || 0}/${sortedScores[i].statistics?.miss || 0}`;
 			if (mode === 1) {
-				hits = `${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_miss}`;
+				hits = `${sortedScores[i].statistics?.great || 0}/${sortedScores[i].statistics?.ok || 0}/${sortedScores[i].statistics?.miss || 0}`;
 			} else if (mode === 2) {
-				hits = `${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_katu}/${sortedScores[i].statistics.count_miss}`;
+				hits = `${sortedScores[i].statistics?.great || 0}/${sortedScores[i].statistics?.large_tick_hit || 0}/${sortedScores[i].statistics?.small_tick_miss || 0}/${sortedScores[i].statistics?.miss || 0}`;
 			} else if (mode === 3) {
-				hits = `${sortedScores[i].statistics.count_geki}/${sortedScores[i].statistics.count_300}/${sortedScores[i].statistics.count_katu}/${sortedScores[i].statistics.count_100}/${sortedScores[i].statistics.count_50}/${sortedScores[i].statistics.count_miss}`;
+				hits = `${sortedScores[i].statistics?.perfect || 0}/${sortedScores[i].statistics?.great || 0}/${sortedScores[i].statistics?.good || 0}/${sortedScores[i].statistics?.ok || 0}/${sortedScores[i].statistics?.meh || 0}/${sortedScores[i].statistics?.miss || 0}`;
 			}
 
 			ctx.fillText(hits, (canvas.width / 28) * 23.4 - ctx.measureText(combo).width - 10, 500 / 8 + (500 / 12) * i + 500 / 12 / 2 + 500 / 35);
