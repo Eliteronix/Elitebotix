@@ -8271,7 +8271,7 @@ module.exports = {
 		if (!input.score.perfect && !input.score.legacy_perfect) {
 			let fcScore = null;
 
-			if ('accuracy' in input.score) {
+			if ('statistics' in input.score) {
 				fcScore = {
 					counts: {
 						'300': parseInt(input.score.statistics.great) + parseInt(input.score.statistics.miss),
