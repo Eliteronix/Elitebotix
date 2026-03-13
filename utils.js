@@ -8035,7 +8035,7 @@ module.exports = {
 		//Calculate accuracy
 		let accuracy = input.score.accuracy;
 
-		if (accuracy === null) {
+		if (accuracy === undefined) {
 			accuracy = module.exports.getAccuracy(input.score, input.mode);
 		}
 
