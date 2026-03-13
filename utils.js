@@ -1574,6 +1574,71 @@ module.exports = {
 
 		return responseJson;
 	},
+	async getOsuBeatmapUserScoresV2(input) {
+		const client = input.client;
+		const beatmap = input.beatmap;
+		const osuUserId = input.osuUserId;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!beatmap) {
+			throw new Error('Beatmap is required to get osu! beatmap scores from API v2');
+		}
+
+		if (!osuUserId) {
+			throw new Error('osuUserId is required to get osu! beatmap scores from API v2');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/beatmaps/${beatmap}/scores/users/${osuUserId}/all`
+		);
+
+		let params = input.params;
+
+		if (params) {
+			Object.keys(params).forEach(key => {
+				if (key === 'legacy_only' && isNaN(params[key]) && params[key] != 0 && params[key] != 1) {
+					throw new Error('Invalid legacy_only value. Must be 0 or 1.');
+				}
+
+				if (key === 'ruleset' && (params[key] !== 'osu' && params[key] !== 'taiko' && params[key] !== 'fruits' && params[key] !== 'mania')) {
+					throw new Error('Invalid ruleset. Must be "osu", "taiko", "fruits", or "mania".');
+				}
+
+				if (key !== 'legacy_only' && key !== 'ruleset') {
+					throw new Error(`Invalid parameter: ${key}`);
+				}
+
+				url.searchParams.append(key, params[key]);
+			});
+		}
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`,
+			'x-api-version': '20260311'
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		let responseJson = await response.json();
+
+		// Check if the error attribute exists
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! beatmap user score: ${responseJson.error}`);
+		}
+
+		return responseJson;
+	},
 	async getOsuBeatmapScoresV2(input) {
 		const client = input.client;
 		const beatmap = input.beatmap;

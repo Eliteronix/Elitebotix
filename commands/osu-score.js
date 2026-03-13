@@ -1,6 +1,6 @@
 ﻿const { DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores } = require('../dbObjects');
 const osu = require('node-osu');
-const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapModeId, getModBits, multiToBanchoScore, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls, getMods } = require('../utils');
+const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapModeId, getModBits, multiToBanchoScore, scoreCardAttachment, gatariToBanchoScore, logOsuAPICalls, getMods, getOsuProfileV2, getOsuBeatmapUserScoresV2, getOsuBeatmapScoresV2 } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
@@ -100,6 +100,21 @@ module.exports = {
 					{ name: 'Gatari', value: 'gatari' },
 					{ name: 'Tournaments', value: 'tournaments' },
 				)
+		)
+		.addBooleanOption(option =>
+			option.setName('onlystable')
+				.setNameLocalizations({
+					'de': 'nur-stable',
+					'en-GB': 'onlystable',
+					'en-US': 'onlystable',
+				})
+				.setDescription('Only show scores from stable')
+				.setDescriptionLocalizations({
+					'de': 'Nur Scores von stable anzeigen',
+					'en-GB': 'Only show scores from stable',
+					'en-US': 'Only show scores from stable',
+				})
+				.setRequired(false)
 		)
 		.addStringOption(option =>
 			option.setName('username')
@@ -224,6 +239,8 @@ module.exports = {
 			usernames.push(interaction.options.getString('username5'));
 		}
 
+		let onlyStable = interaction.options.getBoolean('onlyStable');
+
 		let mapRank = 0;
 
 		if (interaction.options.getInteger('mapRank')) {
@@ -267,7 +284,7 @@ module.exports = {
 
 		if (!usernames[0]) {//Get profile by author if no argument
 			if (commandUser && commandUser.osuUserId) {
-				getScore(interaction, dbBeatmap, commandUser.osuUserId, server, gamemode, false, mapRank, mods);
+				getScore(interaction, dbBeatmap, commandUser.osuUserId, server, gamemode, false, mapRank, mods, onlyStable);
 			} else {
 				let userDisplayName = interaction.user.username;
 
@@ -275,7 +292,7 @@ module.exports = {
 					userDisplayName = interaction.member.displayName;
 				}
 
-				getScore(interaction, dbBeatmap, userDisplayName, server, gamemode, false, mapRank, mods);
+				getScore(interaction, dbBeatmap, userDisplayName, server, gamemode, false, mapRank, mods, onlyStable);
 			}
 		} else {
 			//Get profiles by arguments
@@ -289,21 +306,21 @@ module.exports = {
 					});
 
 					if (discordUser && discordUser.osuUserId) {
-						getScore(interaction, dbBeatmap, discordUser.osuUserId, server, gamemode, false, mapRank, mods);
+						getScore(interaction, dbBeatmap, discordUser.osuUserId, server, gamemode, false, mapRank, mods, onlyStable);
 					} else {
 						await interaction.followUp(`\`${usernames[i].replace(/`/g, '')}\` doesn't have their osu! account connected.\nPlease use their username or wait until they connected their account by using </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}>.`);
-						getScore(interaction, dbBeatmap, usernames[i], server, gamemode, false, mapRank, mods);
+						getScore(interaction, dbBeatmap, usernames[i], server, gamemode, false, mapRank, mods, onlyStable);
 					}
 				} else {
 
 					if (usernames.length === 1 && !(usernames[0].startsWith('<@')) && !(usernames[0].endsWith('>'))) {
 						if (!(commandUser) || commandUser && !(commandUser.osuUserId)) {
-							getScore(interaction, dbBeatmap, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, true, mapRank, mods);
+							getScore(interaction, dbBeatmap, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, true, mapRank, mods, onlyStable);
 						} else {
-							getScore(interaction, dbBeatmap, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, false, mapRank, mods);
+							getScore(interaction, dbBeatmap, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, false, mapRank, mods, onlyStable);
 						}
 					} else {
-						getScore(interaction, dbBeatmap, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, false, mapRank, mods);
+						getScore(interaction, dbBeatmap, getIDFromPotentialOsuLink(usernames[i]), server, gamemode, false, mapRank, mods, onlyStable);
 					}
 				}
 			}
@@ -311,7 +328,7 @@ module.exports = {
 	},
 };
 
-async function getScore(interaction, beatmap, username, server, mode, noLinkedAccount, mapRank, mods) {
+async function getScore(interaction, beatmap, username, server, mode, noLinkedAccount, mapRank, mods, onlyStable) {
 	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -331,96 +348,154 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 			username = discordUser.osuName;
 		}
 
-		//TODO: API v2
-		logOsuAPICalls('commands/osu-score.js getScores Bancho 1');
-		osuApi.getScores({ b: beatmap.beatmapId, u: username, m: mode })
-			.then(async (scores) => {
-				if (!(scores[0])) {
-					return await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
-				}
-				let scoreHasBeenOutput = false;
-				for (let i = 0; i < scores.length; i++) {
-					if (mods === 'best' && i === 0 || mods === 'all' || mods !== 'best' && mods !== 'all' && getModBits(mods) === scores[i].raw_mods) {
-						scoreHasBeenOutput = true;
-						logOsuAPICalls('commands/osu-score.js getUser Bancho');
-						const user = await osuApi.getUser({ u: username, m: mode });
-						updateOsuDetailsforUser(interaction.client, user, mode);
+		let osuProfile = null;
 
-						//Get the map leaderboard and fill the maprank if found
-						if (!mapRank) {
-							//TODO: API v2
-							logOsuAPICalls('commands/osu-score.js getScores Bancho 2 maprank');
-							await osuApi.getScores({ b: beatmap.beatmapId, m: mode, limit: 100 })
-								.then(async (mapScores) => {
-									for (let j = 0; j < mapScores.length && !mapRank; j++) {
-										if (scores[i].raw_mods === mapScores[j].raw_mods && scores[i].user.id === mapScores[j].user.id && scores[i].score === mapScores[j].score) {
-											mapRank = j + 1;
-										}
-									}
-								})
-								// eslint-disable-next-line no-unused-vars
-								.catch(err => {
-									//Nothing
-								});
-						}
+		try {
+			osuProfile = await getOsuProfileV2({
+				client: interaction.client,
+				osuUserId: username,
+				mode: getLinkModeName(mode)
+			});
+		} catch (err) {
+			if (err.message !== 'Error fetching osu! profile: null') {
+				console.error(err);
+			}
+			return await interaction.followUp(`Could not find user \`${username.replace(/`/g, '')}\`.`);
+		}
 
-						const input = {
-							beatmap: beatmap,
-							score: scores[i],
-							mode: mode,
-							user: user,
-							server: server,
-							mapRank: mapRank,
-							client: interaction.client,
-						};
+		let userBeatmapScores = await getOsuBeatmapUserScoresV2({
+			client: interaction.client,
+			beatmap: beatmap.beatmapId,
+			osuUserId: osuProfile.id,
+			params: {
+				legacy_only: onlyStable ? 1 : 0,
+				ruleset: getLinkModeName(mode),
+			}
+		});
 
-						const scoreCard = await scoreCardAttachment(input);
+		if (userBeatmapScores.scores.length === 0) {
+			return await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
+		}
 
-						const linkedUser = await DBDiscordUsers.findOne({
-							attributes: ['userId'],
-							where: {
-								osuUserId: user.id
-							}
-						});
+		let modsIncludeCL = false;
 
-						if (linkedUser && linkedUser.userId) {
-							noLinkedAccount = false;
-						}
+		if (mods !== 'all' && mods !== 'best') {
+			// Turn mods into array
+			mods = mods.match(/.{1,2}/g);
 
-						let messageContent = `${user.name}: <https://osu.ppy.sh/users/${user.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`;
+			if (mods.includes('CL')) {
+				modsIncludeCL = true;
+			}
 
-						if (noLinkedAccount) {
-							messageContent += `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
-						}
-
-						const row = new ActionRowBuilder();
-
-						if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
-							const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
-							row.addComponents(osuCompare);
-						}
-
-						const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
-						const osuProfile = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${user.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
-						row.addComponents(osuBeatmap, osuProfile);
-
-						await interaction.followUp({ content: messageContent, files: [scoreCard], components: [row] });
-
-						//Reset maprank in case of multiple scores displayed
-						mapRank = 0;
-					}
-				}
-				if (!scoreHasBeenOutput) {
-					await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\` with \`${mods}\`.`);
-				}
-			})
-			.catch(async (err) => {
-				if (err.message === 'Not found') {
-					await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\`.`);
+			// Sort mods alphabetically
+			mods.sort((a, b) => {
+				if (a < b) {
+					return -1;
+				} else if (a > b) {
+					return 1;
 				} else {
-					console.error(err);
+					return 0;
 				}
 			});
+
+			mods = mods.join('');
+		}
+
+		let beatmapScores = [];
+
+		if (!mapRank) {
+			beatmapScores = await getOsuBeatmapScoresV2({
+				client: interaction.client,
+				beatmap: beatmap.beatmapId,
+				params: {
+					legacy_only: onlyStable ? 1 : 0,
+					mode: getLinkModeName(mode),
+				}
+			});
+		}
+
+		let scoreHasBeenOutput = false;
+		for (let i = 0; i < userBeatmapScores.scores.length; i++) {
+			let scoreMods = userBeatmapScores.scores[i].mods.map(mod => mod.acronym);
+
+			if (!modsIncludeCL) {
+				scoreMods = scoreMods.filter(mod => mod !== 'CL');
+			}
+
+			scoreMods.sort((a, b) => {
+				if (a < b) {
+					return -1;
+				} else if (a > b) {
+					return 1;
+				} else {
+					return 0;
+				}
+			});
+
+			scoreMods = scoreMods.join('');
+
+			if (mods === 'best' && i === 0 || mods === 'all' || mods !== 'best' && mods !== 'all' && mods === scoreMods) {
+				scoreHasBeenOutput = true;
+				updateOsuDetailsforUser(interaction.client, osuProfile, mode);
+
+				//Get the map leaderboard and fill the maprank if found
+				if (!mapRank) {
+					for (let j = 0; j < beatmapScores.scores.length && !mapRank; j++) {
+						if (userBeatmapScores.scores[i].id === beatmapScores.scores[j].id) {
+							mapRank = j + 1;
+						}
+					}
+				}
+
+				const input = {
+					beatmap: beatmap,
+					score: userBeatmapScores.scores[i],
+					mode: mode,
+					user: osuProfile,
+					server: server,
+					mapRank: mapRank,
+					client: interaction.client,
+				};
+
+				const scoreCard = await scoreCardAttachment(input);
+
+				const linkedUser = await DBDiscordUsers.findOne({
+					attributes: ['userId'],
+					where: {
+						osuUserId: osuProfile.id
+					}
+				});
+
+				if (linkedUser && linkedUser.userId) {
+					noLinkedAccount = false;
+				}
+
+				let messageContent = `${osuProfile.username}: <https://osu.ppy.sh/users/${osuProfile.id}/${getLinkModeName(mode)}>\nBeatmap: <https://osu.ppy.sh/b/${beatmap.beatmapId}>`;
+
+				if (noLinkedAccount) {
+					messageContent += `\nFeel free to use </osu-link connect:${interaction.client.slashCommandData.find(command => command.name === 'osu-link').id}> if the specified account is yours.`;
+				}
+
+				const row = new ActionRowBuilder();
+
+				if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved' || beatmap.approvalStatus === 'Qualified' || beatmap.approvalStatus === 'Loved') {
+					const osuCompare = new ButtonBuilder().setCustomId(`osu-score||{"beatmap": "${beatmap.beatmapId}", "gamemode":${mode}}`).setLabel('compare to self').setStyle(ButtonStyle.Primary);
+					row.addComponents(osuCompare);
+				}
+
+				const osuBeatmap = new ButtonBuilder().setCustomId(`osu-beatmap||{"id": "${beatmap.beatmapId}","mods":"${getMods(input.score.raw_mods).join('')}"}`).setLabel('/osu-beatmap').setStyle(ButtonStyle.Primary);
+				const osuProfileButton = new ButtonBuilder().setCustomId(`osu-profile||{"username": "${osuProfile.id}"}`).setLabel('/osu-profile').setStyle(ButtonStyle.Primary);
+				row.addComponents(osuBeatmap, osuProfileButton);
+
+				await interaction.followUp({ content: messageContent, files: [scoreCard], components: [row] });
+
+				//Reset maprank in case of multiple scores displayed
+				mapRank = 0;
+			}
+		}
+		if (!scoreHasBeenOutput) {
+			await interaction.followUp(`Couldn't find any scores for \`${username.replace(/`/g, '')}\` on \`${beatmap.artist} - ${beatmap.title} [${beatmap.difficulty}] (${beatmap.beatmapId})\` with \`${mods}\`.`);
+		}
 	} else if (server === 'ripple') {
 		fetch(`https://www.ripple.moe/api/get_scores?b=${beatmap.beatmapId}&u=${username}&m=${mode}`)
 			.then(async (response) => {
