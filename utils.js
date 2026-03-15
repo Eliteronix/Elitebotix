@@ -8145,6 +8145,10 @@ module.exports = {
 
 		ctx.globalAlpha = 0.2;
 
+		if (input.score.passed === false) {
+			input.score.rank = 'F';
+		}
+
 		if (input.score.rank === 'XH' || input.score.rank === 'X') {
 			ctx.globalAlpha = 1;
 		}
@@ -8339,10 +8343,19 @@ module.exports = {
 		if (input.score.rank === 'F') {
 			//Calculate Completion
 			const beatmapObjects = parseInt(input.beatmap.circles) + parseInt(input.beatmap.sliders) + parseInt(input.beatmap.spinners);
-			let scoreHits = parseInt(input.score.counts[300]) + parseInt(input.score.counts[100]) + parseInt(input.score.counts[50]) + parseInt(input.score.counts.miss);
-			//Mania needs to add geki and katu
-			if (input.mode === 3) {
-				scoreHits = scoreHits + parseInt(input.score.counts.geki) + parseInt(input.score.counts.katu);
+
+			let scoreHits = 0;
+			if (input.score.counts) {
+				scoreHits = parseInt(input.score.counts[300]) + parseInt(input.score.counts[100]) + parseInt(input.score.counts[50]) + parseInt(input.score.counts.miss);
+				//Mania needs to add geki and katu
+				if (input.mode === 3) {
+					scoreHits = scoreHits + parseInt(input.score.counts.geki) + parseInt(input.score.counts.katu);
+				}
+			} else if (input.score.statistics) {
+				scoreHits += input.score.statistics.great || 0;
+				scoreHits += input.score.statistics.ok || 0;
+				scoreHits += input.score.statistics.meh || 0;
+				scoreHits += input.score.statistics.miss || 0;
 			}
 			const completion = 100 / beatmapObjects * scoreHits;
 
