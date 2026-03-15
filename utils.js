@@ -1574,6 +1574,79 @@ module.exports = {
 
 		return responseJson;
 	},
+	async getOsuBeatmapUserScoreV2(input) {
+		const client = input.client;
+		const beatmap = input.beatmap;
+		const osuUserId = input.osuUserId;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!beatmap) {
+			throw new Error('Beatmap is required to get osu! beatmap scores from API v2');
+		}
+
+		if (!osuUserId) {
+			throw new Error('osuUserId is required to get osu! beatmap scores from API v2');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/beatmaps/${beatmap}/scores/users/${osuUserId}`
+		);
+
+		let params = input.params;
+
+		if (params) {
+			Object.keys(params).forEach(key => {
+				if (key === 'legacy_only' && isNaN(params[key]) && params[key] != 0 && params[key] != 1) {
+					throw new Error('Invalid legacy_only value. Must be 0 or 1.');
+				}
+
+				if (key === 'mode' && (params[key] !== 'osu' && params[key] !== 'taiko' && params[key] !== 'fruits' && params[key] !== 'mania')) {
+					throw new Error('Invalid ruleset. Must be "osu", "taiko", "fruits", or "mania".');
+				}
+
+				if (key === 'mods[]' && (!Array.isArray(params[key]) || params[key].some(mod => typeof mod !== 'string'))) {
+					throw new Error('Invalid mods. Must be an array of strings.');
+				}
+
+				if (key !== 'legacy_only' && key !== 'mode' && key !== 'mods[]') {
+					throw new Error(`Invalid parameter: ${key}`);
+				}
+
+				if (key.endsWith('[]')) {
+					params[key].forEach(value => url.searchParams.append(key, value));
+				} else {
+					url.searchParams.append(key, params[key]);
+				}
+			});
+		}
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`,
+			'x-api-version': '20260311'
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		let responseJson = await response.json();
+
+		// Check if the error attribute exists
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! beatmap user score: ${responseJson.error}`);
+		}
+
+		return responseJson;
+	},
 	async getOsuBeatmapUserScoresV2(input) {
 		const client = input.client;
 		const beatmap = input.beatmap;
@@ -1634,7 +1707,7 @@ module.exports = {
 
 		// Check if the error attribute exists
 		if ('error' in responseJson) {
-			throw new Error(`Error fetching osu! beatmap user score: ${responseJson.error}`);
+			throw new Error(`Error fetching osu! beatmap user scores: ${responseJson.error}`);
 		}
 
 		return responseJson;
@@ -1669,21 +1742,24 @@ module.exports = {
 					throw new Error('Invalid mode. Must be "osu", "taiko", "fruits", or "mania".');
 				}
 
-				// mods not implemented yet in the api at this point in time
-				// if (key === 'mods' && (isNaN(params[key]) || params[key] < 1 || params[key] > 100)) {
-				// 	throw new Error('Invalid mods. Must be a number between 1 and 100.');
-				// }
+				if (key === 'mods[]' && (!Array.isArray(params[key]) || params[key].some(mod => typeof mod !== 'string'))) {
+					throw new Error('Invalid mods. Must be an array of strings.');
+				}
 
 				// type not implemented yet in the api at this point in time
 				// if (key === 'type' && (isNaN(params[key]) || params[key] < 0)) {
 				// 	throw new Error('Invalid type. Must be a number greater than or equal to 0.');
 				// }
 
-				if (key !== 'legacy_only' && key !== 'mode') {
+				if (key !== 'legacy_only' && key !== 'mode' && key !== 'mods[]') {
 					throw new Error(`Invalid parameter: ${key}`);
 				}
 
-				url.searchParams.append(key, params[key]);
+				if (key.endsWith('[]')) {
+					params[key].forEach(value => url.searchParams.append(key, value));
+				} else {
+					url.searchParams.append(key, params[key]);
+				}
 			});
 		}
 
@@ -1770,6 +1846,10 @@ module.exports = {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	},
 	getAccuracy(score, mode) {
+		if (score.accuracy) {
+			return score.accuracy;
+		}
+
 		let accuracy = ((score.counts[300] * 100 + score.counts[100] * 33.33 + score.counts[50] * 16.67) / (parseInt(score.counts[300]) + parseInt(score.counts[100]) + parseInt(score.counts[50]) + parseInt(score.counts.miss))) / 100;
 
 		if (mode === 1) {
@@ -4353,6 +4433,11 @@ module.exports = {
 		let beatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: input });
 		if (beatmap) {
 			let mods = module.exports.getMods(input);
+
+			if (isNaN(input)) {
+				mods = input;
+			}
+
 			if (beatmap.mode !== 'Mania') {
 				//double time - halftime
 				if (mods.includes('DT') && mods.includes('HT')) {

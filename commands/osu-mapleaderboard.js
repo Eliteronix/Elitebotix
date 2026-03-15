@@ -1,8 +1,7 @@
 const { DBDiscordUsers, DBOsuMultiGameScores, DBOsuMultiMatches } = require('../dbObjects');
 const Discord = require('discord.js');
-const osu = require('node-osu');
 const Canvas = require('@napi-rs/canvas');
-const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, getBeatmapCover, getAvatar, logOsuAPICalls } = require('../utils');
+const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, getBeatmapCover, getAvatar, getOsuBeatmapScoresV2, getLinkModeName, getOsuBeatmapUserScoreV2 } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
@@ -76,6 +75,21 @@ module.exports = {
 					'de': 'Die Mod-Kombination, die angezeigt werden soll (z. B. alle, NM, HDHR, ...)',
 					'en-GB': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
 					'en-US': 'The mod combination that should be displayed (i.e. all, NM, HDHR, ...)',
+				})
+				.setRequired(false)
+		)
+		.addBooleanOption(option =>
+			option.setName('onlystable')
+				.setNameLocalizations({
+					'de': 'nur-stable',
+					'en-GB': 'onlystable',
+					'en-US': 'onlystable',
+				})
+				.setDescription('Only show scores from stable')
+				.setDescriptionLocalizations({
+					'de': 'Nur Scores von stable anzeigen',
+					'en-GB': 'Only show scores from stable',
+					'en-US': 'Only show scores from stable',
 				})
 				.setRequired(false)
 		)
@@ -162,30 +176,25 @@ module.exports = {
 			}
 		}
 
-		let modBits = 0;
+		let mods = [];
 
 		if (interaction.options.getString('mods')) {
-			modBits = getModBits(interaction.options.getString('mods'));
+			mods = interaction.options.getString('mods').match(/.{1,2}/g);
 		}
 
-		let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(id));
+		let modCompatibility = await checkModsCompatibility(mods, getIDFromPotentialOsuLink(id));
 
 		if (!modCompatibility) {
-			modBits = 0;
+			mods = [];
 		}
+
+		let modBits = getModBits(mods.join(''));
 
 		const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(id), modBits: modBits });
 
 		if (!dbBeatmap) {
 			return await interaction.followUp({ content: `Could not find beatmap \`${id.replace(/`/g, '')}\`.` });
 		}
-
-		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-			completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-			parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-		});
 
 		let mode = dbBeatmap.mode;
 
@@ -203,6 +212,11 @@ module.exports = {
 			mode = 3;
 		}
 
+		let onlyStable = false;
+		if (interaction.options.getBoolean('onlystable')) {
+			onlyStable = interaction.options.getBoolean('onlystable');
+		}
+
 		let scoresArray = [];
 		let userScore = null;
 
@@ -214,35 +228,25 @@ module.exports = {
 		});
 
 		if (server === 'bancho') {
-			let options = {
-				b: dbBeatmap.beatmapId,
-				m: mode,
-			};
-
-			try {
-				if (interaction.options.getString('mods')) {
-					options.mods = modBits;
+			let beatmapScores = await getOsuBeatmapScoresV2({
+				client: interaction.client,
+				beatmap: dbBeatmap.beatmapId,
+				params: {
+					legacy_only: onlyStable ? 1 : 0,
+					mode: getLinkModeName(mode),
+					'mods[]': mods
 				}
+			});
 
-				//TODO: API v2
-				logOsuAPICalls('commands/osu-mapleaderboard.js mapscores');
-				await osuApi.getScores(options)
-					.then(async (mapScores) => {
-						scoresArray = mapScores;
-					});
-			} catch (error) {
-				if (error.message === 'Not found') {
-					return interaction.followUp({ content: 'The map doesn\'t have any submitted scores.' });
-				}
-
-				console.error(error);
-			}
+			scoresArray = beatmapScores.scores;
 
 			for (let i = 0; i < scoresArray.length; i++) {
-				if (user && scoresArray[i].user.id === user.osuUserId) {
+				scoresArray[i].raw_date = scoresArray[i].ended_at;
+
+				if (user && scoresArray[i].user_id == user.osuUserId) {
 					userScore = {
 						score: scoresArray[i],
-						rank: i
+						rank: i + 1
 					};
 					break;
 				}
@@ -250,15 +254,27 @@ module.exports = {
 
 			if (user && !userScore) {
 				try {
-					//TODO: API v2
-					options.u = user.osuUserId;
-					logOsuAPICalls('commands/osu-mapleaderboard.js userScore');
-					await osuApi.getScores(options)
-						.then(async scores => {
-							userScore = { score: scores[0] };
-						});
+					let userBeatmapScore = await getOsuBeatmapUserScoreV2({
+						client: interaction.client,
+						beatmap: dbBeatmap.beatmapId,
+						osuUserId: user.osuUserId,
+						params: {
+							legacy_only: onlyStable ? 1 : 0,
+							mode: getLinkModeName(mode),
+							'mods[]': mods
+						}
+					});
+
+					userScore = {
+						score: userBeatmapScore.score,
+						rank: userBeatmapScore.position,
+					};
+
+					userScore.score.raw_date = userScore.score.ended_at;
 				} catch (error) {
-					// nothing
+					if (error.message !== 'Error fetching osu! beatmap user score: null') {
+						throw console.error(error);
+					}
 				}
 			}
 		} else if (server === 'tournaments') {
@@ -503,6 +519,10 @@ module.exports = {
 
 			let mods = getMods(topScore.raw_mods);
 
+			if (topScore.mods) {
+				mods = topScore.mods.map(mod => mod.acronym);
+			}
+
 			if (mods.includes('HD')) {
 				gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
 				gradeS = await Canvas.loadImage('./other/rank_pictures/SH_Rank.png');
@@ -554,13 +574,18 @@ module.exports = {
 			ctx.textAlign = 'left';
 
 			//total score
-			let score = Number(topScore.score);
+			let score = Number(topScore.score || topScore.legacy_total_score || topScore.total_score);
 			ctx.fillText(`${score.toLocaleString('en-US')}`, 615, 195);
 			// accuracy
-			let accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
+			let accuracy = topScore.accuracy;
+
+			if (!accuracy) {
+				accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
+			}
+
 			ctx.fillText(`${accuracy}%`, 720, 195);
 			// maxCombo
-			ctx.fillText(`${topScore.maxCombo}`, 780, 195);
+			ctx.fillText(`${topScore.maxCombo || topScore.max_combo}`, 780, 195);
 			//mods
 			for (let i = 0; i < mods.length; i++) {
 				const modImage = await Canvas.loadImage(getModImage(mods[i]));
@@ -570,14 +595,25 @@ module.exports = {
 
 			// pp
 			ctx.fillText(`${Math.round(topScore.pp)}`, 675, 232);
-			// miss
-			ctx.fillText(`${topScore.counts['miss']}`, 625, 232);
-			//counts 50
-			ctx.fillText(`${topScore.counts['50']}`, 575, 232);
-			// counts 100
-			ctx.fillText(`${topScore.counts['100']}`, 525, 232);
-			// counts {300}
-			ctx.fillText(`${topScore.counts['300']}`, 475, 232);
+			if (topScore.counts) {
+				// miss
+				ctx.fillText(`${topScore.counts['miss']}`, 625, 232);
+				//counts 50
+				ctx.fillText(`${topScore.counts['50']}`, 575, 232);
+				// counts 100
+				ctx.fillText(`${topScore.counts['100']}`, 525, 232);
+				// counts {300}
+				ctx.fillText(`${topScore.counts['300']}`, 475, 232);
+			} else {
+				// miss
+				ctx.fillText(`${topScore.statistics?.miss || 0}`, 625, 232);
+				//counts 50
+				ctx.fillText(`${topScore.statistics?.meh || 0}`, 575, 232);
+				// counts 100
+				ctx.fillText(`${topScore.statistics?.good || 0}`, 525, 232);
+				// counts {300}
+				ctx.fillText(`${topScore.statistics?.great || 0}`, 475, 232);
+			}
 
 			ctx.font = 'bold 8px comfortaa, arial';
 			ctx.fillStyle = '#898989';
@@ -608,6 +644,11 @@ module.exports = {
 				let topScore = userScore.score;
 				roundedRect(ctx, 50, 255, 800, 80, 500 / 70, '70', '57', '63', 0.75);
 
+				if (!topScore.user) {
+					topScore.user = {};
+					topScore.user.id = topScore.user_id;
+				}
+
 				let topScoreUserImage = await getAvatar(topScore.user.id, interaction.client);
 
 				roundedRect(ctx, 100, 175 + 90, 60.39, 60.39, 500 / 70, '0', '0', '0', 0.75);
@@ -624,6 +665,10 @@ module.exports = {
 				let gradeS;
 
 				let mods = getMods(topScore.raw_mods);
+
+				if (topScore.mods) {
+					mods = topScore.mods.map(mod => mod.acronym);
+				}
 
 				if (mods.includes('HD')) {
 					gradeSS = await Canvas.loadImage('./other/rank_pictures/XH_Rank.png');
@@ -686,13 +731,13 @@ module.exports = {
 				ctx.textAlign = 'left';
 
 				//total score
-				let score = Number(topScore.score);
+				let score = Number(topScore.score || topScore.legacy_total_score || topScore.total_score);
 				ctx.fillText(`${score.toLocaleString('en-US')}`, 615, 195 + 90);
 				// accuracy
 				let accuracy = Math.floor(getAccuracy(topScore, mode) * 100 * 100) / 100;
 				ctx.fillText(`${accuracy}%`, 720, 195 + 90);
 				// maxCombo
-				ctx.fillText(`${topScore.maxCombo}`, 780, 195 + 90);
+				ctx.fillText(`${topScore.maxCombo || topScore.max_combo}`, 780, 195 + 90);
 				//mods
 				for (let i = 0; i < mods.length; i++) {
 					const modImage = await Canvas.loadImage(getModImage(mods[i]));
@@ -702,14 +747,25 @@ module.exports = {
 
 				// pp
 				ctx.fillText(`${Math.round(topScore.pp)}`, 675, 232 + 90);
-				// miss
-				ctx.fillText(`${topScore.counts['miss']}`, 625, 232 + 90);
-				//counts 50
-				ctx.fillText(`${topScore.counts['50']}`, 575, 232 + 90);
-				// counts 100
-				ctx.fillText(`${topScore.counts['100']}`, 525, 232 + 90);
-				// counts {300}
-				ctx.fillText(`${topScore.counts['300']}`, 475, 232 + 90);
+				if (topScore.counts) {
+					// miss
+					ctx.fillText(`${topScore.counts['miss']}`, 625, 232 + 90);
+					//counts 50
+					ctx.fillText(`${topScore.counts['50']}`, 575, 232 + 90);
+					// counts 100
+					ctx.fillText(`${topScore.counts['100']}`, 525, 232 + 90);
+					// counts {300}
+					ctx.fillText(`${topScore.counts['300']}`, 475, 232 + 90);
+				} else {
+					// miss
+					ctx.fillText(`${topScore.statistics?.miss || 0}`, 625, 232 + 90);
+					//counts 50
+					ctx.fillText(`${topScore.statistics?.meh || 0}`, 575, 232 + 90);
+					// counts 100
+					ctx.fillText(`${topScore.statistics?.good || 0}`, 525, 232 + 90);
+					// counts {300}
+					ctx.fillText(`${topScore.statistics?.great || 0}`, 475, 232 + 90);
+				}
 
 				ctx.font = 'bold 8px comfortaa, arial';
 				ctx.fillStyle = '#898989';
@@ -750,7 +806,7 @@ module.exports = {
 				// rank
 				ctx.fillText(`#${i + 1}`, 63, 235.5 + globalOffset + localOffset);
 				// score
-				ctx.fillText(`${Number(scoresArray[i].score).toLocaleString('en-US')}`, 90, 235.5 + globalOffset + localOffset);
+				ctx.fillText(`${Number(scoresArray[i].score || scoresArray[i].legacy_total_score || scoresArray[i].total_score).toLocaleString('en-US')}`, 90, 235.5 + globalOffset + localOffset);
 				// accuracy
 				let accuracy = Math.floor(getAccuracy(scoresArray[i], mode) * 100 * 100) / 100;
 				ctx.fillText(`${accuracy}%`, 160, 235.5 + globalOffset + localOffset);
@@ -760,19 +816,33 @@ module.exports = {
 				}
 				ctx.fillText(`${scoresArray[i].user.name}`, 215, 235.5 + globalOffset + localOffset);
 				// maxCombo
-				ctx.fillText(`${scoresArray[i].maxCombo}`, 380, 235.5 + globalOffset + localOffset);
-				// counts 300
-				ctx.fillText(`${scoresArray[i].counts['300']}`, 475, 235.5 + globalOffset + localOffset);
-				// counts 100
-				ctx.fillText(`${scoresArray[i].counts['100']}`, 525, 235.5 + globalOffset + localOffset);
-				// counts 50
-				ctx.fillText(`${scoresArray[i].counts['50']}`, 575, 235.5 + globalOffset + localOffset);
-				// counts miss
-				ctx.fillText(`${scoresArray[i].counts['miss']}`, 625, 235.5 + globalOffset + localOffset);
+				ctx.fillText(`${scoresArray[i].maxCombo || scoresArray[i].max_combo}`, 380, 235.5 + globalOffset + localOffset);
+				if (scoresArray[i].counts) {
+					// counts 300
+					ctx.fillText(`${scoresArray[i].counts['300']}`, 475, 235.5 + globalOffset + localOffset);
+					// counts 100
+					ctx.fillText(`${scoresArray[i].counts['100']}`, 525, 235.5 + globalOffset + localOffset);
+					// counts 50
+					ctx.fillText(`${scoresArray[i].counts['50']}`, 575, 235.5 + globalOffset + localOffset);
+					// counts miss
+					ctx.fillText(`${scoresArray[i].counts['miss']}`, 625, 235.5 + globalOffset + localOffset);
+				} else {
+					// counts 300
+					ctx.fillText(`${scoresArray[i].statistics?.great || 0}`, 475, 235.5 + globalOffset + localOffset);
+					// counts 100
+					ctx.fillText(`${scoresArray[i].statistics?.good || 0}`, 525, 235.5 + globalOffset + localOffset);
+					// counts 50
+					ctx.fillText(`${scoresArray[i].statistics?.meh || 0}`, 575, 235.5 + globalOffset + localOffset);
+					// counts miss
+					ctx.fillText(`${scoresArray[i].statistics?.miss || 0}`, 625, 235.5 + globalOffset + localOffset);
+				}
 				// pp
 				ctx.fillText(`${Math.round(scoresArray[i].pp)}`, 675, 235.5 + globalOffset + localOffset);
 				// mods
 				let mods = getMods(scoresArray[i].raw_mods);
+				if (scoresArray[i].mods) {
+					mods = scoresArray[i].mods.map(mod => mod.acronym);
+				}
 				for (let j = 0; j < mods.length; j++) {
 					const modImage = await Canvas.loadImage(getModImage(mods[j]));
 					let xOffset = 28;
