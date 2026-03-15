@@ -1157,7 +1157,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			ctx.fillStyle = '#FFCC22';
 			ctx.textAlign = 'right';
 
-			let hits = `${sortedScores[i].statistics?.great || 0}/${sortedScores[i].statistics?.ok || 0}/${sortedScores[i].statistics?.meh || 0}/${sortedScores[i].statistics?.miss || 0}`;
+			let hits = `${sortedScores[i].statistics?.great || sortedScores[i].counts?.[300] || 0}/${sortedScores[i].statistics?.ok || sortedScores[i].counts?.[100] || 0}/${sortedScores[i].statistics?.meh || sortedScores[i].counts?.[50] || 0}/${sortedScores[i].statistics?.miss || sortedScores[i].counts?.['miss'] || 0}`;
 			if (mode === 1) {
 				hits = `${sortedScores[i].statistics?.great || 0}/${sortedScores[i].statistics?.ok || 0}/${sortedScores[i].statistics?.miss || 0}`;
 			} else if (mode === 2) {
