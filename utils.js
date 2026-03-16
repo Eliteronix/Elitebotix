@@ -6771,6 +6771,11 @@ module.exports = {
 															return parseInt(mapRank);
 														}
 													},
+													getBoolean: (string) => {
+														if (string === 'onlyStable') {
+															return false;
+														}
+													}
 												},
 												deferReply: () => { },
 												followUp: async (input) => {
