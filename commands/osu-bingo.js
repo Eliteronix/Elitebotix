@@ -768,7 +768,7 @@ module.exports = {
 		// Refresh the message every 30 seconds
 		let interval = setInterval(async () => {
 			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart, includeLazer);
 
 				let winningTeam = await checkWin(mappool, gracePeriod, gameStart);
 				if (winningTeam) {
@@ -883,7 +883,7 @@ module.exports = {
 
 		refreshCollector.on('collect', async (reaction, user) => {
 			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart, includeLazer);
 			}
 
 			// Remove the reaction unless its the bot
@@ -1076,7 +1076,7 @@ async function refreshMessage(message, mappool, lastRefresh, gracePeriod, maximu
 	}
 }
 
-async function refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart) {
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart, includeLazer) {
 	lastRefresh.date = new Date();
 
 	let winningTeam = checkWin(mappool, gracePeriod, gameStart);
@@ -1099,6 +1099,12 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 			let scoreDate = new Date(recentScores[j].ended_at);
 			scoreDate.setUTCMinutes(scoreDate.getUTCMinutes() - new Date().getTimezoneOffset());
 
+			let score = recentScores[j].legacy_total_score;
+
+			if (includeLazer) {
+				score = recentScores[j].total_score;
+			}
+
 			if (scoreDate > matchStart) {
 				for (let k = 0; k < mappool.length && !winningTeam; k++) {
 					if (mappool[k].beatmapId === recentScores[j].beatmap.id) {
@@ -1107,12 +1113,12 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 							|| requirement === 'Pass') {
 							if (!recentScores[j].mods.map(mod => mod.acronym).includes('NF') && !recentScores[j].mods.map(mod => mod.acronym).includes('HT')) {
 								if (mappool[k].score) {
-									if (mappool[k].score < Number(recentScores[j].legacy_total_score)) {
+									if (mappool[k].score < score) {
 										newScores.push({
 											scoreDate: scoreDate,
 											mappoolIndex: k,
 											userIndex: i,
-											score: Number(recentScores[j].legacy_total_score),
+											score: score,
 											maxCombo: recentScores[j].max_combo,
 										});
 
@@ -1127,7 +1133,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 										scoreDate: scoreDate,
 										mappoolIndex: k,
 										userIndex: i,
-										score: Number(recentScores[j].legacy_total_score),
+										score: score,
 										maxCombo: recentScores[j].max_combo,
 									});
 
