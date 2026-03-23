@@ -162,6 +162,21 @@ module.exports = {
 				.setRequired(false)
 				.setMinValue(0)
 		)
+		.addIntegerOption(option =>
+			option.setName('includelazer')
+				.setNameLocalizations({
+					'de': 'inkludierelazer',
+					'en-GB': 'includelazer',
+					'en-US': 'includelazer',
+				})
+				.setDescription('Include scores set on osu!lazer (off by default; automatically changes to lazer scoring)')
+				.setDescriptionLocalizations({
+					'de': 'Inklusive Scores, aus osu!lazer (standardmäßig deaktiviert; ändert automatisch zu lazer scoring)',
+					'en-GB': 'Include scores set on osu!lazer (off by default; automatically changes to lazer scoring)',
+					'en-US': 'Include scores set on osu!lazer (off by default; automatically changes to lazer scoring)',
+				})
+				.setRequired(false)
+		)
 		.addUserOption(option =>
 			option.setName('player1team3')
 				.setNameLocalizations({
@@ -492,6 +507,12 @@ module.exports = {
 
 		if (interaction.options.getInteger('maximumgametime')) {
 			maximumGameTime = interaction.options.getInteger('maximumgametime');
+		}
+
+		let includeLazer = false;
+
+		if (interaction.options.getInteger('includelazer')) {
+			includeLazer = true;
 		}
 
 		//Cross check that commandUser.userId, teammates and opponents are all unique
