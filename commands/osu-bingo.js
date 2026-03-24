@@ -1107,7 +1107,7 @@ async function refreshStandings(message, mappool, everyUser, matchStart, require
 
 			if (scoreDate > matchStart) {
 				for (let k = 0; k < mappool.length && !winningTeam; k++) {
-					if (mappool[k].beatmapId === recentScores[j].beatmap.id) {
+					if (mappool[k].beatmapId == recentScores[j].beatmap.id) {
 						if (requirement === 'S' && (recentScores[j].rank.startsWith('S') || recentScores[j].rank.startsWith('X') || recentScores[j].rank === 'SH' || recentScores[j].rank === 'XH')
 							|| requirement === 'A' && (recentScores[j].rank === 'A' || recentScores[j].rank.startsWith('S') || recentScores[j].rank.startsWith('X') || recentScores[j].rank === 'SH' || recentScores[j].rank === 'XH')
 							|| requirement === 'Pass') {
