@@ -1,11 +1,10 @@
-const { populateMsgFromInteraction, getOsuUserServerMode, pause, getMods, humanReadable, getMapListCover, logOsuAPICalls } = require('../utils');
+const { populateMsgFromInteraction, getOsuUserServerMode, pause, humanReadable, getMapListCover, getOsuProfileScoresV2 } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
 const { Op } = require('sequelize');
 const { DBOsuBeatmaps, DBDiscordUsers } = require('../dbObjects');
 const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
-const osu = require('node-osu');
 const fs = require('fs');
 
 module.exports = {
@@ -161,6 +160,21 @@ module.exports = {
 				})
 				.setRequired(false)
 				.setMinValue(0)
+		)
+		.addIntegerOption(option =>
+			option.setName('includelazer')
+				.setNameLocalizations({
+					'de': 'inkludierelazer',
+					'en-GB': 'includelazer',
+					'en-US': 'includelazer',
+				})
+				.setDescription('Include scores set on osu!lazer (off by default; automatically changes to lazer scoring)')
+				.setDescriptionLocalizations({
+					'de': 'Inklusive Scores, aus osu!lazer (standardmäßig deaktiviert; ändert automatisch zu lazer scoring)',
+					'en-GB': 'Include scores set on osu!lazer (off by default; automatically changes to lazer scoring)',
+					'en-US': 'Include scores set on osu!lazer (off by default; automatically changes to lazer scoring)',
+				})
+				.setRequired(false)
 		)
 		.addUserOption(option =>
 			option.setName('player1team3')
@@ -494,6 +508,12 @@ module.exports = {
 			maximumGameTime = interaction.options.getInteger('maximumgametime');
 		}
 
+		let includeLazer = false;
+
+		if (interaction.options.getInteger('includelazer')) {
+			includeLazer = true;
+		}
+
 		//Cross check that commandUser.userId, teammates and opponents are all unique
 		const allUsers = [...team1, ...team2, ...team3, ...team4, ...team5];
 		const uniqueUsers = [...new Set(allUsers)];
@@ -748,7 +768,7 @@ module.exports = {
 		// Refresh the message every 30 seconds
 		let interval = setInterval(async () => {
 			if (lastRefresh.date.getTime() + 30000 < new Date().getTime()) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart, includeLazer);
 
 				let winningTeam = await checkWin(mappool, gracePeriod, gameStart);
 				if (winningTeam) {
@@ -863,7 +883,7 @@ module.exports = {
 
 		refreshCollector.on('collect', async (reaction, user) => {
 			if (reaction.emoji.name === '🔄' && allUsers.includes(user.id)) {
-				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart);
+				await refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart, includeLazer);
 			}
 
 			// Remove the reaction unless its the bot
@@ -1056,79 +1076,79 @@ async function refreshMessage(message, mappool, lastRefresh, gracePeriod, maximu
 	}
 }
 
-async function refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart) {
+async function refreshStandings(message, mappool, everyUser, matchStart, requirement, lastRefresh, gracePeriod, maximumGameTime, gameStart, includeLazer) {
 	lastRefresh.date = new Date();
-
-	const osuApi = new osu.Api(process.env.OSUTOKENV1, {
-		// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
-		notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
-		completeScores: false, // When fetching scores also fetch the beatmap they are for (Allows getting accuracy) (default: false)
-		parseNumeric: false // Parse numeric values into numbers/floats, excluding ids
-	});
 
 	let winningTeam = checkWin(mappool, gracePeriod, gameStart);
 
 	let newScores = [];
 
 	for (let i = 0; i < everyUser.length && !winningTeam; i++) {
-		//TODO: API v2
-		logOsuAPICalls('commands/osu-bingo.js');
-		await osuApi.getUserRecent({ u: everyUser[i].osuUserId, m: 0, limit: 10 })
-			.then(async (scores) => {
-				for (let j = 0; j < scores.length && !winningTeam; j++) {
-					let scoreDate = new Date(scores[j].raw_date);
-					scoreDate.setUTCMinutes(scoreDate.getUTCMinutes() - new Date().getTimezoneOffset());
+		let recentScores = await getOsuProfileScoresV2({
+			client: message.client,
+			osuUserId: everyUser[i].osuUserId,
+			type: 'recent',
+			params: {
+				limit: 10,
+				mode: 'osu',
+				include_fails: 0,
+			}
+		});
 
-					if (scoreDate > matchStart) {
-						for (let k = 0; k < mappool.length && !winningTeam; k++) {
-							if (mappool[k].beatmapId === scores[j].beatmapId) {
-								if (requirement === 'S' && (scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X') || scores[j].rank === 'SH' || scores[j].rank === 'XH')
-									|| requirement === 'A' && (scores[j].rank === 'A' || scores[j].rank.startsWith('S') || scores[j].rank.startsWith('X') || scores[j].rank === 'SH' || scores[j].rank === 'XH')
-									|| requirement === 'Pass' && scores[j].rank !== 'F') {
-									if (!getMods(scores[j].raw_mods).includes('NF') && !getMods(scores[j].raw_mods).includes('HT')) {
-										if (mappool[k].score) {
-											if (mappool[k].score < Number(scores[j].score)) {
-												newScores.push({
-													scoreDate: scoreDate,
-													mappoolIndex: k,
-													userIndex: i,
-													score: Number(scores[j].score),
-													maxCombo: scores[j].maxCombo,
-												});
+		for (let j = 0; j < recentScores.length && !winningTeam; j++) {
+			let scoreDate = new Date(recentScores[j].ended_at);
+			scoreDate.setUTCMinutes(scoreDate.getUTCMinutes() - new Date().getTimezoneOffset());
 
-												if (getMods(scores[j].raw_mods).length === 0) {
-													newScores[newScores.length - 1].mods = 'NM';
-												} else {
-													newScores[newScores.length - 1].mods = getMods(scores[j].raw_mods).join('');
-												}
-											}
+			let score = recentScores[j].legacy_total_score;
+
+			if (includeLazer) {
+				score = recentScores[j].total_score;
+			}
+
+			if (scoreDate > matchStart) {
+				for (let k = 0; k < mappool.length && !winningTeam; k++) {
+					if (mappool[k].beatmapId == recentScores[j].beatmap.id) {
+						if (requirement === 'S' && (recentScores[j].rank.startsWith('S') || recentScores[j].rank.startsWith('X') || recentScores[j].rank === 'SH' || recentScores[j].rank === 'XH')
+							|| requirement === 'A' && (recentScores[j].rank === 'A' || recentScores[j].rank.startsWith('S') || recentScores[j].rank.startsWith('X') || recentScores[j].rank === 'SH' || recentScores[j].rank === 'XH')
+							|| requirement === 'Pass') {
+							if (!recentScores[j].mods.map(mod => mod.acronym).includes('NF') && !recentScores[j].mods.map(mod => mod.acronym).includes('HT')) {
+								if (mappool[k].score) {
+									if (mappool[k].score < score) {
+										newScores.push({
+											scoreDate: scoreDate,
+											mappoolIndex: k,
+											userIndex: i,
+											score: score,
+											maxCombo: recentScores[j].max_combo,
+										});
+
+										if (recentScores[j].mods.length === 0) {
+											newScores[newScores.length - 1].mods = 'NM';
 										} else {
-											newScores.push({
-												scoreDate: scoreDate,
-												mappoolIndex: k,
-												userIndex: i,
-												score: Number(scores[j].score),
-												maxCombo: scores[j].maxCombo,
-											});
-
-											if (getMods(scores[j].raw_mods).length === 0) {
-												newScores[newScores.length - 1].mods = 'NM';
-											} else {
-												newScores[newScores.length - 1].mods = getMods(scores[j].raw_mods).join('');
-											}
+											newScores[newScores.length - 1].mods = recentScores[j].mods.map(mod => mod.acronym).join('');
 										}
+									}
+								} else {
+									newScores.push({
+										scoreDate: scoreDate,
+										mappoolIndex: k,
+										userIndex: i,
+										score: score,
+										maxCombo: recentScores[j].max_combo,
+									});
+
+									if (recentScores[j].mods.length === 0) {
+										newScores[newScores.length - 1].mods = 'NM';
+									} else {
+										newScores[newScores.length - 1].mods = recentScores[j].mods.map(mod => mod.acronym).join('');
 									}
 								}
 							}
 						}
 					}
 				}
-			})
-			.catch(err => {
-				if (err.message !== 'Not found') {
-					console.error(err);
-				}
-			});
+			}
+		}
 
 		await pause(1000);
 	}
