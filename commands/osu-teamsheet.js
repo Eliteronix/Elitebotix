@@ -1,7 +1,7 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuTeamSheets, DBOsuPoolAccess, DBOsuMultiGameScores } = require('../dbObjects');
-const { pause, getAvatar, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls } = require('../utils');
+const { pause, getAvatar, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls, getOsuBeatmapUserScoresV2, getModBits } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('@napi-rs/canvas');
 const osu = require('node-osu');
@@ -719,80 +719,35 @@ module.exports = {
 				}
 
 				if (!['Graveyard', 'WIP', 'Pending'].includes(tourneyMaps[j].approvalStatus)) {
-					//TODO: API v2
-					logOsuAPICalls('commands/osu-teamsheet.js getScores');
-					await osuApi.getScores({ b: tourneyMaps[j].beatmapId, u: players[i].osuUserId, m: 0 })
-						.then(async mapScores => {
-							if (mapScores.length === 0) {
-								return null;
-							}
+					let userBeatmapScores = await getOsuBeatmapUserScoresV2({
+						client: interaction.client,
+						beatmap: tourneyMaps[j].beatmapId,
+						osuUserId: players[i].osuUserId,
+						params: {
+							legacy_only: 0,
+							ruleset: 'osu',
+						}
+					});
 
-							for (let k = 0; k < mapScores.length; k++) {
-								let multiplier = 1;
+					userBeatmapScores.scores.sort((a, b) => b.total_score - a.total_score);
 
-								let mods = getMods(mapScores[k].raw_mods);
+					userBeatmapScores.scores = userBeatmapScores.scores.map(score => {
+						return {
+							beatmapId: tourneyMaps[j].beatmapId,
+							score: score.total_score,
+							beatmapHash: tourneyMaps[j].hash,
+							mods: getModBits(score.mods.map(mod => mod.acronym).join('')),
+							count50: score.statistics.meh || 0,
+							count100: score.statistics.ok || 0,
+							count300: score.statistics.great || 0,
+							countMiss: score.statistics.miss || 0,
+							scoringType: 'solo lazer scoring'
+						};
+					});
 
-								if (mods.includes('DT') || mods.includes('NC')) {
-									multiplier *= 1.2;
-								}
+					userBeatmapScores.scores = userBeatmapScores.scores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool));
 
-								if (mods.includes('HT')) {
-									multiplier *= 0.3;
-								}
-
-								if (mods.includes('FL')) {
-									multiplier *= 1.12;
-
-									multiplier *= flmultiplier;
-								}
-
-								if (mods.includes('HD')) {
-									multiplier *= 1.06;
-								}
-
-								if (mods.includes('HR')) {
-									multiplier *= 1.10;
-								}
-
-								if (mods.includes('EZ')) {
-									multiplier *= 0.5;
-
-									multiplier *= ezmultiplier;
-								}
-
-								if (mods.includes('S0')) {
-									multiplier *= 0.9;
-								}
-
-								// Score = ((700000 * combo_bonus / max_combo_bonus) + (300000 * ((accuracy_percentage / 100) ^ 10)) * mod_multiplier
-								mapScores[k].convertedScore = Math.round((700000 * mapScores[k].maxCombo / tourneyMaps[j].maxCombo) + (300000 * Math.pow(getAccuracy(mapScores[k]), 10)) * multiplier);
-							}
-
-							mapScores.sort((a, b) => b.convertedScore - a.convertedScore);
-
-							mapScores = mapScores.map(score => {
-								return {
-									beatmapId: tourneyMaps[j].beatmapId,
-									score: score.convertedScore,
-									beatmapHash: tourneyMaps[j].hash,
-									mods: score.raw_mods,
-									count50: score.counts[50],
-									count100: score.counts[100],
-									count300: score.counts[300],
-									countMiss: score.counts.miss,
-									scoringType: 'Converted'
-								};
-							});
-
-							mapScores = mapScores.filter(score => scoreIsCorrectMods(score, tourneyMaps[j].modPool));
-
-							tourneyMaps[j].scores[i] = tourneyMaps[j].scores[i].concat(mapScores);
-						})
-						.catch(async err => {
-							if (err.message !== 'Not found') {
-								console.error(err);
-							}
-						});
+					tourneyMaps[j].scores[i] = tourneyMaps[j].scores[i].concat(userBeatmapScores.scores);
 
 					scores = tourneyMaps[j].scores[i].filter(score => score.beatmapHash === tourneyMaps[j].hash);
 				}
@@ -1041,9 +996,9 @@ module.exports = {
 					ctx.fillStyle = colour;
 					ctx.fillRect(604 + 400 * j, 4 + 100 * (i + 1) + (k * 33), 150, 33);
 
-					if (playerScores[k].scoringType === 'Converted') {
-						if (!legendItems.includes('Converted')) {
-							legendItems.push('Converted');
+					if (playerScores[k].scoringType === 'solo lazer scoring') {
+						if (!legendItems.includes('solo lazer scoring')) {
+							legendItems.push('solo lazer scoring');
 						}
 
 						// Draw a purple rectangle
@@ -1278,8 +1233,8 @@ module.exports = {
 			let text = null;
 			let colour = null;
 
-			if (legendItems[i] === 'Converted') {
-				text = 'Converted v1 Score';
+			if (legendItems[i] === 'solo lazer scoring') {
+				text = 'Solo with Lazer Scoring';
 				colour = '#A800FF';
 			} else if (legendItems[i] === 'Estimated') {
 				text = 'Estimated by player';
