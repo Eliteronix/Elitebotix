@@ -6448,6 +6448,7 @@ module.exports = {
 
 				if (!randomBeatmapHD) {
 					beatmaps.splice(index, 1);
+					input.alreadyCheckedOther.push(beatmapId);
 					continue;
 				}
 
@@ -6458,6 +6459,7 @@ module.exports = {
 
 				if (!randomBeatmapHR) {
 					beatmaps.splice(index, 1);
+					input.alreadyCheckedOther.push(beatmapId);
 					continue;
 				}
 
