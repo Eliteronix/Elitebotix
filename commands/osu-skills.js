@@ -323,7 +323,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 				//Add and count mods
 				let modAdded = false;
 				for (let j = 0; j < mods.length && !modAdded; j++) {
-					if (mods[j].mods === topScores[i].mods.join('')) {
+					if (mods[j].mods === topScores[i].mods.map(mod => mod.acronym).join('')) {
 						mods[j].amount++;
 						modAdded = true;
 					}
@@ -331,8 +331,8 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 
 				if (!modAdded) {
 					const modObject = {
-						mods: topScores[i].mods.join(''),
-						modsReadable: topScores[i].mods.join(''),
+						mods: topScores[i].mods.map(mod => mod.acronym).join(''),
+						modsReadable: topScores[i].mods.map(mod => mod.acronym).join(''),
 						amount: 1
 					};
 
