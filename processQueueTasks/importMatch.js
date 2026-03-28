@@ -101,7 +101,17 @@ module.exports = {
 					tourneyMatch = 1;
 				}
 
-				if (playedRounds) {
+				let players = [];
+
+				for (let i = 0; i < match.games.length; i++) {
+					for (let j = 0; j < match.games[i].scores.length; j++) {
+						if (players.indexOf(match.games[i].scores[j].userId) === -1) {
+							players.push(match.games[i].scores[j].userId);
+						}
+					}
+				}
+
+				if (playedRounds > 0 && players.length > 0) {
 					let importTasks = await DBProcessQueue.count({
 						where: {
 							task: 'importMatch',
@@ -109,16 +119,6 @@ module.exports = {
 					});
 
 					let seconds = 180 + importTasks * 20;
-
-					let players = [];
-
-					for (let i = 0; i < match.games.length; i++) {
-						for (let j = 0; j < match.games[i].scores.length; j++) {
-							if (players.indexOf(match.games[i].scores[j].userId) === -1) {
-								players.push(match.games[i].scores[j].userId);
-							}
-						}
-					}
 
 					processQueueEntry.additions = `${matchId};${tourneyMatch};${Date.parse(match.raw_start)};${match.name};${players.join(',')}`;
 
