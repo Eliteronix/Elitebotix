@@ -3343,14 +3343,14 @@ module.exports = {
 							return false;
 						}
 
-						// send a birthday gif from tenor 
+						// send a birthday gif from giphy 
 						let index;
 						const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-						const birthdayGif = await fetch(`https://api.tenor.com/v1/search?q=anime_birthday&key=${process.env.TENORTOKEN}&limit=30&contentfilter=medium`)
+						const birthdayGif = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHYTOKEN}&q=birthday&limit=30&offset=0&rating=g&lang=en`)
 							.then(async (res) => {
 								let gifs = await res.json();
-								index = Math.floor(Math.random() * gifs.results.length);
-								return gifs.results[index].media[0].gif.url;
+								index = Math.floor(Math.random() * gifs.data.length);
+								return gifs.data[index].url;
 							});
 
 						// send the birthday message

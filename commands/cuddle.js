@@ -135,12 +135,12 @@ module.exports = {
 		}
 
 		users.forEach(async (user) => {
-			let url = `https://g.tenor.com/v1/search?q=cuddle%20anime&key=${process.env.TENORTOKEN}&contentfilter=high`;
+			let url = `https://api.giphy.com/v1/gifs/search?api_key=${process.env.GIPHYTOKEN}&q=cuddle%20anime&limit=30&offset=0&rating=g&lang=en`;
 			let response = await fetch(url);
 			let json = await response.json();
-			const index = Math.floor(Math.random() * json.results.length);
+			const index = Math.floor(Math.random() * json.data.length);
 
-			return interaction.followUp(`<@${interaction.user.id}> has cuddled <@${user.id}>\n${json.results[index].url}`);
+			return interaction.followUp(`<@${interaction.user.id}> has cuddled <@${user.id}>\n${json.data[index].url}`);
 		});
 	},
 };
