@@ -2350,7 +2350,7 @@ module.exports = {
 							return Math.abs(ownRating - parseFloat(task.additions.split(';')[1])) < 1;
 						});
 
-						return await interaction.editReply(`You are already in the queue for a 1v1 duel. There are ${existingQueueTasks.length - 1} opponents in the queue (${tasksInReach.length - 1} in reach).`);
+						return await interaction.editReply(`You are already in the queue for a 1v1 duel. There are ${existingQueueTasks.length - 1} opponents in the queue (${tasksInReach.length - 1} in reach). \nIf you want to leave the queue use </osu-duel queue1v1-leave:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}>.`);
 					}
 				}
 
@@ -2383,7 +2383,7 @@ module.exports = {
 							return Math.abs(ownRating - parseFloat(task.additions.split(';')[1])) < 1;
 						});
 
-						return await interaction.editReply(`You are already in the queue for a 1v1 duel. There are ${existingQueueTasks.length - 1} opponents in the queue (${tasksInReach.length - 1} in reach).`);
+						return await interaction.editReply(`You are already in the queue for a 1v1 duel. There are ${existingQueueTasks.length - 1} opponents in the queue (${tasksInReach.length - 1} in reach). \nIf you want to leave the queue use </osu-duel queue1v1-leave:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}>.`);
 					}
 				}
 
@@ -2401,7 +2401,7 @@ module.exports = {
 					return Math.abs(ownStarRating - parseFloat(task.additions.split(';')[1])) < 1;
 				});
 
-				return await interaction.editReply(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach).`);
+				return await interaction.editReply(`You are now queued up for a 1v1 duel. There are ${existingQueueTasks.length} opponents in the queue (${tasksInReach.length} in reach). \nIf you want to leave the queue use </osu-duel queue1v1-leave:${interaction.client.slashCommandData.find(command => command.name === 'osu-duel').id}>.`);
 			} else if (interaction.options._subcommand === 'queue1v1-leave') {
 				try {
 					await interaction.deferReply({ flags: MessageFlags.Ephemeral });
