@@ -4149,24 +4149,31 @@ module.exports = {
 				if (input.client) {
 					try {
 						let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
+							const formatRatingChange = (label, oldValue, newValue) => {
+								let oldRounded = Math.round(oldValue * 1000) / 1000;
+								let newRounded = Math.round(newValue * 1000) / 1000;
+								let delta = Math.round((newRounded - oldRounded) * 1000) / 1000;
+								let deltaPrefix = delta >= 0 ? '+' : '';
+								return `${label}: ${oldRounded.toFixed(3)} -> ${newRounded.toFixed(3)} (${deltaPrefix}${delta.toFixed(3)})`;
+							};
 						if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
-							message.push(`SR: ${Math.round(discordUser.osuDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.total * 1000) / 1000}`);
+							message.push(formatRatingChange('SR', discordUser.osuDuelStarRating, duelRatings.total));
 							message.push(`Ratio: ${modPoolAmounts[0]} NM | ${modPoolAmounts[1]} HD | ${modPoolAmounts[2]} HR | ${modPoolAmounts[3]} DT | ${modPoolAmounts[4]} FM`);
 						}
 						if (Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.noMod * 1000) / 1000) {
-							message.push(`NM: ${Math.round(discordUser.osuNoModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.noMod * 1000) / 1000}`);
+							message.push(formatRatingChange('NM', discordUser.osuNoModDuelStarRating, duelRatings.noMod));
 						}
 						if (Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hidden * 1000) / 1000) {
-							message.push(`HD: ${Math.round(discordUser.osuHiddenDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hidden * 1000) / 1000}`);
+							message.push(formatRatingChange('HD', discordUser.osuHiddenDuelStarRating, duelRatings.hidden));
 						}
 						if (Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.hardRock * 1000) / 1000) {
-							message.push(`HR: ${Math.round(discordUser.osuHardRockDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.hardRock * 1000) / 1000}`);
+							message.push(formatRatingChange('HR', discordUser.osuHardRockDuelStarRating, duelRatings.hardRock));
 						}
 						if (Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.doubleTime * 1000) / 1000) {
-							message.push(`DT: ${Math.round(discordUser.osuDoubleTimeDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.doubleTime * 1000) / 1000}`);
+							message.push(formatRatingChange('DT', discordUser.osuDoubleTimeDuelStarRating, duelRatings.doubleTime));
 						}
 						if (Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.freeMod * 1000) / 1000) {
-							message.push(`FM: ${Math.round(discordUser.osuFreeModDuelStarRating * 1000) / 1000} -> ${Math.round(duelRatings.freeMod * 1000) / 1000}`);
+							message.push(formatRatingChange('FM', discordUser.osuFreeModDuelStarRating, duelRatings.freeMod));
 						}
 						if (discordUser.osuDuelProvisional !== duelRatings.provisional) {
 							message.push(`Provisional: ${discordUser.osuDuelProvisional} -> ${duelRatings.provisional}`);
