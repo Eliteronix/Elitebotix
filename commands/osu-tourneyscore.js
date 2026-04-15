@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const { DBOsuMultiMatches, DBOsuMultiGameScores, DBDiscordUsers } = require('../dbObjects');
 const { createLeaderboard, getMods, getOsuPlayerName } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { showUnknownInteractionError } = require('../config.json');
+const { showUnknownInteractionError, leaderboardEntriesPerPage } = require('../config.json');
 
 module.exports = {
     name: 'osu-tourneyscore',
@@ -214,7 +214,7 @@ module.exports = {
 
         replyMessage += `\nPlayers were judged across the whole tournament making players that play more often more valuable. (Middle ground between all-rounders and niche players)\nAnalyzed ${tournamentMatches.length} matches and ${allScores.length} scores.`;
 
-        const totalPages = Math.max(1, Math.ceil(leaderboardData.length / 48));
+        const totalPages = Math.max(1, Math.ceil(leaderboardData.length / leaderboardEntriesPerPage));
         let page = interaction.options.getInteger('page') || 1;
 
         if (page < 1) {
