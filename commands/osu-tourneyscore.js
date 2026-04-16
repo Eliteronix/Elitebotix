@@ -42,6 +42,26 @@ module.exports = {
                 })
                 .setRequired(true)
         )
+        .addStringOption(option =>
+			option.setName('calculation')
+				.setNameLocalizations({
+					'de': 'berechnung',
+					'en-GB': 'calculation',
+					'en-US': 'calculation',
+				})
+				.setDescription('How the matchscore should be calculated')
+				.setDescriptionLocalizations({
+					'de': 'Wie die Matchwertung berechnet werden soll',
+					'en-GB': 'How the matchscore should be calculated',
+					'en-US': 'How the matchscore should be calculated',
+				})
+				.setRequired(false)
+				.addChoices(
+					{ name: 'Mixed (Default)', value: 'mixed' },
+					{ name: 'Sum (favors all-rounders)', value: 'sum' },
+					{ name: 'Average (favors niche players)', value: 'avg' },
+				)
+		)
         .addIntegerOption(option =>
             option.setName('page')
                 .setNameLocalizations({
@@ -78,6 +98,11 @@ module.exports = {
         });
 
         const acronym = interaction.options.getString('acronym');
+        let calculation = 'mixed';
+
+        if (interaction.options.getString('calculation')) {
+            calculation = interaction.options.getString('calculation');
+        }
 
         const tournamentMatches = await DBOsuMultiMatches.findAll({
             attributes: ['matchId', 'matchName'],
@@ -176,9 +201,24 @@ module.exports = {
             return await interaction.editReply('No rounds with at least 2 players found in the tournament data.');
         }
 
-        for (let i = 0; i < playerTourneyResults.length; i++) {
-            playerTourneyResults[i].score = playerTourneyResults[i].score / playerTourneyResults[i].playedRounds;
-            playerTourneyResults[i].score = playerTourneyResults[i].score * (0.8 + 0.2 * playerTourneyResults[i].playedRounds);
+        let valueType = 'summed';
+        let valueHint = 'Players were judged across the whole tournament making players that play more often more valuable. (Favors all-rounders)';
+
+        if (calculation === 'avg') {
+            for (let i = 0; i < playerTourneyResults.length; i++) {
+                playerTourneyResults[i].score = playerTourneyResults[i].score / playerTourneyResults[i].playedRounds;
+            }
+
+            valueType = 'average';
+            valueHint = 'Players were judged across only the maps they played making players that play less often more valuable. (Favors niche players)';
+        } else if (calculation === 'mixed') {
+            for (let i = 0; i < playerTourneyResults.length; i++) {
+                playerTourneyResults[i].score = playerTourneyResults[i].score / playerTourneyResults[i].playedRounds;
+                playerTourneyResults[i].score = playerTourneyResults[i].score * (0.8 + 0.2 * playerTourneyResults[i].playedRounds);
+            }
+
+            valueType = 'mixed';
+            valueHint = 'Players were judged across the whole tournament making players that play more often more valuable. (Middle ground between all-rounders and niche players)';
         }
 
         playerTourneyResults.sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
@@ -199,7 +239,7 @@ module.exports = {
         for (let i = 0; i < playerTourneyResults.length; i++) {
             leaderboardData.push({
                 name: `${await getOsuPlayerName(playerTourneyResults[i].userId)}`,
-                value: `${Math.round(playerTourneyResults[i].score * 100) / 100} mixed over ${playerTourneyResults[i].playedRounds} maps (${playerTourneyResults[i].wins}x #1)`,
+                value: `${Math.round(playerTourneyResults[i].score * 100) / 100} ${valueType} over ${playerTourneyResults[i].playedRounds} maps (${playerTourneyResults[i].wins}x #1)`,
             });
         }
 
@@ -208,11 +248,11 @@ module.exports = {
         if (discordUser && discordUser.osuUserId) {
             const playerResult = playerTourneyResults.find(score => score.userId == discordUser.osuUserId);
             if (playerResult) {
-                replyMessage += `\n**${await getOsuPlayerName(discordUser.osuUserId)}**' score: **${Math.round(playerResult.score * 100) / 100}** mixed over **${playerResult.playedRounds}** maps **(${playerResult.wins}x #1**). Position: **#${playerTourneyResults.findIndex(score => score.userId == discordUser.osuUserId) + 1}**`;
+                replyMessage += `\n**${await getOsuPlayerName(discordUser.osuUserId)}**' score: **${Math.round(playerResult.score * 100) / 100}** ${valueType} over **${playerResult.playedRounds}** maps **(${playerResult.wins}x #1**). Position: **#${playerTourneyResults.findIndex(score => score.userId == discordUser.osuUserId) + 1}**`;
             }
         }
 
-        replyMessage += `\nPlayers were judged across the whole tournament making players that play more often more valuable. (Middle ground between all-rounders and niche players)\nAnalyzed ${tournamentMatches.length} matches and ${allScores.length} scores.`;
+        replyMessage += `\n${valueHint}\nAnalyzed **${tournamentMatches.length}** matches and **${allScores.length}** scores.`;
 
         const totalPages = Math.max(1, Math.ceil(leaderboardData.length / leaderboardEntriesPerPage));
         let page = interaction.options.getInteger('page') || 1;
@@ -238,7 +278,7 @@ module.exports = {
 
             if (page > 1) {
                 const firstPage = new ButtonBuilder()
-                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","page":1}`)
+                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","calculation":"${calculation}","page":1}`)
                     .setLabel('First page')
                     .setStyle(ButtonStyle.Primary);
                 row.addComponents(firstPage);
@@ -246,7 +286,7 @@ module.exports = {
 
             if (page > 2) {
                 const previousPage = new ButtonBuilder()
-                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","page":${page - 1}}`)
+                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","calculation":"${calculation}","page":${page - 1}}`)
                     .setLabel('Previous page')
                     .setStyle(ButtonStyle.Primary);
                 row.addComponents(previousPage);
@@ -254,7 +294,7 @@ module.exports = {
 
             if (page < totalPages - 1) {
                 const nextPage = new ButtonBuilder()
-                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","page":${page + 1}}`)
+                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","calculation":"${calculation}","page":${page + 1}}`)
                     .setLabel('Next page')
                     .setStyle(ButtonStyle.Primary);
                 row.addComponents(nextPage);
@@ -262,7 +302,7 @@ module.exports = {
 
             if (page < totalPages) {
                 const lastPage = new ButtonBuilder()
-                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","page":${totalPages}}`)
+                    .setCustomId(`osu-tourneyscore||{"acronym":"${acronym.replace(/"/g, '\\"')}","calculation":"${calculation}","page":${totalPages}}`)
                     .setLabel('Last page')
                     .setStyle(ButtonStyle.Primary);
                 row.addComponents(lastPage);
