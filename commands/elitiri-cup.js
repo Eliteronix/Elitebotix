@@ -123,7 +123,7 @@ module.exports = {
 
 					await DBElitiriCupSignUp.create({
 						userId: msg.author.id,
-						discordTag: `${msg.author.username}#${msg.author.discriminator}`,
+						discordTag: `${msg.author.username}`,
 						osuUserId: discordUser.osuUserId,
 						osuName: discordUser.osuName,
 						osuBadges: discordUser.osuBadges,

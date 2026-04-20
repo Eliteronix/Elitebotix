@@ -87,7 +87,7 @@ module.exports = {
 				const viabilityEmbed = new Discord.EmbedBuilder()
 					.setColor('#00FF00')
 					.setTitle(`The Beatmap is viable for the tournament (${bracket} bracket)`)
-					.setFooter({ text: `ID: ${beatmaps[0].id}; Checked by ${msg.author.username}#${msg.author.discriminator}` });
+					.setFooter({ text: `ID: ${beatmaps[0].id}; Checked by ${msg.author.username}` });
 
 				//The map has to have audio
 				if (!(beatmaps[0].hasAudio)) {

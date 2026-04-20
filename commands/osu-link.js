@@ -254,7 +254,7 @@ async function connect(args, interaction, osuApi, discordUser) {
 
 					await DBElitebotixBanchoProcessQueue.create({
 						task: 'messageUser',
-						additions: `${osuUser.id};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
+						additions: `${osuUser.id};The Discord account ${interaction.user.username} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
 						date: new Date(),
 					});
 
@@ -290,7 +290,7 @@ async function connect(args, interaction, osuApi, discordUser) {
 
 					await DBElitebotixBanchoProcessQueue.create({
 						task: 'messageUser',
-						additions: `${osuUser.id};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
+						additions: `${osuUser.id};The Discord account ${interaction.user.username} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
 						date: new Date(),
 					});
 
@@ -411,7 +411,7 @@ async function verify(args, interaction, osuApi, discordUser) {
 
 							await DBElitebotixBanchoProcessQueue.create({
 								task: 'messageUser',
-								additions: `${discordUser.osuUserId};The Discord account ${interaction.user.username}#${interaction.user.discriminator} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
+								additions: `${discordUser.osuUserId};The Discord account ${interaction.user.username} has linked their account to this osu! account. If this was you please send '/osu-link verify code:${verificationCode}' with the same user to Elitebotix on discord. If this was not you then don't worry, there won't be any consequences and you can just ignore this message.`,
 								date: new Date(),
 							});
 
