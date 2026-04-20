@@ -882,8 +882,10 @@ async function getResultImage(event, users, client) {
 		ctx.textAlign = 'center';
 		ctx.fillStyle = '#FFFFFF';
 		if (redScore > blueScore) {
+			ctx.fillStyle = '#BB1177';
 			ctx.fillText(`Red Team Wins by ${humanReadable(redScore - blueScore)}`, 500, 342 + scores.length * 75);
 		} else {
+			ctx.fillStyle = '#2299BB';
 			ctx.fillText(`Blue Team Wins by ${humanReadable(blueScore - redScore)}`, 500, 342 + scores.length * 75);
 		}
 	}
