@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const { DBOsuMultiMatches } = require('../dbObjects');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
+const { Op } = require('sequelize');
 
 module.exports = {
 	name: 'osu-tournament',
@@ -63,7 +64,7 @@ module.exports = {
 		let tournamentScores = await DBOsuMultiMatches.findAll({
 			attributes: ['matchId', 'matchName', 'matchStartDate'],
 			where: {
-				acronym: acronym,
+				acronym: acronym.toLowerCase(),
 				tourneyMatch: true,
 			},
 			order: [

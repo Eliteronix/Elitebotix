@@ -102,6 +102,29 @@ module.exports = {
 
 		return path;
 	},
+	getModEmoji: function (mod) {
+		if (mod === 'NF') {
+			return '<:NF:1471321785743048978>';
+		} else if (mod === 'EZ') {
+			return '<:EZ:918920760586805259>';
+		} else if (mod === 'HD') {
+			return '<:HD:918922015182827531>';
+		} else if (mod === 'HR') {
+			return '<:HR:918938816377671740>';
+		} else if (mod === 'DT') {
+			return '<:DT:918920670023397396>';
+		} else if (mod === 'HT') {
+			return '<:HT:918921193426411544>';
+		} else if (mod === 'FI') {
+			return '<:FI:918922047994880010>';
+		} else if (mod === 'FL') {
+			return '<:FL:918920836755382343>';
+		} else if (mod === 'HDDT') {
+			return '<:HDDT:918935350125142036>';
+		} else if (mod === 'HDHR') {
+			return '<:HDHR:918935327215861760>';
+		}
+	},
 	getBeatmapApprovalStatusImage: function (beatmap) {
 		let beatmapStatusIcon;
 		if (beatmap.approvalStatus === 'Ranked' || beatmap.approvalStatus === 'Approved') {
