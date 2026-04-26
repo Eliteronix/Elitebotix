@@ -500,7 +500,7 @@ module.exports = {
 
 			const messageEmbed = new Discord.EmbedBuilder()
 				.setColor('#03C04A')
-				.setAuthor({ name: `${msg.author.username}#${msg.author.discriminator}`, iconURL: msg.author.displayAvatarURL() })
+				.setAuthor({ name: `${msg.author.username}`, iconURL: msg.author.displayAvatarURL() })
 				.setDescription(`<@${msg.author.id}> created a ticket.`)
 				.addFields(
 					{ name: 'Ticket Message', value: args.join(' ') },

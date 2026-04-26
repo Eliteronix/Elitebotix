@@ -647,7 +647,7 @@ module.exports = {
 				elitiriSignUp.bracketName = bracketName;
 			}
 
-			elitiriSignUp.discordTag = `${user.username}#${user.discriminator}`;
+			elitiriSignUp.discordTag = `${user.username}`;
 
 			await elitiriSignUp.save();
 

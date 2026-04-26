@@ -303,7 +303,7 @@ module.exports = {
 				}
 
 				if (discordName) {
-					follower = `${discordName.username}#${discordName.discriminator}`;
+					follower = `${discordName.username}`;
 				}
 
 				let followerUser = await DBDiscordUsers.findOne({

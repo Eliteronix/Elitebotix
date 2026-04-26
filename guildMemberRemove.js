@@ -22,7 +22,7 @@ module.exports = async function (member) {
 			//get the channel object from the id
 			const guildGoodbyeMessageChannel = await member.client.channels.cache.find(channel => channel.id === guildGoodbyeMessageChannelId);
 			//get the goodbye message text
-			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member', member.user.username + '#' + member.user.discriminator);
+			const guildGoodbyeMessageText = guild.goodbyeMessageText.replace('@member', member.user.username);
 			try {
 				//send the goodbye message text into the channel
 				await guildGoodbyeMessageChannel.send(guildGoodbyeMessageText);

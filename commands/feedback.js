@@ -79,19 +79,19 @@ module.exports = {
 		let message = interaction.options.getString('feedback');
 
 		if (type === 'bug') {
-			createGithubIssue('user-bug', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('user-bug', `${message} - ${interaction.user.username}}`);
 
 			return await interaction.editReply('Your bug report was sent to the developers.');
 		} else if (type === 'feature') {
-			createGithubIssue('user-feature', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('user-feature', `${message} - ${interaction.user.username}`);
 
 			return await interaction.editReply('Your feature-request was sent to the developers.');
 		} else if (type === 'feedback') {
-			createGithubIssue('user-feedback', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('user-feedback', `${message} - ${interaction.user.username}`);
 
 			return await interaction.editReply('Your feedback has been sent to the developers.');
 		} else if (type === 'question') {
-			createGithubIssue('question', `${message} - ${interaction.user.username}#${interaction.user.discriminator}`);
+			createGithubIssue('question', `${message} - ${interaction.user.username}`);
 
 			return await interaction.editReply('Your question has been sent to the developers. They will respond to you as soon as possible.');
 		}

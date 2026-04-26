@@ -198,7 +198,7 @@ module.exports = {
 
 			let member = await interaction.guild.members.cache.get(osuAccounts[i].userId);
 
-			let userDisplayName = `${member.user.username}#${member.user.discriminator}`;
+			let userDisplayName = `${member.user.username}`;
 
 			if (member.nickname) {
 				userDisplayName = `${member.nickname} / ${userDisplayName}`;

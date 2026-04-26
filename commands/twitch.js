@@ -177,7 +177,7 @@ module.exports = {
 						date: new Date(),
 					});
 
-					await interaction.editReply(`Your twitch account has been connected. To verify your twitch account, please type \`!verify ${interaction.user.username}#${interaction.user.discriminator}\` in your twitch chat.`);
+					await interaction.editReply(`Your twitch account has been connected. To verify your twitch account, please type \`!verify ${interaction.user.username}\` in your twitch chat.`);
 				} else {
 					await interaction.editReply('The twitch account you entered does not exist.');
 				}
@@ -220,7 +220,7 @@ module.exports = {
 			}
 
 			if (!discordUser.twitchVerified) {
-				return await interaction.editReply(`Your twitch account is not verified. Please type \`!verify ${interaction.user.username}#${interaction.user.discriminator}\` in your twitch chat.`);
+				return await interaction.editReply(`Your twitch account is not verified. Please type \`!verify ${interaction.user.username}\` in your twitch chat.`);
 			}
 
 			if (discordUser.twitchOsuMatchCommand) {
@@ -254,7 +254,7 @@ module.exports = {
 			}
 
 			if (!discordUser.twitchVerified) {
-				return await interaction.editReply(`Your twitch account is not verified. Please type \`!verify ${interaction.user.username}#${interaction.user.discriminator}\` in your twitch chat.`);
+				return await interaction.editReply(`Your twitch account is not verified. Please type \`!verify ${interaction.user.username}\` in your twitch chat.`);
 			}
 
 			if (discordUser.twitchOsuMapSync) {

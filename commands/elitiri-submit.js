@@ -208,7 +208,7 @@ module.exports = {
 					.setColor('#00FF00')
 					.setTitle(`You have submitted the beatmap for the tournament (${bracket} bracket)`)
 					.setDescription(`To look at your submitted maps use \`${guildPrefix}${this.name} list\``)
-					.setFooter({ text: `ID: ${beatmaps[0].id}; Checked by ${msg.author.username}#${msg.author.discriminator}` });
+					.setFooter({ text: `ID: ${beatmaps[0].id}; Checked by ${msg.author.username}` });
 
 				if (existingMap) {
 					viabilityEmbed
