@@ -1867,12 +1867,13 @@ module.exports = {
 				for (let i = 0; i < multiMatches.length; i++) {
 					try {
 						let date = new Date(multiMatches[i].matchStartDate);
+						let matchId = multiMatches[i].matchId;
 
 						if (date > hideQualifiers && multiMatches[i].matchName.toLowerCase().includes('qualifier')) {
-							multiMatches[i].matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+							matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
 						}
 
-						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${multiMatches[i].matchId}`;
+						multiMatches[i] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${multiMatches[i].matchName} ----- https://osu.ppy.sh/community/matches/${matchId}`;
 					} catch (e) {
 						multiMatches[i] = 'Error';
 						console.error(e, multiMatches[i]);
@@ -2019,7 +2020,13 @@ module.exports = {
 							outlierText = ' [outlier - not counted]';
 						}
 						let date = new Date(scores[i][j].matchStartDate);
-						scores[i][j] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | Expected SR: ${scores[i][j].expectedRating.toFixed(2)} | https://osu.ppy.sh/b/${scores[i][j].beatmapId} | Match: https://osu.ppy.sh/mp/${scores[i][j].matchId} | ${outlierText}`;
+						let matchId = scores[i][j].matchId;
+
+						if (date > hideQualifiers && scores[i][j].matchName.toLowerCase().includes('qualifier')) {
+							matchId = `XXXXXXXXX (hidden for ${daysHidingQualifiers} days)`;
+						}
+
+						scores[i][j] = `${(date.getUTCMonth() + 1).toString().padStart(2, '0')}-${date.getUTCFullYear()} - ${Math.round(scores[i][j].score)} points (${(Math.round(scores[i][j].weight * 1000) / 1000).toFixed(3)}): ${(Math.round(scores[i][j].starRating * 100) / 100).toFixed(2)}* | Expected SR: ${scores[i][j].expectedRating.toFixed(2)} | https://osu.ppy.sh/b/${scores[i][j].beatmapId} | Match: https://osu.ppy.sh/mp/${matchId} | ${outlierText}`;
 					}
 
 					if (i === 0) {
