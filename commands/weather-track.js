@@ -198,15 +198,18 @@ module.exports = {
 			const trackingList = await DBProcessQueue.findAll({
 				attributes: ['id', 'additions'],
 				where: {
-					task: 'periodic-weather'
+					task: 'periodic-weather',
 				}
 			});
 
 			let degreeType = interaction.options.getString('unit');
-			let location = interaction.options.getString('location');
+			let location = interaction.options.getString('location').toLowerCase();
 
 			for (let i = 0; i < trackingList.length; i++) {
-				if (trackingList[i].additions.startsWith(interaction.channel.id) && trackingList[i].additions.includes(`;${degreeType};`) && trackingList[i].additions.endsWith(`;${location}`)) {
+				let args = trackingList[i].additions.split(';');
+				let trackedLocation = (args[3] || '').toLowerCase();
+
+				if (args[0] === interaction.channel.id && args[2] === degreeType && trackedLocation === location) {
 					trackingList[i].destroy();
 					return await interaction.editReply('The specified tracker has been removed.');
 				}
