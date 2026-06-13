@@ -156,7 +156,7 @@ let manager = new ShardingManager('./bot.js', {
 if (process.env.SERVER === 'Dev') {
 	manager = new ShardingManager('./bot.js', {
 		token: process.env.BOTTOKEN,
-		execArgv: ['--use_strict', '--unhandled-rejections=warn', '--max-old-space-size=4096'],
+		execArgv: ['--use_strict', '--unhandled-rejections=warn', '--max-old-space-size=4096', '--cpu-prof', '--cpu-prof-dir', process.env.DEVPROFILEPATH],
 		totalShards: 1,
 		timeout: 30000,
 	});

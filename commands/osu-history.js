@@ -169,6 +169,7 @@ module.exports = {
 				}
 			},
 			group: ['matchId'],
+			raw: true,
 		});
 
 		multiMatchIds = multiMatchIds.map(match => match.matchId);
@@ -187,6 +188,7 @@ module.exports = {
 					[Op.not]: 'MOTD',
 				},
 			},
+			raw: true,
 		});
 
 		let multiScores = await DBOsuMultiGameScores.findAll({
@@ -247,6 +249,7 @@ module.exports = {
 			order: [
 				['matchId', 'DESC'],
 			],
+			raw: true,
 		});
 
 		for (let i = 0; i < multiScores.length; i++) {
@@ -290,6 +293,40 @@ module.exports = {
 		let gameScores = null;
 		let matchId = multiScores[0].matchId;
 		let gameId = multiScores[0].gameId;
+
+		let scoresBeatmaps = await DBOsuBeatmaps.findAll({
+			attributes: [
+				'id',
+				'beatmapId',
+				'mods',
+				'starRating',
+				'approvalStatus',
+				'popular',
+				'approachRate',
+				'circleSize',
+				'updatedAt',
+				'maxCombo',
+			],
+			where: {
+				beatmapId: {
+					[Op.in]: multiScores.map(score => score.beatmapId)
+				},
+				mods: 0,
+			},
+			raw: true,
+		});
+
+		const matchNameCache = new Map();
+
+		function getAcronym(matchName) {
+			if (matchNameCache.has(matchName)) return matchNameCache.get(matchName);
+			const result = matchName
+				.replace(/:.*/gm, '')
+				.replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '')
+				.replace(/ GS\d+/gm, '');
+			matchNameCache.set(matchName, result);
+			return result;
+		}
 
 		for (let i = 0; i < multiScores.length; i++) {
 			let newMatch = false;
@@ -439,27 +476,6 @@ module.exports = {
 				}
 			}
 
-			let scoresBeatmaps = await DBOsuBeatmaps.findAll({
-				attributes: [
-					'id',
-					'beatmapId',
-					'mods',
-					'starRating',
-					'approvalStatus',
-					'popular',
-					'approachRate',
-					'circleSize',
-					'updatedAt',
-					'maxCombo',
-				],
-				where: {
-					beatmapId: {
-						[Op.in]: multiScores.map(score => score.beatmapId)
-					},
-					mods: 0,
-				}
-			});
-
 			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
 				if (newMatch) {
 					let matchWonAgainst = false;
@@ -566,11 +582,11 @@ module.exports = {
 			let inMonths = new Date(multiScores[i].matchStartDate);
 			inMonths.setMonth(inMonths.getMonth() + 3);
 
-			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
+			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === getAcronym(multiScores[i].matchName).toLowerCase() && tourney.date < inMonths);
 
 			if (!tourneyEntry) {
 				tourneysPlayed.push({
-					acronym: multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, ''),
+					acronym: getAcronym(multiScores[i].matchName),
 					matches: [{ matchId: multiScores[i].matchId, matchName: multiScores[i].matchName, beatmapIds: [multiScores[i].beatmapId] }],
 					teammates: [], date: multiScores[i].matchStartDate
 				});
@@ -595,7 +611,7 @@ module.exports = {
 					let currentUserTeam = currentUserScores[0].team;
 
 					if (team === currentUserTeam) {
-						let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === multiScores[i].matchName.replace(/:.*/gm, '').replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '').replace(/ GS\d+/gm, '').toLowerCase() && tourney.date < inMonths);
+						let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === getAcronym(multiScores[i].matchName).toLowerCase() && tourney.date < inMonths);
 
 						if (!tourneyEntry.teammates.includes(multiScores[i].osuUserId)) {
 							tourneyEntry.teammates.push(multiScores[i].osuUserId);
@@ -614,6 +630,7 @@ module.exports = {
 					[Op.in]: players,
 				}
 			},
+			raw: true,
 		});
 
 		for (let i = 0; i < players.length; i++) {
@@ -641,6 +658,7 @@ module.exports = {
 						},
 						group: ['matchId', 'matchName', 'matchStartDate'],
 						order: [['matchStartDate', 'DESC']],
+						raw: true,
 					});
 
 					tourneyScores = await DBOsuMultiGames.findAll({
@@ -653,6 +671,7 @@ module.exports = {
 						},
 						group: ['matchId', 'teamType', 'beatmapId'],
 						order: [['matchId', 'DESC']],
+						raw: true,
 					});
 				}
 
@@ -815,6 +834,7 @@ module.exports = {
 				where: {
 					osuUserId: osuUser.osuUserId,
 				},
+				raw: true,
 			});
 
 			// Create rank history graph
@@ -1021,7 +1041,8 @@ module.exports = {
 					beatmapId: {
 						[Op.in]: tourneyPPPlays.map(score => score.beatmapId)
 					},
-				}
+				},
+				raw: true,
 			});
 
 			for (let i = 0; i < Math.min(10, tourneyPPPlays.length); i++) {
