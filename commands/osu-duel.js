@@ -2203,6 +2203,16 @@ module.exports = {
 					});
 				}
 
+				//Experimental
+				datasets = [{
+					label: 'Players',
+					data: leagueAmounts,
+					backgroundColor: colors,
+					fill: true,
+					barPercentage: 1.0,
+					categoryPercentage: 1.0,
+				}];
+
 				const data = {
 					labels: labels,
 					datasets: datasets,
