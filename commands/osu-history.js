@@ -313,7 +313,6 @@ module.exports = {
 				},
 				mods: 0,
 			},
-			raw: true,
 		});
 
 		const matchNameCache = new Map();
