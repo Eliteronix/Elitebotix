@@ -2182,35 +2182,11 @@ module.exports = {
 					leagueAmounts[labels.indexOf(getOsuDuelLeague(parseFloat(discordUsers[i].osuDuelStarRating)).name)]++;
 				}
 
-				let finalAmounts = [];
-				for (let i = 0; i < labels.length; i++) {
-					let amountArray = [];
-					for (let j = 0; j < labels.length; j++) {
-						amountArray.push(0);
-					}
-					amountArray[i] = leagueAmounts[i];
-					finalAmounts.push(amountArray);
-				}
-
-				let datasets = [];
-
-				for (let i = 0; i < labels.length; i++) {
-					datasets.push({
-						label: labels[i],
-						data: finalAmounts[i],
-						backgroundColor: colors[i],
-						fill: true,
-					});
-				}
-
-				//Experimental
-				datasets = [{
-					label: 'Players',
+				let datasets = [{
 					data: leagueAmounts,
 					backgroundColor: colors,
-					fill: true,
-					barPercentage: 1.0,
 					categoryPercentage: 1.0,
+					barPercentage: 0.7,
 				}];
 
 				const data = {
@@ -2229,10 +2205,13 @@ module.exports = {
 								color: '#FFFFFF',
 							},
 							legend: {
-								labels: {
-									color: '#FFFFFF',
-								}
+								display: false,
 							},
+						},
+						layout: {
+							padding: {
+								top: -50,
+							}
 						},
 						responsive: true,
 						scales: {
