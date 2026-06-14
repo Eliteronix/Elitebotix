@@ -257,7 +257,7 @@ module.exports = {
 
 			multiScores[i].matchName = match.matchName;
 			multiScores[i].acronym = match.acronym;
-			multiScores[i].matchStartDate = match.matchStartDate;
+			multiScores[i].matchStartDate = new Date(match.matchStartDate);
 		}
 
 		let onlymatchhistory = false;
@@ -319,7 +319,9 @@ module.exports = {
 		const matchNameCache = new Map();
 
 		function getAcronym(matchName) {
-			if (matchNameCache.has(matchName)) return matchNameCache.get(matchName);
+			if (matchNameCache.has(matchName)) {
+				return matchNameCache.get(matchName);
+			}
 			const result = matchName
 				.replace(/:.*/gm, '')
 				.replace(/ (GF|F|SF|QF|RO16|RO32|RO64) \d+/gm, '')
@@ -582,13 +584,22 @@ module.exports = {
 			let inMonths = new Date(multiScores[i].matchStartDate);
 			inMonths.setMonth(inMonths.getMonth() + 3);
 
-			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === getAcronym(multiScores[i].matchName).toLowerCase() && tourney.date < inMonths);
+			let matchAcronym = getAcronym(multiScores[i].matchName);
+
+			let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === matchAcronym.toLowerCase() && tourney.date < inMonths);
 
 			if (!tourneyEntry) {
 				tourneysPlayed.push({
-					acronym: getAcronym(multiScores[i].matchName),
-					matches: [{ matchId: multiScores[i].matchId, matchName: multiScores[i].matchName, beatmapIds: [multiScores[i].beatmapId] }],
-					teammates: [], date: multiScores[i].matchStartDate
+					acronym: matchAcronym,
+					matches: [
+						{
+							matchId: multiScores[i].matchId,
+							matchName: multiScores[i].matchName,
+							beatmapIds: [multiScores[i].beatmapId]
+						}
+					],
+					teammates: [],
+					date: new Date(multiScores[i].matchStartDate)
 				});
 			} else if (!tourneyEntry.matches.includes(multiScores[i].matchId)) {
 				let matchEntry = tourneyEntry.matches.find(match => match.matchId === multiScores[i].matchId);
@@ -611,7 +622,7 @@ module.exports = {
 					let currentUserTeam = currentUserScores[0].team;
 
 					if (team === currentUserTeam) {
-						let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === getAcronym(multiScores[i].matchName).toLowerCase() && tourney.date < inMonths);
+						let tourneyEntry = tourneysPlayed.find(tourney => tourney.acronym.toLowerCase() === matchAcronym.toLowerCase() && tourney.date < inMonths);
 
 						if (!tourneyEntry.teammates.includes(multiScores[i].osuUserId)) {
 							tourneyEntry.teammates.push(multiScores[i].osuUserId);
@@ -679,7 +690,7 @@ module.exports = {
 					let match = tourneyMatches.find(match => match.matchId === tourneyScores[i].matchId);
 
 					tourneyScores[i].matchName = match.matchName;
-					tourneyScores[i].matchStartDate = match.matchStartDate;
+					tourneyScores[i].matchStartDate = new Date(match.matchStartDate);
 				}
 
 				for (let i = 0; i < tourneysPlayed.length; i++) {
@@ -853,13 +864,13 @@ module.exports = {
 
 			if (oldestScore) {
 				let iterator = 0;
-				let startTime = date - oldestScore.gameEndDate;
+				let startTime = date - new Date(oldestScore.gameEndDate);
 
-				while (date > oldestScore.gameEndDate) {
+				while (date > new Date(oldestScore.gameEndDate)) {
 					iterator++;
 					if (new Date() - lastUpdate > 15000) {
 						try {
-							await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - oldestScore.gameEndDate))).toFixed(2)}%)`);
+							await interaction.editReply(`Processing... (${iterator} months deep | ${(100 - (100 / startTime * (date - new Date(oldestScore.gameEndDate)))).toFixed(2)}%)`);
 							lastUpdate = new Date();
 						} catch (error) {
 							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
