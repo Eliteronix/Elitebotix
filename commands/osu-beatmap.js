@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
-const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating } = require('../utils');
+const { getGameMode, getIDFromPotentialOsuLink, getOsuBeatmap, getModBits, getMods, getModImage, checkModsCompatibility, getOsuPP, getScoreModpool, humanReadable, getBeatmapCover, adjustStarRating, getModEmoji } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require('discord.js');
 const { DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuMultiGames } = require('../dbObjects');
 const { Op } = require('sequelize');
@@ -188,41 +188,14 @@ module.exports = {
 
 		let modBits = getModBits(mods);
 
-		let tournament = false;
+		let tournament = interaction.options.getBoolean('tourney') || false;
 
-		if (interaction.options.getBoolean('tourney')) {
-			tournament = interaction.options.getBoolean('tourney');
-		}
+		let maps = ['id', 'id2', 'id3', 'id4', 'id5'].map((option) => interaction.options.getString(option)).filter(Boolean);
 
-		let maps = [];
-
-		if (interaction.options.getString('id')) {
-			maps.push(interaction.options.getString('id'));
-		}
-
-		if (interaction.options.getString('id2')) {
-			maps.push(interaction.options.getString('id2'));
-		}
-
-		if (interaction.options.getString('id3')) {
-			maps.push(interaction.options.getString('id3'));
-		}
-
-		if (interaction.options.getString('id4')) {
-			maps.push(interaction.options.getString('id4'));
-		}
-
-		if (interaction.options.getString('id5')) {
-			maps.push(interaction.options.getString('id5'));
-		}
-
-		maps.forEach(async (map) => {
+		for (const map of maps) {
 			let modCompatibility = await checkModsCompatibility(modBits, getIDFromPotentialOsuLink(map));
-			if (!modCompatibility) {
-				modBits = 0;
-			}
 
-			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(map), modBits: modBits });
+			const dbBeatmap = await getOsuBeatmap({ beatmapId: getIDFromPotentialOsuLink(map), modBits: modCompatibility ? modBits : 0 });
 			if (dbBeatmap) {
 				getBeatmap(interaction, dbBeatmap, tournament, accuracy);
 			} else {
@@ -232,7 +205,7 @@ module.exports = {
 					await interaction.followUp({ content: `Could not find beatmap \`${map.replace(/`/g, '')}\`.`, flags: MessageFlags.Ephemeral });
 				}
 			}
-		});
+		}
 	},
 };
 
@@ -277,7 +250,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 	let tournamentOccurences = '';
 
 	const mapGames = await DBOsuMultiGames.findAll({
-		attributes: ['matchId', 'gameId', 'scores'],
+		attributes: ['matchId', 'gameId', 'scores', 'gameRawMods', 'freeMod'],
 		where: {
 			beatmapId: beatmap.beatmapId,
 			tourneyMatch: true,
@@ -294,7 +267,6 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		],
 	});
 
-	//TODO: Check where acronym could be used instead
 	const matchData = await DBOsuMultiMatches.findAll({
 		attributes: ['matchId', 'matchName', 'acronym', 'matchStartDate'],
 		where: {
@@ -316,11 +288,17 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 			mapGames[i].acronym = matchData[0].acronym;
 			mapGames[i].matchStartDate = matchData[0].matchStartDate;
 
-			// if acronym starts with MOTD, remove it from mapScores
-			if (mapGames[i].acronym === 'MOTD') {
+			// CHECK THIS: if acronym starts with any of the match-making acronyms, remove it from mapScores for proper filtering?
+			if (matchMakingAcronyms.includes(mapGames[i].acronym)) {
 				mapGames.splice(i, 1);
 				i--;
 			}
+
+			// if acronym starts with MOTD, remove it from mapScores
+			// if (mapGames[i].acronym === 'MOTD') {
+			// 	mapGames.splice(i, 1);
+			// 	i--;
+			// }
 			continue;
 		}
 
@@ -338,46 +316,64 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	for (let i = 0; i < mapGames.length; i++) {
 		let acronym = mapGames[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
-
-		totalScores += mapGames[i].scores;
+		// CHECK THIS: I suppose we need to count matches, not scores themselves
+		totalScores++;
 
 		if (matchMakingAcronyms.includes(mapGames[i].acronym)) {
-			matchMakingScores += mapGames[i].scores;
+			matchMakingScores++;
 		}
 
 		if (tournaments.indexOf(acronym) === -1) {
 			tournaments.push(acronym);
 		}
-
-		if (!tournament) {
-			continue;
-		}
 	}
 
 	let matches = [];
-	if (tournament) {
-		const mapScores = await DBOsuMultiGameScores.findAll({
-			attributes: ['matchId', 'gameId', 'score', 'gameRawMods', 'rawMods', 'freeMod'],
-			where: {
-				gameId: {
-					[Op.in]: mapGames.map((game) => {
-						return game.gameId;
-					}),
-				},
-				score: {
-					[Op.gte]: 10000,
-				},
+
+	const mapScores = await DBOsuMultiGameScores.findAll({
+		attributes: ['matchId', 'gameId', 'score', 'gameRawMods', 'rawMods', 'freeMod'],
+		where: {
+			gameId: {
+				[Op.in]: mapGames.map((game) => {
+					return game.gameId;
+				}),
 			},
-			order: [
-				['matchId', 'DESC'],
-			],
+			score: {
+				[Op.gte]: 10000,
+			},
+		},
+		order: [
+			['matchId', 'DESC'],
+		],
+	});
+
+	function filterNf(mods) {
+		return mods.filter((mod) => mod !== 'NF');
+	}
+
+	let requestedMods = filterNf(getMods(beatmap.mods));
+
+	let matchingGameIds = new Set();
+	for (let i = 0; i < mapScores.length; i++) {
+		let correspondingGame = mapGames.find((game) => {
+			return game.gameId === mapScores[i].gameId;
 		});
 
-		for (let i = 0; i < mapScores.length; i++) {
-			let correspondingGame = mapGames.find((game) => {
-				return game.gameId === mapScores[i].gameId;
-			});
+		if (!correspondingGame) {
+			continue;
+		}
 
+		let isMatchingModScore = false;
+
+		if (beatmap.mods !== 0) {
+			const scoreMods = filterNf(getMods((mapScores[i].gameRawMods ?? correspondingGame.gameRawMods ?? 0) + (mapScores[i].rawMods ?? 0)));
+			if (requestedMods.every((mod) => scoreMods.includes(mod)) && scoreMods.every((mod) => requestedMods.includes(mod))) {
+				isMatchingModScore = true;
+				matchingGameIds.add(mapScores[i].gameId);
+			}
+		}
+
+		if (tournament && (beatmap.mods === 0 || isMatchingModScore)) {
 			mapScores[i].matchStartDate = correspondingGame.matchStartDate;
 			mapScores[i].matchName = correspondingGame.matchName;
 
@@ -395,28 +391,55 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		}
 	}
 
-	//TODO: Number is wrong
-	tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
+	let filteredTournaments = tournaments;
+
+	if (beatmap.mods !== 0) {
+		filteredTournaments = [];
+
+		for (let i = 0; i < mapGames.length; i++) {
+			if (!matchingGameIds.has(mapGames[i].gameId)) {
+				continue;
+			}
+
+			let acronym = mapGames[i].matchName.replace(/:.+/gm, '').replace(/`/g, '');
+			if (filteredTournaments.indexOf(acronym) === -1) {
+				filteredTournaments.push(acronym);
+			}
+		}
+	}
+
+	if (beatmap.mods === 0) {
+		tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${filteredTournaments.join('`, `')}\``;
+	} else {
+		tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods.\nWith ${getModEmoji(getMods(beatmap.mods).join(''))} **${getMods(beatmap.mods).join('')}**, it was played in ${matchingGameIds.size} games in these tournaments (new -> old):\n\`${filteredTournaments.join('`, `')}\``;
+	}
 
 	let addDots = false;
 
 	while (tournamentOccurences.length > 1945) {
 		addDots = true;
 
-		tournaments.pop();
+		filteredTournaments.pop();
 
-		tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${tournaments.join('`, `')}\``;
+		if (beatmap.mods === 0) {
+			tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods in these tournaments (new -> old):\n\`${filteredTournaments.join('`, `')}\``;
+		} else {
+			tournamentOccurences = `The map was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods.\nWith ${getModEmoji(getMods(beatmap.mods).join(''))} **${getMods(beatmap.mods).join('')}**, it was played in ${matchingGameIds.size} games in these tournaments (new -> old):\n\`${filteredTournaments.join('`, `')}\``;
+		}
 	}
 
 	if (addDots) {
-		tournamentOccurences = tournamentOccurences + ', ...';
+		tournamentOccurences += ', ...';
 	}
 
-	if (tournaments.length === 0) {
+	if (filteredTournaments.length === 0) {
 		tournamentOccurences = 'The map was never played in any tournaments.';
+		if (beatmap.mods !== 0) {
+			tournamentOccurences = `The map was never played in any tournaments with ${getModEmoji(getMods(beatmap.mods).join(''))} **${getMods(beatmap.mods).join('')}**.\nIt was played ${totalScores} times (${totalScores - matchMakingScores} times without ETX / o!mm / ROMAI) with any mods.`;
+		}
 	}
 
-	if (tournament) {
+	if (tournament && matches.length > 0) {
 		matches = new Discord.AttachmentBuilder(Buffer.from(matches.join('\n'), 'utf-8'), { name: `tourney-scores-${beatmap.beatmapId}.txt` });
 		files.push(matches);
 	}
@@ -428,18 +451,6 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 		try {
 
 			let mods = getMods(beatmap.mods);
-
-			// if (!mods.includes('HD') && !mods.includes('HR')) {
-			// 	mods.push('HD');
-			// 	mods.push('HR');
-			// } else if (mods.includes('HD') && !mods.includes('HR')) {
-			// 	mods.push('HR');
-			// } else if (!mods.includes('HD') && mods.includes('HR')) {
-			// 	mods.push('HD');
-			// } else {
-			// 	mods.splice(mods.indexOf('HD'), 1);
-			// 	mods.splice(mods.indexOf('HR'), 1);
-			// }
 
 			if (!mods[0]) {
 				mods = ['NM'];
