@@ -8777,6 +8777,68 @@ module.exports = {
 		userData.username = userDisplayName;
 
 		return userData;
+	},
+	async checkForAspireMap(input) {
+		const client = input.client;
+		const beatmapsetId = input.beatmapsetId;
+
+		const beatmapset = await module.exports.getOsuBeatmapSet({ client, beatmapsetId });
+
+		if (!beatmapset) {
+			return false;
+		}
+
+		// usually, aspire maps have the aspire related tag, but to be sure we also check the description, tags and difficulty names for the word aspire
+		const hasAspireRelatedTag = beatmapset.related_tags.some(tag => tag && tag.id === 43);
+
+		const hasAspireInTags = /aspire/i.test(beatmapset.tags);
+
+ 		const descriptionText = beatmapset.description.description || '';
+
+		const hasAspireInDescription = /aspire/i.test(descriptionText);
+
+		const difficultyNames = beatmapset.beatmaps.map(beatmap => beatmap.version).join(' ');
+		const hasAspireInDifficultyNames = /aspire/i.test(difficultyNames);
+
+		return hasAspireRelatedTag || hasAspireInTags || hasAspireInDescription || hasAspireInDifficultyNames;
+	},
+	async getOsuBeatmapSet(input) { 
+		const client = input.client
+		const beatmapsetId = input.beatmapsetId;
+
+		if (!client) {
+			throw new Error('Client is required to get osu!API v2 token');
+		}
+
+		if (!beatmapsetId) {
+			throw new Error('Beatmapset ID is required to get osu! beatmap set from API v2');
+		}
+
+		await module.exports.getNewOsuAPIv2TokenIfNecessary(client);
+
+		const url = new URL(
+			`https://osu.ppy.sh/api/v2/beatmapsets/${beatmapsetId}`
+		);
+
+		const headers = {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+			'Authorization': `Bearer ${client.osuv2_access_token}`
+		};
+
+		process.send('osu!API v2');
+		const response = await fetch(url, {
+			method: 'GET',
+			headers,
+		});
+
+		let responseJson = await response.json();
+
+		if ('error' in responseJson) {
+			throw new Error(`Error fetching osu! beatmap set: ${responseJson.error}`);
+		}
+
+		return responseJson;
 	}
 };
 
