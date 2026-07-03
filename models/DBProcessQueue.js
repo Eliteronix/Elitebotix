@@ -10,20 +10,33 @@ module.exports = (sequelize, DataTypes) => {
 		guildId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'guildid',
 		},
-		task: DataTypes.STRING,
+		task: {
+			type: DataTypes.STRING,
+			field: 'task',
+		},
 		priority: {
 			type: DataTypes.INTEGER,
 			defaultValue: 0,
+			field: 'priority',
 		},
-		filters: DataTypes.STRING,
-		additions: DataTypes.STRING,
+		filters: {
+			type: DataTypes.STRING,
+			field: 'filters',
+		},
+		additions: {
+			type: DataTypes.STRING,
+			field: 'additions',
+		},
 		date: {
 			type: DataTypes.DATE,
+			field: 'date',
 		},
 		beingExecuted: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'beingexecuted',
 		}
 	}, {
 		indexes: [
@@ -31,6 +44,9 @@ module.exports = (sequelize, DataTypes) => {
 				unique: false,
 				fields: ['beingExecuted', 'date', 'priority']
 			}
-		]
+		],
+		tableName: 'dbprocessqueues',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

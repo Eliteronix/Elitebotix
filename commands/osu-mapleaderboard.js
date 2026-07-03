@@ -4,6 +4,7 @@ const Canvas = require('@napi-rs/canvas');
 const { getBeatmapApprovalStatusImage, getGameMode, checkModsCompatibility, roundedRect, getModImage, getMods, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, getOsuPlayerName, getModBits, getBeatmapCover, getAvatar, getOsuBeatmapScoresV2, getLinkModeName, getOsuBeatmapUserScoreV2 } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -289,7 +290,7 @@ module.exports = {
 					'teamType',
 					'pp',
 					'beatmapId',
-					'createdAt',
+					[sequelize.col('createdat'), 'createdAt'],
 					'osuUserId',
 					'count50',
 					'count100',

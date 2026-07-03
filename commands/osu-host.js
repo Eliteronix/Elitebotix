@@ -5,6 +5,7 @@ const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMultiMatches, DBOsuMultiGameScores, 
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const Discord = require('discord.js');
 const ObjectsToCsv = require('objects-to-csv');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const osu = require('node-osu');
 
@@ -291,7 +292,7 @@ module.exports = {
 							'teamType',
 							'pp',
 							'beatmapId',
-							'createdAt',
+							[sequelize.col('createdat'), 'createdAt'],
 							'osuUserId',
 							'count50',
 							'count100',
@@ -828,7 +829,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client) {
 			'teamType',
 			'pp',
 			'beatmapId',
-			'createdAt',
+			[sequelize.col('createdat'), 'createdAt'],
 			'osuUserId',
 			'count50',
 			'count100',
@@ -908,7 +909,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client) {
 			'beatmapsetId',
 			'approvalStatus',
 			'mods',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'starRating',
 			'maxCombo',
 			'mode',

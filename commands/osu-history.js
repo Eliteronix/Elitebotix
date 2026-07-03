@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiGam
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const { getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
@@ -200,7 +201,7 @@ module.exports = {
 				'teamType',
 				'pp',
 				'beatmapId',
-				[Sequelize.fn('min', Sequelize.col('createdAt')), 'createdAt'],
+				[Sequelize.fn('min', Sequelize.col('createdat')), 'createdAt'],
 				'osuUserId',
 				'count50',
 				'count100',
@@ -304,7 +305,7 @@ module.exports = {
 				'popular',
 				'approachRate',
 				'circleSize',
-				'updatedAt',
+				[sequelize.col('updatedat'), 'updatedAt'],
 				'maxCombo',
 			],
 			where: {
@@ -1038,7 +1039,7 @@ module.exports = {
 					'beatmapsetId',
 					'approvalStatus',
 					'mods',
-					'updatedAt',
+					[sequelize.col('updatedat'), 'updatedAt'],
 					'starRating',
 					'maxCombo',
 					'mode',

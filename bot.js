@@ -1,6 +1,7 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
 const { wrongCluster, createNewForumPostRecords, processOsuTrack } = require('./utils');
+const sequelize = require('sequelize');
 
 require('dotenv').config();
 
@@ -387,7 +388,7 @@ async function resetImportMatches() {
 		const tasksToReset = ['importMatch'];
 
 		const task = await DBProcessQueue.findOne({
-			attributes: ['id', 'task', 'beingExecuted', 'updatedAt'],
+			attributes: ['id', 'task', 'beingExecuted', [sequelize.col('updatedat'), 'updatedAt']],
 			where: {
 				task: {
 					[Op.in]: tasksToReset,

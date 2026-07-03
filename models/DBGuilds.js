@@ -7,45 +7,97 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		guildId: {
 			type: DataTypes.STRING,
+			field: 'guildid',
 		},
-		guildName: DataTypes.STRING,
-		customPrefixUsed: DataTypes.BOOLEAN,
-		customPrefix: DataTypes.STRING,
+		guildName: {
+			type: DataTypes.STRING,
+			field: 'guildname',
+		},
+		customPrefixUsed: {
+			type: DataTypes.BOOLEAN,
+			field: 'customprefixused',
+		},
+		customPrefix: {
+			type: DataTypes.STRING,
+			field: 'customprefix',
+		},
 		dadmodeEnabled: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'dadmodeenabled',
 		},
 		saluteEnabled: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'saluteenabled',
 		},
 		owoEnabled: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'owoenabled',
 		},
 		sendWelcomeMessage: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'sendwelcomemessage',
 		},
-		welcomeMessageChannel: DataTypes.STRING,
-		welcomeMessageText: DataTypes.STRING,
+		welcomeMessageChannel: {
+			type: DataTypes.STRING,
+			field: 'welcomemessagechannel',
+		},
+		welcomeMessageText: {
+			type: DataTypes.STRING,
+			field: 'welcomemessagetext',
+		},
 		sendGoodbyeMessage: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'sendgoodbyemessage',
 		},
-		goodbyeMessageChannel: DataTypes.STRING,
-		goodbyeMessageText: DataTypes.STRING,
-		temporaryVoices: DataTypes.BOOLEAN,
-		addTemporaryText: DataTypes.BOOLEAN,
-		starBoardEnabled: DataTypes.BOOLEAN,
-		starBoardMinimum: DataTypes.STRING,
-		starBoardChannel: DataTypes.STRING,
+		goodbyeMessageChannel: {
+			type: DataTypes.STRING,
+			field: 'goodbyemessagechannel',
+		},
+		goodbyeMessageText: {
+			type: DataTypes.STRING,
+			field: 'goodbyemessagetext',
+		},
+		temporaryVoices: {
+			type: DataTypes.BOOLEAN,
+			field: 'temporaryvoices',
+		},
+		addTemporaryText: {
+			type: DataTypes.BOOLEAN,
+			field: 'addtemporarytext',
+		},
+		starBoardEnabled: {
+			type: DataTypes.BOOLEAN,
+			field: 'starboardenabled',
+		},
+		starBoardMinimum: {
+			type: DataTypes.STRING,
+			field: 'starboardminimum',
+		},
+		starBoardChannel: {
+			type: DataTypes.STRING,
+			field: 'starboardchannel',
+		},
 		ticketsEnabled: {
 			type: DataTypes.BOOLEAN,
 			defaultValue: false,
+			field: 'ticketsenabled',
 		},
-		birthdayEnabled: DataTypes.BOOLEAN,
-		birthdayMessageChannel: DataTypes.STRING,
-		paranoid: true,
+		birthdayEnabled: {
+			type: DataTypes.BOOLEAN,
+			field: 'birthdayenabled',
+		},
+		birthdayMessageChannel: {
+			type: DataTypes.STRING,
+			field: 'birthdaymessagechannel',
+		},
+	}, {
+		tableName: 'dbguilds',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

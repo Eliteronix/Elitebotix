@@ -4,6 +4,7 @@ const { getLinkModeName, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetai
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { showUnknownInteractionError } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -602,7 +603,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 				'rawMods',
 				'pp',
 				'beatmapId',
-				'createdAt',
+				[sequelize.col('createdat'), 'createdAt'],
 				'osuUserId',
 				'count50',
 				'count100',

@@ -5,21 +5,66 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		matchId: DataTypes.INTEGER,
-		gameId: DataTypes.INTEGER,
-		tourneyMatch: DataTypes.BOOLEAN,
-		scoringType: DataTypes.INTEGER,
-		mode: DataTypes.INTEGER,
-		beatmapId: DataTypes.INTEGER,
-		gameRawMods: DataTypes.INTEGER,
-		gameStartDate: DataTypes.DATE,
-		gameEndDate: DataTypes.DATE,
-		freeMod: DataTypes.BOOLEAN,
-		forceMod: DataTypes.BOOLEAN,
-		warmup: DataTypes.BOOLEAN,
-		warmupDecidedByAmount: DataTypes.BOOLEAN,
-		teamType: DataTypes.INTEGER,
-		scores: DataTypes.INTEGER,
+		matchId: {
+			type: DataTypes.INTEGER,
+			field: 'matchid',
+		},
+		gameId: {
+			type: DataTypes.INTEGER,
+			field: 'gameid',
+		},
+		tourneyMatch: {
+			type: DataTypes.BOOLEAN,
+			field: 'tourneymatch',
+		},
+		scoringType: {
+			type: DataTypes.INTEGER,
+			field: 'scoringtype',
+		},
+		mode: {
+			type: DataTypes.INTEGER,
+			field: 'mode',
+		},
+		beatmapId: {
+			type: DataTypes.INTEGER,
+			field: 'beatmapid',
+		},
+		gameRawMods: {
+			type: DataTypes.INTEGER,
+			field: 'gamerawmods',
+		},
+		gameStartDate: {
+			type: DataTypes.DATE,
+			field: 'gamestartdate',
+		},
+		gameEndDate: {
+			type: DataTypes.DATE,
+			field: 'gameenddate',
+		},
+		freeMod: {
+			type: DataTypes.BOOLEAN,
+			field: 'freemod',
+		},
+		forceMod: {
+			type: DataTypes.BOOLEAN,
+			field: 'forcemod',
+		},
+		warmup: {
+			type: DataTypes.BOOLEAN,
+			field: 'warmup',
+		},
+		warmupDecidedByAmount: {
+			type: DataTypes.BOOLEAN,
+			field: 'warmupdecidedbyamount',
+		},
+		teamType: {
+			type: DataTypes.INTEGER,
+			field: 'teamtype',
+		},
+		scores: {
+			type: DataTypes.INTEGER,
+			field: 'scores',
+		},
 		paranoid: true,
 	}, {
 		indexes: [
@@ -27,6 +72,9 @@ module.exports = (sequelize, DataTypes) => {
 				unique: false,
 				fields: ['matchId', 'gameId', 'tourneyMatch', 'beatmapId', 'mode', 'gameStartDate', 'gameEndDate', 'warmup', 'warmupDecidedByAmount']
 			}
-		]
+		],
+		tableName: 'dbosumultigames',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };
