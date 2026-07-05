@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'osubadges',
 		},
 		osuPP: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osupp',
 		},
 		lastOsuPPChange: {
@@ -49,11 +49,11 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'nextosuppupdate',
 		},
 		osuDuelStarRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osuduelstarrating',
 		},
 		osuNoModDuelStarRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osunomodduelstarrating',
 		},
 		osuNoModDuelStarRatingLimited: {
@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'osunomodduelstarratinglimited',
 		},
 		osuHiddenDuelStarRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osuhiddenduelstarrating',
 		},
 		osuHiddenDuelStarRatingLimited: {
@@ -71,7 +71,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'osuhiddenduelstarratinglimited',
 		},
 		osuHardRockDuelStarRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osuhardrockduelstarrating',
 		},
 		osuHardRockDuelStarRatingLimited: {
@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'osuhardrockduelstarratinglimited',
 		},
 		osuDoubleTimeDuelStarRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osudoubletimeduelstarrating',
 		},
 		osuDoubleTimeDuelStarRatingLimited: {
@@ -89,7 +89,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'osudoubletimeduelstarratinglimited',
 		},
 		osuFreeModDuelStarRating: {
-			type: DataTypes.STRING,
+			type: DataTypes.DOUBLE,
 			field: 'osufreemodduelstarrating',
 		},
 		osuFreeModDuelStarRatingLimited: {
@@ -264,7 +264,7 @@ module.exports = (sequelize, DataTypes) => {
 			defaultValue: false,
 			field: 'osumotdmuted',
 		},
-		osuMOTDlastRoundPlayed: {
+		osuMOTDLastRoundPlayed: {
 			type: DataTypes.DATE,
 			field: 'osumotdlastroundplayed',
 		},

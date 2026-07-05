@@ -1029,8 +1029,6 @@ module.exports = {
 
 		process.send(`osuUpdateQueue ${osuUpdateQueueLength}`);
 
-		console.log('Last error here');
-
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuUserId'],
 			where: {
@@ -1100,7 +1098,7 @@ module.exports = {
 				userId: null,
 				[Op.or]: [
 					{
-						updatedAt: {
+						updatedat: {
 							[Op.lt]: lastMonth
 						}
 					},
@@ -1142,7 +1140,7 @@ module.exports = {
 				]
 			},
 			order: [
-				['updatedAt', 'ASC'],
+				['updatedat', 'ASC'],
 			]
 		});
 
@@ -2922,7 +2920,7 @@ module.exports = {
 
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
-						beatmapId: beatmapId, mods: modBits
+						beatmapId: beatmapId.toString(), mods: modBits
 					}
 				});
 			}
@@ -4329,7 +4327,7 @@ module.exports = {
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: topScores.map(score => score.beatmap.id)
+					[Op.in]: topScores.map(score => score.beatmap.id.toString())
 				},
 			}
 		});
@@ -5020,20 +5018,10 @@ module.exports = {
 		deleted = 0;
 		let iterations = 0;
 
-		const beatmaps = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/beatmaps.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
+
 
 		while (duplicates && iterations < 100) {
-			let result = await beatmaps.query(
+			let result = await DBOsuBeatmaps.query(
 				'SELECT id, beatmapId, mods, updatedat FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
 
@@ -5082,20 +5070,8 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiMatches = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/multiMatches.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		while (duplicates && iterations < 100) {
-			let result = await multiMatches.query(
+			let result = await DBOsuMultiMatches.query(
 				'SELECT id, matchId, updatedat FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
 			);
 
@@ -5145,20 +5121,8 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiGames = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/multiGames.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		while (duplicates && iterations < 100) {
-			let result = await multiGames.query(
+			let result = await DBOsuMultiGames.query(
 				'SELECT id, matchId, gameId, updatedat FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
 			);
 
@@ -5207,20 +5171,8 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiGameScores = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/multiGameScores.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		while (duplicates && iterations < 100) {
-			let result = await multiGameScores.query(
+			let result = await DBOsuMultiGameScores.query(
 				'SELECT id, matchId, gameId, osuUserId, updatedat FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
 
@@ -5523,7 +5475,8 @@ module.exports = {
 			attributes: ['osuPP', 'osuRank'],
 			where: {
 				osuUserId: {
-					[Op.gt]: 0
+					[Op.not]: null,
+					[Op.ne]: '',
 				},
 				osuPP: {
 					[Op.gt]: 0
@@ -5546,7 +5499,8 @@ module.exports = {
 			attributes: ['osuDuelStarRating'],
 			where: {
 				osuUserId: {
-					[Op.gt]: 0
+					[Op.not]: null,
+					[Op.ne]: '',
 				},
 				osuPP: {
 					[Op.gt]: 0
@@ -7078,7 +7032,7 @@ module.exports = {
 
 						if (guildTrackers[i].tournamentTopPlays) {
 							if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
-								// console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
+								console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 								//Get all scores from tournaments
 								let multiScores = await DBOsuMultiGameScores.findAll({
 									attributes: [

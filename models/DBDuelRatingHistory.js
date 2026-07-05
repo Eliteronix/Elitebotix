@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		osuNoModDuelStarRating: {
 			type: DataTypes.STRING,
-			field: 'osunodmodduelstarrating',
+			field: 'osunomodduelstarrating',
 		},
 		osuNoModDuelStarRatingLimited: {
 			type: DataTypes.BOOLEAN,
