@@ -408,7 +408,7 @@ async function resetImportMatches() {
 		let date = new Date();
 		date.setMinutes(date.getMinutes() - 5);
 
-		if (task && task.updatedAt < date) {
+		if (task && task.updatedat < date) {
 			task.beingExecuted = false;
 			await task.save();
 			// eslint-disable-next-line no-console

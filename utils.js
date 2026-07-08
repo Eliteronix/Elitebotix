@@ -4940,11 +4940,11 @@ module.exports = {
 
 		for (let i = 0; i < duplicates.length; i++) {
 			let results = await DBDiscordUsers.findAll({
-				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
+				attributes: ['id', 'userId', 'osuUserId', 'osuName', [sequelize.col('updatedat'), 'updatedAt']],
 				where: {
 					osuUserId: duplicates[i].osuUserId
 				},
-				order: [['userId', 'ASC'], ['osuVerified', 'ASC'], ['updatedAt', 'ASC']]
+				order: [['userId', 'ASC'], ['osuVerified', 'ASC'], ['updatedat', 'ASC']]
 			});
 
 			if (results.length > 1) {
@@ -4977,11 +4977,11 @@ module.exports = {
 
 		for (let i = 0; i < duplicates.length; i++) {
 			let results = await DBDiscordUsers.findAll({
-				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
+				attributes: ['id', 'userId', 'osuUserId', 'osuName', [sequelize.col('updatedat'), 'updatedAt']],
 				where: {
 					userId: duplicates[i].userId
 				},
-				order: [['osuVerified', 'ASC'], ['osuUserId', 'ASC'], ['updatedAt', 'ASC']]
+				order: [['osuVerified', 'ASC'], ['osuUserId', 'ASC'], ['updatedat', 'ASC']]
 			});
 
 			if (results.length > 1) {
@@ -5021,7 +5021,7 @@ module.exports = {
 
 
 		while (duplicates && iterations < 100) {
-			let result = await DBOsuBeatmaps.query(
+			let result = await DBOsuBeatmaps.sequelize.query(
 				'SELECT id, beatmapId, mods, updatedat FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
 
@@ -5041,7 +5041,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} beatmapId ${result[0][i].beatmapId} mods ${result[0][i].mods} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} beatmapId ${result[0][i].beatmapId} mods ${result[0][i].mods} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5071,7 +5071,7 @@ module.exports = {
 		iterations = 0;
 
 		while (duplicates && iterations < 100) {
-			let result = await DBOsuMultiMatches.query(
+			let result = await DBOsuMultiMatches.sequelize.query(
 				'SELECT id, matchId, updatedat FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
 			);
 
@@ -5091,7 +5091,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5122,7 +5122,7 @@ module.exports = {
 		iterations = 0;
 
 		while (duplicates && iterations < 100) {
-			let result = await DBOsuMultiGames.query(
+			let result = await DBOsuMultiGames.sequelize.query(
 				'SELECT id, matchId, gameId, updatedat FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
 			);
 
@@ -5142,7 +5142,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5172,7 +5172,7 @@ module.exports = {
 		iterations = 0;
 
 		while (duplicates && iterations < 100) {
-			let result = await DBOsuMultiGameScores.query(
+			let result = await DBOsuMultiGameScores.sequelize.query(
 				'SELECT id, matchId, gameId, osuUserId, updatedat FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
 
@@ -5192,7 +5192,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} osuUserId ${result[0][i].osuUserId} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} osuUserId ${result[0][i].osuUserId} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 

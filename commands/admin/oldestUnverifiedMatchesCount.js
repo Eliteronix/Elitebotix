@@ -16,7 +16,7 @@ module.exports = {
 				},
 			},
 			order: [
-				['updatedAt', 'ASC']
+				['updatedat', 'ASC']
 			]
 		});
 
@@ -32,7 +32,7 @@ module.exports = {
 				matchEndDate: {
 					[Op.not]: null,
 				},
-				updatedAt: {
+				updatedat: {
 					[Op.lte]: matchToVerify.updatedAt,
 				},
 			},
