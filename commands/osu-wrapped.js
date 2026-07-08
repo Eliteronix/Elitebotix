@@ -229,6 +229,7 @@ module.exports = {
 				},
 			},
 			group: [
+				'id',
 				'score',
 				'gameRawMods',
 				'rawMods',

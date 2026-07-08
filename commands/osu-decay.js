@@ -159,7 +159,7 @@ module.exports = {
 					},
 					{
 						oldOsuRank: {
-							[Op.lt]: Sequelize.col('osuRank'),
+							[Op.lt]: Sequelize.col('osurank'),
 						},
 					},
 				],

@@ -4923,7 +4923,7 @@ module.exports = {
 		let deleted = 0;
 
 		let duplicates = await DBDiscordUsers.findAll({
-			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'amount']],
+			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuuserid')), 'amount']],
 			where: {
 				userId: {
 					[Op.ne]: null
@@ -4933,7 +4933,7 @@ module.exports = {
 				},
 			},
 			group: ['osuUserId'],
-			order: [[Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'DESC']],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('osuuserid')), 'DESC']],
 		});
 
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
@@ -4963,14 +4963,14 @@ module.exports = {
 		deleted = 0;
 
 		duplicates = await DBDiscordUsers.findAll({
-			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userId')), 'amount']],
+			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userid')), 'amount']],
 			where: {
 				userId: {
 					[Op.ne]: null
 				},
 			},
 			group: ['userId'],
-			order: [[Sequelize.fn('COUNT', Sequelize.col('userId')), 'DESC']],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('userid')), 'DESC']],
 		});
 
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
@@ -5006,7 +5006,7 @@ module.exports = {
 
 		deleted = await DBDuelRatingHistory.destroy({
 			where: {
-				updatedAt: {
+				updatedat: {
 					[Op.lt]: dateLimit
 				}
 			}
@@ -6544,6 +6544,8 @@ module.exports = {
 					});
 
 					let recentActivity = false;
+
+					console.log(`Processing osu! track for ${osuUser.osuUserId}...`);
 
 					let guildTrackers = await DBOsuGuildTrackers.findAll({
 						attributes: [
