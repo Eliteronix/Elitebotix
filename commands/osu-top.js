@@ -428,7 +428,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			const linkedUser = await DBDiscordUsers.findOne({
 				attributes: ['userId'],
 				where: {
-					osuUserId: osuProfile.id
+					osuUserId: osuProfile.id.toString()
 				}
 			});
 
@@ -644,7 +644,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			const linkedUser = await DBDiscordUsers.findOne({
 				attributes: ['userId'],
 				where: {
-					osuUserId: osuProfile.id
+					osuUserId: osuProfile.id.toString()
 				}
 			});
 
@@ -947,7 +947,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		],
 		where: {
 			beatmapId: {
-				[Op.in]: scores.map(score => score.beatmapId)
+				[Op.in]: scores.map(score => score.beatmapId.toString())
 			},
 		}
 	});

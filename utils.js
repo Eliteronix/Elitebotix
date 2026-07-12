@@ -540,7 +540,7 @@ module.exports = {
 				'maniaTotalScore',
 			],
 			where: {
-				osuUserId: user.id
+				osuUserId: user.id.toString()
 			},
 		})
 			.then(async (discordUser) => {
@@ -3479,7 +3479,7 @@ module.exports = {
 					'osuDuelOutdated'
 				],
 				where: {
-					osuUserId: input.osuUserId,
+					osuUserId: input.osuUserId.toString(),
 					year: endDate.getUTCFullYear(),
 					month: endDate.getUTCMonth() + 1,
 					date: endDate.getUTCDate()
@@ -3522,7 +3522,7 @@ module.exports = {
 				'osuDuelOutdated'
 			],
 			where: {
-				osuUserId: input.osuUserId
+				osuUserId: input.osuUserId.toString()
 			}
 		});
 
@@ -3999,7 +3999,7 @@ module.exports = {
 				'osuFreeModDuelStarRating'
 			],
 			where: {
-				osuUserId: input.osuUserId,
+				osuUserId: input.osuUserId.toString(),
 				year: newEndDate.getUTCFullYear(),
 				month: newEndDate.getUTCMonth(),
 				date: newEndDate.getUTCDate()
@@ -4138,12 +4138,12 @@ module.exports = {
 					'lastDuelRatingUpdate',
 				],
 				where: {
-					osuUserId: input.osuUserId
+					osuUserId: input.osuUserId.toString()
 				}
 			});
 
 			if (!discordUser) {
-				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
+				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId.toString() });
 			}
 
 			if (discordUser && !input.date) {
@@ -5651,7 +5651,7 @@ module.exports = {
 		return playerName;
 	},
 	calculateGrade(mode, counts, modBits) {
-		if (mode === 0) {
+		if (mode == 0) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5676,7 +5676,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 1) {
+		} else if (mode == 1) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5700,7 +5700,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 2) {
+		} else if (mode == 2) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 2);
@@ -5724,7 +5724,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 3) {
+		} else if (mode == 3) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 3);
@@ -6545,8 +6545,6 @@ module.exports = {
 
 					let recentActivity = false;
 
-					console.log(`Processing osu! track for ${osuUser.osuUserId}...`);
-
 					let guildTrackers = await DBOsuGuildTrackers.findAll({
 						attributes: [
 							'id',
@@ -7034,7 +7032,6 @@ module.exports = {
 
 						if (guildTrackers[i].tournamentTopPlays) {
 							if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
-								console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 								//Get all scores from tournaments
 								let multiScores = await DBOsuMultiGameScores.findAll({
 									attributes: [

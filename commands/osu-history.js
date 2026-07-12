@@ -843,7 +843,7 @@ module.exports = {
 			let existingDuelRatings = await DBDuelRatingHistory.findAll({
 				attributes: ['osuDuelStarRating', 'year', 'month', 'date'],
 				where: {
-					osuUserId: osuUser.osuUserId,
+					osuUserId: osuUser.osuUserId.toString(),
 				},
 				raw: true,
 			});
