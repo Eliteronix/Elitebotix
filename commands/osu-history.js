@@ -413,7 +413,7 @@ module.exports = {
 						matchesLost++;
 					}
 				} else if (gameScores[0].teamType === 2) {
-					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId.toString());
 
 					let team = ownScores[0].team;
 
@@ -444,11 +444,11 @@ module.exports = {
 					gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId.toString());
 
 				if (ownScore) {
 					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
-						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId.toString());
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							gamesWon++;
@@ -478,7 +478,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
+			if (multiScores[i].osuUserId !== osuUser.osuUserId.toString()) {
 				if (newMatch) {
 					let matchWonAgainst = false;
 					let matchLostAgainst = false;
@@ -488,10 +488,10 @@ module.exports = {
 						gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
 					}
 
-					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId.toString());
 
 					if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
-						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId.toString());
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							matchWonAgainst = true;
@@ -499,7 +499,7 @@ module.exports = {
 							matchLostAgainst = true;
 						}
 					} else if (gameScores[0].teamType === 2) {
-						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId.toString());
 
 						let team = ownScores[0].team;
 
