@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissi
 const { getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo, logOsuAPICalls, sendMessageToLogChannel } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs, logBroadcastEval } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -20,7 +21,7 @@ module.exports = {
 			'id',
 			'osuUserId',
 			'osuName',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'lastOsuPlayCountChange',
 			'nextOsuPPUpdate',
 			'lastOsuPPChange',

@@ -1,6 +1,8 @@
 //Log message upon starting the bot
 // eslint-disable-next-line no-console
 const { wrongCluster, createNewForumPostRecords, processOsuTrack } = require('./utils');
+const sequelize = require('sequelize');
+const util = require('util');
 
 require('dotenv').config();
 
@@ -14,7 +16,14 @@ const originalConsoleError = console.error;
 
 console.error = function (...args) {
 	process.send('error');
-	originalConsoleError.apply(console, args);
+
+	const fullArgs = args.map(arg =>
+		arg instanceof Error || typeof arg === 'object'
+			? util.inspect(arg, { depth: null, maxStringLength: null, showHidden: false, breakLength: 120 })
+			: arg
+	);
+
+	originalConsoleError.apply(console, fullArgs);
 };
 
 //require the discord.js module
@@ -348,7 +357,7 @@ async function cleanUpDuplicates(client) {
 	try {
 		await cleanUpDuplicateEntries(client);
 	} catch (e) {
-		console.error('bot.js | cleanUpDuplicates' + e);
+		console.error('bot.js | cleanUpDuplicates', e);
 	}
 
 	setTimeout(() => {
@@ -360,7 +369,7 @@ async function getForumPosts(client) {
 	try {
 		await createNewForumPostRecords(client);
 	} catch (e) {
-		console.error('bot.js | createNewForumPostRecords' + e);
+		console.error('bot.js | createNewForumPostRecords', e);
 	}
 
 	setTimeout(() => {
@@ -373,7 +382,7 @@ async function checkOsuTracks(client) {
 		await processOsuTrack(client);
 	} catch (e) {
 		if (e !== 'Timeout in osu! track - reject') {
-			console.error('bot.js | processOsuTrack ' + e);
+			console.error('bot.js | processOsuTrack', e);
 		}
 	}
 
@@ -387,7 +396,7 @@ async function resetImportMatches() {
 		const tasksToReset = ['importMatch'];
 
 		const task = await DBProcessQueue.findOne({
-			attributes: ['id', 'task', 'beingExecuted', 'updatedAt'],
+			attributes: ['id', 'task', 'beingExecuted', [sequelize.col('updatedat'), 'updatedAt']],
 			where: {
 				task: {
 					[Op.in]: tasksToReset,
@@ -399,14 +408,14 @@ async function resetImportMatches() {
 		let date = new Date();
 		date.setMinutes(date.getMinutes() - 5);
 
-		if (task && task.updatedAt < date) {
+		if (task && task.updatedat < date) {
 			task.beingExecuted = false;
 			await task.save();
 			// eslint-disable-next-line no-console
 			// console.log(`Reset ${task.task} task`);
 		}
 	} catch (e) {
-		console.error('bot.js | resetImportMatches' + e);
+		console.error('bot.js | resetImportMatches', e);
 	}
 
 	setTimeout(() => {

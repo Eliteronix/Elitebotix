@@ -2,6 +2,7 @@ const { PermissionsBitField, SlashCommandBuilder, AttachmentBuilder } = require(
 const { showUnknownInteractionError } = require('../config.json');
 const { DBOsuBeatmaps, DBDiscordUsers, DBOsuMappools, DBOsuPoolAccess } = require('../dbObjects');
 const { getMods, getModBits, getIDFromPotentialOsuLink, getOsuBeatmap, getBeatmapSlimcover, pause, getMapOsrFile } = require('../utils.js');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const Canvas = require('@napi-rs/canvas');
 const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -708,7 +709,7 @@ module.exports = {
 					'beatmapsetId',
 					'approvalStatus',
 					'mods',
-					'updatedAt',
+					[sequelize.col('updatedat'), 'updatedAt'],
 					'starRating',
 					'maxCombo',
 					'mode',
@@ -1173,7 +1174,7 @@ module.exports = {
 						'beatmapsetId',
 						'approvalStatus',
 						'mods',
-						'updatedAt',
+						[sequelize.col('updatedat'), 'updatedAt'],
 						'starRating',
 						'maxCombo',
 						'mode',
@@ -1345,7 +1346,7 @@ async function createMappoolImage(mappool, client) {
 			'beatmapsetId',
 			'approvalStatus',
 			'mods',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'starRating',
 			'maxCombo',
 			'mode',

@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiGam
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const { getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
@@ -200,7 +201,7 @@ module.exports = {
 				'teamType',
 				'pp',
 				'beatmapId',
-				[Sequelize.fn('min', Sequelize.col('createdAt')), 'createdAt'],
+				[Sequelize.fn('min', Sequelize.col('createdat')), 'createdAt'],
 				'osuUserId',
 				'count50',
 				'count100',
@@ -304,7 +305,7 @@ module.exports = {
 				'popular',
 				'approachRate',
 				'circleSize',
-				'updatedAt',
+				[sequelize.col('updatedat'), 'updatedAt'],
 				'maxCombo',
 			],
 			where: {
@@ -412,7 +413,7 @@ module.exports = {
 						matchesLost++;
 					}
 				} else if (gameScores[0].teamType === 2) {
-					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId.toString());
 
 					let team = ownScores[0].team;
 
@@ -443,11 +444,11 @@ module.exports = {
 					gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId.toString());
 
 				if (ownScore) {
 					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
-						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId.toString());
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							gamesWon++;
@@ -477,7 +478,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
+			if (multiScores[i].osuUserId !== osuUser.osuUserId.toString()) {
 				if (newMatch) {
 					let matchWonAgainst = false;
 					let matchLostAgainst = false;
@@ -487,10 +488,10 @@ module.exports = {
 						gameScores = matchScores.filter(score => score.gameId === multiScores[i].gameId);
 					}
 
-					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+					let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId.toString());
 
 					if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
-						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId.toString());
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							matchWonAgainst = true;
@@ -498,7 +499,7 @@ module.exports = {
 							matchLostAgainst = true;
 						}
 					} else if (gameScores[0].teamType === 2) {
-						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+						let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId.toString());
 
 						let team = ownScores[0].team;
 
@@ -842,7 +843,7 @@ module.exports = {
 			let existingDuelRatings = await DBDuelRatingHistory.findAll({
 				attributes: ['osuDuelStarRating', 'year', 'month', 'date'],
 				where: {
-					osuUserId: osuUser.osuUserId,
+					osuUserId: osuUser.osuUserId.toString(),
 				},
 				raw: true,
 			});
@@ -1038,7 +1039,7 @@ module.exports = {
 					'beatmapsetId',
 					'approvalStatus',
 					'mods',
-					'updatedAt',
+					[sequelize.col('updatedat'), 'updatedAt'],
 					'starRating',
 					'maxCombo',
 					'mode',

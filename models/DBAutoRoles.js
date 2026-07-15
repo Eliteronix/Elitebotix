@@ -8,11 +8,16 @@ module.exports = (sequelize, DataTypes) => {
 		guildId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'guildid',
 		},
 		roleId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'roleid',
 		},
-		paranoid: true,
+	}, {
+		tableName: 'dbautoroles',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

@@ -1,4 +1,5 @@
 const { DBOsuMultiMatches } = require('../../dbObjects');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -6,7 +7,7 @@ module.exports = {
 	usage: 'None',
 	async execute(interaction) {
 		let matchToVerify = await DBOsuMultiMatches.findOne({
-			attributes: ['updatedAt'],
+			attributes: [[sequelize.col('updatedat'), 'updatedAt']],
 			where: {
 				tourneyMatch: true,
 				verifiedAt: null,
@@ -15,7 +16,7 @@ module.exports = {
 				},
 			},
 			order: [
-				['updatedAt', 'ASC']
+				['updatedat', 'ASC']
 			]
 		});
 
@@ -31,7 +32,7 @@ module.exports = {
 				matchEndDate: {
 					[Op.not]: null,
 				},
-				updatedAt: {
+				updatedat: {
 					[Op.lte]: matchToVerify.updatedAt,
 				},
 			},

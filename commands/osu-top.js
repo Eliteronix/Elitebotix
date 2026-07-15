@@ -4,6 +4,7 @@ const Canvas = require('@napi-rs/canvas');
 const { fitTextOnMiddleCanvas, humanReadable, roundedRect, getRankImage, getModImage, getGameModeName, getLinkModeName, getMods, rippleToBanchoScore, rippleToBanchoUser, updateOsuDetailsforUser, getAccuracy, getIDFromPotentialOsuLink, getOsuBeatmap, multiToBanchoScore, gatariToBanchoScore, getOsuProfileV2, getOsuProfileScoresV2, getModBits } = require('../utils');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError } = require('../config.json');
 const ObjectsToCsv = require('objects-to-csv');
@@ -427,7 +428,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			const linkedUser = await DBDiscordUsers.findOne({
 				attributes: ['userId'],
 				where: {
-					osuUserId: osuProfile.id
+					osuUserId: osuProfile.id.toString()
 				}
 			});
 
@@ -643,7 +644,7 @@ async function getTopPlays(interaction, username, server, mode, noLinkedAccount,
 			const linkedUser = await DBDiscordUsers.findOne({
 				attributes: ['userId'],
 				where: {
-					osuUserId: osuProfile.id
+					osuUserId: osuProfile.id.toString()
 				}
 			});
 
@@ -930,7 +931,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 			'beatmapsetId',
 			'approvalStatus',
 			'mods',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'starRating',
 			'maxCombo',
 			'mode',
@@ -946,7 +947,7 @@ async function drawTopPlays(input, server, mode, interaction, sorting, showLimit
 		],
 		where: {
 			beatmapId: {
-				[Op.in]: scores.map(score => score.beatmapId)
+				[Op.in]: scores.map(score => score.beatmapId.toString())
 			},
 		}
 	});
@@ -1289,7 +1290,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 			'teamType',
 			'pp',
 			'beatmapId',
-			'createdAt',
+			[sequelize.col('createdat'), 'createdAt'],
 			'osuUserId',
 			'count50',
 			'count100',
@@ -1342,7 +1343,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 			'popular',
 			'approachRate',
 			'circleSize',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'maxCombo',
 		],
 		where: {
@@ -1402,7 +1403,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 			'beatmapsetId',
 			'approvalStatus',
 			'mods',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'starRating',
 			'maxCombo',
 			'mode',

@@ -1,3 +1,6 @@
+const pg = require('pg');
+pg.types.setTypeParser(20, val => parseInt(val, 10));
+
 const Sequelize = require('sequelize');
 require('dotenv').config();
 
@@ -36,245 +39,27 @@ const logging = {
 	benchmark: true,
 };
 
-const guilds = new Sequelize('database', 'username', 'password', {
+const elitebotixPostgres = new Sequelize('elitebotix', 'elitebotix', process.env.POSTGRESQLPASSWORD, {
+	dialect: 'postgres',
 	host: 'localhost',
-	dialect: 'sqlite',
+	port: 5432,
 	logging: async () => {
 		if (process.shardId !== undefined) {
-			process.send('DB guilds');
+			process.send('DB postgres');
 		}
 	},
 	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/guilds.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
 	pool: {
-		max: 7,
+		max: 10,
+		min: 2,
+		acquire: 30000,
+		idle: 10000,
 	},
 });
 
-const discordUsers = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB discordUsers');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/discordUsers.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const serverActivity = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB serverActivity');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/serverActivity.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const processQueue = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB elitebotix_processQueue');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/processQueue.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const osuData = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB osuData');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/osuData.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const elitiriData = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB elitiriData');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/elitiriData.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const multiScores = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB multiScores');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiScores.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const multiMatches = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB multiMatches');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiMatches.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const multiGames = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB multiGames');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGames.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const multiGameScores = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB multiGameScores');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/multiGameScores.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const beatmaps = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB beatmaps');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/beatmaps.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
-
-const soloScores = new Sequelize('database', 'username', 'password', {
-	host: 'localhost',
-	dialect: 'sqlite',
-	logging: async () => {
-		if (process.shardId !== undefined) {
-			process.send('DB soloScores');
-		}
-	},
-	benchmark: logging.benchmark,
-	storage: `${process.env.ELITEBOTIXROOTPATH}/databases/soloScores.sqlite`,
-	retry: {
-		max: 25, // Maximum retry 15 times
-		backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-		backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-	},
-	pool: {
-		max: 7,
-	}
-});
+elitebotixPostgres.authenticate()
+	.then(() => console.log('✅ Connected to database'))
+	.catch(err => console.error('❌ Failed to connect to database:', err));
 
 const elitebotixBanchoProcessQueue = new Sequelize('database', 'username', 'password', {
 	host: 'localhost',
@@ -296,48 +81,36 @@ const elitebotixBanchoProcessQueue = new Sequelize('database', 'username', 'pass
 	}
 });
 
-const DBGuilds = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBGuilds`)(guilds, Sequelize.DataTypes);
-const DBReactionRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBReactionRoles`)(guilds, Sequelize.DataTypes);
-const DBReactionRolesHeader = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBReactionRolesHeader`)(guilds, Sequelize.DataTypes);
-const DBAutoRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBAutoRoles`)(guilds, Sequelize.DataTypes);
-const DBTemporaryVoices = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBTemporaryVoices`)(guilds, Sequelize.DataTypes);
-const DBActivityRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBActivityRoles`)(guilds, Sequelize.DataTypes);
-const DBStarBoardMessages = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBStarBoardMessages`)(guilds, Sequelize.DataTypes);
-const DBTickets = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBTickets`)(guilds, Sequelize.DataTypes);
-const DBBirthdayGuilds = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBBirthdayGuilds`)(guilds, Sequelize.DataTypes);
-const DBOsuGuildTrackers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuGuildTrackers`)(guilds, Sequelize.DataTypes);
-
-const DBDiscordUsers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBDiscordUsers`)(discordUsers, Sequelize.DataTypes);
-
-const DBServerUserActivity = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBServerUserActivity`)(serverActivity, Sequelize.DataTypes);
-
-const DBProcessQueue = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBProcessQueue`)(processQueue, Sequelize.DataTypes);
-
-const DBMOTDPoints = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBMOTDPoints`)(osuData, Sequelize.DataTypes);
-const DBOsuTourneyFollows = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTourneyFollows`)(osuData, Sequelize.DataTypes);
-const DBDuelRatingHistory = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBDuelRatingHistory`)(osuData, Sequelize.DataTypes);
-const DBOsuForumPosts = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuForumPosts`)(osuData, Sequelize.DataTypes);
-const DBOsuTrackingUsers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTrackingUsers`)(osuData, Sequelize.DataTypes);
-const DBOsuMappools = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMappools`)(osuData, Sequelize.DataTypes);
-const DBOsuPoolAccess = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuPoolAccess`)(osuData, Sequelize.DataTypes);
-const DBOsuTeamSheets = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTeamSheets`)(osuData, Sequelize.DataTypes);
-
-const DBElitiriCupSignUp = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupSignUp`)(elitiriData, Sequelize.DataTypes);
-const DBElitiriCupStaff = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupStaff`)(elitiriData, Sequelize.DataTypes);
-const DBElitiriCupSubmissions = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupSubmissions`)(elitiriData, Sequelize.DataTypes);
-const DBElitiriCupLobbies = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupLobbies`)(elitiriData, Sequelize.DataTypes);
-
-const DBOsuMultiScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiScores`)(multiScores, Sequelize.DataTypes);
-
-const DBOsuMultiMatches = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiMatches`)(multiMatches, Sequelize.DataTypes);
-
-const DBOsuMultiGames = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiGames`)(multiGames, Sequelize.DataTypes);
-
-const DBOsuMultiGameScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiGameScores`)(multiGameScores, Sequelize.DataTypes);
-
-const DBOsuBeatmaps = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuBeatmaps`)(beatmaps, Sequelize.DataTypes);
-
-const DBOsuSoloScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuSoloScores`)(soloScores, Sequelize.DataTypes);
+const DBGuilds = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBGuilds`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBReactionRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBReactionRoles`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBReactionRolesHeader = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBReactionRolesHeader`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBAutoRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBAutoRoles`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBTemporaryVoices = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBTemporaryVoices`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBActivityRoles = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBActivityRoles`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBStarBoardMessages = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBStarBoardMessages`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBTickets = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBTickets`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBBirthdayGuilds = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBBirthdayGuilds`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuGuildTrackers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuGuildTrackers`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBDiscordUsers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBDiscordUsers`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBServerUserActivity = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBServerUserActivity`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBProcessQueue = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBProcessQueue`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBMOTDPoints = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBMOTDPoints`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuTourneyFollows = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTourneyFollows`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBDuelRatingHistory = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBDuelRatingHistory`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuForumPosts = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuForumPosts`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuTrackingUsers = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTrackingUsers`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuMappools = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMappools`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuPoolAccess = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuPoolAccess`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuTeamSheets = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuTeamSheets`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBElitiriCupSignUp = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupSignUp`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBElitiriCupStaff = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupStaff`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBElitiriCupSubmissions = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupSubmissions`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBElitiriCupLobbies = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBElitiriCupLobbies`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuMultiMatches = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiMatches`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuMultiGames = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiGames`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuMultiGameScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuMultiGameScores`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuBeatmaps = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuBeatmaps`)(elitebotixPostgres, Sequelize.DataTypes);
+const DBOsuSoloScores = require(`${process.env.ELITEBOTIXROOTPATH}/models/DBOsuSoloScores`)(elitebotixPostgres, Sequelize.DataTypes);
 
 const DBElitebotixBanchoProcessQueue = require(`${process.env.ELITEBOTIXBANCHOROOTPATH}/models/DBProcessQueue`)(elitebotixBanchoProcessQueue, Sequelize.DataTypes);
 
@@ -388,7 +161,6 @@ module.exports = {
 	DBElitiriCupSubmissions,
 	DBStarBoardMessages,
 	DBTickets,
-	DBOsuMultiScores,
 	DBOsuBeatmaps,
 	DBElitiriCupLobbies,
 	DBElitiriCupStaff,

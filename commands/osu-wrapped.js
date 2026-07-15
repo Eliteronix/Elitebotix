@@ -202,7 +202,7 @@ module.exports = {
 				'rawMods',
 				'pp',
 				'beatmapId',
-				[Sequelize.fn('min', Sequelize.col('createdAt')), 'createdAt'],
+				[Sequelize.fn('min', Sequelize.col('createdat')), 'createdAt'],
 				'osuUserId',
 				'count50',
 				'count100',
@@ -229,6 +229,7 @@ module.exports = {
 				},
 			},
 			group: [
+				'id',
 				'score',
 				'gameRawMods',
 				'rawMods',
@@ -376,10 +377,10 @@ module.exports = {
 					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === parseInt(osuUser.osuUserId));
+				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
 				if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
-					let otherScore = gameScores.find(score => score.osuUserId !== parseInt(osuUser.osuUserId));
+					let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
 					if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 						matchesWon++;
@@ -387,7 +388,7 @@ module.exports = {
 						matchesLost++;
 					}
 				} else if (gameScores[0].teamType === 2) {
-					let ownScores = matchScores.filter(score => score.osuUserId === parseInt(osuUser.osuUserId));
+					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
 
 					let team = ownScores[0].team;
 
@@ -418,11 +419,11 @@ module.exports = {
 					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === parseInt(osuUser.osuUserId));
+				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
 
 				if (ownScore) {
 					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
-						let otherScore = gameScores.find(score => score.osuUserId !== parseInt(osuUser.osuUserId));
+						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							gamesWon++;
@@ -452,7 +453,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].osuUserId !== parseInt(osuUser.osuUserId)) {
+			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
 				let mostPlayedWithPlayer = mostPlayedWith.find(player => player.osuUserId === multiScores[i].osuUserId);
 
 				if (mostPlayedWithPlayer) {
@@ -729,7 +730,7 @@ module.exports = {
 				'beatmapsetId',
 				'approvalStatus',
 				'mods',
-				'updatedAt',
+				[Sequelize.col('updatedat'), 'updatedAt'],
 				'starRating',
 				'maxCombo',
 				'mode',

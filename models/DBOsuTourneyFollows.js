@@ -5,8 +5,17 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		userId: DataTypes.STRING,
-		osuUserId: DataTypes.STRING,
-		paranoid: true,
+		userId: {
+			type: DataTypes.STRING,
+			field: 'userid',
+		},
+		osuUserId: {
+			type: DataTypes.STRING,
+			field: 'osuuserid',
+		},
+	}, {
+		tableName: 'dbosutourneyfollows',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

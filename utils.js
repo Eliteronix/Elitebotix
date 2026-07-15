@@ -4,6 +4,7 @@ const Canvas = require('@napi-rs/canvas');
 const Discord = require('discord.js');
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const osu = require('node-osu');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const rosu = require('rosu-pp-js');
 const mapsRetriedTooOften = [];
@@ -539,7 +540,7 @@ module.exports = {
 				'maniaTotalScore',
 			],
 			where: {
-				osuUserId: user.id
+				osuUserId: user.id.toString()
 			},
 		})
 			.then(async (discordUser) => {
@@ -791,7 +792,7 @@ module.exports = {
 				const serverUserActivity = await DBServerUserActivity.findOne({
 					attributes: [
 						'id',
-						'updatedAt',
+						[sequelize.col('updatedat'), 'updatedAt'],
 						'points',
 					],
 					where: {
@@ -938,7 +939,7 @@ module.exports = {
 						userId: {
 							[Op.not]: null
 						},
-						updatedAt: {
+						updatedat: {
 							[Op.lt]: yesterday
 						},
 						[Op.or]: [
@@ -981,7 +982,7 @@ module.exports = {
 						userId: null,
 						[Op.or]: [
 							{
-								updatedAt: {
+								updatedat: {
 									[Op.lt]: lastMonth
 								}
 							},
@@ -1037,7 +1038,7 @@ module.exports = {
 				userId: {
 					[Op.not]: null
 				},
-				updatedAt: {
+				updatedat: {
 					[Op.lt]: yesterday
 				},
 				[Op.or]: [
@@ -1074,7 +1075,7 @@ module.exports = {
 				]
 			},
 			order: [
-				['updatedAt', 'ASC'],
+				['updatedat', 'ASC'],
 			]
 		});
 
@@ -1097,7 +1098,7 @@ module.exports = {
 				userId: null,
 				[Op.or]: [
 					{
-						updatedAt: {
+						updatedat: {
 							[Op.lt]: lastMonth
 						}
 					},
@@ -1139,7 +1140,7 @@ module.exports = {
 				]
 			},
 			order: [
-				['updatedAt', 'ASC'],
+				['updatedat', 'ASC'],
 			]
 		});
 
@@ -2919,7 +2920,7 @@ module.exports = {
 
 				dbBeatmap = await DBOsuBeatmaps.findOne({
 					where: {
-						beatmapId: beatmapId, mods: modBits
+						beatmapId: beatmapId.toString(), mods: modBits
 					}
 				});
 			}
@@ -3478,7 +3479,7 @@ module.exports = {
 					'osuDuelOutdated'
 				],
 				where: {
-					osuUserId: input.osuUserId,
+					osuUserId: input.osuUserId.toString(),
 					year: endDate.getUTCFullYear(),
 					month: endDate.getUTCMonth() + 1,
 					date: endDate.getUTCDate()
@@ -3521,7 +3522,7 @@ module.exports = {
 				'osuDuelOutdated'
 			],
 			where: {
-				osuUserId: input.osuUserId
+				osuUserId: input.osuUserId.toString()
 			}
 		});
 
@@ -3729,7 +3730,7 @@ module.exports = {
 					'popular',
 					'approachRate',
 					'circleSize',
-					'updatedAt',
+					[sequelize.col('updatedat'), 'updatedAt'],
 					'maxCombo',
 				],
 				where: {
@@ -3998,7 +3999,7 @@ module.exports = {
 				'osuFreeModDuelStarRating'
 			],
 			where: {
-				osuUserId: input.osuUserId,
+				osuUserId: input.osuUserId.toString(),
 				year: newEndDate.getUTCFullYear(),
 				month: newEndDate.getUTCMonth(),
 				date: newEndDate.getUTCDate()
@@ -4137,25 +4138,25 @@ module.exports = {
 					'lastDuelRatingUpdate',
 				],
 				where: {
-					osuUserId: input.osuUserId
+					osuUserId: input.osuUserId.toString()
 				}
 			});
 
 			if (!discordUser) {
-				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId });
+				discordUser = await DBDiscordUsers.create({ osuUserId: input.osuUserId.toString() });
 			}
 
 			if (discordUser && !input.date) {
 				if (input.client) {
 					try {
 						let message = [`${discordUser.osuName} / ${discordUser.osuUserId}:`];
-							const formatRatingChange = (label, oldValue, newValue) => {
-								let oldRounded = Math.round(oldValue * 1000) / 1000;
-								let newRounded = Math.round(newValue * 1000) / 1000;
-								let delta = Math.round((newRounded - oldRounded) * 1000) / 1000;
-								let deltaPrefix = delta >= 0 ? '+' : '';
-								return `${label}: ${oldRounded.toFixed(3)} -> ${newRounded.toFixed(3)} (${deltaPrefix}${delta.toFixed(3)})`;
-							};
+						const formatRatingChange = (label, oldValue, newValue) => {
+							let oldRounded = Math.round(oldValue * 1000) / 1000;
+							let newRounded = Math.round(newValue * 1000) / 1000;
+							let delta = Math.round((newRounded - oldRounded) * 1000) / 1000;
+							let deltaPrefix = delta >= 0 ? '+' : '';
+							return `${label}: ${oldRounded.toFixed(3)} -> ${newRounded.toFixed(3)} (${deltaPrefix}${delta.toFixed(3)})`;
+						};
 						if (Math.round(discordUser.osuDuelStarRating * 1000) / 1000 !== Math.round(duelRatings.total * 1000) / 1000) {
 							message.push(formatRatingChange('SR', discordUser.osuDuelStarRating, duelRatings.total));
 							message.push(`Ratio: ${modPoolAmounts[0]} NM | ${modPoolAmounts[1]} HD | ${modPoolAmounts[2]} HR | ${modPoolAmounts[3]} DT | ${modPoolAmounts[4]} FM`);
@@ -4319,14 +4320,14 @@ module.exports = {
 				'beatmapsetId',
 				'approvalStatus',
 				'mods',
-				'updatedAt',
+				[sequelize.col('updatedat'), 'updatedAt'],
 				'starRating',
 				'maxCombo',
 				'mode',
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: topScores.map(score => score.beatmap.id)
+					[Op.in]: topScores.map(score => score.beatmap.id.toString())
 				},
 			}
 		});
@@ -4922,7 +4923,7 @@ module.exports = {
 		let deleted = 0;
 
 		let duplicates = await DBDiscordUsers.findAll({
-			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'amount']],
+			attributes: ['osuUserId', [Sequelize.fn('COUNT', Sequelize.col('osuuserid')), 'amount']],
 			where: {
 				userId: {
 					[Op.ne]: null
@@ -4932,18 +4933,18 @@ module.exports = {
 				},
 			},
 			group: ['osuUserId'],
-			order: [[Sequelize.fn('COUNT', Sequelize.col('osuUserId')), 'DESC']],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('osuuserid')), 'DESC']],
 		});
 
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
 		for (let i = 0; i < duplicates.length; i++) {
 			let results = await DBDiscordUsers.findAll({
-				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
+				attributes: ['id', 'userId', 'osuUserId', 'osuName', [sequelize.col('updatedat'), 'updatedAt']],
 				where: {
 					osuUserId: duplicates[i].osuUserId
 				},
-				order: [['userId', 'ASC'], ['osuVerified', 'ASC'], ['updatedAt', 'ASC']]
+				order: [['userId', 'ASC'], ['osuVerified', 'ASC'], ['updatedat', 'ASC']]
 			});
 
 			if (results.length > 1) {
@@ -4962,25 +4963,25 @@ module.exports = {
 		deleted = 0;
 
 		duplicates = await DBDiscordUsers.findAll({
-			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userId')), 'amount']],
+			attributes: ['userId', [Sequelize.fn('COUNT', Sequelize.col('userid')), 'amount']],
 			where: {
 				userId: {
 					[Op.ne]: null
 				},
 			},
 			group: ['userId'],
-			order: [[Sequelize.fn('COUNT', Sequelize.col('userId')), 'DESC']],
+			order: [[Sequelize.fn('COUNT', Sequelize.col('userid')), 'DESC']],
 		});
 
 		duplicates = duplicates.filter(user => user.dataValues.amount > 1);
 
 		for (let i = 0; i < duplicates.length; i++) {
 			let results = await DBDiscordUsers.findAll({
-				attributes: ['id', 'userId', 'osuUserId', 'osuName', 'updatedAt'],
+				attributes: ['id', 'userId', 'osuUserId', 'osuName', [sequelize.col('updatedat'), 'updatedAt']],
 				where: {
 					userId: duplicates[i].userId
 				},
-				order: [['osuVerified', 'ASC'], ['osuUserId', 'ASC'], ['updatedAt', 'ASC']]
+				order: [['osuVerified', 'ASC'], ['osuUserId', 'ASC'], ['updatedat', 'ASC']]
 			});
 
 			if (results.length > 1) {
@@ -5005,7 +5006,7 @@ module.exports = {
 
 		deleted = await DBDuelRatingHistory.destroy({
 			where: {
-				updatedAt: {
+				updatedat: {
 					[Op.lt]: dateLimit
 				}
 			}
@@ -5017,21 +5018,11 @@ module.exports = {
 		deleted = 0;
 		let iterations = 0;
 
-		const beatmaps = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/beatmaps.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
+
 
 		while (duplicates && iterations < 100) {
-			let result = await beatmaps.query(
-				'SELECT id, beatmapId, mods, updatedAt FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
+			let result = await DBOsuBeatmaps.sequelize.query(
+				'SELECT id, beatmapId, mods, updatedat FROM DBOsuBeatmaps WHERE 0 < (SELECT COUNT(1) FROM DBOsuBeatmaps as a WHERE a.beatmapId = DBOsuBeatmaps.beatmapId AND a.mods = DBOsuBeatmaps.mods AND a.id <> DBOsuBeatmaps.id)',
 			);
 
 			iterations++;
@@ -5050,7 +5041,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} beatmapId ${result[0][i].beatmapId} mods ${result[0][i].mods} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} beatmapId ${result[0][i].beatmapId} mods ${result[0][i].mods} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5079,21 +5070,9 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiMatches = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/multiMatches.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		while (duplicates && iterations < 100) {
-			let result = await multiMatches.query(
-				'SELECT id, matchId, updatedAt FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
+			let result = await DBOsuMultiMatches.sequelize.query(
+				'SELECT id, matchId, updatedat FROM DBOsuMultiMatches WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiMatches as a WHERE a.matchId = DBOsuMultiMatches.matchId AND a.id <> DBOsuMultiMatches.id)',
 			);
 
 			iterations++;
@@ -5112,7 +5091,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5142,21 +5121,9 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiGames = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/multiGames.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		while (duplicates && iterations < 100) {
-			let result = await multiGames.query(
-				'SELECT id, matchId, gameId, updatedAt FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
+			let result = await DBOsuMultiGames.sequelize.query(
+				'SELECT id, matchId, gameId, updatedat FROM DBOsuMultiGames WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGames as a WHERE a.matchId = DBOsuMultiGames.matchId AND a.gameId = DBOsuMultiGames.gameId AND a.id <> DBOsuMultiGames.id)',
 			);
 
 			iterations++;
@@ -5175,7 +5142,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5204,21 +5171,9 @@ module.exports = {
 		deleted = 0;
 		iterations = 0;
 
-		const multiGameScores = new Sequelize('database', 'username', 'password', {
-			host: 'localhost',
-			dialect: 'sqlite',
-			logging: false,
-			storage: 'databases/multiGameScores.sqlite',
-			retry: {
-				max: 15, // Maximum retry 15 times
-				backoffBase: 100, // Initial backoff duration in ms. Default: 100,
-				backoffExponent: 1.14, // Exponent to increase backoff each try. Default: 1.1
-			},
-		});
-
 		while (duplicates && iterations < 100) {
-			let result = await multiGameScores.query(
-				'SELECT id, matchId, gameId, osuUserId, updatedAt FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
+			let result = await DBOsuMultiGameScores.sequelize.query(
+				'SELECT id, matchId, gameId, osuUserId, updatedat FROM DBOsuMultiGameScores WHERE 0 < (SELECT COUNT(1) FROM DBOsuMultiGameScores as a WHERE a.osuUserId = DBOsuMultiGameScores.osuUserId AND a.matchId = DBOsuMultiGameScores.matchId AND a.gameId = DBOsuMultiGameScores.gameId AND a.id <> DBOsuMultiGameScores.id)',
 			);
 
 			iterations++;
@@ -5237,7 +5192,7 @@ module.exports = {
 
 						deleted++;
 
-						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} osuUserId ${result[0][i].osuUserId} updatedAt ${result[0][i].updatedAt}\``);
+						await module.exports.sendMessageToLogChannel(client, process.env.CLEANUPLOG, `\`# ${deleted} iteration ${iterations} matchId ${result[0][i].matchId} gameId ${result[0][i].gameId} osuUserId ${result[0][i].osuUserId} updatedAt ${result[0][i].updatedat}\``);
 					}
 				}
 
@@ -5520,7 +5475,8 @@ module.exports = {
 			attributes: ['osuPP', 'osuRank'],
 			where: {
 				osuUserId: {
-					[Op.gt]: 0
+					[Op.not]: null,
+					[Op.ne]: '',
 				},
 				osuPP: {
 					[Op.gt]: 0
@@ -5543,7 +5499,8 @@ module.exports = {
 			attributes: ['osuDuelStarRating'],
 			where: {
 				osuUserId: {
-					[Op.gt]: 0
+					[Op.not]: null,
+					[Op.ne]: '',
 				},
 				osuPP: {
 					[Op.gt]: 0
@@ -5694,7 +5651,7 @@ module.exports = {
 		return playerName;
 	},
 	calculateGrade(mode, counts, modBits) {
-		if (mode === 0) {
+		if (mode == 0) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5719,7 +5676,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 1) {
+		} else if (mode == 1) {
 			let grade = 'D';
 
 			let count300Rate = parseInt(counts['300']) / (parseInt(counts['300']) + parseInt(counts['100']) + parseInt(counts['50']) + parseInt(counts.miss));
@@ -5743,7 +5700,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 2) {
+		} else if (mode == 2) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 2);
@@ -5767,7 +5724,7 @@ module.exports = {
 			}
 
 			return grade;
-		} else if (mode === 3) {
+		} else if (mode == 3) {
 			let grade = 'D';
 
 			let accuracy = module.exports.getAccuracy({ counts: counts }, 3);
@@ -5817,7 +5774,7 @@ module.exports = {
 					const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 					let existingQueueTasks = await DBProcessQueue.findAll({
-						attributes: ['id', 'additions', 'createdAt'],
+						attributes: ['id', 'additions', [sequelize.col('createdat'), 'createdAt']],
 						where: {
 							task: 'duelQueue1v1',
 						},
@@ -5919,7 +5876,7 @@ module.exports = {
 			const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
 
 			let existingQueueTasks = await DBProcessQueue.findAll({
-				attributes: ['additions', 'createdAt'],
+				attributes: ['additions', [sequelize.col('createdat'), 'createdAt']],
 				where: {
 					task: 'importMatch',
 				},
@@ -6273,7 +6230,7 @@ module.exports = {
 			'approachRate',
 			'circleSize',
 			'overallDifficulty',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'maxCombo',
 			'drainLength',
 			'totalLength',
@@ -6539,7 +6496,7 @@ module.exports = {
 		let now = new Date();
 
 		let osuTracker = await DBOsuTrackingUsers.findOne({
-			attributes: ['id', 'osuUserId', 'nextCheck', 'updatedAt', 'minutesBetweenChecks'],
+			attributes: ['id', 'osuUserId', 'nextCheck', [sequelize.col('updatedat'), 'updatedAt'], 'minutesBetweenChecks'],
 			where: {
 				nextCheck: {
 					[Op.lte]: now,
@@ -6573,6 +6530,7 @@ module.exports = {
 			let recentActivities = client.shard.broadcastEval(async (c, { osuUser, lastUpdated }) => {
 				try {
 					const osu = require('node-osu');
+					const sequelize = require('sequelize');
 					const { Op } = require('sequelize');
 					const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 					const { DBOsuGuildTrackers, DBOsuMultiGameScores, DBOsuMultiMatches, DBOsuBeatmaps } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
@@ -7074,7 +7032,6 @@ module.exports = {
 
 						if (guildTrackers[i].tournamentTopPlays) {
 							if (guildTrackers[i].tournamentNumberTopPlays === undefined) {
-								// console.log(`Getting tournament top plays for ${osuUser.osuUserId}...`);
 								//Get all scores from tournaments
 								let multiScores = await DBOsuMultiGameScores.findAll({
 									attributes: [
@@ -7085,7 +7042,7 @@ module.exports = {
 										'teamType',
 										'pp',
 										'beatmapId',
-										'createdAt',
+										[sequelize.col('createdat'), 'createdAt'],
 										'osuUserId',
 										'count50',
 										'count100',
@@ -7140,7 +7097,7 @@ module.exports = {
 										'popular',
 										'approachRate',
 										'circleSize',
-										'updatedAt',
+										[sequelize.col('updatedat'), 'updatedAt'],
 										'maxCombo',
 									],
 									where: {

@@ -8,13 +8,24 @@ module.exports = (sequelize, DataTypes) => {
 		guildId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'guildid',
 		},
 		channelId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'channelid',
 		},
-		textChannelId: DataTypes.STRING,
-		creatorId: DataTypes.STRING,
-		paranoid: true,
+		textChannelId: {
+			type: DataTypes.STRING,
+			field: 'textchannelid',
+		},
+		creatorId: {
+			type: DataTypes.STRING,
+			field: 'creatorid',
+		},
+	}, {
+		tableName: 'dbtemporaryvoices',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };
