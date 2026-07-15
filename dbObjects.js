@@ -1,3 +1,6 @@
+const pg = require('pg');
+pg.types.setTypeParser(20, val => parseInt(val, 10));
+
 const Sequelize = require('sequelize');
 require('dotenv').config();
 
