@@ -3735,7 +3735,7 @@ module.exports = {
 				],
 				where: {
 					beatmapId: {
-						[Op.in]: userMaps.map(beatmap => beatmap.beatmapId)
+						[Op.in]: userMaps.map(beatmap => beatmap.beatmapId.toString())
 					},
 				}
 			});
@@ -4368,7 +4368,7 @@ module.exports = {
 				'lastDuelRatingUpdate',
 			],
 			where: {
-				osuUserId: input.osuUserId
+				osuUserId: input.osuUserId.toString()
 			}
 		});
 
@@ -4841,7 +4841,7 @@ module.exports = {
 
 		// Filter out maps that have less than 250 plays
 		let popular = mostplayed.filter(map => map.dataValues.playcount > 250);
-		popular = popular.map(map => map.beatmapId);
+		popular = popular.map(map => map.beatmapId.toString());
 
 		// Update beatmap data
 		let update = await DBOsuBeatmaps.update({
@@ -4849,7 +4849,7 @@ module.exports = {
 		}, {
 			where: {
 				beatmapId: {
-					[Op.notIn]: popular
+					[Op.notIn]: popular.map(map => map.beatmapId)
 				},
 				popular: {
 					[Op.not]: false
@@ -4879,7 +4879,7 @@ module.exports = {
 
 		// Filter out maps that have less than 100 plays
 		let usedOften = mostplayed.filter(map => map.dataValues.playcount > 100);
-		usedOften = usedOften.map(map => map.beatmapId);
+		usedOften = usedOften.map(map => map.beatmapId.toString());
 
 		// Update beatmap data
 		update = await DBOsuBeatmaps.update({
@@ -5614,7 +5614,7 @@ module.exports = {
 		let discordUser = await DBDiscordUsers.findOne({
 			attributes: ['osuName'],
 			where: {
-				osuUserId: osuUserId
+				osuUserId: osuUserId.toString()
 			}
 		});
 

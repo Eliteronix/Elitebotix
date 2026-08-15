@@ -377,10 +377,10 @@ module.exports = {
 					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+				let ownScore = gameScores.find(score => score.osuUserId.toString() === osuUser.osuUserId);
 
 				if (gameScores.length === 2 && gameScores[0].teamType === 0 && ownScore) {
-					let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+					let otherScore = gameScores.find(score => score.osuUserId.toString() !== osuUser.osuUserId);
 
 					if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 						matchesWon++;
@@ -388,7 +388,7 @@ module.exports = {
 						matchesLost++;
 					}
 				} else if (gameScores[0].teamType === 2) {
-					let ownScores = matchScores.filter(score => score.osuUserId === osuUser.osuUserId);
+					let ownScores = matchScores.filter(score => score.osuUserId.toString() === osuUser.osuUserId);
 
 					let team = ownScores[0].team;
 
@@ -419,11 +419,11 @@ module.exports = {
 					gameScores = multiScores.filter(score => score.gameId === multiScores[i].gameId);
 				}
 
-				let ownScore = gameScores.find(score => score.osuUserId === osuUser.osuUserId);
+				let ownScore = gameScores.find(score => score.osuUserId.toString() === osuUser.osuUserId);
 
 				if (ownScore) {
 					if (gameScores.length === 2 && gameScores[0].teamType === 0) {
-						let otherScore = gameScores.find(score => score.osuUserId !== osuUser.osuUserId);
+						let otherScore = gameScores.find(score => score.osuUserId.toString() !== osuUser.osuUserId);
 
 						if (parseInt(ownScore.score) > parseInt(otherScore.score)) {
 							gamesWon++;
@@ -453,7 +453,7 @@ module.exports = {
 				}
 			}
 
-			if (multiScores[i].osuUserId !== osuUser.osuUserId) {
+			if (multiScores[i].osuUserId.toString() !== osuUser.osuUserId) {
 				let mostPlayedWithPlayer = mostPlayedWith.find(player => player.osuUserId === multiScores[i].osuUserId);
 
 				if (mostPlayedWithPlayer) {
@@ -740,7 +740,7 @@ module.exports = {
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: tourneyPPPlays.map(score => score.beatmapId)
+					[Op.in]: tourneyPPPlays.map(score => score.beatmapId.toString())
 				},
 			}
 		});

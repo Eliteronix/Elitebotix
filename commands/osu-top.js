@@ -1348,7 +1348,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 		],
 		where: {
 			beatmapId: {
-				[Op.in]: multiScores.map(score => score.beatmapId)
+				[Op.in]: multiScores.map(score => score.beatmapId.toString())
 			},
 			mods: 0,
 		}
@@ -1410,7 +1410,7 @@ async function getTournamentTopPlayData(osuUserId, mode, client, mixed = false) 
 		],
 		where: {
 			beatmapId: {
-				[Op.in]: multiScores.map(score => score.beatmapId)
+				[Op.in]: multiScores.map(score => score.beatmapId.toString())
 			},
 			mods: 0
 		}
