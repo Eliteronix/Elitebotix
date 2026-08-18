@@ -7395,12 +7395,13 @@ module.exports = {
 				if (recentActivity) {
 					osuTracker.minutesBetweenChecks = 15;
 				} else {
-					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 1;
+					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 10;
 				}
 
-				if (osuTracker.minutesBetweenChecks > 60 * 23) {
-					osuTracker.minutesBetweenChecks = 60 * 23;
-				}
+				// Commented out for better performance
+				// if (osuTracker.minutesBetweenChecks > 60 * 23) {
+				// 	osuTracker.minutesBetweenChecks = 60 * 23;
+				// }
 
 				let date = new Date();
 				date.setMinutes(date.getMinutes() + osuTracker.minutesBetweenChecks);
