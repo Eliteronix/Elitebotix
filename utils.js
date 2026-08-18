@@ -921,8 +921,8 @@ module.exports = {
 
 		let now = new Date();
 
-		let yesterday = new Date();
-		yesterday.setUTCHours(yesterday.getUTCHours() - 24);
+		let lastWeek = new Date();
+		lastWeek.setUTCHours(lastWeek.getUTCHours() - 24);
 
 		let lastMonth = new Date();
 		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
@@ -939,7 +939,7 @@ module.exports = {
 							[Op.not]: null
 						},
 						updatedAt: {
-							[Op.lt]: yesterday
+							[Op.lt]: lastWeek
 						},
 						[Op.or]: [
 							{
@@ -1038,7 +1038,7 @@ module.exports = {
 					[Op.not]: null
 				},
 				updatedAt: {
-					[Op.lt]: yesterday
+					[Op.lt]: lastWeek
 				},
 				[Op.or]: [
 					{
