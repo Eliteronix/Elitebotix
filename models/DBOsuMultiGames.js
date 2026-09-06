@@ -65,7 +65,6 @@ module.exports = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER,
 			field: 'scores',
 		},
-		paranoid: true,
 	}, {
 		indexes: [
 			{
