@@ -58,6 +58,7 @@ const elitebotixPostgres = new Sequelize('elitebotix', 'elitebotix', process.env
 });
 
 elitebotixPostgres.authenticate()
+	// eslint-disable-next-line no-console
 	.then(() => console.log('✅ Connected to database'))
 	.catch(err => console.error('❌ Failed to connect to database:', err));
 
