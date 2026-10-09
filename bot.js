@@ -221,48 +221,48 @@ function readyDiscord() {
 		executeProcessQueue(client);
 	}, 60000);
 
-	const blocked = require('blocked-at');
+	// const blocked = require('blocked-at');
 
-	const { logBroadcastEval } = require('./config.json');
+	// const { logBroadcastEval } = require('./config.json');
 
-	blocked((time, stack, { type, resource }) => {
-		if (logBroadcastEval) {
-			// eslint-disable-next-line no-console
-			console.log('Broadcasting bot.js event loop blocked...');
-		}
+	// blocked((time, stack, { type, resource }) => {
+	// 	if (logBroadcastEval) {
+	// 		// eslint-disable-next-line no-console
+	// 		console.log('Broadcasting bot.js event loop blocked...');
+	// 	}
 
-		let header = '###';
+	// 	let header = '###';
 
-		if (time.toFixed() > 20000) {
-			header = '#';
-		} else if (time.toFixed() > 10000) {
-			header = '##';
-		}
+	// 	if (time.toFixed() > 20000) {
+	// 		header = '#';
+	// 	} else if (time.toFixed() > 10000) {
+	// 		header = '##';
+	// 	}
 
-		client.shard.broadcastEval(async (c, { message }) => {
-			let guildId = null;
-			let channelId = null;
-			if (process.env.SERVER === 'Dev') {
-				guildId = '800641468321759242';
-				channelId = '1365819208545603605';
-			} else {
-				guildId = '727407178499096597';
-				channelId = '1365819043306672208';
-			}
+	// 	client.shard.broadcastEval(async (c, { message }) => {
+	// 		let guildId = null;
+	// 		let channelId = null;
+	// 		if (process.env.SERVER === 'Dev') {
+	// 			guildId = '800641468321759242';
+	// 			channelId = '1365819208545603605';
+	// 		} else {
+	// 			guildId = '727407178499096597';
+	// 			channelId = '1365819043306672208';
+	// 		}
 
-			const guild = await c.guilds.cache.get(guildId);
+	// 		const guild = await c.guilds.cache.get(guildId);
 
-			if (!guild || guild.shardId !== c.shardId) {
-				return;
-			}
+	// 		if (!guild || guild.shardId !== c.shardId) {
+	// 			return;
+	// 		}
 
-			const channel = await guild.channels.cache.get(channelId);
+	// 		const channel = await guild.channels.cache.get(channelId);
 
-			if (!channel) return;
+	// 		if (!channel) return;
 
-			await channel.send(message);
-		}, { context: { message: `${header} Shard ${client.shardId} Blocked for ${time.toFixed()}ms\noperation: ${type}, resource: ${resource}\n\`\`\`${stack.join('\n')}\`\`\`` } });
-	}, { threshold: 5000 });
+	// 		await channel.send(message);
+	// 	}, { context: { message: `${header} Shard ${client.shardId} Blocked for ${time.toFixed()}ms\noperation: ${type}, resource: ${resource}\n\`\`\`${stack.join('\n')}\`\`\`` } });
+	// }, { threshold: 5000 });
 }
 
 client.on('messageCreate', msg => gotMessage(msg));
