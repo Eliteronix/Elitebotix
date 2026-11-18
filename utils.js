@@ -7105,7 +7105,7 @@ module.exports = {
 									],
 									where: {
 										beatmapId: {
-											[Op.in]: multiScores.map(score => score.beatmapId)
+											[Op.in]: multiScores.map(score => String(score.beatmapId))
 										},
 										mods: 0,
 									}
@@ -7121,7 +7121,7 @@ module.exports = {
 										multiScores[j].rawMods = parseInt(multiScores[j].rawMods) - 1;
 									}
 
-									multiScores[j].dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId == multiScores[j].beatmapId);
+									multiScores[j].dbBeatmap = beatmaps.find(beatmap => beatmap.beatmapId == String(multiScores[j].beatmapId));
 
 									multiScores[j] = await multiToBanchoScore(multiScores[j], c);
 
