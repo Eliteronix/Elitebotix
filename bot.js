@@ -228,7 +228,7 @@ function readyDiscord() {
 
 	setTimeout(() => {
 		executeProcessQueue(client);
-	}, 60000);
+	}, 120000);
 
 	const blocked = require('blocked-at');
 
@@ -314,7 +314,7 @@ setTimeout(() => {
 	setInterval(() => checkForBirthdays(client), 300000);
 
 	setInterval(() => refreshOsuRank(client), 50000);
-}, 60000);
+}, 120000);
 
 // Set update to 1 after 23 hours to make it restart
 setTimeout(() => {
