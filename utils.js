@@ -5775,6 +5775,7 @@ module.exports = {
 				if (textChannel && textChannel.guildId) {
 					const { DBProcessQueue, DBDiscordUsers } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 					const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+					const sequelize = require('sequelize');
 
 					let existingQueueTasks = await DBProcessQueue.findAll({
 						attributes: ['id', 'additions', [sequelize.col('createdat'), 'createdAt']],
@@ -5877,6 +5878,7 @@ module.exports = {
 
 			const { DBProcessQueue } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\dbObjects`);
 			const { getOsuPlayerName } = require(`${__dirname.replace(/Elitebotix\\.+/gm, '')}Elitebotix\\utils`);
+			const sequelize = require('sequelize');
 
 			let existingQueueTasks = await DBProcessQueue.findAll({
 				attributes: ['additions', [sequelize.col('createdat'), 'createdAt']],
