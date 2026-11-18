@@ -4751,6 +4751,9 @@ module.exports = {
 		// Remove null values
 		existingUsers = existingUsers.filter(user => user !== null);
 
+		// Postgres compares against a bigint column, so keep only numeric IDs
+		existingUsers = existingUsers.filter(user => /^\d+$/.test(String(user)));
+
 		let missingUsers = await DBOsuMultiGameScores.findAll({
 			attributes: ['osuUserId'],
 			where: {
