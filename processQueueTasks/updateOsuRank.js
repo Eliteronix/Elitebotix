@@ -157,7 +157,7 @@ module.exports = {
 					discordUser.osuPlayCount = osuUser.counts.plays;
 					discordUser.nextOsuPPUpdate = new Date();
 				} else {
-					discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPlayCountChange));
+					discordUser.nextOsuPPUpdate = getNextUpdate(discordUser.lastOsuPlayCountChange);
 				}
 
 				discordUser.osuRankedScore = osuUser.scores.ranked;
@@ -182,7 +182,7 @@ module.exports = {
 					discordUser.taikoPlayCount = taikoUser.counts.plays;
 					discordUser.nextTaikoPPUpdate = new Date();
 				} else {
-					discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPlayCountChange));
+					discordUser.nextTaikoPPUpdate = getNextUpdate(discordUser.lastTaikoPlayCountChange);
 				}
 
 				discordUser.taikoRankedScore = taikoUser.scores.ranked;
@@ -207,7 +207,7 @@ module.exports = {
 					discordUser.catchPlayCount = catchUser.counts.plays;
 					discordUser.nextCatchPPUpdate = new Date();
 				} else {
-					discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPlayCountChange));
+					discordUser.nextCatchPPUpdate = getNextUpdate(discordUser.lastCatchPlayCountChange);
 				}
 
 				discordUser.catchRankedScore = catchUser.scores.ranked;
@@ -232,7 +232,7 @@ module.exports = {
 					discordUser.maniaPlayCount = maniaUser.counts.plays;
 					discordUser.nextManiaPPUpdate = new Date();
 				} else {
-					discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPlayCountChange));
+					discordUser.nextManiaPPUpdate = getNextUpdate(discordUser.lastManiaPlayCountChange);
 				}
 
 				discordUser.maniaRankedScore = maniaUser.scores.ranked;
@@ -665,3 +665,12 @@ module.exports = {
 		processQueueEntry.destroy();
 	},
 };
+
+function getNextUpdate(lastChange) {
+	const now = Date.now();
+	const last = lastChange ? new Date(lastChange).getTime() : NaN;
+	if (Number.isNaN(last)) {
+		return new Date(now); // no usable history -> update on the next run
+	}
+	return new Date(now + (now - last));
+}
