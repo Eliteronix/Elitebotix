@@ -2576,7 +2576,7 @@ module.exports = {
 			}, {
 				where: {
 					beatmapId: {
-						[Op.in]: NMBeatmaps,
+						[Op.in]: NMBeatmaps.map(x => String(x)),
 					},
 					noModMap: {
 						[Op.not]: true,
@@ -2594,7 +2594,7 @@ module.exports = {
 			}, {
 				where: {
 					beatmapId: {
-						[Op.in]: HDBeatmaps,
+						[Op.in]: HDBeatmaps.map(x => String(x)),
 					},
 					hiddenMap: {
 						[Op.not]: true,
@@ -2612,7 +2612,7 @@ module.exports = {
 			}, {
 				where: {
 					beatmapId: {
-						[Op.in]: HRBeatmaps,
+						[Op.in]: HRBeatmaps.map(x => String(x)),
 					},
 					hardRockMap: {
 						[Op.not]: true,
@@ -2630,7 +2630,7 @@ module.exports = {
 			}, {
 				where: {
 					beatmapId: {
-						[Op.in]: DTBeatmaps,
+						[Op.in]: DTBeatmaps.map(x => String(x)),
 					},
 					doubleTimeMap: {
 						[Op.not]: true,
@@ -2648,7 +2648,7 @@ module.exports = {
 			}, {
 				where: {
 					beatmapId: {
-						[Op.in]: FMBeatmaps,
+						[Op.in]: FMBeatmaps.map(x => String(x)),
 					},
 					freeModMap: {
 						[Op.not]: true,
