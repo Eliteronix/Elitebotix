@@ -989,7 +989,7 @@ module.exports = {
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: beatmaps.map(b => b.beatmapId)
+					[Op.in]: beatmaps.map(b => String(b.beatmapId))
 				},
 				mods: 0
 			}
