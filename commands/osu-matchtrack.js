@@ -240,6 +240,10 @@ module.exports = {
 
 							json = matchResponse;
 
+							if (!json.events || !json.events.length) {
+								console.log(`No events found for match ${match.id} (${match.name})`, json);
+							}
+
 							let firstIdNewJson = json.events[0].id;
 
 							// Add all old events that are not in the new array to the new array
