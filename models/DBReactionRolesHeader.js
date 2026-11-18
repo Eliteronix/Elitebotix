@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
 			field: 'reactionimage',
 		},
 	}, {
-		tableName: 'dbreactionrolesheader',
+		tableName: 'dbreactionrolesheaders',
 		createdAt: 'createdat',
 		updatedAt: 'updatedat',
 	});
