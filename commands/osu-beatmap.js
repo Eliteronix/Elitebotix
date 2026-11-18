@@ -311,7 +311,7 @@ async function getBeatmap(interaction, beatmap, tournament, accuracy) {
 
 	// populate mapScores with matchName and matchStartDate
 	for (let i = 0; i < mapGames.length; i++) {
-		if (mapGames[i].matchId === matchData[0].matchId) {
+		if (matchData[0] && mapGames[i].matchId === matchData[0].matchId) {
 			mapGames[i].matchName = matchData[0].matchName;
 			mapGames[i].acronym = matchData[0].acronym;
 			mapGames[i].matchStartDate = matchData[0].matchStartDate;
