@@ -1,0 +1,33 @@
+diff --git a/node_modules/node-osu/lib/Api.js b/node_modules/node-osu/lib/Api.js
+index 8a70f89..166e916 100644
+--- a/node_modules/node-osu/lib/Api.js
++++ b/node_modules/node-osu/lib/Api.js
+@@ -15,7 +15,7 @@ class Api {
+ 	 * @param {Boolean} [options.completeScores=false] When fetching scores also fetch the beatmap they are for (Allows getting accuracy)
+ 	 * @param {Boolean} [options.parseNumeric=false] Parse numeric properties into numbers. May have overflow
+ 	 */
+-	constructor(apiKey, options = { }) {
++	constructor(apiKey, options = {}) {
+ 		this.apiKey = apiKey;
+ 		this.baseUrl = options.baseUrl || 'https://osu.ppy.sh/api';
+ 		this.notFoundAsError = options.notFoundAsError === undefined ? true : !!options.notFoundAsError;
+@@ -61,7 +61,18 @@ class Api {
+ 
+ 			return resp.body;
+ 		} catch (error) {
+-			throw new Error(error.response || error);
++			const res = error.response;
++			if (!res) throw error; // network/timeout: keep the original error
++
++			let detail = res.text;
++			try {
++				const parsed = JSON.parse(res.text);
++				detail = parsed.error || res.text;
++			} catch (e) { /* body wasn't JSON, keep the raw text */ }
++
++			const err = new Error(`osu! API ${res.status}: ${String(detail).slice(0, 200)}`);
++			err.status = res.status;
++			throw err;
+ 		}
+ 	}
+ 

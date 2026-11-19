@@ -13,6 +13,8 @@ const fs = require('fs');
 let getOsuBeatmapCallStacks = [];
 const osuPlayerNameCache = {};
 const activityRolesCache = {};
+let osuApiBlockedUntil = 0;           // set after a 429
+const failedRefreshes = new Map();    // `${beatmapId}-${modBits}` -> timestamp
 
 module.exports = {
 	getGuildPrefix: async function (msg) {
@@ -2926,6 +2928,13 @@ module.exports = {
 			}
 
 			try {
+				// Skip the API while rate limited, or if this exact map failed in the last minute.
+				// Falls through to the return at the bottom with whatever is in the DB (or null).
+				const lastFail = failedRefreshes.get(`${beatmapId}-${modBits}`);
+				if (osuApiBlocked() || (lastFail && Date.now() - lastFail < 60000)) {
+					break;
+				}
+
 				if (!dbBeatmap
 					|| forceUpdate
 					|| dbBeatmap && dbBeatmap.updatedAt < lastRework //If reworked
@@ -3200,8 +3209,16 @@ module.exports = {
 									starRating: 0,
 									maxCombo: 0,
 								});
+							} else if (error.status === 429) {
+								// Rate limited: pause all API calls for a minute and log it once
+								if (!osuApiBlocked()) {
+									console.error('osu! API rate limited (429), pausing API calls for 60s');
+								}
+								osuApiBlockedUntil = Date.now() + 60000;
+								failedRefreshes.set(`${beatmapId}-${modBits}`, Date.now());
 							} else {
 								console.error(`Error fetching beatmap ${beatmapId} with mods ${modBits}:`, error);
+								failedRefreshes.set(`${beatmapId}-${modBits}`, Date.now());
 							}
 						});
 				}
@@ -4500,9 +4517,11 @@ module.exports = {
 		const path = `${process.env.ELITEBOTIXROOTPATH}/maps/${beatmapId}.osu`;
 
 		//Force download if the map is recently updated in the database and therefore probably updated
-		dbBeatmap = await module.exports.getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: beatmapId, modBits: 0 });
+		if (depth === 0) {
+			dbBeatmap = await module.exports.getOsuBeatmap({ beatmap: dbBeatmap, beatmapId: beatmapId, modBits: 0 });
+		}
 
-		if (dbBeatmap.approvalStatus === 'Not found') {
+		if (!dbBeatmap || dbBeatmap.approvalStatus === 'Not found') {
 			return null;
 		}
 
@@ -4516,7 +4535,7 @@ module.exports = {
 
 		try {
 			if (forceDownload || !fs.existsSync(path)) {
-				if (mapsRetriedTooOften.includes(beatmapId)) {
+				if (mapsRetriedTooOften.includes(beatmapId) || osuApiBlocked()) {
 					return null;
 				}
 
@@ -8931,4 +8950,8 @@ function getExpectedDuelRating(score) {
 	}
 
 	return rating;
+}
+
+function osuApiBlocked() {
+	return Date.now() < osuApiBlockedUntil;
 }
