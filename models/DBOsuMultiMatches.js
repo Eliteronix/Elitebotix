@@ -5,23 +5,55 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		matchId: DataTypes.INTEGER,
-		matchName: DataTypes.STRING,
-		acronym: DataTypes.STRING,
-		referee: DataTypes.INTEGER,
-		tourneyMatch: DataTypes.BOOLEAN,
-		matchStartDate: DataTypes.DATE,
-		matchEndDate: DataTypes.DATE,
-		verifiedAt: DataTypes.DATE,
-		verifiedBy: DataTypes.INTEGER,
-		verificationComment: DataTypes.STRING,
-		paranoid: true,
+		matchId: {
+			type: DataTypes.INTEGER,
+			field: 'matchid',
+		},
+		matchName: {
+			type: DataTypes.STRING,
+			field: 'matchname',
+		},
+		acronym: {
+			type: DataTypes.STRING,
+			field: 'acronym',
+		},
+		referee: {
+			type: DataTypes.INTEGER,
+			field: 'referee',
+		},
+		tourneyMatch: {
+			type: DataTypes.BOOLEAN,
+			field: 'tourneymatch',
+		},
+		matchStartDate: {
+			type: DataTypes.DATE,
+			field: 'matchstartdate',
+		},
+		matchEndDate: {
+			type: DataTypes.DATE,
+			field: 'matchenddate',
+		},
+		verifiedAt: {
+			type: DataTypes.DATE,
+			field: 'verifiedat',
+		},
+		verifiedBy: {
+			type: DataTypes.INTEGER,
+			field: 'verifiedby',
+		},
+		verificationComment: {
+			type: DataTypes.STRING,
+			field: 'verificationcomment',
+		},
 	}, {
 		indexes: [
 			{
 				unique: false,
 				fields: ['matchId', 'tourneyMatch', 'matchName', 'acronym', 'verifiedAt', 'verifiedBy', 'verificationComment']
 			}
-		]
+		],
+		tableName: 'dbosumultimatches',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

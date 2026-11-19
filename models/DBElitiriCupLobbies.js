@@ -7,25 +7,35 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		tournamentName: {
 			type: DataTypes.STRING,
+			field: 'tournamentname',
 		},
 		lobbyId: {
 			type: DataTypes.STRING,
+			field: 'lobbyid',
 		},
 		lobbyDate: {
 			type: DataTypes.DATE,
+			field: 'lobbydate',
 		},
 		bracketName: {
 			type: DataTypes.STRING,
+			field: 'bracketname',
 		},
 		refDiscordTag: {
 			type: DataTypes.STRING,
+			field: 'refdiscordtag',
 		},
 		refOsuUserId: {
 			type: DataTypes.STRING,
+			field: 'refosuuserid',
 		},
 		refOsuName: {
 			type: DataTypes.STRING,
+			field: 'refosuname',
 		},
-		paranoid: true,
+	}, {
+		tableName: 'dbelitiricuplobbies',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

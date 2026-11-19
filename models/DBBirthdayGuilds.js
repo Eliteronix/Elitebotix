@@ -8,13 +8,20 @@ module.exports = (sequelize, DataTypes) => {
 		userId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'userid',
 		},
 		guildId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'guildid',
 		},
 		birthdayTime: {
 			type: DataTypes.DATE,
+			field: 'birthdaytime',
 		},
+	}, {
+		tableName: 'dbbirthdayguilds',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

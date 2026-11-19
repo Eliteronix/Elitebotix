@@ -1,5 +1,6 @@
 const { DBProcessQueue, DBDiscordUsers, DBElitebotixBanchoProcessQueue } = require('../dbObjects');
 const { updateQueueChannels } = require('../utils');
+const sequelize = require('sequelize');
 
 module.exports = {
 	async execute(client, processQueueEntry) {
@@ -11,7 +12,7 @@ module.exports = {
 		let difficultyArea = parseFloat(args[2]);
 
 		let otherQueueTasks = await DBProcessQueue.findAll({
-			attributes: ['id', 'createdAt', 'additions'],
+			attributes: ['id', [sequelize.col('createdat'), 'createdAt'], 'additions'],
 			where: {
 				task: 'duelQueue1v1',
 			}

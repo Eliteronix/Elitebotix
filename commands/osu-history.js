@@ -2,6 +2,7 @@ const { DBDiscordUsers, DBDuelRatingHistory, DBOsuMultiGameScores, DBOsuMultiGam
 const osu = require('node-osu');
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, daysHidingQualifiers, matchMakingAcronyms } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const { getOsuPlayerName, multiToBanchoScore, getUserDuelStarRating, getOsuBeatmap, getOsuDuelLeague, getIDFromPotentialOsuLink, getAvatar, logOsuAPICalls } = require('../utils');
 const Canvas = require('@napi-rs/canvas');
@@ -200,7 +201,7 @@ module.exports = {
 				'teamType',
 				'pp',
 				'beatmapId',
-				[Sequelize.fn('min', Sequelize.col('createdAt')), 'createdAt'],
+				[Sequelize.fn('min', Sequelize.col('createdat')), 'createdAt'],
 				'osuUserId',
 				'count50',
 				'count100',
@@ -304,12 +305,12 @@ module.exports = {
 				'popular',
 				'approachRate',
 				'circleSize',
-				'updatedAt',
+				[sequelize.col('updatedat'), 'updatedAt'],
 				'maxCombo',
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: multiScores.map(score => score.beatmapId)
+					[Op.in]: multiScores.map(score => score.beatmapId.toString())
 				},
 				mods: 0,
 			},
@@ -637,7 +638,7 @@ module.exports = {
 			attributes: ['osuUserId', 'osuName'],
 			where: {
 				osuUserId: {
-					[Op.in]: players,
+					[Op.in]: players.map(player => player.toString()),
 				}
 			},
 			raw: true,
@@ -842,7 +843,7 @@ module.exports = {
 			let existingDuelRatings = await DBDuelRatingHistory.findAll({
 				attributes: ['osuDuelStarRating', 'year', 'month', 'date'],
 				where: {
-					osuUserId: osuUser.osuUserId,
+					osuUserId: osuUser.osuUserId.toString(),
 				},
 				raw: true,
 			});
@@ -1038,7 +1039,7 @@ module.exports = {
 					'beatmapsetId',
 					'approvalStatus',
 					'mods',
-					'updatedAt',
+					[sequelize.col('updatedat'), 'updatedAt'],
 					'starRating',
 					'maxCombo',
 					'mode',
@@ -1049,7 +1050,7 @@ module.exports = {
 				],
 				where: {
 					beatmapId: {
-						[Op.in]: tourneyPPPlays.map(score => score.beatmapId)
+						[Op.in]: tourneyPPPlays.map(score => score.beatmapId.toString())
 					},
 				},
 				raw: true,

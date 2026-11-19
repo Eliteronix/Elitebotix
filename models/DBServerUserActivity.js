@@ -8,15 +8,21 @@ module.exports = (sequelize, DataTypes) => {
 		guildId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'guildid',
 		},
 		userId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'userid',
 		},
 		points: {
 			type: DataTypes.INTEGER,
 			defaultValue: 1,
+			field: 'points',
 		},
-		paranoid: true,
+	}, {
+		tableName: 'dbserveruseractivities',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

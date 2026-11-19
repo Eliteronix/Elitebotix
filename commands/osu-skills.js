@@ -5,6 +5,7 @@ const { DBDiscordUsers, DBOsuBeatmaps, DBOsuMultiGameScores, DBOsuMultiGames, DB
 const { getIDFromPotentialOsuLink, getOsuBeatmap, fitTextOnLeftCanvas, getScoreModpool, getUserDuelStarRating, getOsuDuelLeague, fitTextOnMiddleCanvas, getAvatar, logOsuAPICalls, getOsuProfileScoresV2, getModBits } = require('../utils');
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -304,7 +305,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 					'popular',
 					'approachRate',
 					'circleSize',
-					'updatedAt',
+					[sequelize.col('updatedat'), 'updatedAt'],
 					'maxCombo',
 					'mapper',
 					'aimRating',

@@ -7,14 +7,20 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		osuUserId: {
 			type: DataTypes.STRING,
+			field: 'osuuserid',
 		},
 		nextCheck: {
 			type: DataTypes.DATE,
+			field: 'nextcheck',
 		},
 		minutesBetweenChecks: {
 			type: DataTypes.INTEGER,
 			defaultValue: 15,
+			field: 'minutesbetweenchecks',
 		},
-		paranoid: true,
+	}, {
+		tableName: 'dbosutrackingusers',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

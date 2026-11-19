@@ -5,11 +5,29 @@ module.exports = (sequelize, DataTypes) => {
 			primaryKey: true,
 			autoIncrement: true,
 		},
-		originalChannelId: DataTypes.STRING,
-		originalMessageId: DataTypes.STRING,
-		starBoardChannelId: DataTypes.STRING,
-		starBoardMessageId: DataTypes.STRING,
-		starBoardMessageStarsQuantityMax: DataTypes.INTEGER,
-		paranoid: true,
+		originalChannelId: {
+			type: DataTypes.STRING,
+			field: 'originalchannelid',
+		},
+		originalMessageId: {
+			type: DataTypes.STRING,
+			field: 'originalmessageid',
+		},
+		starBoardChannelId: {
+			type: DataTypes.STRING,
+			field: 'starboardchannelid',
+		},
+		starBoardMessageId: {
+			type: DataTypes.STRING,
+			field: 'starboardmessageid',
+		},
+		starBoardMessageStarsQuantityMax: {
+			type: DataTypes.INTEGER,
+			field: 'starboardmessagestarsquantitymax',
+		},
+	}, {
+		tableName: 'dbstarboardmessages',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

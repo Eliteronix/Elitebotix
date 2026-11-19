@@ -6,7 +6,8 @@
 	"scripts": {
 		"start": "bun run --unhandled-rejections=warn --use_strict index.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"lint": "eslint"
+		"lint": "eslint",
+		"postinstall": "patch-package"
 	},
 	"author": "",
 	"license": "ISC",
@@ -25,8 +26,10 @@
 		"google-spreadsheet": "^3.3.0",
 		"jszip": "^3.10.1",
 		"node-fetch": "^3.3.0",
-		"node-osu": "^2.2.1",
+		"node-osu": "2.2.1",
 		"objects-to-csv": "^1.3.6",
+		"pg": "^8.23.1",
+		"pg-hstore": "^2.3.4",
 		"prom-client": "^14.1.1",
 		"rosu-pp-js": "^3.0.0",
 		"sequelize": "^6.26.0",
@@ -35,6 +38,7 @@
 		"weather-js": "^2.0.0"
 	},
 	"devDependencies": {
-		"eslint": "^8.57.1"
+		"eslint": "^8.57.1",
+		"patch-package": "^8.0.1"
 	}
 }

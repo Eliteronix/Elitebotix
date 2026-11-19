@@ -8,19 +8,26 @@ module.exports = (sequelize, DataTypes) => {
 		dbReactionRolesHeaderId: {
 			type: DataTypes.INTEGER,
 			allowNullValue: false,
+			field: 'dbreactionrolesheaderid',
 		},
 		roleId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'roleid',
 		},
 		emoji: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'emoji',
 		},
 		description: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'description',
 		},
-		paranoid: true,
+	}, {
+		tableName: 'dbreactionroles',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };

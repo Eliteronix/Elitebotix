@@ -2,11 +2,19 @@ const { DBDiscordUsers, DBProcessQueue, DBElitiriCupSignUp, DBElitiriCupSubmissi
 const { getUserDuelStarRating, getDerankStats, getAdditionalOsuInfo, logOsuAPICalls, sendMessageToLogChannel } = require('../utils.js');
 const osu = require('node-osu');
 const { currentElitiriCup, currentElitiriCupEndOfRegs, logBroadcastEval } = require('../config.json');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
 module.exports = {
 	async execute(client, processQueueEntry) {
 		// console.log('updateOsuRank', processQueueEntry.additions);
+
+		// Check before looping over users:
+		if (osu.Api.isBlocked()) {
+			processQueueEntry.destroy();
+			return;
+		}
+
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -20,7 +28,7 @@ module.exports = {
 			'id',
 			'osuUserId',
 			'osuName',
-			'updatedAt',
+			[sequelize.col('updatedat'), 'updatedAt'],
 			'lastOsuPlayCountChange',
 			'nextOsuPPUpdate',
 			'lastOsuPPChange',
@@ -137,6 +145,13 @@ module.exports = {
 				discordUser.lastManiaPlayCountChange = new Date();
 			}
 
+			const now = new Date();
+			for (const mode of ['Osu', 'Taiko', 'Catch', 'Mania']) {
+				discordUser[`next${mode}PPUpdate`] ??= now;
+				discordUser[`last${mode}PPChange`] ??= now;
+				discordUser[`last${mode}PlayCountChange`] ??= now;
+			}
+
 			if (discordUser.nextOsuPPUpdate <= new Date()) {
 				logOsuAPICalls('processQueueTasks/updateOsuRank.js standard user');
 				const osuUser = await osuApi.getUser({ u: discordUser.osuUserId, m: 0 });
@@ -156,7 +171,7 @@ module.exports = {
 					discordUser.osuPlayCount = osuUser.counts.plays;
 					discordUser.nextOsuPPUpdate = new Date();
 				} else {
-					discordUser.nextOsuPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastOsuPlayCountChange));
+					discordUser.nextOsuPPUpdate = getNextUpdate(discordUser.lastOsuPlayCountChange);
 				}
 
 				discordUser.osuRankedScore = osuUser.scores.ranked;
@@ -181,7 +196,7 @@ module.exports = {
 					discordUser.taikoPlayCount = taikoUser.counts.plays;
 					discordUser.nextTaikoPPUpdate = new Date();
 				} else {
-					discordUser.nextTaikoPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastTaikoPlayCountChange));
+					discordUser.nextTaikoPPUpdate = getNextUpdate(discordUser.lastTaikoPlayCountChange);
 				}
 
 				discordUser.taikoRankedScore = taikoUser.scores.ranked;
@@ -206,7 +221,7 @@ module.exports = {
 					discordUser.catchPlayCount = catchUser.counts.plays;
 					discordUser.nextCatchPPUpdate = new Date();
 				} else {
-					discordUser.nextCatchPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastCatchPlayCountChange));
+					discordUser.nextCatchPPUpdate = getNextUpdate(discordUser.lastCatchPlayCountChange);
 				}
 
 				discordUser.catchRankedScore = catchUser.scores.ranked;
@@ -231,7 +246,7 @@ module.exports = {
 					discordUser.maniaPlayCount = maniaUser.counts.plays;
 					discordUser.nextManiaPPUpdate = new Date();
 				} else {
-					discordUser.nextManiaPPUpdate = new Date(new Date().getTime() + new Date().getTime() - Date.parse(discordUser.lastManiaPlayCountChange));
+					discordUser.nextManiaPPUpdate = getNextUpdate(discordUser.lastManiaPlayCountChange);
 				}
 
 				discordUser.maniaRankedScore = maniaUser.scores.ranked;
@@ -403,6 +418,9 @@ module.exports = {
 
 				await discordUser.save();
 
+			} else if (error.status === 429) {
+				processQueueEntry.destroy();
+				return;
 			} else {
 				console.error(error);
 			}
@@ -664,3 +682,12 @@ module.exports = {
 		processQueueEntry.destroy();
 	},
 };
+
+function getNextUpdate(lastChange) {
+	const now = Date.now();
+	const last = lastChange ? new Date(lastChange).getTime() : NaN;
+	if (Number.isNaN(last)) {
+		return new Date(now); // no usable history -> update on the next run
+	}
+	return new Date(now + (now - last));
+}

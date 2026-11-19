@@ -5,6 +5,7 @@ const { getIDFromPotentialOsuLink, fitTextOnMiddleCanvas, getScoreModpool, human
 const { PermissionsBitField, SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const Canvas = require('@napi-rs/canvas');
 const ChartJsImage = require('chartjs-to-image');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 const { showUnknownInteractionError, daysHidingQualifiers } = require('../config.json');
 
@@ -978,7 +979,7 @@ module.exports = {
 				'beatmapsetId',
 				'approvalStatus',
 				'mods',
-				'updatedAt',
+				[sequelize.col('updatedat'), 'updatedAt'],
 				'starRating',
 				'maxCombo',
 				'mode',
@@ -988,7 +989,7 @@ module.exports = {
 			],
 			where: {
 				beatmapId: {
-					[Op.in]: beatmaps.map(b => b.beatmapId)
+					[Op.in]: beatmaps.map(b => String(b.beatmapId))
 				},
 				mods: 0
 			}

@@ -5,3 +5,6 @@
 
 Issues are currently tracked in [Github Projects](https://github.com/users/Eliteronix/projects/5).
 The official support discord server [is this](https://discord.gg/Asz5Gfe).
+
+Database setup:
+1. Download and install the [installer](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)

@@ -8,15 +8,32 @@ module.exports = (sequelize, DataTypes) => {
 		guildId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'guildid',
 		},
 		channelId: {
 			type: DataTypes.STRING,
 			allowNullValue: false,
+			field: 'channelid',
 		},
-		creatorId: DataTypes.STRING,
-		statusId: DataTypes.INTEGER,
-		statusName: DataTypes.STRING,
-		additionalParties: DataTypes.STRING,
-		paranoid: true,
+		creatorId: {
+			type: DataTypes.STRING,
+			field: 'creatorid',
+		},
+		statusId: {
+			type: DataTypes.INTEGER,
+			field: 'statusid',
+		},
+		statusName: {
+			type: DataTypes.STRING,
+			field: 'statusname',
+		},
+		additionalParties: {
+			type: DataTypes.STRING,
+			field: 'additionalparties',
+		},
+	}, {
+		tableName: 'dbtickets',
+		createdAt: 'createdat',
+		updatedAt: 'updatedat',
 	});
 };
