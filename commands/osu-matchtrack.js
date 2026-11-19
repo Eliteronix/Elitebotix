@@ -518,8 +518,10 @@ module.exports = {
 										try {
 											await lastMessage.edit({ embeds: [embed] });
 										} catch (e) {
-											console.error(e);
-											console.error(lastMessage);
+											if (e.message !== 'Unknown Message') {
+												console.error(e);
+												console.error(lastMessage);
+											}
 										}
 									}
 
