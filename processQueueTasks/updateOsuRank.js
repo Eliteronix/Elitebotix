@@ -8,6 +8,13 @@ const { Op } = require('sequelize');
 module.exports = {
 	async execute(client, processQueueEntry) {
 		// console.log('updateOsuRank', processQueueEntry.additions);
+
+		// Check before looping over users:
+		if (osu.Api.isBlocked()) {
+			processQueueEntry.destroy();
+			return;
+		}
+
 		const osuApi = new osu.Api(process.env.OSUTOKENV1, {
 			// baseUrl: sets the base api url (default: https://osu.ppy.sh/api)
 			notFoundAsError: true, // Throw an error on not found instead of returning nothing. (default: true)
@@ -136,6 +143,13 @@ module.exports = {
 				discordUser.nextManiaPPUpdate = new Date();
 				discordUser.lastManiaPPChange = new Date();
 				discordUser.lastManiaPlayCountChange = new Date();
+			}
+
+			const now = new Date();
+			for (const mode of ['Osu', 'Taiko', 'Catch', 'Mania']) {
+				discordUser[`next${mode}PPUpdate`] ??= now;
+				discordUser[`last${mode}PPChange`] ??= now;
+				discordUser[`last${mode}PlayCountChange`] ??= now;
 			}
 
 			if (discordUser.nextOsuPPUpdate <= new Date()) {
@@ -404,6 +418,9 @@ module.exports = {
 
 				await discordUser.save();
 
+			} else if (error.status === 429) {
+				processQueueEntry.destroy();
+				return;
 			} else {
 				console.error(error);
 			}

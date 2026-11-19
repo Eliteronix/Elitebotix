@@ -1,8 +1,22 @@
 diff --git a/node_modules/node-osu/lib/Api.js b/node_modules/node-osu/lib/Api.js
-index 8a70f89..166e916 100644
+index 8a70f89..2f22edc 100644
 --- a/node_modules/node-osu/lib/Api.js
 +++ b/node_modules/node-osu/lib/Api.js
-@@ -15,7 +15,7 @@ class Api {
+@@ -5,6 +5,13 @@ const Score = require('./base/Score.js');
+ const Match = require('./base/Match.js');
+ const User = require('./base/User.js');
+ 
++let blockedUntil = 0;
++let backoff = 60000;                 // grows on repeated 429s, resets on success
++const MAX_BACKOFF = 15 * 60000;
++let lastCall = 0;
++const MIN_INTERVAL = 1000;           // ms between calls per process
++const sleep = (ms) => new Promise(r => setTimeout(r, ms));
++
+ class Api {
+ 	/**
+ 	 * Creates a new node-osu object
+@@ -15,7 +22,7 @@ class Api {
  	 * @param {Boolean} [options.completeScores=false] When fetching scores also fetch the beatmap they are for (Allows getting accuracy)
  	 * @param {Boolean} [options.parseNumeric=false] Parse numeric properties into numbers. May have overflow
  	 */
@@ -11,19 +25,58 @@ index 8a70f89..166e916 100644
  		this.apiKey = apiKey;
  		this.baseUrl = options.baseUrl || 'https://osu.ppy.sh/api';
  		this.notFoundAsError = options.notFoundAsError === undefined ? true : !!options.notFoundAsError;
-@@ -61,7 +61,18 @@ class Api {
+@@ -31,6 +38,10 @@ class Api {
+ 		};
+ 	}
  
++	static isBlocked() {
++		return Date.now() < blockedUntil;
++	}
++
+ 	/**
+ 	 * Makes an api call
+ 	 * @param {String} endpoint
+@@ -54,14 +65,46 @@ class Api {
+ 			throw new Error('apiKey not set');
+ 		options.k = this.apiKey;
+ 
++		// Fail fast while blocked, without touching the network
++		if (Date.now() < blockedUntil) {
++			const blocked = new Error('osu! API locally paused after rate limit (429)');
++			blocked.status = 429;
++			blocked.blocked = true;
++			throw blocked;
++		}
++
++		// Space calls out
++		const now = Date.now();
++		const slot = Math.max(now, lastCall + MIN_INTERVAL);
++		lastCall = slot;
++		if (slot > now) await sleep(slot - now);
++
+ 		try {
+ 			const resp = await request.get(this.baseUrl + endpoint)
+ 				.set('User-Agent', userAgent)
+ 				.query(options);
+ 
++			backoff = 60000; // healthy again
  			return resp.body;
  		} catch (error) {
 -			throw new Error(error.response || error);
 +			const res = error.response;
-+			if (!res) throw error; // network/timeout: keep the original error
++			if (!res) throw error;
 +
 +			let detail = res.text;
 +			try {
 +				const parsed = JSON.parse(res.text);
 +				detail = parsed.error || res.text;
-+			} catch (e) { /* body wasn't JSON, keep the raw text */ }
++			} catch (e) { /* not JSON */ }
++
++			if (res.status === 429) {
++				blockedUntil = Date.now() + backoff;
++				console.error(`osu! API locally paused after rate limit (429), pausing API calls for ${backoff / 1000}s`);
++				backoff = Math.min(backoff * 2, MAX_BACKOFF);
++			}
 +
 +			const err = new Error(`osu! API ${res.status}: ${String(detail).slice(0, 200)}`);
 +			err.status = res.status;

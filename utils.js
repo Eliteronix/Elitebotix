@@ -13,7 +13,6 @@ const fs = require('fs');
 let getOsuBeatmapCallStacks = [];
 const osuPlayerNameCache = {};
 const activityRolesCache = {};
-let osuApiBlockedUntil = 0;           // set after a 429
 const failedRefreshes = new Map();    // `${beatmapId}-${modBits}` -> timestamp
 
 module.exports = {
@@ -3214,7 +3213,7 @@ module.exports = {
 								if (!osuApiBlocked()) {
 									console.error('osu! API rate limited (429), pausing API calls for 60s');
 								}
-								osuApiBlockedUntil = Date.now() + 60000;
+
 								failedRefreshes.set(`${beatmapId}-${modBits}`, Date.now());
 							} else {
 								console.error(`Error fetching beatmap ${beatmapId} with mods ${modBits}:`, error);
@@ -8953,5 +8952,5 @@ function getExpectedDuelRating(score) {
 }
 
 function osuApiBlocked() {
-	return Date.now() < osuApiBlockedUntil;
+	return osu.Api.isBlocked();
 }
