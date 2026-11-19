@@ -314,7 +314,7 @@ async function getOsuSkills(interaction, username, scaled, scoringType, tourneyM
 					'mode'
 				],
 				where: {
-					beatmapId: topScores.map(score => score.beatmap.id)
+					beatmapId: topScores.map(score => String(score.beatmap.id))
 				},
 			});
 
