@@ -278,7 +278,14 @@ module.exports = {
 					let osuName = await getOsuPlayerName(osuUserId);
 
 					if (new Date() - lastUpdate > 15000) {
-						await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
+
 						lastUpdate = new Date();
 					}
 
@@ -343,13 +350,25 @@ module.exports = {
 					}
 
 					if (new Date() - lastUpdate > 15000) {
-						processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores) (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 
 					for (let j = 0; j < multiScores.length; j++) {
 						if (new Date() - lastUpdate > 15000) {
-							processingMessage.edit(`Processing ${osuName} (Removing irrelevant scores from ${multiScores.length} found scores) (Account ${i + 1}/${file.length})...`);
+							try {
+								await processingMessage.edit(`Processing ${osuName} (Removing irrelevant scores from ${multiScores.length} found scores) (Account ${i + 1}/${file.length})...`);
+							} catch (error) {
+								if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+									return console.error(error);
+								}
+							}
 							lastUpdate = new Date();
 						}
 
@@ -367,14 +386,26 @@ module.exports = {
 					}
 
 					if (new Date() - lastUpdate > 15000) {
-						processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores after removing irrelevant scores) (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Found ${multiScores.length} scores after removing irrelevant scores) (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 
 					//Translate the scores to bancho scores
 					for (let j = 0; j < multiScores.length; j++) {
 						if (new Date() - lastUpdate > 15000) {
-							processingMessage.edit(`Processing ${osuName} (Score ${j + 1}/${multiScores.length}) (Account ${i + 1}/${file.length})...`);
+							try {
+								await processingMessage.edit(`Processing ${osuName} (Score ${j + 1}/${multiScores.length}) (Account ${i + 1}/${file.length})...`);
+							} catch (error) {
+								if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+									return console.error(error);
+								}
+							}
 							lastUpdate = new Date();
 						}
 						if (parseInt(multiScores[j].gameRawMods) % 2 === 1) {
@@ -412,7 +443,13 @@ module.exports = {
 					let scoreCount = 0;
 					for (let j = 0; j < multiScores.length && scoreCount < amountPerPlayer; j++) {
 						if (new Date() - lastUpdate > 15000) {
-							processingMessage.edit(`Processing ${osuName} (Adding score ${j + 1}/${amountPerPlayer} to the output) (Account ${i + 1}/${file.length})...`);
+							try {
+								await processingMessage.edit(`Processing ${osuName} (Adding score ${j + 1}/${amountPerPlayer} to the output) (Account ${i + 1}/${file.length})...`);
+							} catch (error) {
+								if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+									return console.error(error);
+								}
+							}
 							lastUpdate = new Date();
 						}
 						multiScores[j].beatmap = await getOsuBeatmap({ beatmapId: multiScores[j].beatmapId });
@@ -491,7 +528,13 @@ module.exports = {
 
 					if (new Date() - lastUpdate > 15000) {
 						let osuName = await getOsuPlayerName(osuUserId);
-						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 
@@ -560,7 +603,13 @@ module.exports = {
 					let osuName = await getOsuPlayerName(osuUserId);
 
 					if (new Date() - lastUpdate > 15000) {
-						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 
@@ -626,7 +675,13 @@ module.exports = {
 
 					if (new Date() - lastUpdate > 15000) {
 						let osuName = await getOsuPlayerName(osuUserId);
-						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 
@@ -732,7 +787,13 @@ module.exports = {
 
 					if (new Date() - lastUpdate > 15000) {
 						let osuName = await getOsuPlayerName(osuUserId);
-						processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						try {
+							await processingMessage.edit(`Processing ${osuName} (Account ${i + 1}/${file.length})...`);
+						} catch (error) {
+							if (error.message !== 'Invalid Webhook Token' && error.message !== 'Unknown Message') {
+								return console.error(error);
+							}
+						}
 						lastUpdate = new Date();
 					}
 

@@ -923,8 +923,8 @@ module.exports = {
 
 		let now = new Date();
 
-		let yesterday = new Date();
-		yesterday.setUTCHours(yesterday.getUTCHours() - 24);
+		let lastWeek = new Date();
+		lastWeek.setUTCHours(lastWeek.getUTCHours() - 24);
 
 		let lastMonth = new Date();
 		lastMonth.setUTCDate(lastMonth.getUTCMonth() - 1);
@@ -940,8 +940,8 @@ module.exports = {
 						userId: {
 							[Op.not]: null
 						},
-						updatedat: {
-							[Op.lt]: yesterday
+						updatedAt: {
+							[Op.lt]: lastWeek
 						},
 						[Op.or]: [
 							{
@@ -1039,8 +1039,8 @@ module.exports = {
 				userId: {
 					[Op.not]: null
 				},
-				updatedat: {
-					[Op.lt]: yesterday
+				updatedAt: {
+					[Op.lt]: lastWeek
 				},
 				[Op.or]: [
 					{
@@ -2916,7 +2916,7 @@ module.exports = {
 				let similarStacks = getOsuBeatmapCallStacks.filter(x => x.stack === err.stack);
 				if (similarStacks.length === 60 && !err.stack.includes('osu-top.js:956:') && !err.stack.includes('osu-wrapped.js:481:') && !err.stack.includes('getUserDuelStarRating')) {
 					// eslint-disable-next-line no-console
-					console.log(`getOsuBeatmap similar stack called 60 times in the last minute:\n${err.stack}`);
+					//console.log(`getOsuBeatmap similar stack called 60 times in the last minute:\n${err.stack}`);
 				}
 
 				dbBeatmap = await DBOsuBeatmaps.findOne({
@@ -3833,9 +3833,7 @@ module.exports = {
 					userMaps[i].underPerformWeight = underPerformWeight;
 					userMaps[i].weight = Math.abs(overPerformWeight + underPerformWeight - 1);
 
-					let mapStarRating = module.exports.adjustStarRating(dbBeatmap.starRating, dbBeatmap.approachRate, dbBeatmap.circleSize, dbBeatmap.mods);
-
-					userMaps[i].starRating = mapStarRating;
+					userMaps[i].starRating = dbBeatmap.starRating;
 
 					userMaps[i].expectedRating = getExpectedDuelRating(userMaps[i]);
 
@@ -6403,8 +6401,6 @@ module.exports = {
 			// refresh the map
 			if (modPool == 'NM') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
-
-				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 0);
 			} else if (modPool == 'HD') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 8 });
 
@@ -6412,16 +6408,10 @@ module.exports = {
 					beatmaps.splice(index, 1);
 					continue;
 				}
-
-				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 8);
 			} else if (modPool == 'HR') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
-
-				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 16);
 			} else if (modPool == 'DT') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 64 });
-
-				randomBeatmap.starRating = module.exports.adjustStarRating(randomBeatmap.starRating, randomBeatmap.approachRate, randomBeatmap.circleSize, 64);
 			} else if (modPool == 'FM') {
 				randomBeatmap = await module.exports.getOsuBeatmap({ beatmap: randomBeatmap, beatmapId: randomBeatmap.beatmapId, modBits: 0 });
 
@@ -6439,8 +6429,6 @@ module.exports = {
 					continue;
 				}
 
-				randomBeatmapHD.starRating = module.exports.adjustStarRating(randomBeatmapHD.starRating, randomBeatmapHD.approachRate, randomBeatmapHD.circleSize, 8);
-
 				let randomBeatmapHR = fmhrBeatmaps.find(b => b.beatmapId === randomBeatmap.beatmapId);
 				randomBeatmapHR = await module.exports.getOsuBeatmap({ beatmap: randomBeatmapHR, beatmapId: randomBeatmap.beatmapId, modBits: 16 });
 
@@ -6449,8 +6437,6 @@ module.exports = {
 					input.alreadyCheckedOther.push(beatmapId);
 					continue;
 				}
-
-				randomBeatmapHR.starRating = module.exports.adjustStarRating(randomBeatmapHR.starRating, randomBeatmapHR.approachRate, randomBeatmapHR.circleSize, 16);
 
 				randomBeatmap.starRating = (randomBeatmapHD.starRating + randomBeatmapHR.starRating) / 2;
 			}
@@ -7389,12 +7375,13 @@ module.exports = {
 				if (recentActivity) {
 					osuTracker.minutesBetweenChecks = 15;
 				} else {
-					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 1;
+					osuTracker.minutesBetweenChecks = osuTracker.minutesBetweenChecks + 10;
 				}
 
-				if (osuTracker.minutesBetweenChecks > 60 * 23) {
-					osuTracker.minutesBetweenChecks = 60 * 23;
-				}
+				// Commented out for better performance
+				// if (osuTracker.minutesBetweenChecks > 60 * 23) {
+				// 	osuTracker.minutesBetweenChecks = 60 * 23;
+				// }
 
 				let date = new Date();
 				date.setMinutes(date.getMinutes() + osuTracker.minutesBetweenChecks);
@@ -7959,59 +7946,6 @@ module.exports = {
 		}
 
 		return true;
-	},
-	adjustStarRating(starRating, approachRate, circleSize, mods) {
-		// Adapt star rating from 0.0 to 1.5 depending on the CS
-		circleSize = parseFloat(circleSize);
-
-		if (circleSize > 5.5) {
-			let starRatingAdjust = 1.5 * (circleSize - 5) / 4.5;
-
-			starRating = parseFloat(starRating) + starRatingAdjust;
-		}
-
-		approachRate = parseFloat(approachRate);
-
-		if (module.exports.getMods(mods).includes('HD') && approachRate <= 10) {
-			// Adapt star rating from 0.0 to 0.2 depending on the AR for the HD modpool only
-			if (approachRate > 9) {
-				let starRatingAdjust = 0.2 * (10 - approachRate);
-
-				return parseFloat(starRating) + starRatingAdjust;
-			}
-
-
-			//Adapt starRating from 0.2 to 1.5 depending on the AR for the HD modpool only
-			//Cap at AR 5
-			if (approachRate < 5) {
-				approachRate = 5;
-			}
-
-			let starRatingAdjust = 0.2 + (1.3 * (9 - approachRate) / 4);
-
-			return parseFloat(starRating) + starRatingAdjust;
-		}
-
-		// Does not include HD
-		// Adapt star rating from 0.0 to 0.75 depending on the AR
-		if (approachRate > 10) {
-			let starRatingAdjust = 0.75 - (0.75 * (11 - approachRate));
-
-			return parseFloat(starRating) + starRatingAdjust;
-		}
-
-		//Adapt starRating from 0.0 to 1.0 depending on the AR
-		if (approachRate < 9) {
-			if (approachRate < 5) {
-				approachRate = 5;
-			}
-
-			let starRatingAdjust = 1.0 * (9 - approachRate) / 4;
-
-			return parseFloat(starRating) + starRatingAdjust;
-		}
-
-		return parseFloat(starRating);
 	},
 	async scoreCardAttachment(input) {
 		//Input has to be an object with the following properties:

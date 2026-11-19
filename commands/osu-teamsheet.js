@@ -1,7 +1,7 @@
 const { AttachmentBuilder, PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const { showUnknownInteractionError, developers } = require('../config.json');
 const { DBDiscordUsers, DBOsuMappools, DBOsuSoloScores, DBOsuTeamSheets, DBOsuPoolAccess, DBOsuMultiGameScores } = require('../dbObjects');
-const { pause, getAvatar, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, adjustStarRating, logOsuAPICalls, getOsuBeatmapUserScoresV2, getModBits } = require('../utils');
+const { pause, getAvatar, getIDFromPotentialOsuLink, getOsuBeatmap, getMapListCover, getAccuracy, getMods, humanReadable, logOsuAPICalls, getOsuBeatmapUserScoresV2, getModBits } = require('../utils');
 const { Op } = require('sequelize');
 const Canvas = require('@napi-rs/canvas');
 const osu = require('node-osu');
@@ -781,7 +781,7 @@ module.exports = {
 				const b = -1.67;
 				const c = 20000;
 
-				let starRating = adjustStarRating(tourneyMaps[j].starRating, tourneyMaps[j].approachRate, tourneyMaps[j].circleSize, tourneyMaps[j].mods);
+				let starRating = tourneyMaps[j].starRating;
 
 				let expectedScore = Math.round(a * Math.pow(starRating + (b - duelRating), 2) + c);
 
