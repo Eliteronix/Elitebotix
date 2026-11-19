@@ -1,5 +1,6 @@
 const pg = require('pg');
-pg.types.setTypeParser(20, val => parseInt(val, 10));
+pg.types.setTypeParser(1700, (value) => parseFloat(value));   // NUMERIC
+pg.types.setTypeParser(20, (value) => parseInt(value, 10));   // BIGINT (int8)
 
 const Sequelize = require('sequelize');
 require('dotenv').config();
