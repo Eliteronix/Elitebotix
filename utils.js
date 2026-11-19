@@ -940,7 +940,7 @@ module.exports = {
 						userId: {
 							[Op.not]: null
 						},
-						updatedAt: {
+						updatedat: {
 							[Op.lt]: lastWeek
 						},
 						[Op.or]: [
@@ -1039,7 +1039,7 @@ module.exports = {
 				userId: {
 					[Op.not]: null
 				},
-				updatedAt: {
+				updatedat: {
 					[Op.lt]: lastWeek
 				},
 				[Op.or]: [
