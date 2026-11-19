@@ -1,8 +1,8 @@
 const pg = require('pg');
-pg.types.setTypeParser(1700, (value) => parseFloat(value));   // NUMERIC
 pg.types.setTypeParser(20, (value) => parseInt(value, 10));   // BIGINT (int8)
 
 const Sequelize = require('sequelize');
+Sequelize.postgres.DECIMAL.parse = (value) => parseFloat(value); // DECIMAL (numeric)
 require('dotenv').config();
 
 const logging = {
