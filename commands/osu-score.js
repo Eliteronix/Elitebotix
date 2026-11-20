@@ -354,7 +354,7 @@ async function getScore(interaction, beatmap, username, server, mode, noLinkedAc
 		try {
 			osuProfile = await getOsuProfileV2({
 				client: interaction.client,
-				osuUserId: username,
+				osuUserId: String(username),
 				mode: getLinkModeName(mode)
 			});
 		} catch (err) {
