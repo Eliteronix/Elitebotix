@@ -6290,7 +6290,7 @@ module.exports = {
 				}
 			},
 			beatmapId: {
-				[Op.notIn]: finalAvoidList,
+				[Op.notIn]: finalAvoidList.map(id => id.toString()),
 			},
 			notDownloadable: {
 				[Op.not]: true,
