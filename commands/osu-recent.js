@@ -355,7 +355,7 @@ async function getScore(interaction, username, server, mode, noLinkedAccount, pa
 		const linkedUser = await DBDiscordUsers.findOne({
 			attributes: ['userId'],
 			where: {
-				osuUserId: osuProfile.id
+				osuUserId: String(osuProfile.id)
 			}
 		});
 
