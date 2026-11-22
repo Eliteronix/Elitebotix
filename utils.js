@@ -2850,8 +2850,12 @@ module.exports = {
 	async getOsuBeatmap(input) {
 		let beatmapId = input.beatmapId;
 		let modBits = 0;
-		if (input.modBits) {
-			modBits = input.modBits;
+		if (Array.isArray(input.modBits)) {
+			modBits = module.exports.getModBits(input.modBits.join(''));
+		} else if (input.modBits && isNaN(input.modBits)) {
+			modBits = module.exports.getModBits(String(input.modBits));
+		} else if (input.modBits) {
+			modBits = parseInt(input.modBits);
 		}
 
 		let mods = module.exports.getMods(modBits);
@@ -4452,7 +4456,7 @@ module.exports = {
 		}
 	},
 	async checkModsCompatibility(input, beatmapId) { //input = mods | beatmapMode needs to be NOT ID
-		let beatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: input });
+		let beatmap = await module.exports.getOsuBeatmap({ beatmapId: beatmapId, modBits: 0 }); // Can be NoMod since we only grab the beatmap for the mode
 		if (beatmap) {
 			let mods = module.exports.getMods(input);
 
