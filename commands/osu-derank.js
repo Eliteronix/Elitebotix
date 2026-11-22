@@ -165,7 +165,7 @@ module.exports = {
 		message.push(`Elitebotix users Duel-Rating-Rank ${derankStats.duelRank} out of ${derankStats.duelUsersLength}`);
 		message.push('');
 		message.push('The expected osu! rank change for that duel rating would be:');
-		message.push(`#${discordUser.osuRank} (${String(derankStats.expectedCurrentDuelRating).substring(0, 5)}*) -> ~#${derankStats.expectedPpRankOsu} (${derankStats.expectedDuelRating.substring(0, 5)}*) (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks / ${(derankStats.expectedDuelRating - derankStats.expectedCurrentDuelRating).toFixed(3)}*)\`\`\``);
+		message.push(`#${discordUser.osuRank} (${String(derankStats.expectedCurrentDuelRating).substring(0, 5)}*) -> ~#${derankStats.expectedPpRankOsu} (${String(derankStats.expectedDuelRating).substring(0, 5)}*) (Difference: ${discordUser.osuRank - derankStats.expectedPpRankOsu} ranks / ${(derankStats.expectedDuelRating - derankStats.expectedCurrentDuelRating).toFixed(3)}*)\`\`\``);
 
 		await interaction.editReply(message.join('\n'));
 	},
