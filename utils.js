@@ -2084,6 +2084,8 @@ module.exports = {
 				teamType = 3;
 			}
 
+			console.log(match.id, match.games[gameIndex].id, warmup, warmupDecidedByAmount);
+
 			games.push({
 				matchId: match.id,
 				gameId: match.games[gameIndex].id,
