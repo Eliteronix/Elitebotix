@@ -2281,6 +2281,7 @@ module.exports = {
 			let existingGame = existingGames.find(x => x.gameId === parseInt(games[i].gameId));
 
 			if (existingGame) {
+				console.log('Updating existing game', existingGame.gameId, 'for match', match.id, '| warmup:', existingGame.warmup, '| warmupDecidedByAmount:', existingGame.warmupDecidedByAmount);
 				existingGame.tourneyMatch = games[i].tourneyMatch;
 				existingGame.scoringType = games[i].scoringType;
 				existingGame.mode = games[i].mode;
@@ -2296,6 +2297,7 @@ module.exports = {
 				existingGame.scores = games[i].scores;
 				await existingGame.save();
 			} else {
+				console.log('Creating new game', games[i].gameId, 'for match', match.id, '| warmup:', games[i].warmup, '| warmupDecidedByAmount:', games[i].warmupDecidedByAmount);
 				newGames.push(games[i]);
 			}
 		}
