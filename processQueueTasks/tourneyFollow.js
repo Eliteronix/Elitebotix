@@ -1,4 +1,5 @@
 const { getOsuPlayerName } = require('../utils');
+const { DBOsuTourneyFollows } = require('../dbObjects');
 
 module.exports = {
 	async execute(client, processQueueEntry) {
@@ -25,7 +26,15 @@ module.exports = {
 			try {
 				await user.send(message);
 			} catch (error) {
-				if (error.message !== 'Cannot send messages to this user') {
+				if (error.message === 'Cannot send messages to this user' || error.message === 'Cannot send messages to this user due to having no mutual guilds') {
+					console.log(`Cannot send message to ${user.username} (${user.id}) | Removing follows for this user`);
+
+					await DBOsuTourneyFollows.destroy({
+						where: {
+							userId: user.id
+						}
+					});
+				} else {
 					console.error(error);
 				}
 			}
